@@ -24,8 +24,8 @@
 use blake3;
 use secp256k1::{Secp256k1, SecretKey, PublicKey};
 use x25519_dalek::{StaticSecret, PublicKey as X25519PublicKey};
-use libp2p_core::identity::{self, Keypair, ed25519};
-use libp2p_core::noise::{NoiseConfig, Keypair as NoiseKeypair, X25519Spec};
+use rust-libp2p_core::identity::{self, Keypair, ed25519};
+use rust-libp2p_core::noise::{NoiseConfig, Keypair as NoiseKeypair, X25519Spec};
 use rand::rngs::OsRng;
 
 /// Represents a cryptographic key pair
@@ -62,7 +62,7 @@ pub fn hash_content(data: &[u8]) -> [u8; 32] {
 
 /// Noise protocol session for encrypted communications
 pub struct NoiseSession {
-    inner: libp2p_core::noise::NoiseConfig<X25519Spec>,
+    inner: rust-libp2p_core::noise::NoiseConfig<X25519Spec>,
 }
 
 impl NoiseSession {

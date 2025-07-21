@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package cpc.internal;
+
+// Node Orchestration Service
+service NodeOrchestration {
+  // Registers a new node with the orchestrator
+  rpc RegisterNode(NodeRegistrationRequest) returns (NodeRegistrationResponse);
+  
+  // Periodically sent by nodes to confirm liveness
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Streams node metrics to orchestrator
+  rpc StreamMetrics(stream MetricsUpdate) returns (MetricsAck);
+  
+  // Initiates content replication to target nodes
+  rpc ReplicateContent(ReplicationRequest) returns (ReplicationStatus);
+  
+  // Reports replication status to orchestrator
+  rpc ReportReplication(ReplicationStatus) returns (ReplicationAck);
+}
+
+// Node Registration
+message NodeRegistrationRequest {
+  string node_id = 1;
+  Resources resources = 2;
+  string location = 3;  // e.g., "us-west", "eu-central"
+  repeated string capabilities = 4;  // e.g., ["storage", "compute"]
+}
+
+message NodeRegistrationResponse {
+  bool success = 1;
+  string message = 2;
+  string assigned_id = 3;  // Orchestrator-assigned node ID
+}
+
+// Health Checks
+message HealthCheckRequest {
+  string node_id = 1;
+}
+
+message HealthCheckResponse {
+  bool healthy = 1;
+  uint64 timestamp = 2;  // Unix timestamp
+}
+
+// Metrics
+message MetricsUpdate {
+  string node_id = 1;
+  double cpu_usage = 2;  // percentage
+  uint64 memory_used = 3;  // in MB
+  uint64 memory_total = 4;  // in MB
+  uint64 storage_used = 5;  // in GB
+  uint64 storage_total = 6;  // in GB
+  uint64 bandwidth_up = 7;  // Mbps
+  uint64 bandwidth_down = 8;  // Mbps
+}
+
+message MetricsAck {
+  bool received = 1;
+}
+
+// Replication
+message ReplicationRequest {
+  string content_id = 1;
+  repeated string target_node_ids = 2;
+  uint32 priority = 3;  // 1-5 (5 = highest)
+}
+
+message ReplicationStatus {
+  string content_id = 1;
+  string node_id = 2;
+  enum Status {
+    SUCCESS = 0;
+    FAILED = 1;
+    IN_PROGRESS = 2;
+  }
+  Status status = 3;
+  string message = 4;
+}
+
+message ReplicationAck {
+  bool received = 1;
+}
+
+// Resource definition
+message Resources {
+  uint64 memory = 1;  // in MB
+  uint64 storage = 2;  // in GB
+  uint32 cores = 3;
+  uint64 bandwidth = 4;  // in Mbps
+}

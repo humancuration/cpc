@@ -33,26 +33,26 @@
 //! };
 //! ```
 
-use libp2p_core::identity;
-use libp2p_core::PeerId;
-use libp2p_core::transport::Boxed;
-use libp2p_core::upgrade::Version;
-use libp2p_tcp::TokioTcpConfig;
-use libp2p_websocket::WsConfig;
-use libp2p_quic::tokio::Transport as QuicTransport;
-use libp2p_kad::{Kademlia, KademliaConfig, KademliaEvent, record::store::MemoryStore};
-use libp2p_gossipsub::{Gossipsub, GossipsubConfig, GossipsubEvent, MessageId, Topic};
-use libp2p_bitswap::{Bitswap, BitswapEvent};
-use libp2p_metrics::Metrics;
-use libp2p_swarm::{Swarm, SwarmEvent};
+use rust-libp2p_core::identity;
+use rust-libp2p_core::PeerId;
+use rust-libp2p_core::transport::Boxed;
+use rust-libp2p_core::upgrade::Version;
+use rust-libp2p_tcp::TokioTcpConfig;
+use rust-libp2p_websocket::WsConfig;
+use rust-libp2p_quic::tokio::Transport as QuicTransport;
+use rust-libp2p_kad::{Kademlia, KademliaConfig, KademliaEvent, record::store::MemoryStore};
+use rust-libp2p_gossipsub::{Gossipsub, GossipsubConfig, GossipsubEvent, MessageId, Topic};
+use rust-libp2p_bitswap::{Bitswap, BitswapEvent};
+use rust-libp2p_metrics::Metrics;
+use rust-libp2p_swarm::{Swarm, SwarmEvent};
 use futures::Stream;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
 /// Network builder for configuring the P2P stack
 pub struct NetworkBuilder {
-    transports: Vec<Boxed<(PeerId, libp2p_core::muxing::StreamMuxerBox)>>,
-    behaviors: Vec<Box<dyn libp2p_swarm::NetworkBehaviour>>,
+    transports: Vec<Boxed<(PeerId, rust-libp2p_core::muxing::StreamMuxerBox)>>,
+    behaviors: Vec<Box<dyn rust-libp2p_swarm::NetworkBehaviour>>,
     metrics: Option<Metrics>,
 }
 
@@ -76,7 +76,7 @@ impl NetworkBuilder {
     /// Add QUIC transport
     pub fn with_quic(mut self) -> Self {
         let keypair = identity::Keypair::generate_ed25519();
-        let quic = QuicTransport::new(libp2p_quic::Config::new(&keypair));
+        let quic = QuicTransport::new(rust-libp2p_quic::Config::new(&keypair));
         self.transports.push(quic.boxed());
         self
     }
@@ -142,13 +142,13 @@ impl NetworkBuilder {
 
 /// Represents the network stack
 pub struct Network {
-    swarm: Swarm<Box<dyn libp2p_swarm::NetworkBehaviour>>,
+    swarm: Swarm<Box<dyn rust-libp2p_swarm::NetworkBehaviour>>,
 }
 
 impl Network {
     fn new(
-        transport: Boxed<(PeerId, libp2p_core::muxing::StreamMuxerBox)>,
-        behavior: Box<dyn libp2p_swarm::NetworkBehaviour>,
+        transport: Boxed<(PeerId, rust-libp2p_core::muxing::StreamMuxerBox)>,
+        behavior: Box<dyn rust-libp2p_swarm::NetworkBehaviour>,
         metrics: Option<Metrics>,
     ) -> Self {
         let swarm = Swarm::new(transport, behavior, PeerId::random());
@@ -185,7 +185,7 @@ pub enum NetworkEvent {
 }
 
 impl NetworkEvent {
-    fn from_swarm(event: SwarmEvent<impl libp2p_swarm::NetworkBehaviourEvent>) -> Self {
+    fn from_swarm(event: SwarmEvent<impl rust-libp2p_swarm::NetworkBehaviourEvent>) -> Self {
         match event {
             SwarmEvent::Behaviour(event) => {
                 // Convert behavior-specific events

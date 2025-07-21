@@ -1,0 +1,34 @@
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Tauri
+    participant P2PNetwork
+    participant DHT
+    participant Storage
+
+    User->>Frontend: Select file to download
+    Frontend->>Tauri: invoke('download_file', {path})
+    Tauri->>DHT: query_metadata(content_hash)
+    DHT-->>Tauri: metadata
+    loop For each chunk (with retries)
+        Tauri->>P2PNetwork: request_chunk(chunk_hash)
+        P2PNetwork->>Storage: Retrieve chunk
+        Storage-->>P2PNetwork: encrypted_chunk
+        P2PNetwork-->>Tauri: encrypted_chunk
+        Tauri->>Tauri: Validate chunk hash
+        alt Hash valid
+            Tauri->>Tauri: Store valid chunk
+        else Hash invalid
+            Tauri->>P2PNetwork: Retry request (max 3x)
+        end
+    end
+    Tauri->>Tauri: Reassemble file from valid chunks
+    Tauri->>Tauri: Verify Merkle tree (root hash)
+    alt Root valid
+        Tauri->>Tauri: Decrypt file
+        Tauri-->>Frontend: file_data
+        Frontend-->>User: File downloaded
+    else Root invalid
+        Tauri-->>Frontend: Verification failed
+        Frontend-->>User: Download failed (corrupted)
+    end

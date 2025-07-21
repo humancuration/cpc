@@ -11,3 +11,13 @@ tokio = { version = "1.0", features = ["full"] }
 rusqlite = "0.29"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+aes-gcm = "0.12"
+sha2 = "0.10"
+merkle-cbt = "0.2"
+rand = "0.8"
+chrono = "0.4"          # For timestamp handling
+hex = "0.4"             # For hex encoding
+mime_guess = "2.0"      # For MIME type detection
+notify = "6.1.1"        # For file watching
+tokio = { version = "1.0", features = ["sync", "rt-multi-thread"] }
+async-trait = "0.1"     # For async trait support

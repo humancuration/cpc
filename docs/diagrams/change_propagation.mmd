@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant LocalPeer as Local Peer
+    participant Network
+    participant RemotePeer as Remote Peer
+
+    LocalPeer->>LocalPeer: Detect file change (inotify)
+    LocalPeer->>LocalPeer: Compute Merkle tree diff
+    alt Change type
+        case Small change
+            LocalPeer->>Network: Send delta update
+        case Large change
+            LocalPeer->>Network: Send full chunks
+    end
+    
+    Network->>RemotePeer: Forward change notification
+    RemotePeer->>RemotePeer: Verify Merkle tree
+    alt Conflict detected
+        RemotePeer->>RemotePeer: Queue conflict resolution
+        RemotePeer->>Network: Request version history
+    else
+        RemotePeer->>RemotePeer: Apply changes
+        RemotePeer->>Network: Ack change application
+    end
+    
+    Network->>LocalPeer: Forward ack/conflict
+    alt Conflict exists
+        LocalPeer->>LocalPeer: Mark conflict state
+        LocalPeer->>Network: Broadcast resolution
+    end

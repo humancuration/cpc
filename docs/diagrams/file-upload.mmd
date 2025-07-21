@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Tauri
+    participant P2PNetwork
+    participant DHT
+    participant Storage
+    participant FileWatcher
+
+    User->>Frontend: Select file to upload
+    Frontend->>Tauri: invoke('upload_file', {path, file})
+    Tauri->>Tauri: Split file into 256KB chunks
+    Tauri->>Tauri: Encrypt each chunk (AES-256-GCM)
+    Tauri->>Tauri: Build Merkle tree from chunks
+    Tauri->>DHT: publish_metadata(content_hash)
+    loop For each chunk
+        Tauri->>P2PNetwork: store_chunk(chunk_hash, encrypted_data)
+        P2PNetwork->>Storage: Store chunk
+        P2PNetwork-->>Tauri: chunk_stored
+    end
+    Tauri->>Storage: store_metadata(file_info)
+    Tauri-->>Frontend: upload_success
+    Frontend-->>User: File uploaded successfully
+
+    Note over FileWatcher: Added for Phase 2
+    FileWatcher->>Tauri: file_change_detected(path, event_type)
+    Tauri->>Tauri: Compute file diff using Merkle tree
+    Tauri->>P2PNetwork: broadcast_change_notification(file_id, diff)
+    P2PNetwork-->>Peers: Propagate change

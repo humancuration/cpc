@@ -1,7 +1,8 @@
 //! Cooperative Node for Cooperative Peer Cloud
 
-use cpc_lib::{storage::LruStorage, net::NetworkBuilder};
+use cpc_lib::{storage::LruStorage, net::NetworkBuilder, grpc::client::OrchestratorClient, grpc::internal::{NodeRegistrationRequest, Resources}};
 use std::error::Error;
+use std::time::Duration;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -18,15 +19,31 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .enable_bitswap()
         .build();
 
-    // Register with orchestrator (pseudo-code implementation)
-    println!("Registering with orchestrator...");
-    // network.register_with_orchestrator("https://orchestrator.example.com").await?;
-    // Placeholder until implementation is complete
+    // Create gRPC client and register with orchestrator
+    println!("Connecting to orchestrator...");
+    let mut client = OrchestratorClient::connect("http://orchestrator:50051".to_string())
+        .await
+        .expect("Failed to connect to orchestrator");
+
+    println!("Registering node with orchestrator...");
+    let response = client.register_node(NodeRegistrationRequest {
+        node_id: network.local_peer_id().to_string(),
+        resources: Some(Resources {
+            memory: 8192, // 8GB
+            storage: 100, // 100GB
+            cores: 4,
+            bandwidth: 100, // 100 Mbps
+        }),
+        location: "us-west".to_string(),
+        capabilities: vec!["storage".to_string(), "compute".to_string()],
+    }).await?;
+
+    println!("Registration response: {}", response.message);
 
     // Keep the node running
     loop {
         // Handle network events
         // Placeholder for actual event handling
-        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+        tokio::time::sleep(Duration::from_secs(10)).await;
     }
 }

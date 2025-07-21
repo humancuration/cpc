@@ -7,7 +7,7 @@
   - Manages user identities and social graphs
   - Tracks content metadata and node locations
   - Coordinates content distribution
-  - Collects metrics via libp2p-metrics (OpenMetrics format)
+  - Collects metrics via rust-libp2p-metrics (OpenMetrics format)
 - **Key Features**:
   - REST API for client interactions
   - gRPC for internal component communication
@@ -40,7 +40,7 @@
 ## Shared Library (cpc-lib)
 - **Purpose**: Common functionality used across all components
 - **Key Modules**:
-  - `net`: libp2p networking setup and protocols
+  - `net`: rust-libp2p networking setup and protocols
   - `crypto`: Encryption/decryption utilities
   - `models`: Common data structures
 - **Benefits**:
@@ -54,22 +54,22 @@
 ```mermaid
 graph LR
   A[User Device] -- HTTP/REST --> B(Orchestrator)
-  A -- libp2p --> C(PDS)
-  C -- libp2p --> D[Cooperative Node]
+  A -- rust-libp2p --> C(PDS)
+  C -- rust-libp2p --> D[Cooperative Node]
   B -- gRPC --> D
 ```
 
-### rust-libp2p Protocols
-- **Peer Discovery**: Kademlia DHT using [libp2p-kad]
-- **Data Transfer**: Bitswap implementation from [libp2p-bitswap]
-- **Messaging**: [libp2p-gossipsub] for pub/sub
-- **NAT Traversal**: [libp2p-autonat] + [libp2p-upnp]
+### rust-rust-libp2p Protocols
+- **Peer Discovery**: Kademlia DHT using [rust-libp2p-kad]
+- **Data Transfer**: Bitswap implementation from [rust-libp2p-bitswap]
+- **Messaging**: [rust-libp2p-gossipsub] for pub/sub
+- **NAT Traversal**: [rust-libp2p-autonat] + [rust-libp2p-upnp]
 
-[libp2p-kad]: https://docs.rs/libp2p-kad
-[libp2p-bitswap]: https://docs.rs/libp2p-bitswap
-[libp2p-gossipsub]: https://docs.rs/libp2p-gossipsub
-[libp2p-autonat]: https://docs.rs/libp2p-autonat
-[libp2p-upnp]: https://docs.rs/libp2p-upnp
+[rust-libp2p-kad]: https://docs.rs/rust-libp2p-kad
+[rust-libp2p-bitswap]: https://docs.rs/rust-libp2p-bitswap
+[rust-libp2p-gossipsub]: https://docs.rs/rust-libp2p-gossipsub
+[rust-libp2p-autonat]: https://docs.rs/rust-libp2p-autonat
+[rust-libp2p-upnp]: https://docs.rs/rust-libp2p-upnp
 
 ## Data Structures
 

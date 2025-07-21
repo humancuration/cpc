@@ -9,14 +9,14 @@ members = [
 
 [workspace.dependencies]
 tokio = { version = "1.0", features = ["full"] }
-libp2p-core = "0.41.0"
-libp2p-kad = "0.43.0"
-libp2p-bitswap = "0.44.0"
-libp2p-gossipsub = "0.47.0"
-libp2p-metrics = "0.16.0"
-libp2p-tcp = "0.42.0"
-libp2p-websocket = "0.45.0"
-libp2p-quic = "0.5.0"
+rust-libp2p-core = "0.41.0"
+rust-libp2p-kad = "0.43.0"
+rust-libp2p-bitswap = "0.44.0"
+rust-libp2p-gossipsub = "0.47.0"
+rust-libp2p-metrics = "0.16.0"
+rust-libp2p-tcp = "0.42.0"
+rust-libp2p-websocket = "0.45.0"
+rust-libp2p-quic = "0.5.0"
 blake3 = "1.5.0"
 rusqlite = "0.29"
 rocksdb = "0.21.0"

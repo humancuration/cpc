@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Tauri
+    participant Storage
+
+    User->>Frontend: Navigate to directory
+    Frontend->>Tauri: invoke('list_files', {path})
+    Tauri->>Storage: query_metadata_directory(path)
+    Storage-->>Tauri: file_list
+    Tauri-->>Frontend: file_list
+    Frontend->>Frontend: Filter by category/search
+    Frontend-->>User: Display filtered files
