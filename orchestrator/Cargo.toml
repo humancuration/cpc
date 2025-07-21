@@ -1,0 +1,12 @@
+[package]
+name = "orchestrator"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+cpc-lib = { path = "../lib" }
+tokio = { version = "1.0", features = ["full"] }
+warp = "0.3"
+tonic = "0.9"
+prost = "0.11"
