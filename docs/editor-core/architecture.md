@@ -42,11 +42,28 @@ The entire `SceneManager` will be managed as a shared, mutable state object usin
 
 ## 4. Future-Proofing for Collaboration
 
-This command-based architecture is inherently well-suited for real-time collaborative editing.
+This command-based architecture has been extended to support real-time collaborative editing with the following enhancements:
 
--   **Serialization:** Commands can be designed to be serializable (e.g., using `serde`). This allows them to be sent over the network to other clients.
--   **Conflict Resolution:** By representing every change as a discrete command, we can implement sophisticated conflict resolution strategies (e.g., Operational Transformation or CRDTs) on top of this foundation. A command from a remote peer can be integrated into the local `SceneManager`'s execution flow.
-
+- **Synchronization Metadata:** Each command event now includes:
+  - Timestamp of modification
+  - User ID and session ID of the editor
+  - Version vector for conflict resolution
+  - Serialized component data for full state restoration
+  
+- **Conflict Detection:**
+  - Entities now have version numbers in their metadata
+  - The scene manager maintains a version vector tracking the latest version of each entity
+  - When applying changes, the system checks for version conflicts
+  
+- **Conflict Resolution Strategies:**
+  - Automatic merging when safe (non-overlapping changes)
+  - User prompting for conflicting changes
+  - Last-write-wins as fallback with logging
+  
+- **UI Indicators:**
+  - User avatars showing who last modified an entity
+  - Timestamps showing when entities were last modified
+  - Visual cues for conflicting versions
 ## 5. High-Level Flow Diagram
 
 ```mermaid
@@ -62,7 +79,32 @@ sequenceDiagram
     Tauri Backend->>SceneManager: execute_command(command)
     SceneManager->>+Command: execute(self)
     Command-->>-SceneManager: Modify scene data
+    SceneManager->>SceneManager: Update version vector
     SceneManager->>SceneManager: Push command to Undo Stack
     SceneManager->>SceneManager: Clear Redo Stack
+    SceneManager->>SceneManager: Emit event with metadata
     SceneManager-->>-Tauri Backend: Release lock
     Tauri Backend-->>-Frontend: Acknowledge success
+```
+
+## 6. Conflict Resolution Flow
+
+```mermaid
+sequenceDiagram
+    participant ClientA
+    participant Server
+    participant ClientB
+
+    ClientA->>Server: Command C1 (Version 1)
+    Server->>ClientB: Forward C1
+    ClientB->>ClientB: Check entity version (local=1, remote=1)
+    ClientB->>ClientB: Apply changes (new version=2)
+    ClientB->>Server: Command C2 (Version 2)
+    Server->>ClientA: Forward C2
+    ClientA->>ClientA: Check entity version (local=1, remote=2)
+    alt Versions match
+        ClientA->>ClientA: Apply changes
+    else Versions conflict
+        ClientA->>ClientA: Prompt user to resolve conflict
+    end
+```

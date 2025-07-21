@@ -12,15 +12,6 @@ let contextMenu = {
     entity: null
 };
 
-// Load scene hierarchy
-onMount(async () => {
-    try {
-        const hierarchy = await dispatchCommand('GetSceneHierarchy');
-        scene.set(hierarchy);
-    } catch (error) {
-        toast.push(`Error loading scene: ${error.message}`, { theme: { '--toastColor': 'red' } });
-    }
-});
 
 // Context menu handlers
 function showContextMenu(event, entityId) {

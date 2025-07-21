@@ -41,8 +41,26 @@
         // Set up collaborator listeners
         invoke('subscribe_to_collaborator_updates');
         
+        // Listen for command-executed events
+        const unlisten = await listen('command-executed', (event) => {
+            const payload = event.payload;
+            switch(payload.command_type) {
+                case 'CreateEntity':
+                    sceneStore.addEntity(payload.entity_id, payload.parent_id);
+                    break;
+                case 'DeleteEntity':
+                    sceneStore.removeEntity(payload.entity_id);
+                    break;
+                case 'ReparentEntity':
+                    sceneStore.reparentEntity(payload.entity_id, payload.parent_id);
+                    break;
+                // Add cases for other command types
+            }
+        });
+        
         return () => {
             window.removeEventListener('texture-update', textureUpdateHandler);
+            unlisten();
         };
     });
     // Function to resolve conflicts

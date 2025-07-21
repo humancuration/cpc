@@ -50,19 +50,27 @@ Swift (+ SwiftUI)
 
 -No reliance on external cloud providers. We will be using our own semi-centralized internal peer to peer cloud solution.
 
-Directories
+File Structure
 
-apps/cpc-studio/  The game editor
-cpc-core/         The core crate
-cpc-node/         
-docs/             
-lib/              
-mobile/           
-orchestrator/     
-pds/              Desktop client
-protos/           
-src-tauri/        
-WheresThisFrom    Android app
+cpc
+├── apps/
+│   ├── cpc-studio/          # The editor application
+│   ├── pds/                 # The desktop PDS client
+│   ├── orchestrator/
+│   ├── cpc-node/
+│   └── cpc-platform/        
+│       ├── src/               # Your Svelte/JS source code for the UI
+│       ├── src-tauri/         # The Rust code for the desktop/mobile backend
+│       ├── android/           # The Android Kotlin/Bevy app
+│       └── ios/               # The iOS swift/Bevy app
+│       └── tauri.conf.json    # Configuration for this specific app
+│
+├── packages/
+│   ├── cpc-core/            # Shared game engine and social media logic
+│   ├── cpc-net/             # Shared P2P logic
+│   └── cpc-protos/          # Shared gRPC code
+│
+└── Cargo.toml               # Unified workspace root
 
 ====
 

@@ -4,10 +4,20 @@ use std::any::Any;
 use uuid::Uuid;
 use serde_json::Value;
 
+use serde_json::Value;
+use uuid::Uuid;
+
 pub trait Command: Send + Sync {
     fn execute(&self, scene: &mut SceneManager);
     fn undo(&self, scene: &mut SceneManager);
     fn as_any(&self) -> &dyn Any;
+    
+    // New methods for command metadata
+    fn command_type(&self) -> &str;
+    fn entity_id(&self) -> Option<Uuid>;
+    fn component_type(&self) -> Option<&str>;
+    fn parent_id(&self) -> Option<Uuid>;
+    fn serialized_component_data(&self) -> Option<Value>;
 }
 
 #[derive(Serialize, Deserialize)]
@@ -38,6 +48,16 @@ impl Command for UpdateComponentCommand {
     }
 
     fn as_any(&self) -> &dyn Any { self }
+    
+    fn command_type(&self) -> &str { "UpdateComponent" }
+    
+    fn entity_id(&self) -> Option<Uuid> { Some(self.entity_id) }
+    
+    fn component_type(&self) -> Option<&str> { Some(&self.component_type_name) }
+    
+    fn parent_id(&self) -> Option<Uuid> { None }
+    
+    fn serialized_component_data(&self) -> Option<Value> { Some(self.new_value.clone()) }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -64,6 +84,16 @@ impl Command for AddComponentCommand {
     }
 
     fn as_any(&self) -> &dyn Any { self }
+    
+    fn command_type(&self) -> &str { "AddComponent" }
+    
+    fn entity_id(&self) -> Option<Uuid> { Some(self.entity_id) }
+    
+    fn component_type(&self) -> Option<&str> { Some(&self.component_type_name) }
+    
+    fn parent_id(&self) -> Option<Uuid> { None }
+    
+    fn serialized_component_data(&self) -> Option<Value> { Some(self.component_data.clone()) }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -90,6 +120,16 @@ impl Command for RemoveComponentCommand {
     }
 
     fn as_any(&self) -> &dyn Any { self }
+    
+    fn command_type(&self) -> &str { "RemoveComponent" }
+    
+    fn entity_id(&self) -> Option<Uuid> { Some(self.entity_id) }
+    
+    fn component_type(&self) -> Option<&str> { Some(&self.component_type_name) }
+    
+    fn parent_id(&self) -> Option<Uuid> { None }
+    
+    fn serialized_component_data(&self) -> Option<Value> { Some(self.removed_component_data.clone()) }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -123,6 +163,16 @@ impl Command for CreateEntityCommand {
     }
 
     fn as_any(&self) -> &dyn Any { self }
+    
+    fn command_type(&self) -> &str { "CreateEntity" }
+    
+    fn entity_id(&self) -> Option<Uuid> { Some(self.entity_id) }
+    
+    fn component_type(&self) -> Option<&str> { None }
+    
+    fn parent_id(&self) -> Option<Uuid> { self.parent_id }
+    
+    fn serialized_component_data(&self) -> Option<Value> { None }
 }
 
 #[derive(Serialize, Deserialize)]
