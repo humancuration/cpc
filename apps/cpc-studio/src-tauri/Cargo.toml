@@ -17,3 +17,7 @@ anyhow = "1.0"
 thiserror = "1.0"
 reqwest = { version = "0.11", features = ["json"] }
 cpc-core = { path = "../../../packages/cpc-core" }
+jsonwebtoken = "8.3"
+chrono = "0.4"
+scene_manager = { path = "./src/scene_manager" }
+scene_commands = { path = "./src/scene_commands" }

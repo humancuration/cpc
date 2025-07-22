@@ -14,6 +14,7 @@ mod identity;
 mod discovery;
 mod metrics;
 mod secret_manager;
+mod auth;
 mod cpc_orchestrator {
     tonic::include_proto!("cpc.orchestrator");
 }
@@ -49,6 +50,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Initialize services
     let node_registry = NodeRegistryService::new(db_pool.clone());
+    let auth_service = auth::service::AuthService::new(
+        db_pool.clone(),
+        secret_manager.get_secret("JWT_SECRET")
+            .await
+            .unwrap_or_else(|_| "fallback_secret".to_string())
+    );
     // Create secret manager
     let secret_manager = Arc::new(SecretManager::new(
         if std::env::var("PRODUCTION").is_ok() {
@@ -61,7 +68,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let identity = IdentityService::new(
         db_pool.clone(),
         secret_manager.clone()
-    );
+    ).with_auth_service(auth_service.clone());
     let discovery = DiscoveryService::new(db_pool.clone(), search_client.clone());
     let metrics = MetricsService::new();
 

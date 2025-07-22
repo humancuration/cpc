@@ -21,7 +21,7 @@ wry
 Axum
 Svelte (+ SvelteKit)
 
-Android app (we will refactor to use as much of the shared Rust code as possible)
+Android app (we will refactor to use as much of the shared Rust code, bevy, tauri, axum as possible)
 
 -Language: Kotlin (+ Compose)
 -Android UI: Jetpack Compose
@@ -36,7 +36,7 @@ Android app (we will refactor to use as much of the shared Rust code as possible
 -Networking (Client-side): Ktor Client
 -Data Serialization: Kotlinx Serialization
 -Database (Client-side): Room
--Backend Framework: Ktor Server
+-Backend Framework: Axum
 (We need to refactor to use the same shared Axum backend as the desktop/web app)
 -Valkey for distributed caching
 -Caffeine for local, in-process caching

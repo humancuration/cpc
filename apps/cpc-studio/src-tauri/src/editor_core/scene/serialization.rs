@@ -5,9 +5,12 @@ use uuid::Uuid;
 use super::{Entity, ComponentStorage, SceneHierarchy};
 use crate::editor_core::scene::component::SerializableComponent;
 use cpc_core::scene::{SceneData, EntityData, ComponentData};
+use cpc_core::error::PublishError;
+use tracing;
 
 impl SceneHierarchy {
     /// Serialize the scene hierarchy to MessagePack bytes
+    #[tracing::instrument(skip(self))]
     pub fn serialize(&self) -> Result<Vec<u8>, rmp_serde::encode::Error> {
         let scene_data = SceneData {
             entities: self.entities.values()
@@ -20,15 +23,20 @@ impl SceneHierarchy {
                 .collect(),
         };
         
+        tracing::debug!("Serializing scene with {} entities", scene_data.entities.len());
+        
         let mut buf = Vec::new();
         scene_data.serialize(&mut Serializer::new(&mut buf))?;
         Ok(buf)
     }
 
     /// Deserialize MessagePack bytes into a scene hierarchy
+    #[tracing::instrument]
     pub fn deserialize(data: &[u8]) -> Result<Self, rmp_serde::decode::Error> {
         let mut de = Deserializer::new(data);
         let scene_data: SceneData = Deserialize::deserialize(&mut de)?;
+        
+        tracing::debug!("Deserializing scene with {} entities", scene_data.entities.len());
         
         let mut hierarchy = SceneHierarchy::default();
         for entity_data in scene_data.entities {
@@ -51,6 +59,7 @@ impl SceneHierarchy {
 
 impl ComponentStorage {
     /// Serialize all components into a vector of ComponentData
+    #[tracing::instrument(skip(self))]
     pub fn serialize_components(&self) -> Vec<ComponentData> {
         // In a real implementation, we would iterate through all components
         // For now, we'll leave this as a placeholder
@@ -59,6 +68,7 @@ impl ComponentStorage {
     }
 
     /// Deserialize a component from its type name and data
+    #[tracing::instrument]
     pub fn deserialize_component(type_name: &str, data: &[u8]) -> Option<Box<dyn SerializableComponent>> {
         // In a real implementation, we would match on type_name
         // and deserialize the appropriate component type

@@ -3,12 +3,13 @@
 mod asset_commands;
 mod editor_core;
 mod scene_commands;
+mod scene_manager;
 
 use editor_core::{EditorCore, EditorState};
 use tauri::Manager;
 use cpc_core::p2p::NetworkHandler;
 use std::sync::{Arc, Mutex};
-use editor_core::scene::manager::SceneManager;
+use scene_manager::SceneManager;
 
 fn main() {
     tauri::Builder::default()
@@ -25,7 +26,7 @@ fn main() {
             let editor_state = EditorState::default();
             
             // Create scene manager
-            let scene_manager = Arc::new(Mutex::new(SceneManager::new()));
+            let scene_manager = SceneManager::new();
             
             // Manage state
             app.manage(network_handler.clone());
@@ -52,7 +53,8 @@ fn main() {
             scene_commands::add_component,
             scene_commands::remove_component,
             scene_commands::undo,
-            scene_commands::redo
+            scene_commands::redo,
+            scene_commands::build_project_data
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

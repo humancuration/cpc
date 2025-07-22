@@ -1,11 +1,13 @@
-use axum::{Router, routing::post};
+use axum::{Router, routing::post, middleware};
 use std::sync::Arc;
 use rmp_serde::Serializer;
 use serde::Serialize;
 use anyhow::Result;
+use uuid::Uuid;
 
 mod http_handlers;
 mod file_utils;
+mod auth;
 
 struct AppState {
     file_processor: file_utils::FileProcessor,
@@ -30,9 +32,10 @@ async fn main() {
     // Create shared application state
     let app_state = Arc::new(AppState::new());
 
-    // Build our application with a route
+    // Build our application with routes and middleware
     let app = Router::new()
-        .route("/publish", post(http_handlers::publish_handler))
+        .route("/publish", post(http_handlers::publish_handler)
+            .route_layer(middleware::from_fn(auth::auth_middleware)))
         .with_state(app_state);
 
     // Run our app with hyper

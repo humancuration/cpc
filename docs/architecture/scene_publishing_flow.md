@@ -13,23 +13,39 @@ sequenceDiagram
     participant PDS (HTTP Server)
     participant P2P Network
 
+    %% Authentication Prerequisite %%
+    Note over Studio (Tauri): Assumes user is authenticated and has a JWT
+
+    %% Scene Publishing Flow %%
     Studio (UI)->>Studio (Tauri): 1. User clicks "Publish"
     activate Studio (Tauri)
+    
     Studio (Tauri)->>Studio (Tauri): 2. Serialize scene to MessagePack
-    Studio (Tauri)->>Studio (Tauri): 3. Wrap scene data with metadata (ProjectData)
-    Studio (Tauri)->>PDS (HTTP Server): 4. POST /publish with ProjectData
+    Studio (Tauri)->>Studio (Tauri): 3. Retrieve JWT from secure storage
+    Studio (Tauri)->>Studio (Tauri): 4. Wrap scene data with metadata (ProjectData)
+    
+    Note right of Studio (Tauri): Includes Authorization: Bearer <JWT>
+    Studio (Tauri)->>PDS (HTTP Server): 5. POST /publish with ProjectData
     deactivate Studio (Tauri)
+    
     activate PDS (HTTP Server)
-    PDS (HTTP Server)->>PDS (HTTP Server): 5. Receive and deserialize ProjectData
-    PDS (HTTP Server)->>PDS (HTTP Server): 6. Chunk, encrypt, and generate content address for the data
-    PDS (HTTP Server)->>P2P Network: 7. Store chunks and metadata
+    PDS (HTTP Server)->>PDS (HTTP Server): 6. Middleware: Validate JWT
+    alt Token is invalid
+        PDS (HTTP Server)-->>Studio (Tauri): 401 Unauthorized
+    end
+    
+    PDS (HTTP Server)->>PDS (HTTP Server): 7. Receive and deserialize ProjectData
+    PDS (HTTP Server)->>PDS (HTTP Server): 8. Chunk, encrypt, and generate content address
+    PDS (HTTP Server)->>P2P Network: 9. Store chunks and metadata
     activate P2P Network
-    P2P Network-->>PDS (HTTP Server): 8. Confirm storage
+    P2P Network-->>PDS (HTTP Server): 10. Confirm storage
     deactivate P2P Network
-    PDS (HTTP Server)->>Studio (Tauri): 9. Respond with { "content_address": "..." }
+    
+    PDS (HTTP Server)->>Studio (Tauri): 11. Respond with { "content_address": "..." }
     deactivate PDS (HTTP Server)
+    
     activate Studio (Tauri)
-    Studio (Tauri)-->>Studio (UI): 10. Notify UI of success
+    Studio (Tauri)-->>Studio (UI): 12. Notify UI of success
     deactivate Studio (Tauri)
 ```
 
@@ -70,6 +86,8 @@ Communication between `cpc-studio` and `pds` will occur over a local HTTP interf
 - **Endpoint**: `POST /publish`
 - **Host**: `http://localhost:3030` (Port should be configurable)
 - **Request `Content-Type`**: `application/msgpack`
+- **Headers**:
+  - `Authorization`: `Bearer <jwt>`
 - **Request Body**: MessagePack-serialized `ProjectData`.
 
 - **Success Response (200 OK)**:
@@ -81,6 +99,7 @@ Communication between `cpc-studio` and `pds` will occur over a local HTTP interf
 
 - **Error Responses**:
   - `400 Bad Request`: Invalid request body.
+  - `401 Unauthorized`: Missing or invalid JWT.
   - `500 Internal Server Error`: Failure during processing in the PDS.
   - **Body**:
     ```json
@@ -88,6 +107,25 @@ Communication between `cpc-studio` and `pds` will occur over a local HTTP interf
       "error": "A descriptive error message."
     }
     ```
+
+### 2.4. Authentication
+
+Authentication for the `/publish` endpoint is handled via JSON Web Tokens (JWT).
+
+- **Algorithm**: HS256
+- **Token Source**: The JWT is generated during the user's login or session initialization process and stored securely in `cpc-studio`.
+- **Token Claims**:
+  ```json
+  {
+    "user_id": "uuid-goes-here",
+    "exp": 1672531200
+  }
+  ```
+- **Validation**:
+  1. The `pds` server expects the JWT in the `Authorization: Bearer <token>` header.
+  2. An Axum middleware extracts and validates the token using a shared secret key.
+  3. If validation fails (e.g., expired, invalid signature), the server returns a `401 Unauthorized` response.
+  4. If validation succeeds, the `user_id` from the token's claims is extracted and used to populate the `author_id` field in the `ProjectMetadata`.
 
 ### 2.3. Implementation Details
 
