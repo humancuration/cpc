@@ -5,6 +5,9 @@ use crate::bridge::{EngineBridge, TextureData};
 #[cfg(target_os = "android")]
 pub mod android;
 
+// Thread management module
+pub mod bevy_thread;
+
 pub struct CpcBevyPlugin;
 
 impl Plugin for CpcBevyPlugin {
@@ -110,6 +113,18 @@ impl CpcBevyPlugin {
         // Reconfigure Bevy with the new surface
         let mut app = self.app.lock().unwrap();
         app.world.resource_mut::<WindowDescriptor>().canvas = Some(surface as _);
+    }
+}
+
+// macOS-specific implementation
+#[cfg(target_os = "macos")]
+impl CpcBevyPlugin {
+    pub fn stop_engine(app_ptr: *mut App) {
+        unsafe {
+            if !app_ptr.is_null() {
+                let _ = Box::from_raw(app_ptr);
+            }
+        }
     }
 }
 

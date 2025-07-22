@@ -43,6 +43,11 @@ impl NewUser {
         // Add more security checks as needed (special characters, etc)
         Ok(())
     }
+
+    /// Updates the user's password with a new one
+    pub fn update_password(&mut self, new_password: String) {
+        self.password = new_password;
+    }
 }
 
 #[cfg(test)]

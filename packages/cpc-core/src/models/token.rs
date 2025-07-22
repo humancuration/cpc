@@ -14,10 +14,25 @@ pub struct AuthToken {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeviceFingerprint(String);
+
+impl DeviceFingerprint {
+    pub fn new(user_agent: &str, ip: &str) -> Self {
+        use sha2::{Sha256, Digest};
+        let mut hasher = Sha256::new();
+        hasher.update(user_agent.as_bytes());
+        hasher.update(ip.as_bytes());
+        let result = hasher.finalize();
+        DeviceFingerprint(format!("{:x}", result))
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Token {
     pub user_id: Uuid,
-    pub refresh_token: String,
-    pub device_info: Option<String>,
+    pub token: String,
+    pub token_type: String, // "access" or "refresh"
+    pub device_fingerprint: String,
     #[serde(with = "crate::utils::datetime")]
     pub created_at: DateTime<Utc>,
     #[serde(with = "crate::utils::datetime")]
@@ -27,8 +42,9 @@ pub struct Token {
 #[derive(Debug, Clone)]
 pub struct NewToken {
     pub user_id: Uuid,
-    pub refresh_token: String,
-    pub device_info: Option<String>,
+    pub token: String,
+    pub token_type: String, // "access" or "refresh"
+    pub device_fingerprint: String,
     pub expires_at: DateTime<Utc>,
 }
 

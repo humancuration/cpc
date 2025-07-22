@@ -14,6 +14,7 @@ pub struct RegisterInput {
 pub struct LoginInput {
     pub email: String,
     pub password: String,
+    pub device_fingerprint: String,
 }
 
 #[derive(SimpleObject)]
@@ -41,16 +42,17 @@ impl AuthMutation {
             .await
             .map_err(|e| e.into())?;
 
-        // Generate tokens
-        let access_token = auth_service.generate_jwt(user_id);
+        // Generate tokens using JwtService
+        let access_token = auth_service.jwt_service.generate_token(user_id);
         let refresh_token = Uuid::new_v4().to_string();
+        let expires_at = Utc::now() + Duration::days(30);
         
         // Store refresh token
         auth_service.create_token(NewToken {
             user_id,
             refresh_token: refresh_token.clone(),
-            device_info: None,
-            expires_at: Utc::now() + Duration::days(30),
+            device_info: Some("web".to_string()), // TODO: get actual device info
+            expires_at,
         }).await.map_err(|e| e.into())?;
 
         // Get full user data
@@ -67,19 +69,68 @@ impl AuthMutation {
 
     async fn login(&self, ctx: &Context<'_>, input: LoginInput) -> Result<AuthPayload> {
         let auth_service = ctx.data::<AuthService>()?;
-        // TODO: Verify credentials and generate tokens
-        unimplemented!()
+        
+        let (access_token, refresh_token) = auth_service.login(
+            &input.email,
+            &input.password,
+            &input.device_fingerprint
+        )
+        .await
+        .map_err(|e| e.into())?;
+        
+        // Get user by email
+        let user = sqlx::query_as!(
+            User,
+            "SELECT * FROM users WHERE email = $1",
+            input.email
+        )
+        .fetch_one(&auth_service.db)
+        .await
+        .map_err(|_| "User not found".into())?;
+
+        Ok(AuthPayload {
+            access_token,
+            refresh_token,
+            user,
+        })
     }
 
-    async fn refresh_token(&self, ctx: &Context<'_>, refresh_token: String) -> Result<String> {
+    async fn refresh_token(&self, ctx: &Context<'_>, input: RefreshTokenInput) -> Result<AuthPayload> {
         let auth_service = ctx.data::<AuthService>()?;
-        // TODO: Validate refresh token and generate new access token
-        unimplemented!()
+        
+        let (access_token, refresh_token) = auth_service.refresh_token(
+            &input.refresh_token,
+            &input.device_fingerprint
+        )
+        .await
+        .map_err(|e| e.into())?;
+
+        // Get user from token claims
+        let claims = auth_service.jwt_service.validate_access_token(&access_token)
+            .map_err(|_| "Invalid token".into())?;
+            
+        let user = auth_service.get_user_by_id(claims.sub)
+            .await
+            .map_err(|e| e.into())?;
+
+        Ok(AuthPayload {
+            access_token,
+            refresh_token,
+            user,
+        })
     }
+
+#[derive(InputObject)]
+pub struct RefreshTokenInput {
+    pub refresh_token: String,
+    pub device_fingerprint: String,
+}
 
     async fn logout(&self, ctx: &Context<'_>, refresh_token: String) -> Result<bool> {
         let auth_service = ctx.data::<AuthService>()?;
-        // TODO: Invalidate refresh token
-        unimplemented!()
+        auth_service.logout(&refresh_token)
+            .await
+            .map_err(|e| e.into())?;
+        Ok(true)
     }
 }

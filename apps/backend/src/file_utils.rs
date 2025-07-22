@@ -21,6 +21,8 @@ pub struct FileProcessor {
 
 impl FileProcessor {
     pub fn new(encryption_key: [u8; 32]) -> Self {
+        // Validate key length at creation time
+        assert_eq!(encryption_key.len(), 32, "Encryption key must be 32 bytes");
         Self { encryption_key }
     }
 

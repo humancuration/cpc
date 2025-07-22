@@ -70,3 +70,16 @@ impl NetworkHandler {
         }
     }
 }
+
+impl NetworkHandler {
+    pub fn shutdown(&self) {
+        let mut swarm = self.swarm.lock().unwrap();
+        // Gracefully disconnect from all peers
+        for peer_id in swarm.connected_peers().collect::<Vec<_>>() {
+            if let Err(e) = swarm.disconnect_peer_id(peer_id) {
+                log::error!("Failed to disconnect from {}: {:?}", peer_id, e);
+            }
+        }
+        // Additional cleanup as needed
+    }
+}

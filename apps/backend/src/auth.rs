@@ -13,11 +13,6 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use uuid::Uuid;
 
-static SECRET_KEY: Lazy<String> = Lazy::new(|| "my-secret-key".to_string());
-static DECODING_KEY: Lazy<DecodingKey> = Lazy::new(|| {
-    DecodingKey::from_secret(SECRET_KEY.as_bytes())
-});
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub user_id: Uuid,
@@ -25,6 +20,7 @@ pub struct Claims {
 }
 
 pub async fn auth_middleware(
+    State(state): State<Arc<crate::AppState>>,
     req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
@@ -42,7 +38,7 @@ pub async fn auth_middleware(
         .to_owned();
 
     // Decode and validate token
-    let token_data = decode::<Claims>(&token, &DECODING_KEY, &Validation::new(Algorithm::HS256))
+    let token_data = decode::<Claims>(&token, &state.decoding_key, &Validation::new(Algorithm::HS256))
         .map_err(|_| StatusCode::UNAUTHORIZED)?;
     
     // Insert user_id into request extensions

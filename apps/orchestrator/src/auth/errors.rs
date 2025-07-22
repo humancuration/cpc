@@ -15,6 +15,10 @@ pub enum AuthError {
     TokenExpired,
     #[error("Internal server error")]
     InternalError,
+    #[error("Refresh rate limit exceeded")]
+    RefreshRateLimitExceeded,
+    #[error("Password change failed")]
+    PasswordChangeFailed,
 }
 
 impl AuthError {
@@ -26,6 +30,8 @@ impl AuthError {
             AuthError::InvalidToken => StatusCode::UNAUTHORIZED,
             AuthError::TokenExpired => StatusCode::UNAUTHORIZED,
             AuthError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
+            AuthError::RefreshRateLimitExceeded => StatusCode::TOO_MANY_REQUESTS,
+            AuthError::PasswordChangeFailed => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }
