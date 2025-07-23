@@ -19,7 +19,7 @@ pub fn update_component(
     
     // Get the old value for undo operation
     let old_value = scene_manager.get_entity(entity_id)
-        .and_then(|e| e.components.get(&component极_name).cloned())
+        .and_then(|e| e.components.get(&component_type_name).cloned())
         .unwrap_or(Value::Null);
 
     let command = Box::new(UpdateComponentCommand {

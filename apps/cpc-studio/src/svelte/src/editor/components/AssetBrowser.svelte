@@ -144,55 +144,73 @@
     flex-direction: column;
     height: 100%;
     position: relative;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   }
   
   .breadcrumbs {
     display: flex;
     align-items: center;
-    padding: 8px;
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #ddd;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0;
   }
   
   .up-button {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1.2rem;
-    padding: 4px 8px;
+    font-size: 1.3rem;
+    padding: 6px 10px;
+    color: #495057;
+    transition: color 0.2s ease;
+  }
+  
+  .up-button:hover {
+    color: #007bff;
   }
   
   .up-button:disabled {
-    opacity: 0.3;
+    opacity: 0.4;
     cursor: not-allowed;
   }
   
   .path-display {
-    margin-left: 8px;
-    font-size: 0.9rem;
+    margin-left: 10px;
+    font-size: 0.95rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: #343a40;
   }
   
   .search-bar {
-    padding: 8px;
+    padding: 12px;
     display: flex;
-    gap: 8px;
+    gap: 10px;
+    background: #f8f9fa;
   }
   
   .search-bar input {
     flex-grow: 1;
-    padding: 6px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    transition: border-color 0.2s ease;
+  }
+  
+  .search-bar input:focus {
+    border-color: #007bff;
+    outline: none;
   }
   
   .asset-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 16px;
-    padding: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 20px;
+    padding: 20px;
     overflow-y: auto;
     flex-grow: 1;
   }
@@ -202,55 +220,62 @@
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 8px;
     overflow: hidden;
     position: relative;
-    transition: transform 0.2s;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   }
   
   .asset-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
   }
   
   .thumbnail {
     width: 100%;
-    height: 100px;
+    height: 110px;
     object-fit: cover;
-    background-color: #f0f0f0;
+    background-color: #f1f3f5;
   }
   
   .thumbnail.placeholder {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
+    font-size: 2.5rem;
+    color: #adb5bd;
   }
   
   .asset-name {
-    margin-top: 8px;
+    margin-top: 10px;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 100%;
+    padding: 0 8px 8px;
+    color: #212529;
   }
   
   .lock-indicator {
     position: absolute;
-    top: 4px;
-    right: 4px;
-    background: rgba(255,255,255,0.7);
+    top: 6px;
+    right: 6px;
+    background: rgba(255,255,255,0.8);
     border-radius: 50%;
-    padding: 2px;
+    padding: 4px;
+    font-size: 0.9rem;
   }
   
   .empty-state {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 40px 0;
-    color: #888;
+    padding: 50px 0;
+    color: #6c757d;
+    font-size: 1.1rem;
   }
   
   .drag-overlay {
@@ -259,23 +284,25 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(33, 150, 243, 0.1);
-    border: 2px dashed #2196f3;
+    background: rgba(0, 123, 255, 0.1);
+    border: 2px dashed #007bff;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 10;
+    border-radius: 12px;
   }
   
   .drag-message {
     background: white;
-    padding: 20px 40px;
-    border-radius: 8px;
-    font-weight: bold;
-    color: #2196f3;
+    padding: 25px 50px;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #007bff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
   
   .active-drag {
-    background-color: rgba(33, 150, 243, 0.05);
+    background-color: rgba(0, 123, 255, 0.05);
   }
 </style>

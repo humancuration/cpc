@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { refreshNetworkStatus } from './stores/network';
+  import { theme } from './stores/theme';
   
   import NetworkStatusDashboard from './components/NetworkStatusDashboard.svelte';
   import StorageConfigPanel from './components/StorageConfigPanel.svelte';
@@ -15,7 +16,7 @@
   });
 </script>
 
-<main>
+<main class={$theme}>
   <header>
     <h1>Cooperative Peer Cloud</h1>
     <nav>
@@ -51,40 +52,48 @@
   :global(body) {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #f0f0f0;
   }
-  
+  :global(.light) {
+    --background: #f0f0f0;
+    --content-bg: white;
+    --text: black;
+    --accent: #007bff;
+  }
+  :global(.dark) {
+    --background: #333;
+    --content-bg: #444;
+    --text: white;
+    --accent: #4da6ff;
+  }
+  :global(.blue) {
+    --background: #e6f2ff;
+    --content-bg: white;
+    --text: #004080;
+    --accent: #0066cc;
+  }
+  :global(.green) {
+    --background: #e6ffe6;
+    --content-bg: white;
+    --text: #006600;
+    --accent: #009900;
+  }
   main {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    background: var(--background);
+    color: var(--text);
   }
-  
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 20px;
+  // Update other styles to use variables, e.g.
+  .content {
+    background: var(--content-bg);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  
-  nav {
-    display: flex;
-    gap: 10px;
-  }
-  
-  button {
-    padding: 8px 15px;
-    background: #eee;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
   button.active {
-    background: #007bff;
-    color: white;
+    background: var(--accent);
+    color: var(--content-bg);
   }
   
   .content {

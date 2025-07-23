@@ -1,3 +1,4 @@
+// DEPRECATED: This file has been moved and refactored to coop.cpc.platform.MainActivity.kt
 package com.wtf
 
 import android.content.Intent

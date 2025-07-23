@@ -156,75 +156,118 @@
 
 <style>
     .inspector-panel {
-        padding: 15px;
-        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 12px;
         height: 100%;
         overflow-y: auto;
+        background: #ffffff;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
     .entity-info {
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #eee;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
     }
     
     .property {
         display: flex;
-        margin: 5px 0;
+        margin: 8px 0;
+        color: #495057;
     }
     
     .property label {
-        font-weight: bold;
-        width: 100px;
+        font-weight: 600;
+        width: 120px;
+        color: #212529;
     }
     
     .components {
-        margin-top: 20px;
+        margin-top: 25px;
     }
     
     .component {
-        margin-bottom: 15px;
-        border: 1px solid #eee;
-        border-radius: 4px;
-        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        background: #f8f9fa;
+        transition: box-shadow 0.2s ease;
+    }
+    
+    .component:hover {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
     .component-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-weight: bold;
-        margin-bottom: 5px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #343a40;
     }
     
     .remove-btn {
-        background: #ff6b6b;
+        background: #ff4757;
         color: white;
         border: none;
-        border-radius: 4px;
-        padding: 2px 8px;
+        border-radius: 6px;
+        padding: 4px 12px;
         cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    
+    .remove-btn:hover {
+        background: #ff6b81;
     }
     
     .component-data {
-        background: #f8f8f8;
-        padding: 8px;
-        border-radius: 4px;
-        max-height: 200px;
+        background: #e9ecef;
+        padding: 12px;
+        border-radius: 6px;
+        max-height: 250px;
         overflow: auto;
-        font-size: 0.9em;
+        font-size: 0.95em;
+        color: #212529;
     }
     
     .component-header-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
     }
     
     .add-component {
         display: flex;
-        gap: 10px;
-        margin-top: 15px;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .add-component select {
+        flex: 1;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+    }
+    
+    .add-component button {
+        background: #1e90ff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    
+    .add-component button:hover {
+        background: #40a9ff;
+    }
+    
+    .add-component button:disabled {
+        background: #a5d1ff;
+        cursor: not-allowed;
     }
 </style>

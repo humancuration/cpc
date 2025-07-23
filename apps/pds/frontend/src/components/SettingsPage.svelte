@@ -1,11 +1,15 @@
 <script>
   import { invoke } from '@tauri-apps/api';
+  import { theme } from '../stores/theme';
   
   let encryptionKey = '';
   let networkProtocols = ['TCP', 'QUIC', 'WebSockets'];
   let selectedProtocols = ['TCP', 'WebSockets'];
   let bootstrapNodes = ['/ip4/10.0.0.1/tcp/4001/p2p/12D3KooWM8s3KQT7LKUpZb7hY4E3AbM4WZ1xWKQqQK3q4VZ7V5v2'];
   let newNode = '';
+  let selectedTheme = '';
+
+  $: selectedTheme = $theme;
 
   async function saveSettings() {
     try {
@@ -21,6 +25,10 @@
       bootstrapNodes = [...bootstrapNodes, newNode.trim()];
       newNode = '';
     }
+  }
+
+  function updateTheme(newTheme) {
+    theme.set(newTheme);
   }
 </script>
 
@@ -43,6 +51,16 @@
         {protocol}
       </label>
     {/each}
+  </div>
+
+  <div class="settings-section">
+    <h3>Visual Theme</h3>
+    <select bind:value={selectedTheme} on:change={(e) => updateTheme(e.target.value)}>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+      <option value="blue">Blue</option>
+      <option value="green">Green</option>
+    </select>
   </div>
 
   <div class="settings-section">

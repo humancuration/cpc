@@ -1,12 +1,15 @@
 use jni::JNIEnv;
-use jni::objects::{JObject, JValue};
-use jni::sys::{jint, jlong};
+use jni::objects::{JObject, JString, JValue};
+use jni::sys::{jbyteArray, jint, jlong};
 use bevy::prelude::*;
+use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+use bevy::render::texture::Image;
 use bevy::window::Window;
 use crossbeam_channel::{bounded, Receiver, Sender};
 use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
 use std::thread;
-use cpc_core::texture_manifest::{TextureManifest, populate_texture_manifest};
+use cpc_core::texture_manifest::TextureManifest;
+use cpc_core::SpritePlugin;
 
 struct BevyThreadManager {
     app: Mutex<Option<App>>,
@@ -20,6 +23,8 @@ enum BevyCommand {
     Resize(u32, u32),
     NewSurface(*mut std::ffi::c_void),
     Exit,
+    GameEvent(String, String),
+    AddTexture(String, Vec<u8>, u32, u32),
 }
 
 lazy_static! {
@@ -54,6 +59,24 @@ fn bevy_thread(rx: Receiver<BevyCommand>, manager: Arc<BevyThreadManager>) {
                     recreate_renderer(&manager);
                 }
                 BevyCommand::Exit => break,
+                BevyCommand::GameEvent(event_type, data) => {
+                    info!("Received game event: {} - {}", event_type, data);
+                }
+                BevyCommand::AddTexture(name, bytes, width, height) => {
+                    if let Some(mut app) = manager.app.lock().unwrap().as_mut() {
+                        let mut images = app.world.get_resource_mut::<Assets<Image>>().unwrap();
+                        let mut manifest = app.world.get_resource_mut::<TextureManifest>().unwrap();
+                        
+                        let image = Image::new(
+                            Extent3d { width, height, depth_or_array_layers: 1 },
+                            TextureDimension::D2,
+                            bytes,
+                            TextureFormat::Rgba8UnormSrgb,
+                        );
+                        let handle = images.add(image);
+                        manifest.textures.insert(name, handle);
+                    }
+                }
             }
         }
         
@@ -81,8 +104,8 @@ fn recreate_renderer(manager: &Arc<BevyThreadManager>) {
 }
 
 #[no_mangle]
-pub extern "system" fn Java_com_wtf_BevyView_initializeBevy(
-    env: JNIEnv,
+pub extern "system" fn Java_coop_cpc_platform_NativeBridge_initializeBevy(
+    _env: JNIEnv,
     _: JObject,
     surface: JObject,
 ) {
@@ -96,12 +119,12 @@ pub extern "system" fn Java_com_wtf_BevyView_initializeBevy(
     let mut app = App::new();
     app.add_plugins(DefaultPlugins)
         .init_resource::<TextureManifest>()
-        .add_startup_system(populate_texture_manifest);
+        .add_plugins(SpritePlugin);
     *BEVY_MANAGER.app.lock().unwrap() = Some(app);
 }
 
 #[no_mangle]
-pub extern "system" fn Java_com_wtf_BevyView_resizeBevy(
+pub extern "system" fn Java_coop_cpc_platform_NativeBridge_resizeBevy(
     env: JNIEnv,
     _: JObject,
     width: jint,
@@ -118,12 +141,42 @@ pub extern "system" fn Java_com_wtf_BevyView_resizeBevy(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_com_wtf_BevyView_destroyBevy(_env: JNIEnv, _: JObject) {
+pub extern "system" fn Java_coop_cpc_platform_NativeBridge_destroyBevy(_env: JNIEnv, _: JObject) {
     BEVY_MANAGER.running.store(false, Ordering::SeqCst);
     BEVY_MANAGER.command_tx.send(BevyCommand::Exit)
         .expect("Failed to send exit command");
     *BEVY_MANAGER.app.lock().unwrap() = None;
     *BEVY_MANAGER.surface.lock().unwrap() = None;
+}
+
+#[no_mangle]
+pub extern "system" fn Java_coop_cpc_platform_NativeBridge_sendGameEvent(
+    env: JNIEnv,
+    _: JObject,
+    event_type: JString,
+    data: JString,
+) {
+    let event_type_str: String = env.get_string(event_type).expect("Couldn't get java string!").into();
+    let data_str: String = env.get_string(data).expect("Couldn't get java string!").into();
+    
+    BEVY_MANAGER.command_tx.send(BevyCommand::GameEvent(event_type_str, data_str))
+        .expect("Failed to send game event");
+}
+
+#[no_mangle]
+pub extern "system" fn Java_coop_cpc_platform_NativeBridge_sendTextureToEngine(
+    env: JNIEnv,
+    _: JObject,
+    name: JString,
+    bytes: jbyteArray,
+    width: jint,
+    height: jint,
+) {
+    let name_str: String = env.get_string(name).expect("Couldn't get java string!").into();
+    let byte_array = env.convert_byte_array(bytes).expect("Couldn't convert byte array!");
+    
+    BEVY_MANAGER.command_tx.send(BevyCommand::AddTexture(name_str, byte_array, width as u32, height as u32))
+        .expect("Failed to send texture");
 }
 
 // Helper for lifecycle integration

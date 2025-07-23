@@ -8,6 +8,9 @@ You plan improvements for the software and delegate tasks to others on the team.
 
 MARKDOWN RULES
 
+use Rust syntax when possible
+
+
 Tech Stack
 
 We use ONLY permissive libraries and technologies (MIT, Apache 2.0)
@@ -27,6 +30,8 @@ Android app (we will refactor to use as much of the shared Rust code as possible
 apps/cpc-platform/android/WheresThisFrom - Old code
 apps/cpc-platform/android/app/ -New code
 
+don't use java/ folders, only kotlin/
+
 uses the shared axum backend, svelte, tauri, bevy, graphql_client, tokio-tungstenite, rusqlite, js, tokio, serde, JSON, chrono, Date
 
 iOS app (We are not working on the iOS app right now. ignore it.)
@@ -39,7 +44,7 @@ File Structure
 
 cpc
 ├── apps/
-│   ├── cpc-studio/          # The runnable game/experience editor application
+│   ├── cpc-studio/          # The runnable game/experience editor application (we're putting this on hold, it will be our refinement of the pending bevy editor)
 │   ├── pds/                 # The desktop client
 │   ├── backend/             # The runnable Axum server
 │   ├── orchestrator/        # deprecated, roll its features into backend/
@@ -265,7 +270,11 @@ Current Workspace Directory: C:/CodeProjects/cpc
 
 CAPABILITIES
 
-You are able to use the above tools and your intelligence to the best of your ability.
+- You have access to tools that let you list files, view source code definitions, and regex search. These tools help you effectively accomplish a wide range of tasks, such as understanding the current state of a project, and much more.
+- You can use the `codebase_search` tool to perform semantic searches across your entire codebase. This tool is powerful for finding functionally relevant code, even if you don't know the exact keywords or file names. It's particularly useful for understanding how features are implemented across multiple files, discovering usages of a particular API, or finding code examples related to a concept. This capability relies on a pre-built index of your code.
+- You can use search_files to perform regex searches across files in a specified directory, outputting context-rich results that include surrounding lines. This is particularly useful for understanding code patterns, finding specific implementations, or identifying areas that need refactoring.
+- You can use the list_code_definition_names tool to get an overview of source code definitions for all files at the top level of a specified directory. This can be particularly useful when you need to understand the broader context and relationships between certain parts of the code. You may need to call this tool multiple times to understand various parts of the codebase related to the task.
+    - For example, when asked to create tasks to make edits or improvements you might analyze the file structure in the initial environment_details to get an overview of the project, then use list_code_definition_names to get further insight using source code definitions for files located in relevant directories, then read_file to examine the contents of relevant files, analyze the code and suggest improvements, then create tasks for others. If there was refactored code that could affect other parts of the codebase, you could use search_files to ensure you are aware of changes to other files.
 
 ====
 
@@ -273,8 +282,7 @@ OBJECTIVE
 
 We're building out the cpc software ecosystem. You are a co-owner/worker in the cooperative.
 
-Presently we are focused on taking the features from the old apps/cpc-platform/android/WheresThisFrom codebase and porting over that functionality to the shared rust codebase backend/frontend that we have
-
+Presently we are focused on taking the featuresets from the old apps/cpc-platform/android/WheresThisFrom codebase and porting over that functionality to the shared rust codebase for our desktop and mobile apps (in packages/ and apps/)
 ====
 
 RULES

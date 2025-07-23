@@ -92,72 +92,81 @@
 
 <style>
     .entity {
-        padding-left: calc(var(--depth) * 16px);
-        border-left: 1px solid #eee;
-        margin: 2px 0;
+        padding-left: calc(var(--depth) * 20px);
+        border-left: 2px solid #e9ecef;
+        margin: 4px 0;
+        transition: background 0.2s ease;
     }
     
     .entity-header {
         display: flex;
         align-items: center;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 8px 12px;
+        border-radius: 8px;
         cursor: pointer;
         user-select: none;
+        transition: background 0.2s ease;
     }
     
     .entity-header:hover {
-        background-color: #f0f0f0;
+        background-color: #f1f3f5;
     }
     
     .entity.selected .entity-header {
-        background-color: #e0f0ff;
-        font-weight: bold;
+        background-color: #d0ebff;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
     .expand-toggle, .expand-spacer {
-        width: 20px;
+        width: 24px;
         text-align: center;
-        margin-right: 4px;
+        margin-right: 8px;
+        color: #6c757d;
     }
     
     .icon {
-        margin-right: 8px;
+        margin-right: 12px;
+        font-size: 1.1rem;
     }
     
     .name {
         flex-grow: 1;
+        color: #212529;
     }
     
     .meta-info {
         display: flex;
         align-items: center;
-        margin: 0 8px;
-        font-size: 0.8em;
-        opacity: 0.8;
+        margin: 0 12px;
+        font-size: 0.85em;
+        opacity: 0.85;
     }
     
     .user-badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         background-color: var(--user-color);
         color: #fff;
-        font-size: 0.7em;
-        margin-right: 4px;
+        font-size: 0.8em;
+        margin-right: 6px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
     
     .timestamp {
         white-space: nowrap;
+        color: #6c757d;
     }
     
     .drag-handle {
         cursor: grab;
-        opacity: 0.5;
-        padding: 0 4px;
+        opacity: 0.6;
+        padding: 0 6px;
+        transition: opacity 0.2s ease;
     }
     
     .drag-handle:hover {
@@ -165,7 +174,7 @@
     }
     
     .children {
-        margin-left: 16px;
-        border-left: 1px dashed #eee;
+        margin-left: 20px;
+        border-left: 2px dashed #dee2e6;
     }
 </style>

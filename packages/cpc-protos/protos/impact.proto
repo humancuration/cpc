@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package impact;
+
+import "google/protobuf/timestamp.proto";
+
+service ImpactService {
+    rpc ComputeImpactReport (ComputeImpactReportRequest) returns (stream ComputeImpactReportResponse);
+}
+
+message ComputeImpactReportRequest {
+    string user_id = 1;
+    google.protobuf.Timestamp start_date = 2;
+    google.protobuf.Timestamp end_date = 3;
+}
+
+message ComputeImpactReportResponse {
+    oneof result {
+        ProgressUpdate progress = 1;
+        ImpactReport report = 2;
+    }
+}
+
+message ProgressUpdate {
+    string message = 1;
+    float percent_complete = 2;
+}
+
+message ImpactReport {
+    string id = 1;
+    string user_id = 2;
+    google.protobuf.Timestamp period_start = 3;
+    google.protobuf.Timestamp period_end = 4;
+    double overall_score = 5;
+    map<string, double> category_distribution = 6;
+    string signature = 7; // Cryptographic signature for verification
+}

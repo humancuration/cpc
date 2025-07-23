@@ -1,8 +1,9 @@
 use bevy::prelude::*;
+use std::collections::HashMap;
 
-/// Resource that holds the paths of essential textures that must be reloaded after a pause.
-/// The game should populate this resource with the paths of textures that are essential and must be reloaded on resume.
+/// Resource that holds handles to textures that are dynamically added at runtime.
+/// This allows other parts of the application to look up textures by a string name.
 #[derive(Resource, Default)]
 pub struct TextureManifest {
-    pub paths: Vec<String>,
+    pub textures: HashMap<String, Handle<Image>>,
 }

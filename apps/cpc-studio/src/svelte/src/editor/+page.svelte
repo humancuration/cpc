@@ -118,49 +118,74 @@
     .editor-layout {
         display: grid;
         grid-template-columns: 300px 1fr 300px;
-        gap: 16px;
+        gap: 20px;
         height: 100vh;
+        background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+        padding: 20px;
     }
     
     .left-panel {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 20px;
     }
     
     .panel-section {
-        border: 1px solid #ccc;
-        padding: 10px;
+        border: none;
+        border-radius: 12px;
+        padding: 15px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
         flex: 1;
+        background: white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .panel-section:hover {
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
     
     .panel-section h3 {
         margin-top: 0;
-        margin-bottom: 10px;
-        padding-bottom: 5px;
-        border-bottom: 1px solid #eee;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+        color: #343a40;
+        font-size: 1.1rem;
     }
     
     .viewport {
         position: relative;
         display: flex;
         flex-direction: column;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        background: white;
     }
     
     .inspector-panel {
-        border: 1px solid #ccc;
-        padding: 10px;
+        border: none;
+        border-radius: 12px;
+        padding: 15px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        background: white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .inspector-panel:hover {
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
     
     #editor-canvas {
         width: 100%;
         flex: 1;
-        background: #222;
+        background: #2c3e50;
+        border-radius: 0 0 12px 12px;
     }
 </style>

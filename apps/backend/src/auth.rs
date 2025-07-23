@@ -10,13 +10,27 @@ use axum_extra::headers::authorization::{Bearer, Authorization};
 use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
+use ed25519_dalek::{Keypair, PublicKey};
 use std::sync::Arc;
 use uuid::Uuid;
+use base64;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub user_id: Uuid,
     pub exp: usize,
+    pub fn new(decoding_key: DecodingKey) -> Self {
+        let signing_key = Self::load_signing_key();
+        let verification_key = PublicKey::from(&signing_key);
+        Self { decoding_key, signing_key, verification_key }
+    }
+
+    fn load_signing_key() -> Keypair {
+        let key_bytes = base64::decode(env::var("IMPACT_SIGNING_KEY")
+            .expect("IMPACT_SIGNING_KEY must be set"))
+            .expect("Failed to decode IMPACT_SIGNING_KEY");
+        Keypair::from_bytes(&key_bytes).expect("Invalid signing key")
+    }
 }
 
 pub async fn auth_middleware(

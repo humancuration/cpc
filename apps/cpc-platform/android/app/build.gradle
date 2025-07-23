@@ -1,8 +1,16 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
+apply plugin: 'com.apollographql.apollo'
 
 android {
     compileSdkVersion 33
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
     ndkVersion "25.2.9519653"
 
     defaultConfig {
@@ -47,11 +55,11 @@ android {
 }
 
 cargo {
-    module = "../../../src-tauri"  // Path to Rust project
-    libname = "cpc_platform"
+    module = "../../.."  // Path to workspace root
+    libname = "cpc_core"  // Build the core crate
     targets = ["arm", "arm64", "x86", "x86_64"]
     profile = "release"
-    extraCargoBuildArguments = ['--lib']
+    extraCargoBuildArguments = ['-p', 'cpc-core']  // Build specific crate
 }
 
 dependencies {
@@ -59,6 +67,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.webkit:webkit:1.8.0'
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    
+    // GraphQL Apollo Client
+    implementation 'com.apollographql.apollo3:apollo-runtime:3.8.2'
     
     // Tauri dependencies
     implementation 'app.tauri:tauri-android:1.0.0'
