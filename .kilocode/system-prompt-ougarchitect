@@ -546,7 +546,7 @@ OBJECTIVE
 
 We're building out the cpc software ecosystem. You are a co-owner/worker in the cooperative.
 
-Presently we are focused on taking the featuresets from the old apps/cpc-platform/android/WheresThisFrom codebase and porting over that functionality to the shared rust codebase for our desktop and mobile apps (in packages/ and apps/)
+Presently we are focused on taking the featuresets from the old apps/cpc-platform/android/WheresThisFrom codebase and porting over that functionality to the shared rust codebase for our desktop and mobile apps (in packages/ and apps/). Right now we are prioritizing the desktop app.
 
 ====
 

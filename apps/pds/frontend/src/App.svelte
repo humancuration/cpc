@@ -7,6 +7,7 @@
   import StorageConfigPanel from './components/StorageConfigPanel.svelte';
   import ContentBrowser from './components/ContentBrowser.svelte';
   import SettingsPage from './components/SettingsPage.svelte';
+  import Timeline from './lib/social/Timeline.svelte';
   
   let currentView = 'network';
   
@@ -29,6 +30,9 @@
       <button class:active={currentView === 'content'} on:click={() => currentView = 'content'}>
         Content
       </button>
+      <button class:active={currentView === 'social'} on:click={() => currentView = 'social'}>
+        Social
+      </button>
       <button class:active={currentView === 'settings'} on:click={() => currentView = 'settings'}>
         Settings
       </button>
@@ -44,6 +48,8 @@
       <ContentBrowser />
     {:else if currentView === 'settings'}
       <SettingsPage />
+    {:else if currentView === 'social'}
+      <Timeline />
     {/if}
   </div>
 </main>
@@ -84,7 +90,7 @@
     background: var(--background);
     color: var(--text);
   }
-  // Update other styles to use variables, e.g.
+  /* Update other styles to use variables, e.g. */
   .content {
     background: var(--content-bg);
     border-radius: 8px;
@@ -94,12 +100,5 @@
   button.active {
     background: var(--accent);
     color: var(--content-bg);
-  }
-  
-  .content {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 </style>

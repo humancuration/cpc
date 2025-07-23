@@ -1,0 +1,43 @@
+[package]
+name = "pds-tauri"
+version = "0.1.0"
+description = "CPC Desktop Client"
+authors = ["CPC Team"]
+license = "MIT"
+edition = "2021"
+rust-version = "1.70"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+tauri = { version = "1.5", features = ["api-all"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+cpc-core = { path = "../../../packages/cpc-core" }
+image = "0.24"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+bevy = { version = "0.12", features = ["dynamic_linking"] }
+ort = "2.0"
+ndarray = "0.15"
+ring = "0.17"
+zeroize = "1.6"
+base64 = "0.21"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+
+[[bin]]
+name = "pds-tauri"
+path = "src/main.rs"
+
+[lib]
+name = "cpc_pds_lib"
+path = "src/lib.rs"

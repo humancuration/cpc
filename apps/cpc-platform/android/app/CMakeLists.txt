@@ -1,19 +1,43 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.18.1)
 
-# Add the prebuilt Rust library
-add_library(cpc_platform SHARED IMPORTED)
-set_target_properties(cpc_platform PROPERTIES IMPORTED_LOCATION
-    ${CMAKE_CURRENT_SOURCE_DIR}/build/rustJniLibs/${ANDROID_ABI}/libcpc_platform.so)
+project("cpc_core")
 
-# Find required libraries
-find_library(log-lib log)
+# Set the path to the Rust library
+set(RUST_LIBRARY_DIR "${CMAKE_SOURCE_DIR}/../../../../target/release")
 
-# Link libraries to cpc_platform
-target_link_libraries(cpc_platform
-    android
-    ${log-lib}
-    # Add Bevy dependencies as needed
+# Find the Rust library
+find_library(
+    log-lib
+    log
+)
+
+# Import the Rust library
+add_library(
+    cpc_core
+    SHARED
+    IMPORTED
+)
+
+# Set the properties for the imported library
+set_target_properties(
+    cpc_core
+    PROPERTIES IMPORTED_LOCATION
+    ${RUST_LIBRARY_DIR}/libcpc_core.so
 )
 
 # Include directories
-include_directories(src/main/cpp)
+include_directories(${CMAKE_SOURCE_DIR}/src/main/cpp/include)
+
+# Create the final shared library
+add_library(
+    cpc_android
+    SHARED
+    src/main/cpp/native-lib.cpp
+)
+
+# Link the libraries
+target_link_libraries(
+    cpc_android
+    ${log-lib}
+    cpc_core
+)

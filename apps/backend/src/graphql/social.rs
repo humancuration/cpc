@@ -8,46 +8,8 @@ use uuid::Uuid;
 pub struct SocialQuery;
 
 #[derive(MergedObject, Default)]
-pub struct SocialMutation {
-    create_post: create_post_mutation::CreatePostMutation,
-    follow_user: follow_user_mutation::FollowUserMutation,
-    unfollow_user: unfollow_user_mutation::UnfollowUserMutation,
-}
+pub struct SocialMutation;
 
-#[derive(Default)]
-pub struct FollowUserMutation;
-
-#[Object]
-impl FollowUserMutation {
-    async fn follow_user(&self, ctx: &Context<'_>, user_id: Uuid) -> Result<User> {
-        let social_service = ctx.data::<Arc<SocialService>>()?;
-        let current_user_id = get_current_user_id(ctx)?;
-        
-        social_service.follow_user(current_user_id, user_id).await
-            .map_err(|e| async_graphql::Error::new(format!("Follow failed: {}", e)))?;
-        
-        // TODO: Implement actual user fetching
-        Ok(User { id: user_id })
-    }
-}
-
-#[derive(Default)]
-pub struct UnfollowUserMutation;
-
-#[Object]
-impl UnfollowUserMutation {
-    async fn unfollow_user(&self, ctx: &Context<'_>, user_id: Uuid) -> Result<bool> {
-        let social_service = ctx.data::<Arc<SocialService>>()?;
-        let current_user_id = get_current_user_id(ctx)?;
-        
-        social_service.unfollow_user(current_user_id, user_id).await
-            .map_err(|e| async_graphql::Error::new(format!("Unfollow failed: {}", e)))?;
-            
-        Ok(true)
-    }
-}
-
-// Add to top of file:
 use crate::services::social_service::SocialService;
 use async_graphql::MergedObject;
 use cpc_core::models::social::relationship::Relationship;
@@ -63,6 +25,33 @@ impl SocialQuery {
             .await
             .map_err(|e| async_graphql::Error::new(format!("Failed to get post: {:?}", e)))
     }
+    
+    async fn get_posts_by_user(&self, ctx: &Context<'_>, user_id: Uuid) -> Result<Vec<Post>> {
+        let service = ctx.data::<Arc<SocialService>>()?;
+        
+        service
+            .get_posts_by_user(user_id)
+            .await
+            .map_err(|e| async_graphql::Error::new(format!("Failed to get user posts: {:?}", e)))
+    }
+    
+    async fn get_followers(&self, ctx: &Context<'_>, user_id: Uuid) -> Result<Vec<Uuid>> {
+        let service = ctx.data::<Arc<SocialService>>()?;
+        
+        service
+            .get_followers(user_id)
+            .await
+            .map_err(|e| async_graphql::Error::new(format!("Failed to get followers: {:?}", e)))
+    }
+    
+    async fn get_following(&self, ctx: &Context<'_>, user_id: Uuid) -> Result<Vec<Uuid>> {
+        let service = ctx.data::<Arc<SocialService>>()?;
+        
+        service
+            .get_following(user_id)
+            .await
+            .map_err(|e| async_graphql::Error::new(format!("Failed to get following: {:?}", e)))
+    }
 }
 
 #[Object]
@@ -72,7 +61,7 @@ impl SocialMutation {
         ctx: &Context<'_>,
         author_id: Uuid,
         content: String,
-        visibility: Visibility, // Changed from String
+        visibility: Visibility,
     ) -> Result<Post> {
         let service = ctx.data::<Arc<SocialService>>()?;
 
@@ -83,10 +72,65 @@ impl SocialMutation {
 
         Ok(post)
     }
+
+    async fn create_post(
+        &self,
+        ctx: &Context<'_>,
+        author_id: Uuid,
+        content: String,
+        visibility: Visibility,
+    ) -> Result<Post> {
+        let service = ctx.data::<Arc<SocialService>>()?;
+
+        let post = service
+            .create_post(author_id, content, visibility)
+            .await
+            .map_err(|e| async_graphql::Error::new(format!("Failed to create post: {:?}", e)))?;
+
+        async fn follow_user(
+            &self,
+            ctx: &Context<'_>,
+            follower_id: Uuid,
+            following_id: Uuid
+        ) -> Result<Relationship> {
+            let service = ctx.data::<Arc<SocialService>>()?;
+            let current_user_id = get_current_user_id(ctx)?;
+            
+            if current_user_id != follower_id {
+                return Err(async_graphql::Error::new("You can only follow as yourself"));
+            }
+            
+            let relationship = service.follow_user(follower_id, following_id).await
+                .map_err(|e| async_graphql::Error::new(format!("Follow failed: {}", e)))?;
+                
+            Ok(relationship)
+        }
+            
+        Ok(())
+    }
+
+    async fn unfollow_user(
+        &self,
+        ctx: &Context<'_>,
+        follower_id: Uuid,
+        following_id: Uuid
+    ) -> Result<bool> {
+        let service = ctx.data::<Arc<SocialService>>()?;
+        let current_user_id = get_current_user_id(ctx)?;
+        
+        if current_user_id != follower_id {
+            return Err(async_graphql::Error::new("You can only unfollow as yourself"));
+        }
+        
+        service.unfollow_user(follower_id, following_id).await
+            .map_err(|e| async_graphql::Error::new(format!("Unfollow failed: {}", e)))?;
+            
+        Ok(true)
+    }
 }
-// Helper function to get authenticated user ID (temporary implementation)
+// Helper function to get authenticated user ID
 fn get_current_user_id(ctx: &Context<'_>) -> Result<Uuid> {
-    // TODO: Replace with actual authentication logic
-    // For now, return a placeholder user ID
-    Ok(Uuid::parse_str("00000000-0000-0000-0000-000000000001").unwrap())
+    // Extract user ID from authentication context
+    let auth_data = ctx.data::<auth::AuthData>()?;
+    Ok(auth_data.user_id)
 }

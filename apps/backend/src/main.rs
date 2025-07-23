@@ -6,6 +6,7 @@ mod graphql;
 mod auth;
 mod file_utils;
 mod config;
+mod repositories;  // Add repositories module
 
 use crate::graphql::schema::{build_schema, Mutation, Query};
 use async_graphql::Schema;
@@ -15,7 +16,11 @@ use axum::routing::post;
 use std::sync::Arc;
 use crate::file_utils::FileProcessor;
 use crate::config::{Config, ConfigError};
-use jsonwebtoken::DecodingKey;  // Add missing import
+use jsonwebtoken::DecodingKey;
+use crate::repositories::social::{  // Import repositories
+    post_repository,
+    relationship_repository
+};
 
 pub struct AppState {
     file_processor: FileProcessor,
@@ -38,8 +43,21 @@ async fn main() {
     let config = Config::from_env()
         .expect("Failed to load configuration");
 
-    let schema = build_schema().finish();
-    let app_state = Arc::new(AppState::new(config.encryption_key, config.jwt_secret));  // Add jwt_secret
+    // Create repository implementations
+    let post_repo = Arc::new(post_repository::PostRepositoryImpl::new(db_pool.clone()));
+    let relationship_repo = Arc::new(relationship_repository::RelationshipRepositoryImpl::new(db_pool.clone()));
+    
+    // Create social service
+    let social_service = Arc::new(SocialService::new(
+        post_repo,
+        relationship_repo
+    ));
+    
+    let schema = build_schema()
+        .data(social_service)
+        .finish();
+    
+    let app_state = Arc::new(AppState::new(config.encryption_key, config.jwt_secret));
 
     let app = Router::new()
         .route("/health", get(routes::health_check))

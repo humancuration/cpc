@@ -17,6 +17,12 @@ anyhow = "1.0"   # For error handling
 thiserror = "1.0" # For structured error handling
 argon2 = { version = "0.5", features = ["std"] }
 rand = "0.8"
+tract = { version = "0.18", features = ["onnx"] }
+tract-onnx = { version = "0.18", features = ["onnx"] }
+tract-core = { version = "0.18" }
+ort = "2.0"
+ndarray = "0.15"
+log = "0.4"
 
 [build-dependencies]
 

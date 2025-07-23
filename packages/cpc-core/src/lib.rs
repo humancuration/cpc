@@ -8,6 +8,7 @@ pub mod auth;
 pub mod models;
 pub mod utils;  // Add datetime utilities module
 pub mod texture_manifest; // Add texture manifest module
+pub mod vision; // Image recognition functionality
 
 #[cfg(target_os = "android")]
 mod android_lifecycle;
@@ -20,6 +21,12 @@ mod macos_lifecycle;
 
 #[cfg(target_os = "windows")]
 mod windows_lifecycle;
+
+// Android FFI module for social features
+#[cfg(target_os = "android")]
+pub mod ffi {
+    pub mod android;
+}
 
 // Re-export android lifecycle functions
 #[cfg(target_os = "android")]

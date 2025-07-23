@@ -2,7 +2,8 @@
 
 **Author:** Elias Petrova
 **Date:** 2025-07-23
-**Status:** Proposed
+**Status:** Implemented (Partial)
+**Android Implementation:** Complete
 
 ## 1. Overview
 

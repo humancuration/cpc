@@ -1,12 +1,18 @@
-use cpc_core::models::social::post::{Post, Visibility};
-use cpc_core::repositories::social::post_repository::{PostRepository, CreatePostData};
+use async_trait::async_trait;
+use sqlx::Error;
 use std::sync::Arc;
 use uuid::Uuid;
+use cpc_core::models::social::post::{Post, Visibility};
+use crate::repositories::social::{
+    post_repository::{PostRepository, NewPost},
+    relationship_repository::RelationshipRepository
+};
 
 #[derive(Debug)]
 pub enum SocialServiceError {
     PostNotFound,
     DatabaseError(sqlx::Error),
+    RelationshipNotFound,
     // Add other specific errors as needed
 }
 
@@ -38,22 +44,30 @@ impl SocialService {
         content: String,
         visibility: Visibility,
     ) -> Result<Post> {
-        let create_data = CreatePostData {
+        let new_post = NewPost {
             author_id,
             content,
             visibility,
-            cooperative_id: None, // Or handle this based on visibility
+            cooperative_id: None,
         };
 
-        let post = self.post_repo.create_post(create_data).await?;
-        Ok(post)
+        self.post_repo.create_post(new_post).await
+            .map_err(SocialServiceError::from)
     }
 
     pub async fn get_post(&self, post_id: Uuid) -> Result<Post> {
         self.post_repo
-            .find_post_by_id(post_id)
-            .await?
+            .get_post_by_id(post_id)
+            .await
+            .map_err(SocialServiceError::from)?
             .ok_or(SocialServiceError::PostNotFound)
+    }
+
+    pub async fn get_posts_by_user(&self, user_id: Uuid) -> Result<Vec<Post>> {
+        self.post_repo
+            .get_posts_by_user(user_id)
+            .await
+            .map_err(SocialServiceError::from)
     }
 
     pub async fn follow_user(
@@ -62,7 +76,7 @@ impl SocialService {
         followed_id: Uuid
     ) -> Result<Relationship> {
         self.relationship_repo
-            .follow_user(follower_id, followed_id)
+            .follow(follower_id, followed_id)
             .await
             .map_err(SocialServiceError::from)
     }
@@ -73,9 +87,22 @@ impl SocialService {
         followed_id: Uuid
     ) -> Result<()> {
         self.relationship_repo
-            .unfollow_user(follower_id, followed_id)
+            .unfollow(follower_id, followed_id)
             .await
-            .map(|_| ())
+            .map_err(SocialServiceError::from)
+    }
+
+    pub async fn get_followers(&self, user_id: Uuid) -> Result<Vec<Uuid>> {
+        self.relationship_repo
+            .get_followers(user_id)
+            .await
+            .map_err(SocialServiceError::from)
+    }
+
+    pub async fn get_following(&self, user_id: Uuid) -> Result<Vec<Uuid>> {
+        self.relationship_repo
+            .get_following(user_id)
+            .await
             .map_err(SocialServiceError::from)
     }
 }
