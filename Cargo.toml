@@ -5,7 +5,10 @@ members = [
     "orchestrator",
     "pds",
     "cpc-node",
-    "apps/backend"
+    "apps/backend",
+    "packages/cpc-core",
+    "packages/cpc-net",
+    "packages/cpc-protos"
 ]
 
 [workspace.dependencies]

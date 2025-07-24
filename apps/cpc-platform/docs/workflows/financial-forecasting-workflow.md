@@ -23,7 +23,7 @@ sequenceDiagram
     
     Database-->>Backend: (Job status updated)
     Backend->>UI: Push results via GraphQL subscription
-    UI->>User: Display forecast
+    UI->>User: Display forecast in Financial Dashboard
 ```
 
 ## Training Session Flow

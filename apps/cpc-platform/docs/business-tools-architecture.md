@@ -7,7 +7,7 @@
 The financial forecasting module provides cash flow projections and scenario modeling capabilities. It allows users to:
 - Create multiple forecast scenarios with custom parameters
 - Project cash flow using historical transaction data
-- Compare different financial scenarios
+- Compare different financial scenarios using interactive dashboards
 - Track budget variances
 - Analyze sensitivity of projections to parameter changes
 

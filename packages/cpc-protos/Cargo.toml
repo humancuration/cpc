@@ -1,0 +1,14 @@
+[package]
+name = "cpc-protos"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tonic = "0.11"
+prost = "0.12"
+prost-types = "0.12"
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+
+[build-dependencies]
+tonic-build = "0.11"

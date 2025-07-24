@@ -4,6 +4,7 @@ use std::sync::Arc;
 use tokio::sync::{broadcast, RwLock};
 use uuid::Uuid;
 use serde::{Deserialize, Serialize};
+use chrono::{DateTime, Utc};
 
 /// Notification types
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,6 +22,20 @@ pub enum NotificationType {
     JobStarted {
         job_id: Uuid,
         job_type: String,
+    },
+    InvoiceIssued {
+        invoice_id: Uuid,
+        due_date: DateTime<Utc>,
+    },
+    PaymentReminder {
+        invoice_id: Uuid,
+        days_until_due: i32,
+    },
+    InvoicePaid {
+        invoice_id: Uuid,
+        payment_method: String,
+        amount: f64,
+        currency: String,
     },
 }
 

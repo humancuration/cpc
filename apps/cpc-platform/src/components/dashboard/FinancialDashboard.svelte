@@ -1,96 +1,174 @@
 <script>
   import { onMount } from 'svelte';
-  import { forecastStore } from '../stores/forecastStore.js';
+  import forecastStore, { cashFlowData, sensitivityScenarios, riskMetrics, baseScenario } from '../../stores/forecastStore.js';
   import CashFlowChart from './components/CashFlowChart.svelte';
   import SensitivityMatrix from './components/SensitivityMatrix.svelte';
   import ScenarioControls from './components/ScenarioControls.svelte';
   
-  export let jobId = null;
-  
   let loading = false;
   let error = null;
   
-  onMount(async () => {
-    if (jobId) {
-      loading = true;
-      try {
-        await forecastStore.loadForecast(jobId);
-      } catch (err) {
-        error = err.message;
-      } finally {
-        loading = false;
-      }
-    }
+  // Subscribe to store
+  const unsubscribe = forecastStore.subscribe(state => {
+    loading = state.loading;
+    error = state.error;
   });
   
-  $: if (jobId && jobId !== $forecastStore.currentJobId) {
-    loading = true;
-    forecastStore.loadForecast(jobId).catch(err => {
-      error = err.message;
-    }).finally(() => {
-      loading = false;
+  onMount(async () => {
+    // Load user preferences when component mounts
+    await forecastStore.loadPreferences();
+    
+    return () => {
+      unsubscribe();
+    };
+  });
+  
+  async function handleGenerateScenarios(parameters) {
+    try {
+      await forecastStore.updateParameters(parameters);
+      
+      // Create new forecast job
+      const jobId = await forecastStore.createForecast({
+        parameters,
+        scenarios: generateSensitivityScenarios(parameters)
+      });
+      
+      console.log('Created forecast job:', jobId);
+    } catch (err) {
+      console.error('Failed to generate forecast:', err);
+    }
+  }
+  
+  function generateSensitivityScenarios(baseParams) {
+    const scenarios = [];
+    const variations = [
+      { name: 'Optimistic', factor: 1.2 },
+      { name: 'Pessimistic', factor: 0.8 },
+      { name: 'High Inflation', adjustments: { inflation_rate: 0.05 } },
+      { name: 'Low Returns', adjustments: { investment_return: 0.05 } }
+    ];
+    
+    variations.forEach(variation => {
+      const params = { ...baseParams };
+      
+      if (variation.factor) {
+        params.investment_return *= variation.factor;
+        params.income_growth_rate *= variation.factor;
+      }
+      
+      if (variation.adjustments) {
+        Object.assign(params, variation.adjustments);
+      }
+      
+      scenarios.push({
+        name: variation.name,
+        parameters: params
+      });
     });
+    
+    return scenarios;
+  }
+  
+  function handleScenarioSelect(event) {
+    forecastStore.setActiveScenario(event.detail);
+  }
+  
+  function handleParameterChange(event) {
+    forecastStore.updateParameters({ [event.detail.key]: event.detail.value });
   }
 </script>
 
 <div class="financial-dashboard">
-  <div class="dashboard-header">
-    <h1>Financial Forecast Dashboard</h1>
-    {#if jobId}
-      <span class="job-id">Job ID: {jobId}</span>
-    {/if}
-  </div>
+  <header class="dashboard-header">
+    <h1>Financial Forecasting Dashboard</h1>
+    <div class="dashboard-actions">
+      <button class="refresh-btn" on:click={() => forecastStore.loadForecast($forecastStore.currentJob)}>
+        Refresh
+      </button>
+    </div>
+  </header>
+  
+  {#if error}
+    <div class="error-banner">
+      <p>{error}</p>
+      <button on:click={() => forecastStore.clearError()}>Dismiss</button>
+    </div>
+  {/if}
   
   {#if loading}
-    <div class="loading">
+    <div class="loading-state">
       <div class="spinner"></div>
-      <p>Loading forecast data...</p>
+      <p>Calculating financial forecast...</p>
     </div>
-  {:else if error}
-    <div class="error">
-      <p>Error: {error}</p>
-      <button on:click={() => forecastStore.loadForecast(jobId)}>Retry</button>
+  {/if}
+  
+  <div class="dashboard-content">
+    <div class="controls-section">
+      <ScenarioControls
+        parameters={$forecastStore.parameters}
+        activeScenario={$forecastStore.activeScenario}
+        on:parameterChange={handleParameterChange}
+        on:generateScenarios={handleGenerateScenarios}
+        on:scenarioSelect={handleScenarioSelect}
+      />
     </div>
-  {:else if $forecastStore.data}
-    <div class="dashboard-content">
-      <div class="controls-section">
-        <ScenarioControls 
-          scenarios={$forecastStore.data.sensitivity_scenarios}
-          baseScenario={$forecastStore.data.base_scenario}
-          on:scenarioSelect={(e) => forecastStore.selectScenario(e.detail)}
-        />
-      </div>
-      
+    
+    {#if $cashFlowData.length > 0}
       <div class="charts-section">
         <div class="chart-container">
           <h2>Cash Flow Projections</h2>
-          <CashFlowChart 
-            projections={$forecastStore.data.projections}
-            selectedScenario={$forecastStore.selectedScenario}
-          />
+          <CashFlowChart projections={$cashFlowData} />
         </div>
         
-        <div class="matrix-container">
-          <h2>Sensitivity Analysis</h2>
-          <SensitivityMatrix 
-            scenarios={$forecastStore.data.sensitivity_scenarios}
-            baseScenario={$forecastStore.data.base_scenario}
-          />
-        </div>
+        {#if $sensitivityScenarios.length > 0}
+          <div class="matrix-container">
+            <h2>Sensitivity Analysis</h2>
+            <SensitivityMatrix
+              scenarios={$sensitivityScenarios}
+              baseScenario={$baseScenario}
+              on:scenarioSelect={handleScenarioSelect}
+            />
+          </div>
+        {/if}
+        
+        {#if $riskMetrics}
+          <div class="metrics-container">
+            <h2>Risk Metrics</h2>
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <h3>Success Probability</h3>
+                <span class="metric-value">{$riskMetrics.probabilitySuccess}%</span>
+              </div>
+              <div class="metric-card">
+                <h3>Worst Case</h3>
+                <span class="metric-value">${$riskMetrics.worstCase.toLocaleString()}</span>
+              </div>
+              <div class="metric-card">
+                <h3>Best Case</h3>
+                <span class="metric-value">${$riskMetrics.bestCase.toLocaleString()}</span>
+              </div>
+              <div class="metric-card">
+                <h3>Average Outcome</h3>
+                <span class="metric-value">${$riskMetrics.averageOutcome.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        {/if}
       </div>
-    </div>
-  {:else}
-    <div class="empty-state">
-      <p>No forecast data available. Create a new forecast to get started.</p>
-    </div>
-  {/if}
+    {:else if !$forecastStore.currentJob}
+      <div class="empty-state">
+        <h2>Get Started</h2>
+        <p>Configure your parameters and generate your first financial forecast</p>
+      </div>
+    {/if}
+  </div>
 </div>
 
 <style>
   .financial-dashboard {
-    padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    padding: 2rem;
   }
   
   .dashboard-header {
@@ -98,8 +176,6 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e0e0e0;
   }
   
   .dashboard-header h1 {
@@ -107,15 +183,42 @@
     color: #2c3e50;
   }
   
-  .job-id {
-    font-family: monospace;
-    color: #666;
-    font-size: 0.9rem;
+  .refresh-btn {
+    padding: 0.5rem 1rem;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
   }
   
-  .loading, .error, .empty-state {
+  .refresh-btn:hover {
+    background: #2980b9;
+  }
+  
+  .error-banner {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .error-banner button {
+    background: none;
+    border: none;
+    color: #c33;
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+  
+  .loading-state {
     text-align: center;
-    padding: 3rem;
+    padding: 2rem;
   }
   
   .spinner {
@@ -124,7 +227,7 @@
     border-radius: 50%;
     width: 40px;
     height: 40px;
-    animation: spin 1s linear infinite;
+    animation: spin 2s linear infinite;
     margin: 0 auto 1rem;
   }
   
@@ -133,59 +236,82 @@
     100% { transform: rotate(360deg); }
   }
   
-  .error {
-    color: #e74c3c;
-  }
-  
-  .error button {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 1rem;
-  }
-  
   .dashboard-content {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 2rem;
   }
   
   .controls-section {
     background: white;
-    padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
   }
   
   .charts-section {
     display: grid;
-    grid-template-columns: 2fr 1fr;
     gap: 2rem;
   }
   
-  .chart-container, .matrix-container {
+  .chart-container,
+  .matrix-container,
+  .metrics-container {
     background: white;
-    padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
-  .chart-container h2, .matrix-container h2 {
-    margin: 0 0 1rem 0;
+  .chart-container h2,
+  .matrix-container h2,
+  .metrics-container h2 {
+    margin-top: 0;
     color: #2c3e50;
-    font-size: 1.2rem;
+  }
+  
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .metric-card {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  .metric-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+  }
+  
+  .metric-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #7f8c8d;
   }
   
   @media (max-width: 768px) {
-    .charts-section {
-      grid-template-columns: 1fr;
-    }
-    
     .financial-dashboard {
       padding: 1rem;
+    }
+    
+    .dashboard-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+    }
+    
+    .metrics-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>

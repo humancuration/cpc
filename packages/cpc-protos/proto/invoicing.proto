@@ -1,0 +1,136 @@
+syntax = "proto3";
+package cpc.invoicing;
+
+import "google/protobuf/timestamp.proto";
+
+message Invoice {
+  string id = 1;
+  string invoice_number = 2;
+  string client_id = 3;
+  string issuer_id = 4;
+  google.protobuf.Timestamp issue_date = 5;
+  google.protobuf.Timestamp due_date = 6;
+  string currency = 7;
+  InvoiceStatus status = 8;
+  repeated InvoiceLineItem line_items = 9;
+  double subtotal = 10;
+  double tax_amount = 11;
+  double total_amount = 12;
+  string notes = 13;
+  string terms = 14;
+  string purchase_order_number = 15;
+  google.protobuf.Timestamp created_at = 16;
+  google.protobuf.Timestamp updated_at = 17;
+}
+
+enum InvoiceStatus {
+  DRAFT = 0;
+  SENT = 1;
+  VIEWED = 2;
+  PARTIALLY_PAID = 3;
+  PAID = 4;
+  OVERDUE = 5;
+  CANCELLED = 6;
+}
+
+message InvoiceLineItem {
+  string id = 1;
+  string description = 2;
+  double quantity = 3;
+  double unit_price = 4;
+  string unit = 5;
+  double discount_percentage = 6;
+  double tax_rate = 7;
+  double total_price = 8;
+}
+
+message InvoiceRequest {
+  string job_id = 1;
+  string client_id = 2;
+  InvoiceFilter filter = 3;
+  PaginationParams pagination = 4;
+}
+
+message InvoiceFilter {
+  optional string invoice_number = 1;
+  optional InvoiceStatus status = 2;
+  optional string client_id = 3;
+  optional google.protobuf.Timestamp date_from = 4;
+  optional google.protobuf.Timestamp date_to = 5;
+  optional double min_amount = 6;
+  optional double max_amount = 7;
+}
+
+message PaginationParams {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message InvoiceResponse {
+  string job_id = 1;
+  repeated Invoice invoices = 2;
+  int32 total_count = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+message CreateInvoiceRequest {
+  string job_id = 1;
+  Invoice invoice = 2;
+}
+
+message CreateInvoiceResponse {
+  string job_id = 1;
+  Invoice invoice = 2;
+}
+
+message UpdateInvoiceRequest {
+  string job_id = 1;
+  string invoice_id = 2;
+  Invoice invoice = 3;
+}
+
+message UpdateInvoiceResponse {
+  string job_id = 1;
+  Invoice invoice = 2;
+}
+
+message DeleteInvoiceRequest {
+  string job_id = 1;
+  string invoice_id = 2;
+}
+
+message DeleteInvoiceResponse {
+  string job_id = 1;
+  bool success = 2;
+}
+
+message InvoicePayment {
+  string id = 1;
+  string invoice_id = 2;
+  double amount = 3;
+  google.protobuf.Timestamp payment_date = 4;
+  PaymentMethod method = 5;
+  string reference_number = 6;
+  string notes = 7;
+}
+
+enum PaymentMethod {
+  CASH = 0;
+  CHECK = 1;
+  BANK_TRANSFER = 2;
+  CREDIT_CARD = 3;
+  DIGITAL_WALLET = 4;
+  OTHER = 5;
+}
+
+message PaymentRequest {
+  string job_id = 1;
+  InvoicePayment payment = 2;
+}
+
+message PaymentResponse {
+  string job_id = 1;
+  InvoicePayment payment = 2;
+  Invoice updated_invoice = 3;
+}
