@@ -6,7 +6,7 @@ This document outlines the technical plan for implementing the Scene Hierarchy a
 
 The goal is to create a scene hierarchy panel that displays a tree view of entities in the current scene. Users will be able to select, create, delete, duplicate, and reparent entities. These actions will be synchronized in real-time for all collaborators.
 
-## 2. Frontend Implementation (Svelte)
+## 2. Frontend Implementation (Yew)
 
 ### 2.1. New Component: `SceneHierarchyPanel.svelte`
 

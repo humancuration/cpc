@@ -8,7 +8,7 @@
 
 This document outlines the architectural design for a new Business Intelligence (BI) toolkit within the `cpc-platform` desktop application. The initial focus of this toolkit will be the implementation of an "Impact Report" feature, which will serve as a foundational element for future BI and data visualization capabilities.
 
-Our design adheres to the core architectural principles of the project: Hexagonal Architecture, Screaming Architecture, and Vertical Slices. The implementation will leverage our existing tech stack, including Rust, Svelte, Tauri, and GraphQL.
+Our design adheres to the core architectural principles of the project: Hexagonal Architecture, Screaming Architecture, and Vertical Slices. The implementation will leverage our existing tech stack, including Rust, Yew, Tauri, and GraphQL.
 
 ## 2. Architectural Goals
 
@@ -21,8 +21,8 @@ Our design adheres to the core architectural principles of the project: Hexagona
 
 ```mermaid
 graph TD
-    subgraph "cpc-platform (Svelte/Tauri)"
-        A[BI Dashboard View] --> B{Svelte Components};
+    subgraph "cpc-platform (Yew/Tauri)"
+        A[BI Dashboard View] --> B{Yew Components};
         B --> C[GraphQL Client];
     end
 
@@ -52,24 +52,24 @@ graph TD
     style J fill:#cfc,stroke:#333,stroke-width:2px
 ```
 
-## 4. Frontend Component Structure (Svelte)
+## 4. Frontend Component Structure (Yew)
 
-The BI toolkit's frontend will be built as a set of modular Svelte components, organized in a hierarchical structure. These components will reside within `apps/cpc-platform/src/lib/bi/`.
+The BI toolkit's frontend will be built as a set of modular Yew components, organized in a hierarchical structure. These components will reside within `apps/cpc-platform/src/bi/`.
 
 ### 4.1. Component Hierarchy
 
--   `BIDashboard.svelte`: The top-level container for a BI view. It will manage the overall layout and orchestrate data fetching for its child components.
-    -   `WidgetGrid.svelte`: A layout component that arranges BI widgets in a grid.
-        -   `ChartWidget.svelte`: A generic widget for displaying charts. It will accept a chart type and data as props.
-            -   `PieChart.svelte`: A specific chart component for pie charts.
-            -   `BarChart.svelte`: A specific chart component for bar charts.
-            -   `LineChart.svelte`: A specific chart component for line charts.
-        -   `KpiWidget.svelte`: A widget for displaying a single Key Performance Indicator (KPI).
-        -   `DataTableWidget.svelte`: A widget for displaying tabular data.
+-   `dashboard.rs`: The top-level container for a BI view. It will manage the overall layout and orchestrate data fetching for its child components.
+    -   `widget_grid.rs`: A layout component that arranges BI widgets in a grid.
+        -   `chart_widget.rs`: A generic widget for displaying charts. It will accept a chart type and data as props.
+            -   `pie_chart.rs`: A specific chart component for pie charts.
+            -   `bar_chart.rs`: A specific chart component for bar charts.
+            -   `line_chart.rs`: A specific chart component for line charts.
+        -   `kpi_widget.rs`: A widget for displaying a single Key Performance Indicator (KPI).
+        -   `data_table_widget.rs`: A widget for displaying tabular data.
 
 ### 4.2. State Management
 
-We will use Svelte's built-in stores to manage the state of the BI dashboard. A context-based store will be provided by `BIDashboard.svelte` to make data and loading states available to all child widgets.
+We will use Yew's state management capabilities (e.g., `use_reducer` hooks or a global state manager like `Yewdux`) to manage the state of the BI dashboard. A context provider in the main `dashboard.rs` component will make data and loading states available to all child widgets.
 
 ## 5. Backend Integration (Rust/Axum/GraphQL)
 
@@ -120,11 +120,11 @@ For long-running data processing tasks, the backend will delegate to `cpc-node` 
 
 For data visualization, we need a library that is:
 
--   Compatible with Svelte and Tauri.
+-   Compatible with Yew, WASM, and Tauri.
 -   Permissively licensed (MIT or Apache 2.0).
 -   Performant and feature-rich.
 
-**Recommendation:** **ECharts** (via a Svelte wrapper like `svelte-echarts`).
+**Recommendation:** **ECharts** (via a Yew wrapper like `yew-echarts`). If a mature wrapper is not available, we can create our own bindings.
 
 -   **License:** Apache 2.0.
 -   **Features:** A comprehensive set of chart types, extensive customization options, and good performance.
@@ -136,7 +136,7 @@ To support real-time updates on the BI dashboard, we will leverage GraphQL Subsc
 
 ### 7.1. Data Flow
 
-1.  The Svelte frontend subscribes to the `impactReportUpdated` subscription via its GraphQL client (using WebSockets).
+1.  The Yew frontend subscribes to the `impactReportUpdated` subscription via its GraphQL client (using WebSockets).
 2.  When a relevant event occurs in the backend (e.g., new data is processed), a message is published to the subscription.
 3.  The frontend receives the updated data and automatically re-renders the relevant components.
 
@@ -157,12 +157,12 @@ Updates can be triggered by various events:
     -   Implement the `getImpactReport` query resolver.
 
 2.  **Phase 2: Frontend Component Development**
-    -   Create the Svelte component hierarchy under `apps/cpc-platform/src/lib/bi/`.
-    -   Integrate the chosen charting library (`svelte-echarts`).
-    -   Develop the `BIDashboard.svelte` and basic chart widgets.
+    -   Create the Yew component hierarchy under `apps/cpc-platform/src/bi/`.
+    -   Integrate the chosen charting library (e.g., `yew-echarts`).
+    -   Develop the `BIDashboard.rs` and basic chart widgets.
 
 3.  **Phase 3: Integration & Real-time**
-    -   Connect the Svelte components to the GraphQL backend.
+    -   Connect the Yew components to the GraphQL backend.
     -   Implement the GraphQL Subscription for real-time updates.
     -   Connect the backend's update mechanism to the subscription publisher.
 

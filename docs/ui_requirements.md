@@ -2,7 +2,7 @@
 
 ## 1. Introduction
 
-This document outlines the user interface (UI) requirements for the asset management features within `cpc-studio`. These specifications are intended to guide the design and implementation of the SvelteKit frontend, ensuring a user-friendly and powerful workflow for managing project assets.
+This document outlines the user interface (UI) requirements for the asset management features within `cpc-studio`. These specifications are intended to guide the design and implementation of the Yew frontend, ensuring a user-friendly and powerful workflow for managing project assets.
 
 ## 2. Asset Browser Panel
 

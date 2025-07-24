@@ -1,0 +1,188 @@
+.invoice-creator {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.invoice-creator h2 {
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.form-section h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.form-section label {
+    display: block;
+    margin-bottom: 1rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.form-section input,
+.form-section select,
+.form-section textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-section input:focus,
+.form-section select:focus,
+.form-section textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.item-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.item-row input {
+    margin-top: 0;
+}
+
+.item-row span {
+    font-weight: 600;
+    color: #333;
+    text-align: right;
+}
+
+.summary {
+    background: #f5f5f5;
+    padding: 1.5rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+.summary p {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.summary p strong {
+    font-size: 1.3rem;
+    color: #007bff;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+button:hover:not(:disabled) {
+    background: #0056b3;
+}
+
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+button[type="button"] {
+    background: #6c757d;
+}
+
+button[type="button"]:hover:not(:disabled) {
+    background: #545b62;
+}
+
+.error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    border: 1px solid #f5c6cb;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .invoice-creator {
+        padding: 1rem;
+    }
+    
+    .item-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .item-row span {
+        text-align: left;
+    }
+}
+
+/* Additional styles for better UX */
+.form-section textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-section select {
+    cursor: pointer;
+}
+
+.form-section input[type="number"] {
+    text-align: right;
+}
+
+button.add-item-btn {
+    background: #28a745;
+    margin-top: 0.5rem;
+}
+
+button.add-item-btn:hover:not(:disabled) {
+    background: #1e7e34;
+}
+
+button.remove-item-btn {
+    background: #dc3545;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+button.remove-item-btn:hover:not(:disabled) {
+    background: #c82333;
+}

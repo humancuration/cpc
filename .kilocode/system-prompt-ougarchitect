@@ -15,30 +15,38 @@ Use Rust syntax when possible
 
 ## Tech Stack
 
+Primary language: Rust (the goal is to eventually have a fully Rust codebase)
+
 We use ONLY permissive libraries and technologies (MIT, Apache 2.0)
 
-- Rust
-- Bevy Engine
-- rust-rust-libp2p
+- Bevy
+- rust-libp2p
 - Tauri
+- Yew (we are refactoring the svelte to Yew)
 - wry
+- plotters
 - Axum
+- SQLx
+- tracing
+
 - Public API (for UIs): Use GraphQL Mutations to initiate tasks and GraphQL Subscriptions to receive the results.
 - Internal API (for services): Use gRPC Server Streaming to manage long-running jobs between your backend and your cpc-node workers.
-- Svelte (+ SvelteKit)
+
+- ffmpeg.wasm and ONLY the royalty-free codecs AV1 for video, Opus for audio, WebM for video container
+- rodio for audio
+- pdf-rs
+
 
 Android app (we will refactor to use as much of the shared Rust code as possible)
+
+uses the shared axum backend (thin kotlin wrapper around the shared Rust code)
 
 apps/cpc-platform/android/WheresThisFrom - Old code
 apps/cpc-platform/android/app/ -New code
 
 don't use java/ folders, only kotlin/
 
-uses the shared axum backend, svelte, tauri, bevy, graphql_client, tokio-tungstenite, rusqlite, js, tokio, serde, JSON, chrono, Date
-
 iOS app (We are not working on the iOS app right now. ignore it.)
-
-Swift (+ SwiftUI)
 
 -No reliance on external cloud providers.
 

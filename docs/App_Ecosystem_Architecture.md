@@ -39,7 +39,7 @@ wry	Standalone WebView renderer for diegetic UI in the Bevy engine.	Apache 2.0
 Kotlin (+ Compose)	Primary language & UI for the Android application shell.	Apache 2.0
 Swift (+ SwiftUI)	Primary language & UI for the iOS application shell.	Apache 2.0
 Axum	Rust web framework for the Central Orchestrator backend server.	MIT
-Svelte (+ SvelteKit)	JavaScript framework for UI inside WebViews and the Web app.	MIT
+Yew	Rust/WASM framework for UI inside WebViews and the Web app.	MIT
 4.0 Core Architectural Component: cpc-core
 
     Android App Stack (We might move to the Axum rust server backend)
@@ -136,7 +136,7 @@ Memory management across the JNI boundary requires careful handling to prevent l
 
 5.2 Desktop Platform (Windows, macOS, Linux) - The "CPC Studio" Creator App
 
-    Shell: A Tauri application. The editor "chrome" (asset browser, inspector panels, scene hierarchy) is built with Svelte for a flexible and rich UI experience.
+    Shell: A Tauri application. The editor "chrome" (asset browser, inspector panels, scene hierarchy) is built with Yew for a flexible and rich UI experience.
 
     Core Logic: The core crates are used directly by the Tauri Rust backend.
 
@@ -146,9 +146,9 @@ Memory management across the JNI boundary requires careful handling to prevent l
 
     Backend: A lean Axum web server acts as the Central Orchestrator, managing identity, metadata, and matchmaking.
 
-    Frontend: A SvelteKit application provides the website.
+    Frontend: A Yew application provides the website.
 
-    Game Rendering: To play games, the cpc-core and Bevy engine are compiled to WebAssembly (WASM). The SvelteKit frontend loads this WASM module and gives it control of an HTML <canvas> element. Graphics are rendered via the high-performance WebGPU API.
+    Game Rendering: To play games, the cpc-core and Bevy engine are compiled to WebAssembly (WASM). The Yew frontend loads this WASM module and gives it control of an HTML <canvas> element. Graphics are rendered via the high-performance WebGPU API.
 
     Limitations: P2P networking is limited to the browser's capabilities (WebRTC, WebSockets) and is only active while the tab is open. This platform serves as an easy entry point, encouraging users to download the more powerful native desktop and mobile clients.
 

@@ -1,12 +1,12 @@
 # PDS Tauri UI Architecture
 
-## 1. Framework Selection: Svelte
+## 1. Framework Selection: Yew
 - **Justification**:
-  - Minimal runtime overhead (critical for resource-constrained devices)
-  - Excellent reactivity model for real-time network updates
-  - Simple state management without complex libraries
-  - Small bundle size (faster loading)
-  - Seamless Tauri integration via `@tauri-apps/api`
+  - Leverages Rust's performance, safety, and concurrency for the frontend.
+  - Enables a unified Rust codebase across the entire stack (backend, core, and frontend).
+  - Component-based architecture similar to React, but with Rust's strong typing.
+  - Compiles to high-performance WebAssembly (WASM).
+  - Excellent integration with the Rust ecosystem and Tauri.
 
 ## 2. Component Structure
 
@@ -20,19 +20,19 @@ graph TD
 ```
 
 ### Component Details:
-1. **NetworkStatusDashboard.svelte**
+1. **network_status_dashboard.rs**
    - Connection status indicators (online/offline)
    - Bandwidth usage graph (upload/download)
    - Peer list with connection quality
    - Network protocol indicators (TCP/QUIC/WebSockets)
 
-2. **StorageConfigPanel.svelte**
+2. **storage_config_panel.rs**
    - Storage limit slider (GB)
    - Cache eviction policy selector
    - Storage usage visualization (pie chart)
    - Data encryption status indicator
 
-3. **ContentBrowser.svelte**
+3. **content_browser.rs**
    - File list with type icons
    - Upload/Download action buttons
    - Search and filter functionality
@@ -40,7 +40,7 @@ graph TD
    - Conflict badge indicator on conflicting files
    - Right-click "Resolve Conflict" option connecting to Tauri command
 
-4. **SettingsPage.svelte**
+4. **settings_page.rs**
    - Encryption key management
    - Network preference toggles
    - Bootstrap node configuration
@@ -64,7 +64,7 @@ sequenceDiagram
 
 2. **Event System** (real-time updates)
    - Subscribe to network events via Tauri events
-   - Use Svelte stores for reactive UI updates
+   - Use Yew's state management (e.g., `use_state` hooks, `Yewdux` for global state) for reactive UI updates
 
 3. **Error Handling**:
    - Uniform error codes across Rust/JS boundary
@@ -107,26 +107,26 @@ pds/
 │   └── tauri.conf.json
 ├── frontend/
 │   ├── src/
-│   │   ├── App.svelte       # Root component
+│   │   ├── main.rs          # Yew entry point
+│   │   ├── app.rs           # Root component
 │   │   ├── components/      # UI components
-│   │   ├── stores/          # Svelte stores
-│   │   └── main.js          # Entry point
-│   ├── public/
-│   └── package.json
+│   │   └── state/           # Global state management
+│   ├── static/
+│   │   └── index.html
+│   └── Trunk.toml           # Build configuration
 └── ...
 ```
 
-### Dependencies (npm):
-```json
-{
-  "dependencies": {
-    "@tauri-apps/api": "^2.0.0",
-    "svelte": "^4.0.0",
-    "svelte-routing": "^1.0.0",
-    "chart.js": "^4.0.0",
-    "svelte-chartjs": "^3.0.0"
-  }
-}
+### Dependencies (Cargo.toml):
+```toml
+[dependencies]
+yew = "0.20"
+yew-router = "0.17"
+yewdux = "0.9"
+# A Yew-compatible charting library would be added here
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+gloo-net = "0.2"
 ```
 
 ### Integration Points:
@@ -138,21 +138,40 @@ pds/
    }
    ```
 
-2. **Frontend Consumption** (frontend/src/stores/network.js):
-   ```javascript
-   import { invoke } from '@tauri-apps/api';
-   import { writable } from 'svelte/store';
-   
-   export const networkStatus = writable({});
-   
-   export async function refreshNetworkStatus() {
-       const status = await invoke('get_network_status');
-       networkStatus.set(status);
+2. **Frontend Consumption** (frontend/src/components/network_status.rs):
+   ```rust
+   use yew::prelude::*;
+   use wasm_bindgen_futures::spawn_local;
+   // Assume 'invoke' is a custom wrapper around Tauri's JS API
+   use crate::bindings::{invoke, NetworkStatus};
+
+   #[function_component(NetworkStatusComponent)]
+   pub fn network_status_component() -> Html {
+       let status = use_state(|| NetworkStatus::default());
+
+       let refresh_status = {
+           let status = status.clone();
+           Callback::from(move |_| {
+               let status = status.clone();
+               spawn_local(async move {
+                   if let Ok(new_status) = invoke("get_network_status", ()).await {
+                       status.set(new_status);
+                   }
+               });
+           })
+       };
+
+       html! {
+           <div>
+               // Render status...
+               <button onclick={refresh_status}>{ "Refresh" }</button>
+           </div>
+       }
    }
    ```
 
 ### Build Process:
-1. Vite for Svelte frontend
+1. Trunk for Yew/WASM frontend
 2. Tauri bundler for Rust backend
 3. Cross-platform builds via `tauri build`
 
@@ -189,26 +208,38 @@ pds/
   - Empty: Placeholder message
   - Conflict: Merge icon with resolve action
 - **Storage Error Example**:
-  ```svelte
-  {#if error}
-    <div class="error-state">
-      <Icon name="warning" />
-      <p>Failed to load storage data</p>
-      <button on:click={retry}>Retry</button>
-    </div>
-  {:else}
-    <!-- Normal content -->
-  {/if}
+  ```rust
+  // Example in a Yew component
+  html! {
+      if let Some(error) = &*error_state {
+          html! {
+              <div class="error-state">
+                  <Icon name="warning" />
+                  <p>{"Failed to load storage data"}</p>
+                  <button onclick={retry_callback}>{"Retry"}</button>
+              </div>
+          }
+      } else {
+          html! { /* Normal content */ }
+      }
+  }
   ```
 - **Conflict Error Example**:
-  ```svelte
-  {#if error?.type === 'ConflictDetected'}
-    <div class="conflict-error">
-      <Icon name="merge" />
-      <p>Conflict detected in {error.fileName}</p>
-      <button on:click={() => resolveConflict(error)}>Resolve</button>
-    </div>
-  {/if}
+  ```rust
+  // Example in a Yew component
+  html! {
+      if let Some(ErrorType::ConflictDetected { file_name }) = &*error_state {
+          html! {
+              <div class="conflict-error">
+                  <Icon name="merge" />
+                  <p>{format!("Conflict detected in {}", file_name)}</p>
+                  <button onclick={resolve_callback}>{"Resolve"}</button>
+              </div>
+          }
+      } else {
+          html! {}
+      }
+  }
   ```
 - **Logging**: Capture errors to persistent log (visible in Settings)
 
@@ -218,13 +249,14 @@ pds/
   2. File type distribution (images, docs, media)
   3. Usage trend graph (7-day history)
 - **Implementation**:
-  ```svelte
-  <PieChart
-    data={[
-      {label: 'Local', value: localUsage},
-      {label: 'P2P', value: p2pUsage}
-    ]}
-  />
+  ```rust
+  // Assuming a Yew wrapper for a charting library
+  html! {
+      <PieChart data={vec![
+          ChartData { label: "Local".into(), value: local_usage },
+          ChartData { label: "P2P".into(), value: p2p_usage },
+      ]} />
+  }
   ```
 
 ### 5.4 Data Presentation Standards
@@ -240,7 +272,7 @@ pds/
   - StorageConfigPanel: Add pie chart and file type breakdown
 ### 5.5 ContentBrowser Implementation Details
 
-- **File Icons**: Implemented via `fileUtils.js` mapping
+- **File Icons**: Implemented via a Rust utility module (e.g., `file_utils.rs`)
 - **Preview System**:
   - Text files: Display as-is
   - Images: Shown as base64-encoded previews
@@ -260,7 +292,7 @@ pds/
 
 ### Conflict Resolution UI
 
-The `ConflictResolutionModal.svelte` component provides side-by-side file comparison with these features:
+The `conflict_resolution_modal.rs` component provides side-by-side file comparison with these features:
 
 - Visual diff highlighting for text files
 - Thumbnail comparison for images
@@ -272,61 +304,84 @@ The `ConflictResolutionModal.svelte` component provides side-by-side file compar
   - Rename Remote
 - Progress indicators during resolution
 
-```svelte
-<!-- ConflictResolutionModal.svelte -->
-<script>
-  import { resolveConflict } from '../stores/conflict';
-  export let conflict; // { localFile, remoteFile, fileName }
-</script>
+```rust
+// conflict_resolution_modal.rs
+use yew::prelude::*;
 
-<div class="modal">
-  <h2>Conflict: {conflict.fileName}</h2>
-  <div class="versions">
-    <div class="version local">
-      <h3>Your Version</h3>
-      <FilePreview file={conflict.localFile} />
-    </div>
-    <div class="version remote">
-      <h3>Remote Version</h3>
-      <FilePreview file={conflict.remoteFile} />
-    </div>
-  </div>
-  <div class="actions">
-    <button on:click={() => resolveConflict('keepLocal')}>Keep Local</button>
-    <button on:click={() => resolveConflict('keepRemote')}>Keep Remote</button>
-    <button on:click={() => resolveConflict('merge')}>Merge</button>
-    <button on:click={() => resolveConflict('renameLocal')}>Rename Local</button>
-    <button on:click={() => resolveConflict('renameRemote')}>Rename Remote</button>
-  </div>
-</div>
+#[derive(Properties, PartialEq)]
+pub struct Props {
+    pub conflict: Conflict,
+    pub on_resolve: Callback<ResolveAction>,
+}
+
+#[function_component(ConflictResolutionModal)]
+pub fn conflict_resolution_modal(props: &Props) -> Html {
+    let resolve = |action: ResolveAction| {
+        let on_resolve = props.on_resolve.clone();
+        Callback::from(move |_| on_resolve.emit(action))
+    };
+
+    html! {
+        <div class="modal">
+            <h2>{ format!("Conflict: {}", props.conflict.file_name) }</h2>
+            <div class="versions">
+                <div class="version local">
+                    <h3>{ "Your Version" }</h3>
+                    <FilePreview file={props.conflict.local_file.clone()} />
+                </div>
+                <div class="version remote">
+                    <h3>{ "Remote Version" }</h3>
+                    <FilePreview file={props.conflict.remote_file.clone()} />
+                </div>
+            </div>
+            <div class="actions">
+                <button onclick={resolve(ResolveAction::KeepLocal)}>{ "Keep Local" }</button>
+                <button onclick={resolve(ResolveAction::KeepRemote)}>{ "Keep Remote" }</button>
+                <button onclick={resolve(ResolveAction::Merge)}>{ "Merge" }</button>
+                <button onclick={resolve(ResolveAction::RenameLocal)}>{ "Rename Local" }</button>
+                <button onclick={resolve(ResolveAction::RenameRemote)}>{ "Rename Remote" }</button>
+            </div>
+        </div>
+    }
+}
 ```
 
 ### User-Facing Messages
-```svelte
-{#if downloadState === 'verifying'}
-  <div class="verification-status">
-    <Spinner />
-    Verifying file integrity...
-  </div>
-{:else if downloadState === 'verified'}
-  <div class="verification-success">
-    <CheckmarkIcon />
-    File integrity verified
-  </div>
-{:else if downloadState === 'verification_failed'}
-  <div class="verification-error">
-    <WarningIcon />
-    Verification failed: corrupted data
-    <button on:click={retry}>Retry Download</button>
-  </div>
-{/if}
+```rust
+// Example in a Yew component's view
+match &*download_state {
+    DownloadState::Verifying => html! {
+        <div class="verification-status">
+            <Spinner />
+            { "Verifying file integrity..." }
+        </div>
+    },
+    DownloadState::Verified => html! {
+        <div class="verification-success">
+            <CheckmarkIcon />
+            { "File integrity verified" }
+        </div>
+    },
+    DownloadState::VerificationFailed => html! {
+        <div class="verification-error">
+            <WarningIcon />
+            { "Verification failed: corrupted data" }
+            <button onclick={retry_callback}>{ "Retry Download" }</button>
+        </div>
+    },
+    _ => html! {},
+}
 
-<!-- Conflict error state in main UI -->
-{#if error?.type === 'ConflictDetected'}
-  <div class="conflict-error">
-    <MergeIcon />
-    <span>Conflict detected in {error.fileName}</span>
-    <button on:click={showConflictResolution}>Resolve</button>
-  </div>
-{/if}
+// Conflict error state in main UI
+if let Some(ErrorType::ConflictDetected { file_name }) = &*error_state {
+    html! {
+        <div class="conflict-error">
+            <MergeIcon />
+            <span>{ format!("Conflict detected in {}", file_name) }</span>
+            <button onclick={show_conflict_resolution_callback}>{ "Resolve" }</button>
+        </div>
+    }
+} else {
+    html!{}
+}
 ```

@@ -7,7 +7,7 @@ Validate feature parity and performance across Android and desktop platforms for
 
 | Feature            | Android Implementation                    | Desktop Implementation               | Test Cases                     |
 |--------------------|------------------------------------------|-------------------------------------|--------------------------------|
-| **Social Features**| Kotlin UI + Rust Core                    | Svelte UI + Rust Core               | PC-01 to PC-08, TL-01 to TL-08|
+| **Social Features**| Kotlin UI + Rust Core                    | Yew UI + Rust Core               | PC-01 to PC-08, TL-01 to TL-08|
 | **Image Recognition**| CameraX + JNI bindings                 | Tauri commands + Webcam API         | IR-01 to IR-10                |
 | **Offline Support**| WorkManager + SQLite                    | Tauri background tasks + SQLite     | OF-01 to OF-08                |
 | **Performance**    | Android Profiler metrics                 | Desktop performance monitoring       | PERF-01 to PERF-05            |
@@ -64,7 +64,7 @@ class CrossPlatformTest {
 }
 ```
 
-**Desktop (Svelte):**
+**Desktop (Yew):**
 ```javascript
 // apps/pds/frontend/tests/vision.test.js
 test('recognition workflow', async () => {

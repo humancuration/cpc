@@ -1,5 +1,7 @@
 # Business Tools Architecture (v2)
 
+## We are refactoring from svelte to Yew!
+
 ## 1. Executive Summary
 
 The existing architecture for the financial forecasting module is insufficient for providing a robust and scalable user experience. It relies on synchronous, blocking GraphQL mutations, contains critically flawed business logic, and lacks a backend-driven notification system.

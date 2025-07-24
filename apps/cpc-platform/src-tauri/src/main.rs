@@ -9,6 +9,9 @@ use jni::{JNIEnv, objects::JObject}; // for Android
 mod bevy_jni;
 mod svelte_bevy_bridge;
 mod android_keystore;
+mod api;
+mod types;
+mod invoicing;
 #[cfg(not(target_os = "android"))]
 mod bevy_plugin;
 
@@ -31,13 +34,23 @@ fn build_tauri_app() -> tauri::Builder {
         .setup(|app| {
             // Initialize Svelte-Bevy communication bridge (common for all platforms)
             svelte_bevy_bridge::init_bridge(app);
+            
+            // Initialize invoicing system
+            invoicing::init_invoicing(app)?;
+            
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             svelte_bevy_bridge::show_bevy_view,
             android_keystore::secure_store,
-            android_keystore::secure_retrieve
+            android_keystore::secure_retrieve,
+            api::invoicing::get_invoice_templates,
+            api::invoicing::get_contacts,
+            api::invoicing::create_invoice
         ]);
+    
+    // Register invoicing commands
+    builder = invoicing::register_commands(builder);
     
     // Add desktop-specific handlers
     #[cfg(not(target_os = "android"))]

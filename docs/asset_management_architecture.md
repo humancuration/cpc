@@ -10,7 +10,7 @@ The following Mermaid diagram illustrates the key components and data flows of t
 
 ```mermaid
 graph TD
-    subgraph "cpc-studio Frontend (SvelteKit)"
+    subgraph "cpc-studio Frontend (Yew)"
         A[Asset Browser UI]
         B[Inspector Panel]
         C[Viewport (Bevy Render)]
@@ -77,8 +77,8 @@ graph TD
 
 ## 3. Component Descriptions
 
-*   **Asset Browser UI (SvelteKit):** The primary interface for users to view, organize, and manage project assets. It supports operations like import, delete, rename, and folder creation.
-*   **Inspector Panel (SvelteKit):** Displays and allows editing of metadata for the selected asset (e.g., texture import settings, model properties).
+*   **Asset Browser UI (Yew):** The primary interface for users to view, organize, and manage project assets. It supports operations like import, delete, rename, and folder creation.
+*   **Inspector Panel (Yew):** Displays and allows editing of metadata for the selected asset (e.g., texture import settings, model properties).
 *   **Tauri Commands:** The API layer between the frontend and the Rust backend. Asset-related UI actions are translated into calls to these commands.
 *   **Asset Service (Rust):** A central service in the backend that orchestrates all asset-related operations. It acts as a facade, coordinating the importer, processor, and `cpc-core` integration.
 *   **Asset Importer (Rust):** Responsible for handling the initial import of a file from the user's filesystem into the project's asset directory. It creates the initial asset metadata record.

@@ -2,7 +2,8 @@ use chrono::{Utc, Duration};
 use tokio::time::{sleep, interval};
 use std::sync::Arc;
 use crate::{
-    services::invoicing::{InvoiceService, DbPool},
+    services::invoicing::InvoiceService,
+    db::DbPool,
     notifications::{NotificationService, NotificationType},
 };
 
@@ -14,7 +15,7 @@ pub struct InvoiceReminderScheduler {
 
 impl InvoiceReminderScheduler {
     pub fn new(
-        db: PgPool,
+        db: DbPool,
         invoice_service: InvoiceService,
         notification_service: Arc<NotificationService>
     ) -> Self {
@@ -37,8 +38,7 @@ impl InvoiceReminderScheduler {
         let due_tomorrow = now + Duration::days(1);
         
         // Get invoices due in 3 days
-        let invoices = self.invoice_service.get_invoices_due_between(now, due_soon).await
-            .map_err(|e| format!("Database error: {}", e))?;
+        let invoices = self.invoice_service.get_invoices_due_between(now, due_soon).await?;
         for invoice in invoices {
             if let Err(e) = self.notification_service.send_notification(
                 invoice.issuer_id,
@@ -48,13 +48,12 @@ impl InvoiceReminderScheduler {
                 },
                 serde_json::json!({}),
             ).await {
-                log::error!("Failed to send notification for invoice {}: {}", invoice.id, e);
+                tracing::error!("Failed to send notification for invoice {}: {}", invoice.id, e);
             }
         }
         
         // Get invoices due tomorrow
-        let invoices = self.invoice_service.get_invoices_due_between(due_tomorrow, due_tomorrow + Duration::days(1)).await
-            .map_err(|e| format!("Database error: {}", e))?;
+        let invoices = self.invoice_service.get_invoices_due_between(due_tomorrow, due_tomorrow + Duration::days(1)).await?;
         for invoice in invoices {
             if let Err(e) = self.notification_service.send_notification(
                 invoice.issuer_id,
@@ -64,13 +63,12 @@ impl InvoiceReminderScheduler {
                 },
                 serde_json::json!({}),
             ).await {
-                log::error!("Failed to send notification for invoice {}: {}", invoice.id, e);
+                tracing::error!("Failed to send notification for invoice {}: {}", invoice.id, e);
             }
         }
         
         // Get overdue invoices
-        let overdue_invoices = self.invoice_service.get_overdue_invoices().await
-            .map_err(|e| format!("Database error: {}", e))?;
+        let overdue_invoices = self.invoice_service.get_overdue_invoices().await?;
         for invoice in overdue_invoices {
             if let Err(e) = self.notification_service.send_notification(
                 invoice.issuer_id,
@@ -80,7 +78,7 @@ impl InvoiceReminderScheduler {
                 },
                 serde_json::json!({}),
             ).await {
-                log::error!("Failed to send notification for invoice {}: {}", invoice.id, e);
+                tracing::error!("Failed to send notification for invoice {}: {}", invoice.id, e);
             }
         }
         

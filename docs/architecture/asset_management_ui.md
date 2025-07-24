@@ -4,7 +4,7 @@ This document outlines the architectural design for the advanced asset managemen
 
 ## 1. Overview
 
-The architecture leverages Tauri-based communication between the Svelte frontend and the Rust backend. The backend's asset management system is built on Bevy, SQLite for metadata, and Valkey for caching. The system is designed to be extensible and robust, supporting real-time collaboration.
+The architecture leverages Tauri-based communication between the Yew frontend and the Rust backend. The backend's asset management system is built on Bevy, SQLite for metadata, and Valkey for caching. The system is designed to be extensible and robust, supporting real-time collaboration.
 
 ## 2. System Components
 
@@ -19,7 +19,7 @@ The asset management system is composed of several key components, each with a s
 *   **`AssetSync` (`asset_manager/asset_sync.rs`):** Manages real-time synchronization of asset metadata and lock states between peers using our P2P network.
 *   **Tauri Commands:** A set of Rust functions exposed to the frontend for performing asset-related operations (e.g., `get_assets_in_path`, `import_asset`, `acquire_asset_lock`).
 
-### 2.2. Frontend (Svelte)
+### 2.2. Frontend (Yew)
 
 *   **`AssetBrowser.svelte`:** The primary UI for browsing, searching, and managing assets. It displays assets in a grid or list view and provides controls for importing, creating folders, and locking/unlocking.
 *   **`InspectorPanel.svelte`:** Displays detailed metadata for a selected asset and allows for editing properties. It also handles conflict resolution when concurrent edits occur.
@@ -91,7 +91,7 @@ sequenceDiagram
     User A->>User A: Update UI with lock indicator
 ```
 
-## 4. Svelte Component Structure
+## 4. Yew Component Structure
 
 ```
 src/

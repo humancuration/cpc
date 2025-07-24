@@ -11,7 +11,7 @@ The Revenue Dashboard provides comprehensive revenue tracking and analysis capab
 
 ## Component Specifications
 
-### Frontend Components (Svelte)
+### Frontend Components (Yew)
 
 #### 1. RevenueDashboard.svelte
 **Purpose**: Main container for revenue analytics interface

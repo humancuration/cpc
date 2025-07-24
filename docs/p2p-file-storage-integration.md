@@ -26,7 +26,7 @@
 
 ```mermaid
 sequenceDiagram
-    participant F as Frontend (Svelte)
+    participant F as Frontend (Yew)
     participant T as Tauri (Rust)
     participant P as P2P Network
     participant S as Storage

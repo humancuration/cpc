@@ -11,7 +11,7 @@ The Expense Tracking System provides comprehensive expense management capabiliti
 
 ## Component Specifications
 
-### Frontend Components (Svelte)
+### Frontend Components (Yew)
 
 #### 1. ExpenseDashboard.svelte
 **Purpose**: Main container for expense tracking interface
@@ -373,7 +373,7 @@ subscription ExpenseUpdated($userId: ID!) {
 
 ### Frontend Integration
 
-#### 1. Svelte Store Setup
+#### 1. Yew State Setup
 ```javascript
 // stores/expenseStore.js
 import { writable } from 'svelte/store';

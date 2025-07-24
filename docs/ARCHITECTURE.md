@@ -192,3 +192,17 @@ pub struct PdsConfig {
    - User profile management endpoints
    - Content search functionality
    - Node status reporting
+## Business Intelligence and Tools
+
+The CPC platform includes tools for cooperatives and individuals to manage their business operations.
+
+### Invoice Management
+We've implemented an invoice management system with offline capabilities and cross-device synchronization. 
+See [ADR 0006](./architecture/adr/0006-invoice_system_architecture.md) for architectural details.
+
+Key features:
+- Local-first data storage using SeaORM/SQLite
+- GraphQL API integration with backend
+- Real-time updates via subscriptions
+- PDF generation using printpdf
+- Conflict resolution for multi-device sync

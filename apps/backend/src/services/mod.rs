@@ -4,3 +4,5 @@ pub mod social;
 pub mod permissions;
 pub mod invoicing;
 pub mod invoice_reminder;
+pub mod asset_storage;
+pub mod asset_preview;

@@ -2,11 +2,12 @@ use chrono::Utc;
 use tokio::time::{sleep, Duration};
 use crate::graphql::user_testing::send_weekly_summary;
 use crate::services::invoice_reminder::InvoiceReminderScheduler;
-use crate::services::invoicing::{InvoiceService, DbPool};
+use crate::services::invoicing::InvoiceService;
+use crate::db::DbPool;
 use crate::notifications::NotificationService;
 use std::sync::Arc;
 
-pub async fn start_scheduled_jobs() {
+pub async fn start_scheduled_jobs(db: DbPool) {
     // Start weekly summary job
     tokio::spawn(async move {
         // Weekly summary job: every Monday at 9:00 AM
@@ -33,6 +34,11 @@ pub async fn start_scheduled_jobs() {
             sleep(Duration::from_secs(7 * 24 * 60 * 60)).await;
         }
     });
+
+    // Start invoice reminder scheduler
+    let invoice_service = InvoiceService::new(db.clone());
+    let notification_service = Arc::new(NotificationService::new());
+    start_invoice_reminder_scheduler(db, invoice_service, notification_service).await;
 }
 
 pub async fn start_invoice_reminder_scheduler(

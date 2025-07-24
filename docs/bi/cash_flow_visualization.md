@@ -11,7 +11,7 @@ The Cash Flow Visualization System provides comprehensive cash flow analysis and
 
 ## Component Specifications
 
-### Frontend Components (Svelte)
+### Frontend Components (Yew)
 
 #### 1. CashFlowDashboard.svelte
 **Purpose**: Main container for cash flow analytics interface

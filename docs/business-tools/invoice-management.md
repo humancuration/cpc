@@ -38,7 +38,7 @@ message InvoiceItem {
 
 ## System Architecture
 ```
-Frontend (Svelte) → GraphQL API → Invoice Service → Database
+Frontend (Yew) → GraphQL API → Invoice Service → Database
                               │
                               ├→ Notification Service
                               └→ Payment Processing
@@ -53,14 +53,14 @@ Frontend (Svelte) → GraphQL API → Invoice Service → Database
 ## Component Structure
 ```
 src/components/invoicing/
-├── InvoiceCreator.svelte
-├── InvoiceTracker.svelte
+├── InvoiceCreator.rs
+├── InvoiceTracker.rs
 ├── templates/
-│   ├── CustomTemplateEditor.svelte
-│   └── TemplateGallery.svelte
+│   ├── CustomTemplateEditor.rs
+│   └── TemplateGallery.rs
 └── reports/
-    ├── AgingReport.svelte
-    └── SupplierPerformance.svelte
+    ├── AgingReport.rs
+    └── SupplierPerformance.rs
 ```
 
 ## Implementation Details

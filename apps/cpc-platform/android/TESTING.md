@@ -86,7 +86,7 @@
 
 2. **IPC Validation**
    ```javascript
-   // From Svelte frontend
+   // From Yew frontend
    invoke('secure_store', { key: 'test', value: 'data' })
    ```
    - [ ] Confirm message routing through Rust/Kotlin bridge

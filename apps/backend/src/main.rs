@@ -6,11 +6,13 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::cors::CorsLayer;
 
+mod db;
 mod routes;
 mod services;
 mod bi;
 mod scheduled_jobs;  // Add scheduled_jobs module
 
+use crate::db::{DbPool, init_db};
 use crate::bi::{BIService, BIConfig};
 use crate::scheduled_jobs::start_scheduled_jobs;  // Import start function
 
@@ -19,12 +21,17 @@ async fn main() {
     // Initialize tracing
     tracing_subscriber::fmt::init();
 
+    // Initialize database
+    let db = init_db()
+        .await
+        .expect("Failed to initialize database");
+
     // Initialize services
     let bi_config = BIConfig::default();
     let bi_service = Arc::new(BIService::new(bi_config));
 
     // Start scheduled jobs
-    start_scheduled_jobs().await;
+    start_scheduled_jobs(db.clone()).await;
 
     // Build our application with routes
     let app = Router::new()

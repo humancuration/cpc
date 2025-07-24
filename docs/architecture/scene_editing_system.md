@@ -18,7 +18,7 @@ The scene editing system will be composed of the following key components:
 *   **`ComponentRegistry`**: A registry for all available components, allowing for dynamic inspection and modification in the UI.
 *   **`SceneSync`**: A new module, similar to `AssetSync`, responsible for synchronizing scene changes between peers.
 
-### 2.2. Frontend (Svelte)
+### 2.2. Frontend (Yew)
 
 *   **`SceneGraphPanel.svelte`**: A UI component for displaying the scene hierarchy in a tree view. It will allow for parenting, reordering, and selecting entities.
 *   **`InspectorPanel.svelte`**: This existing component will be extended to display and edit the components of the selected entity.
