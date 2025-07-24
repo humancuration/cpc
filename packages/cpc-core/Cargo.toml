@@ -17,6 +17,7 @@ anyhow = "1.0"   # For error handling
 thiserror = "1.0" # For structured error handling
 argon2 = { version = "0.5", features = ["std"] }
 rand = "0.8"
+rand_distr = "0.4"
 tract = { version = "0.18", features = ["onnx"] }
 tract-onnx = { version = "0.18", features = ["onnx"] }
 tract-core = { version = "0.18" }

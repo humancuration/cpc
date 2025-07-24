@@ -267,4 +267,79 @@ export class SocialRepository {
       }
     });
   }
+
+  /**
+   * Toggle like on a post
+   * @param {string} postId - Post ID
+   * @param {boolean} isLiked - Current like status
+   * @returns {Promise<Object>} - Updated like info
+   */
+  async toggleLike(postId, isLiked) {
+    try {
+      if (isLiked) {
+        await graphqlClient.mutate({
+          mutation: UNLIKE_POST,
+          variables: { postId }
+        });
+      } else {
+        await graphqlClient.mutate({
+          mutation: LIKE_POST,
+          variables: { postId }
+        });
+      }
+
+      // Clear cache since like status changed
+      this.clearCache();
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      throw new Error('Failed to toggle like');
+    }
+  }
+
+  /**
+   * Create a comment on a post
+   * @param {string} postId - Post ID
+   * @param {string} content - Comment content
+   * @returns {Promise<Object>} - Created comment
+   */
+  async createComment(postId, content) {
+    try {
+      const { data } = await graphqlClient.mutate({
+        mutation: CREATE_COMMENT,
+        variables: { postId, content }
+      });
+
+      // Clear cache since comments changed
+      this.clearCache();
+      
+      return data?.createComment;
+    } catch (error) {
+      console.error('Error creating comment:', error);
+      throw new Error('Failed to create comment');
+    }
+  }
+
+  /**
+   * Delete a comment
+   * @param {string} commentId - Comment ID
+   * @returns {Promise<boolean>} - Success status
+   */
+  async deleteComment(commentId) {
+    try {
+      await graphqlClient.mutate({
+        mutation: DELETE_COMMENT,
+        variables: { id: commentId }
+      });
+
+      // Clear cache since comments changed
+      this.clearCache();
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      throw new Error('Failed to delete comment');
+    }
+  }
 }

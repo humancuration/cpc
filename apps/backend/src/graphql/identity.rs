@@ -10,6 +10,7 @@ use crate::{
     utils::graphql::{AppContext, extract_auth_token},
 };
 use uuid::Uuid;
+use serde_json::Value as JsonValue;
 
 /// GraphQL representation of a User
 #[derive(Clone)]
@@ -67,6 +68,19 @@ impl UserType {
         // Placeholder - will implement with data loaders
         Ok(futures_util::stream::empty())
     }
+
+    /// Get dashboard preferences for the user
+    async fn dashboard_preferences(&self, ctx: &Context<'_>) -> Result<Option<JsonValue>> {
+        let app_ctx = AppContext::from(ctx);
+        
+        let preferences = app_ctx
+            .user_service
+            .get_user_preferences(self.id)
+            .await
+            .map_err(|e| async_graphql::Error::new(format!("Failed to get preferences: {}", e)))?;
+        
+        Ok(preferences.map(|p| p.dashboard_preferences))
+    }
 }
 
 /// Authentication payload returned after login/register
@@ -101,6 +115,14 @@ struct RegisterInput {
 struct LoginInput {
     email: String,
     password: String,
+}
+
+/// Input for dashboard preferences
+#[derive(async_graphql::InputObject)]
+struct DashboardPreferencesInput {
+    default_date_range: Option<String>,
+    favorite_metrics: Option<Vec<String>>,
+    chart_settings: Option<JsonValue>,
 }
 
 /// Identity-related GraphQL queries
@@ -187,6 +209,36 @@ impl IdentityMutation {
         
         Ok(user.into())
     }
+
+    /// Update dashboard preferences
+    async fn update_dashboard_preferences(
+        &self,
+        ctx: &Context<'_>,
+        input: DashboardPreferencesInput,
+    ) -> Result<UserPreferences> {
+        let auth_data = extract_auth_token(ctx)?;
+        let app_ctx = AppContext::from(ctx);
+        
+        let preferences = app_ctx
+            .user_service
+            .update_dashboard_preferences(
+                auth_data.user_id,
+                input.default_date_range,
+                input.favorite_metrics,
+                input.chart_settings,
+            )
+            .await
+            .map_err(|e| async_graphql::Error::new(format!("Failed to update preferences: {}", e)))?;
+        
+        Ok(preferences)
+    }
+}
+
+/// User preferences structure
+#[derive(SimpleObject)]
+struct UserPreferences {
+    user_id: Uuid,
+    dashboard_preferences: JsonValue,
 }
 
 /// Convert core User model to GraphQL UserType

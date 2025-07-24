@@ -1,20 +1,24 @@
-use crate::graphql::social::{SocialMutation, SocialQuery};
-use crate::services::social_service::SocialService;
-use async_graphql::{EmptySubscription, MergedObject, Schema};
-use cpc_core::repositories::social::post_repository::PostRepository;
-use std::sync::Arc;
+use async_graphql::*;
+use crate::graphql::media_mutations::MediaMutations;
+use crate::graphql::media_subscriptions::MediaSubscriptions;
+use crate::bi::graphql::{BIQuery, BIMutation, BISubscription};
+use crate::graphql::financial_forecasting::{FinancialForecastingMutation, FinancialForecastingQuery};
+use crate::graphql::calendar::{CalendarMutation, CalendarQuery, CalendarSubscription}; // Added CalendarSubscription
+use crate::graphql::user_testing::Mutation as UserTestingMutation;
 
 #[derive(MergedObject, Default)]
-pub struct Query(SocialQuery);
+pub struct RootQuery(BIQuery, FinancialForecastingQuery, CalendarQuery);
 
 #[derive(MergedObject, Default)]
-pub struct Mutation(SocialMutation);
+pub struct RootMutation(
+    MediaMutations,
+    BIMutation,
+    FinancialForecastingMutation,
+    CalendarMutation,
+    UserTestingMutation
+);
 
-pub type AppSchema = Schema<Query, Mutation, EmptySubscription>;
+#[derive(MergedSubscription, Default)]
+pub struct RootSubscription(MediaSubscriptions, BISubscription, CalendarSubscription); // Added CalendarSubscription
 
-pub fn create_schema(social_service: Arc<SocialService>) -> AppSchema {
-
-    Schema::build(Query::default(), Mutation::default(), EmptySubscription)
-        .data(Arc::new(social_service))
-        .finish()
-}
+pub type Schema = async_graphql::Schema<RootQuery, RootMutation, RootSubscription>;

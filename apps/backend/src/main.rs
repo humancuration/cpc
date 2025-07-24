@@ -1,76 +1,50 @@
-use axum::{Router, routing::{get, post}};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use std::net::SocketAddr;
+use std::sync::Arc;
+use tower_http::cors::CorsLayer;
 
 mod routes;
-mod graphql;
-mod auth;
-mod file_utils;
-mod config;
-mod repositories;  // Add repositories module
+mod services;
+mod bi;
+mod scheduled_jobs;  // Add scheduled_jobs module
 
-use crate::graphql::schema::{build_schema, Mutation, Query};
-use async_graphql::Schema;
-use axum::{Extension, middleware};
-use axum::http::HeaderValue;
-use axum::routing::post;
-use std::sync::Arc;
-use crate::file_utils::FileProcessor;
-use crate::config::{Config, ConfigError};
-use jsonwebtoken::DecodingKey;
-use crate::repositories::social::{  // Import repositories
-    post_repository,
-    relationship_repository
-};
-
-pub struct AppState {
-    file_processor: FileProcessor,
-    decoding_key: DecodingKey<'static>,
-}
-
-impl AppState {
-    fn new(encryption_key: [u8; 32], jwt_secret: String) -> Self {
-        let decoding_key = DecodingKey::from_secret(jwt_secret.as_bytes());
-        AppState {
-            file_processor: FileProcessor::new(encryption_key),
-            decoding_key,
-        }
-    }
-}
+use crate::bi::{BIService, BIConfig};
+use crate::scheduled_jobs::start_scheduled_jobs;  // Import start function
 
 #[tokio::main]
 async fn main() {
-    // Load configuration from environment variables
-    let config = Config::from_env()
-        .expect("Failed to load configuration");
+    // Initialize tracing
+    tracing_subscriber::fmt::init();
 
-    // Create repository implementations
-    let post_repo = Arc::new(post_repository::PostRepositoryImpl::new(db_pool.clone()));
-    let relationship_repo = Arc::new(relationship_repository::RelationshipRepositoryImpl::new(db_pool.clone()));
-    
-    // Create social service
-    let social_service = Arc::new(SocialService::new(
-        post_repo,
-        relationship_repo
-    ));
-    
-    let schema = build_schema()
-        .data(social_service)
-        .finish();
-    
-    let app_state = Arc::new(AppState::new(config.encryption_key, config.jwt_secret));
+    // Initialize services
+    let bi_config = BIConfig::default();
+    let bi_service = Arc::new(BIService::new(bi_config));
 
+    // Start scheduled jobs
+    start_scheduled_jobs().await;
+
+    // Build our application with routes
     let app = Router::new()
         .route("/health", get(routes::health_check))
-        .route("/api/update/check", post(routes::update::check_for_updates))
-        .route("/graphql", post(graphql::handler))
-        .route("/publish", post(routes::publish_handler)
-            .route_layer(middleware::from_fn_with_state(app_state.clone(), auth::auth_middleware)))
-        .layer(Extension(schema))
-        .with_state(app_state);
+        .nest("/api", create_api_router())
+        .nest("/bi", bi_service.clone())
+        .layer(CorsLayer::permissive());
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], config.port));
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    // Run the server
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    println!("Server listening on {}", addr);
+    
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
+
+fn create_api_router() -> Router {
+    Router::new()
+        .route("/upload", post(routes::upload::upload_image))
+        .merge(routes::publish::router())
+        .merge(routes::update::router())
+        .merge(routes::impact::router())
 }

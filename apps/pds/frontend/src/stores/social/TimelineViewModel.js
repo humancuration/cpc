@@ -123,6 +123,94 @@ function createTimelineStore() {
         filters: { type: 'all', authorId: null },
         pagination: { limit: 20, offset: 0 }
       });
+    },
+
+    // Toggle like on a post
+    async toggleLike(postId) {
+      let currentState;
+      subscribe(state => { currentState = state; })();
+      
+      const post = currentState.posts.find(p => p.id === postId);
+      if (!post) {
+        throw new Error('Post not found');
+      }
+
+      const isLiked = post.likedByCurrentUser || false;
+      
+      try {
+        await repository.toggleLike(postId, isLiked);
+        
+        // Update the post in the timeline
+        update(state => ({
+          ...state,
+          posts: state.posts.map(p =>
+            p.id === postId
+              ? {
+                  ...p,
+                  likedByCurrentUser: !isLiked,
+                  likeCount: isLiked ? (p.likeCount || 1) - 1 : (p.likeCount || 0) + 1
+                }
+              : p
+          )
+        }));
+        
+        return true;
+      } catch (error) {
+        console.error('Error toggling like:', error);
+        throw error;
+      }
+    },
+
+    // Create a comment on a post
+    async createComment(postId, content) {
+      try {
+        const comment = await repository.createComment(postId, content);
+        
+        // Update the post in the timeline with the new comment
+        update(state => ({
+          ...state,
+          posts: state.posts.map(p =>
+            p.id === postId
+              ? {
+                  ...p,
+                  commentCount: (p.commentCount || 0) + 1,
+                  comments: [...(p.comments || []), comment]
+                }
+              : p
+          )
+        }));
+        
+        return comment;
+      } catch (error) {
+        console.error('Error creating comment:', error);
+        throw error;
+      }
+    },
+
+    // Delete a comment
+    async deleteComment(commentId, postId) {
+      try {
+        await repository.deleteComment(commentId);
+        
+        // Update the post in the timeline
+        update(state => ({
+          ...state,
+          posts: state.posts.map(p =>
+            p.id === postId
+              ? {
+                  ...p,
+                  commentCount: Math.max(0, (p.commentCount || 1) - 1),
+                  comments: (p.comments || []).filter(c => c.id !== commentId)
+                }
+              : p
+          )
+        }));
+        
+        return true;
+      } catch (error) {
+        console.error('Error deleting comment:', error);
+        throw error;
+      }
     }
   };
 }

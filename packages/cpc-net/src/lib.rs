@@ -4,30 +4,37 @@
 //! - Cryptographic operations (key generation, hashing, encryption)
 //! - Network abstractions (peer discovery, transport, protocols)
 //! - Content-addressable storage with metrics
+//! - Distributed file hosting (chunking, DHT, peer management)
 //!
 //! ## Example
 //! ```
-//! use cpc_lib::{crypto, net, storage};
-//!
+//! use cpc_lib::{crypto, chunking, dht, peer_manager};
+//! 
 //! // Generate cryptographic keys
 //! let signing_keys = crypto::KeyPair::generate_ed25519();
 //! let encryption_keys = crypto::KeyPair::generate_x25519();
-//!
-//! // Set up network
-//! let mut network = net::NetworkBuilder::new()
-//!     .with_tcp()
-//!     .with_quic()
-//!     .build();
-//!
-//! // Initialize storage
-//! let mut storage = storage::LruStorage::new(1024 * 1024 * 100); // 100 MB
+//! 
+//! // Split file into chunks
+//! let chunks = chunking::ChunkingService::chunk_bytes(b"Hello, distributed world!");
+//! 
+//! // Announce chunk availability in DHT
+//! // let dht = dht::DhtService::new(local_peer_id);
+//! // dht.announce_chunk(chunk_hash, chunk_size).await?;
 //! ```
 
 pub mod crypto;
 pub mod net;
 pub mod storage;
 
+// Distributed file hosting modules
+pub mod chunking;
+pub mod dht;
+pub mod peer_manager;
+
 // Re-export key types from modules
 pub use crypto::{KeyPair, NoiseSession, hash_content};
 pub use net::{NetworkBuilder, Network, NetworkEvent};
 pub use storage::{ContentStorage, LruStorage, StorageMetrics, StorageError};
+pub use chunking::{ChunkingService, FileChunk, CHUNK_SIZE};
+pub use dht::{DhtService, ChunkLocationRecord, DhtStats};
+pub use peer_manager::{PeerManager, PeerManagerEvent, PeerConnection};

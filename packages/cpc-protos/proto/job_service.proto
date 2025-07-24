@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package cpc.jobs;
+
+// Job Service for asynchronous task processing
+service JobService {
+    // Server-streaming RPC for workers to receive jobs
+    rpc SubscribeToJobs(JobSubscriptionRequest) returns (stream Job);
+    
+    // Unary RPC for workers to report job completion
+    rpc UpdateJobStatus(JobStatusUpdate) returns (JobStatusResponse);
+    
+    // Get job details by ID
+    rpc GetJob(GetJobRequest) returns (Job);
+}
+
+// Job types supported by the system
+enum JobType {
+    FINANCIAL_FORECAST = 0;
+    SENSITIVITY_ANALYSIS = 1;
+    DATA_PROCESSING = 2;
+}
+
+// Job status
+enum JobStatus {
+    PENDING = 0;
+    RUNNING = 1;
+    COMPLETED = 2;
+    FAILED = 3;
+    CANCELLED = 4;
+}
+
+// Request to subscribe to jobs
+message JobSubscriptionRequest {
+    string worker_id = 1;
+    repeated string capabilities = 2;  // e.g., ["financial_forecasting", "compute"]
+    Resources available_resources = 3;
+}
+
+// Job definition
+message Job {
+    string job_id = 1;
+    JobType job_type = 2;
+    JobStatus status = 3;
+    string user_id = 4;
+    string created_at = 5;
+    string started_at = 6;
+    string completed_at = 7;
+    bytes payload = 8;  // Serialized job-specific data
+    string error_message = 9;
+    map<string, string> metadata = 10;
+}
+
+// Update job status
+message JobStatusUpdate {
+    string job_id = 1;
+    JobStatus status = 2;
+    string error_message = 3;
+    bytes result = 4;  // Serialized result data
+    map<string, string> metadata = 5;
+}
+
+// Response for job status update
+message JobStatusResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// Request to get a specific job
+message GetJobRequest {
+    string job_id = 1;
+}
+
+// Resource definition for workers
+message Resources {
+    uint64 memory = 1;  // in MB
+    uint64 storage = 2;  // in GB
+    uint32 cores = 3;
+    uint64 bandwidth = 4;  // in Mbps
+}

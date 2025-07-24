@@ -44,12 +44,23 @@ export async function refreshStorageMetrics() {
     // Fetch storage breakdown
     const breakdown = await invoke('get_storage_breakdown');
     
-    storageMetrics.set({
-      data: {
-        used: usage.used,
-        limit: usage.limit,
-        breakdown
+    // Fetch secure storage size
+    const secureStorageSize = await invoke('secure_storage_size');
+    
+    // Combine metrics with secure storage
+    const combinedMetrics = {
+      used: usage.used,
+      limit: usage.limit,
+      breakdown: {
+        ...breakdown,
+        secure_storage_size: secureStorageSize || 0
       },
+      secure_storage_size: secureStorageSize || 0,
+      total_used: usage.used + (secureStorageSize || 0)
+    };
+    
+    storageMetrics.set({
+      data: combinedMetrics,
       loading: false,
       error: null,
       lastUpdated: new Date()

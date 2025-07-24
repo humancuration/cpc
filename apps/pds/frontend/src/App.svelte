@@ -8,6 +8,7 @@
   import ContentBrowser from './components/ContentBrowser.svelte';
   import SettingsPage from './components/SettingsPage.svelte';
   import Timeline from './lib/social/Timeline.svelte';
+  import BevyExperience from './components/BevyExperience.svelte';
   
   let currentView = 'network';
   
@@ -36,6 +37,9 @@
       <button class:active={currentView === 'settings'} on:click={() => currentView = 'settings'}>
         Settings
       </button>
+      <button class:active={currentView === 'bevy'} on:click={() => currentView = 'bevy'}>
+        Bevy
+      </button>
     </nav>
   </header>
 
@@ -50,6 +54,8 @@
       <SettingsPage />
     {:else if currentView === 'social'}
       <Timeline />
+    {:else if currentView === 'bevy'}
+      <BevyExperience />
     {/if}
   </div>
 </main>

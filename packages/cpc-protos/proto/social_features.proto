@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package social_features;
+
+// Social features service definition
+service SocialFeatures {
+    // Share an experience
+    rpc ShareExperience (ShareExperienceRequest) returns (ShareExperienceResponse);
+    // Invite a friend
+    rpc InviteFriend (InviteFriendRequest) returns (InviteFriendResponse);
+    // Post a comment
+    rpc PostComment (PostCommentRequest) returns (PostCommentResponse);
+    // Subscribe to new comments
+    rpc SubscribeToComments (SubscribeToCommentsRequest) returns (stream Comment);
+}
+
+// Request to share an experience
+message ShareExperienceRequest {
+    string experience_id = 1;
+    Visibility visibility = 2;
+}
+
+// Response for sharing an experience
+message ShareExperienceResponse {
+    string experience_id = 1;
+    string url = 2;
+    string timestamp = 3;
+}
+
+// Request to invite a friend
+message InviteFriendRequest {
+    string user_id = 1;
+}
+
+// Response for inviting a friend
+message InviteFriendResponse {
+    string status = 1;
+    string invitation_code = 2;
+}
+
+// Request to post a comment
+message PostCommentRequest {
+    string experience_id = 1;
+    string content = 2;
+}
+
+// Response for posting a comment
+message PostCommentResponse {
+    string comment_id = 1;
+    string author = 2;
+    string content = 3;
+    string created_at = 4;
+}
+
+// Request to subscribe to comments
+message SubscribeToCommentsRequest {
+    string experience_id = 1;
+}
+
+// Comment message for streaming
+message Comment {
+    string comment_id = 1;
+    string author = 2;
+    string content = 3;
+    string created_at = 4;
+}
+
+// Visibility enum
+enum Visibility {
+    PUBLIC = 0;
+    FRIENDS = 1;
+    PRIVATE = 2;
+}

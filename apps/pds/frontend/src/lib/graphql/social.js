@@ -47,6 +47,11 @@ export const GET_POSTS_BY_USER = gql`
         displayName
         avatarUrl
       }
+      likeCount
+      commentCount
+      shareCount
+      likedByCurrentUser
+      mediaUrls
     }
   }
 `;
@@ -66,6 +71,11 @@ export const GET_TIMELINE = gql`
         displayName
         avatarUrl
       }
+      likeCount
+      commentCount
+      shareCount
+      likedByCurrentUser
+      mediaUrls
     }
   }
 `;

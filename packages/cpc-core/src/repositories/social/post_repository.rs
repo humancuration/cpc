@@ -9,13 +9,16 @@ pub struct CreatePostData {
     pub content: String,
     pub visibility: Visibility,
     pub cooperative_id: Option<Uuid>,
-    // In the future, this could include media item data
+    pub media_ids: Vec<Uuid>,
 }
 
 #[async_trait]
 pub trait PostRepository: Send + Sync {
     async fn create_post(&self, data: CreatePostData) -> Result<Post, sqlx::Error>;
     async fn find_post_by_id(&self, id: Uuid) -> Result<Option<Post>, sqlx::Error>;
+    async fn get_feed_posts(&self, user_id: Uuid, limit: i32, offset: i32) -> Result<Vec<Post>, sqlx::Error>;
+    async fn get_user_posts(&self, user_id: Uuid, limit: i32, offset: i32) -> Result<Vec<Post>, sqlx::Error>;
+    async fn get_cooperative_posts(&self, cooperative_id: Uuid, limit: i32, offset: i32) -> Result<Vec<Post>, sqlx::Error>;
 }
 
 pub struct SqlitePostRepository {
@@ -56,7 +59,7 @@ impl PostRepository for SqlitePostRepository {
         let post = sqlx::query_as!(
             Post,
             r#"
-            SELECT id, author_id, content, visibility as "visibility: _", cooperative_id, created_at, updated_at
+            SELECT id, author_id, content, visibility as "visibility: _", cooperative_id, feed_position, created_at, updated_at
             FROM posts
             WHERE id = $1
             "#,
@@ -66,5 +69,69 @@ impl PostRepository for SqlitePostRepository {
         .await?;
 
         Ok(post)
+    }
+
+    async fn get_feed_posts(&self, user_id: Uuid, limit: i32, offset: i32) -> Result<Vec<Post>, sqlx::Error> {
+        let posts = sqlx::query_as!(
+            Post,
+            r#"
+            SELECT id, author_id, content, visibility as "visibility: _", cooperative_id, feed_position, created_at, updated_at
+            FROM posts
+            WHERE visibility = 'PUBLIC'
+               OR (visibility = 'COOPERATIVE' AND cooperative_id IN (
+                   SELECT cooperative_id FROM cooperative_members WHERE user_id = $1
+               ))
+               OR author_id = $1
+            ORDER BY feed_position ASC, created_at DESC
+            LIMIT $2 OFFSET $3
+            "#,
+            user_id,
+            limit,
+            offset
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(posts)
+    }
+
+    async fn get_user_posts(&self, user_id: Uuid, limit: i32, offset: i32) -> Result<Vec<Post>, sqlx::Error> {
+        let posts = sqlx::query_as!(
+            Post,
+            r#"
+            SELECT id, author_id, content, visibility as "visibility: _", cooperative_id, feed_position, created_at, updated_at
+            FROM posts
+            WHERE author_id = $1
+            ORDER BY created_at DESC
+            LIMIT $2 OFFSET $3
+            "#,
+            user_id,
+            limit,
+            offset
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(posts)
+    }
+
+    async fn get_cooperative_posts(&self, cooperative_id: Uuid, limit: i32, offset: i32) -> Result<Vec<Post>, sqlx::Error> {
+        let posts = sqlx::query_as!(
+            Post,
+            r#"
+            SELECT id, author_id, content, visibility as "visibility: _", cooperative_id, feed_position, created_at, updated_at
+            FROM posts
+            WHERE cooperative_id = $1
+            ORDER BY created_at DESC
+            LIMIT $2 OFFSET $3
+            "#,
+            cooperative_id,
+            limit,
+            offset
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(posts)
     }
 }

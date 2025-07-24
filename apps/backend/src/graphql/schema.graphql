@@ -1,0 +1,50 @@
+type ImpactReport {
+  userId: ID!
+  totalImpact: Float!
+  breakdown: [ImpactBreakdown!]!
+  distribution: [ImpactDistribution!]!
+  timeline: [ImpactTimelinePoint!]!
+  generatedAt: String!
+}
+
+type ImpactBreakdown {
+  category: String!
+  amount: Float!
+  itemName: String!
+  contribution: Float!
+  impactScore: Float!
+}
+
+type ImpactDistribution {
+  category: String!
+  weight: Float!
+}
+
+type ImpactTimelinePoint {
+  date: String!
+  description: String!
+  impactValue: Float!
+  timestamp: Int!
+  score: Float!
+}
+
+type ProcessingStatus {
+  jobId: ID!
+  status: String!
+  progress: Float!
+  message: String
+  estimatedCompletion: String
+}
+
+type Query {
+  getImpactReport(userId: ID!): ImpactReport
+  getProcessingStatus(jobId: ID!): ProcessingStatus
+}
+
+type Mutation {
+  generateImpactReport(userId: ID!): ProcessingStatus
+}
+
+type Subscription {
+  impactReportUpdated(userId: ID!): ImpactReport
+}

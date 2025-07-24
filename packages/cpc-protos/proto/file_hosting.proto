@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package file_hosting;
+
+// File hosting service for distributed chunk operations
+service FileHosting {
+    // Upload a chunk to the network
+    rpc UploadChunk (UploadChunkRequest) returns (UploadChunkResponse);
+    
+    // Download a chunk from the network
+    rpc DownloadChunk (DownloadChunkRequest) returns (DownloadChunkResponse);
+    
+    // Find peers that have a specific chunk
+    rpc FindChunkPeers (FindChunkPeersRequest) returns (FindChunkPeersResponse);
+    
+    // Get chunk metadata
+    rpc GetChunkInfo (GetChunkInfoRequest) returns (GetChunkInfoResponse);
+}
+
+// Upload chunk request
+message UploadChunkRequest {
+    string chunk_hash = 1;
+    bytes data = 2;
+    uint64 index = 3;
+    uint64 total_chunks = 4;
+}
+
+// Upload chunk response
+message UploadChunkResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// Download chunk request
+message DownloadChunkRequest {
+    string chunk_hash = 1;
+}
+
+// Download chunk response
+message DownloadChunkResponse {
+    bytes data = 1;
+    uint64 index = 2;
+    uint64 total_chunks = 3;
+    string chunk_hash = 4;
+}
+
+// Find chunk peers request
+message FindChunkPeersRequest {
+    string chunk_hash = 1;
+}
+
+// Find chunk peers response
+message FindChunkPeersResponse {
+    repeated string peer_ids = 1;
+}
+
+// Get chunk info request
+message GetChunkInfoRequest {
+    string chunk_hash = 1;
+}
+
+// Get chunk info response
+message GetChunkInfoResponse {
+    string chunk_hash = 1;
+    uint64 size = 2;
+    uint64 peer_count = 3;
+}

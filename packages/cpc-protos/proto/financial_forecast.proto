@@ -1,0 +1,25 @@
+syntax = "proto3";
+package cpc.financial;
+
+message FinancialForecastResult {
+  string job_id = 1;
+  
+  message CashFlowProjection {
+    string period = 1;
+    double income = 2;
+    double expenses = 3;
+    double net_cash_flow = 4;
+  }
+  
+  repeated CashFlowProjection projections = 2;
+  
+  message Scenario {
+    string id = 1;
+    string name = 2;
+    map<string, double> parameters = 3;
+    double final_net_worth = 4;
+  }
+  
+  Scenario base_scenario = 3;
+  repeated Scenario sensitivity_scenarios = 4;
+}

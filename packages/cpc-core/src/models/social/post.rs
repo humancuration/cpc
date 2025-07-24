@@ -11,6 +11,7 @@ pub struct Post {
     pub content: String,
     pub visibility: Visibility,
     pub cooperative_id: Option<Uuid>,
+    pub feed_position: Option<i32>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     #[graphql(skip)]
@@ -25,6 +26,7 @@ pub struct MediaItem {
     pub post_id: Uuid,
     pub url: String,
     pub media_type: MediaType,
+    pub processing_status: ProcessingStatus,
     pub created_at: DateTime<Utc>,
 }
 
@@ -43,4 +45,13 @@ pub enum MediaType {
     Video,
     Audio,
     Unknown,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, async_graphql::Enum, sqlx::Type)]
+#[sqlx(type_name = "processing_status", rename_all = "UPPERCASE")]
+pub enum ProcessingStatus {
+    Pending,
+    Processing,
+    Completed,
+    Failed,
 }

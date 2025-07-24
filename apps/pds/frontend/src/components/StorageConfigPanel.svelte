@@ -1,12 +1,16 @@
 <script>
   import { onMount } from 'svelte';
   import { storageMetrics, refreshStorageMetrics, setStorageLimit } from '../stores/storage';
+  import { SecureStorage } from '../stores/secureStorage';
   import StorageUsageChart from './StorageUsageChart.svelte';
   
   let newStorageLimit = 1; // Temporary value for slider
+  let useSecureStorage = false;
+  let secureStorageSize = 0;
   
-  onMount(() => {
-    refreshStorageMetrics();
+  onMount(async () => {
+    await refreshStorageMetrics();
+    await loadSecureStorageSettings();
   });
   
   function formatDate(date) {
@@ -23,6 +27,33 @@
       await setStorageLimit(newStorageLimit);
     } catch (err) {
       console.error('Failed to set storage limit:', err);
+    }
+  }
+  
+  async function loadSecureStorageSettings() {
+    try {
+      const secureSetting = await SecureStorage.retrieve('useSecureStorage');
+      useSecureStorage = secureSetting === 'true';
+      
+      secureStorageSize = await SecureStorage.size();
+    } catch (err) {
+      console.error('Failed to load secure storage settings:', err);
+    }
+  }
+  
+  async function toggleSecureStorage() {
+    try {
+      useSecureStorage = !useSecureStorage;
+      await SecureStorage.store('useSecureStorage', useSecureStorage.toString());
+      
+      // Update secure storage size after change
+      secureStorageSize = await SecureStorage.size();
+      
+      // Refresh main storage metrics to include secure storage
+      await refreshStorageMetrics();
+    } catch (err) {
+      console.error('Failed to toggle secure storage:', err);
+      useSecureStorage = !useSecureStorage; // Revert on error
     }
   }
 </script>
@@ -57,6 +88,16 @@
     <div class="chart-section">
       <h3>Storage Breakdown</h3>
       <StorageUsageChart breakdown={$storageMetrics.data.breakdown} />
+    </div>
+    
+    <div class="security-section">
+      <h3>Security Settings</h3>
+      <label>
+        <input type="checkbox" bind:checked={useSecureStorage} on:change={toggleSecureStorage}>
+        Use Secure Storage for sensitive data
+      </label>
+      <p class="hint">Encrypts API keys and credentials using AES-256-GCM</p>
+      <p class="hint">Current secure storage: {(secureStorageSize / 1024 / 1024).toFixed(2)} MB</p>
     </div>
     
     <div class="footer">
