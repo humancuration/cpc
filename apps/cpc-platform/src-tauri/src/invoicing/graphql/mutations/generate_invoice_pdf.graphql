@@ -1,0 +1,3 @@
+mutation GenerateInvoicePdf($invoiceId: ID!) {
+  generateInvoicePdf(invoiceId: $invoiceId)
+}

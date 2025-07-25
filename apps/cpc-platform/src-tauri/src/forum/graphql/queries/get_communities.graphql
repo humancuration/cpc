@@ -1,0 +1,18 @@
+query GetCommunities($first: Int!, $after: String) {
+  communities(first: $first, after: $after) {
+    edges {
+      cursor
+      node {
+        id
+        name
+        description
+        memberCount
+        isMember
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}

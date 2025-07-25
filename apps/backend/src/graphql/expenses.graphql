@@ -1,0 +1,39 @@
+type Expense {
+  id: ID!
+  amount: Float!
+  currency: String!
+  description: String!
+  category: String!
+  status: String!
+  transactionDate: String!
+  receipts: [Receipt!]!
+}
+
+type Receipt {
+  id: ID!
+  fileName: String!
+  url: String!
+}
+
+input CreateExpenseInput {
+  projectId: ID
+  amount: Float!
+  currency: String!
+  description: String!
+  category: String!
+  transactionDate: String!
+}
+
+extend type Query {
+    expense(id: ID!): Expense
+    expenses: [Expense!]!
+}
+
+extend type Mutation {
+  createExpense(input: CreateExpenseInput!): Expense
+  updateExpenseStatus(id: ID!, status: String!): Expense
+}
+
+extend type Subscription {
+  expenseUpdated(id: ID!): Expense
+}

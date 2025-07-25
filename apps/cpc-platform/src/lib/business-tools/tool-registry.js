@@ -103,6 +103,18 @@ const DEFAULT_TOOLS = [
     version: '1.0.0'
   },
   {
+    id: 'invoicing-dashboard',
+    name: 'Invoicing Dashboard',
+    description: 'Monitor invoices, revenue, and outstanding payments.',
+    icon: 'document-chart-bar',
+    category: 'accounting',
+    component: null, // This will be the Yew component
+    tags: ['invoicing', 'dashboard', 'finance'],
+    permissions: ['invoicing.read'],
+    isBeta: true,
+    version: '0.1.0'
+  },
+  {
     id: 'member-directory',
     name: 'Member Directory',
     description: 'Manage cooperative member information and roles',

@@ -1,3 +1,1 @@
-pub mod accounting;
-pub mod invoicing;
-pub mod product;
+pub mod client;

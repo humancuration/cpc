@@ -1,127 +1,684 @@
 {
-  "data": {
-    "__schema": {
-      "queryType": {
-        "name": "Query"
-      },
-      "mutationType": {
-        "name": "Mutation"
-      },
-      "subscriptionType": {
-        "name": "Subscription"
-      },
-      "types": [
-        {
-          "kind": "OBJECT",
-          "name": "Expense",
-          "fields": [
-            {
-              "name": "id",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "UUID",
-                  "ofType": null
+  "__schema": {
+    "queryType": {
+      "name": "RootQuery"
+    },
+    "mutationType": {
+      "name": "RootMutation"
+    },
+    "subscriptionType": {
+      "name": "RootSubscription"
+    },
+    "types": [
+      {
+        "kind": "OBJECT",
+        "name": "RootQuery",
+        "fields": [
+          {
+            "name": "get_assets_in_path",
+            "args": [
+              {
+                "name": "path",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String"
+                  }
                 }
               }
-            },
-            {
-              "name": "projectId",
-              "type": {
-                "kind": "SCALAR",
-                "name": "UUID",
-                "ofType": null
-              }
-            },
-            {
-              "name": "category",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
                 "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "name": "description",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "name": "amount",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Float",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "name": "currency",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "name": "transactionDate",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "DateTime",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "name": "createdAt",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "DateTime",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "name": "updatedAt",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "DateTime",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AssetMetadata"
+                  }
                 }
               }
             }
-          ]
-        }
-      ]
-    }
+          },
+          {
+            "name": "get_asset_metadata",
+            "args": [
+              {
+                "name": "id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "UUID"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AssetMetadata"
+            }
+          },
+          {
+            "name": "get_asset_preview",
+            "args": [
+              {
+                "name": "id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "UUID"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PreviewData"
+              }
+            }
+          },
+          {
+            "name": "get_organization_impact_report",
+            "description": "Get organization impact report for a specific year",
+            "args": [
+              {
+                "name": "org_id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "UUID"
+                  }
+                }
+              },
+              {
+                "name": "year",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "OrganizationImpactReport"
+            }
+          },
+          {
+            "name": "product",
+            "description": "Get a single product by ID",
+            "args": [
+              {
+                "name": "id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProductQuery"
+              }
+            }
+          },
+          {
+            "name": "getSupplyChainByProduct",
+            "args": [
+              {
+                "name": "product_id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SupplyChain"
+              }
+            }
+          },
+          {
+            "name": "listProductsWithSupplyChains",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ProductSummary"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "getSavedScenarios",
+            "description": "Placeholder for a query to fetch saved forecast scenarios.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ForecastScenario"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "expense",
+            "description": "Get a single expense by ID",
+            "args": [
+              {
+                "name": "id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "UUID"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Expense"
+            }
+          },
+          {
+            "name": "expenses",
+            "description": "Get all expenses for a user",
+            "args": [
+              {
+                "name": "user_id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "UUID"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Expense"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "communities",
+            "args": [
+              {
+                "name": "first",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int"
+                  }
+                }
+              },
+              {
+                "name": "after",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String"
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "CommunityConnection"
+              }
+            }
+          },
+          {
+            "name": "customer",
+            "args": [
+              {
+                "name": "id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Customer"
+            }
+          },
+          {
+            "name": "invoice",
+            "args": [
+              {
+                "name": "id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Invoice"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "RootMutation",
+        "fields": [
+          {
+            "name": "import_asset",
+            "args": [
+              {
+                "name": "file_path",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String"
+                  }
+                }
+              },
+              {
+                "name": "asset_type",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "ENUM",
+                    "name": "AssetType"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "UUID"
+              }
+            }
+          },
+          {
+            "name": "import_multiple_assets",
+            "args": [
+              {
+                "name": "files",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "LIST",
+                    "ofType": {
+                       "kind": "NON_NULL",
+                       "ofType": {
+                         "kind": "SCALAR",
+                         "name": "String"
+                       }
+                    }
+                  }
+                }
+              },
+              {
+                "name": "asset_types",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "LIST",
+                    "ofType": {
+                       "kind": "NON_NULL",
+                       "ofType": {
+                         "kind": "ENUM",
+                         "name": "AssetType"
+                       }
+                    }
+                  }
+                }
+              }
+            ],
+            "type": {
+               "kind": "NON_NULL",
+               "ofType": {
+                  "kind": "LIST",
+                  "ofType": {
+                     "kind": "NON_NULL",
+                     "ofType": {
+                        "kind": "SCALAR",
+                        "name": "UUID"
+                     }
+                  }
+               }
+            }
+          },
+          {
+            "name": "delete_asset",
+            "args": [
+              {
+                "name": "id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "UUID"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            }
+          },
+          {
+            "name": "recalculate_organization_impact",
+            "description": "Trigger recalculation of impact report for an organization",
+            "args": [
+              {
+                "name": "org_id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "UUID"
+                  }
+                }
+              },
+              {
+                "name": "year",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "UUID"
+              }
+            }
+          },
+          {
+            "name": "update_product_validation",
+            "description": "Update product validation status",
+            "args": [
+              {
+                "name": "input",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                     "kind": "INPUT_OBJECT",
+                     "name": "ProductValidationInput"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            }
+          },
+          {
+            "name": "updateSupplyChain",
+            "args": [
+              {
+                "name": "input",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "UpdateSupplyChainInput"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SupplyChain"
+              }
+            }
+          },
+          {
+            "name": "runForecastScenario",
+            "description": "Kicks off a financial forecast. The result will be sent via subscription.",
+            "args": [
+              {
+                "name": "scenario",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "ForecastScenarioInput"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean"
+              }
+            }
+          },
+          {
+            "name": "createExpense",
+            "description": "Create a new expense",
+            "args": [
+               {
+                "name": "user_id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "UUID"
+                  }
+                }
+              },
+              {
+                "name": "input",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "CreateExpenseInput"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Expense"
+              }
+            }
+          },
+          {
+            "name": "updateExpense",
+            "description": "Update an existing expense",
+            "args": [
+              {
+                "name": "id",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "UUID"
+                  }
+                }
+              },
+              {
+                "name": "input",
+                "type": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "UpdateExpenseInput"
+                  }
+                }
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Expense"
+              }
+            }
+          },
+          {
+            "name": "create_community",
+            "args": [
+              { "name": "name", "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "String"}}},
+              { "name": "description", "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "String"}}}
+            ],
+            "type": { "kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "Community"}}
+          },
+          {
+            "name": "join_community",
+            "args": [
+              { "name": "id", "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "ID"}}}
+            ],
+            "type": { "kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "JoinResult"}}
+          },
+          {
+            "name": "leave_community",
+            "args": [
+              { "name": "id", "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "ID"}}}
+            ],
+            "type": { "kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "JoinResult"}}
+          },
+          {
+            "name": "create_customer",
+            "args": [
+              { "name": "input", "type": {"kind": "NON_NULL", "ofType": {"kind": "INPUT_OBJECT", "name": "CreateCustomerInput"}}}
+            ],
+            "type": { "kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "Customer"}}
+          },
+          {
+            "name": "create_invoice",
+            "args": [
+              { "name": "input", "type": {"kind": "NON_NULL", "ofType": {"kind": "INPUT_OBJECT", "name": "CreateInvoiceInput"}}}
+            ],
+            "type": { "kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "Invoice"}}
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "RootSubscription",
+        "fields": [
+          {
+            "name": "asset_created",
+            "type": {"kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "AssetMetadata"}},
+            "args": []
+          },
+          {
+            "name": "asset_updated",
+            "type": {"kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "AssetMetadata"}},
+            "args": []
+          },
+          {
+            "name": "asset_deleted",
+            "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "UUID"}},
+            "args": []
+          },
+          {
+             "name": "asset_conflict",
+             "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "String"}},
+             "args": []
+          },
+          {
+            "name": "impact_calculation_progress",
+            "description": "Subscribe to progress updates for an impact calculation job",
+            "args": [{"name": "job_id", "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "UUID"}}}],
+            "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "String"}}
+          },
+          {
+            "name": "product_validation_updates",
+            "description": "Subscribe to validation updates for a product",
+            "args": [{"name": "product_id", "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "String"}}}],
+            "type": {"kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "ValidationUpdate"}}
+          },
+          {
+             "name": "forecastResult",
+             "description": "Subscribes to the result of a specific forecast scenario.",
+             "args": [{"name": "scenario_id", "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "String"}}}],
+             "type": {"kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "ForecastResult"}}
+          },
+          {
+             "name": "expenseUpdates",
+             "description": "Placeholder for real-time expense updates",
+             "args": [{"name": "_user_id", "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "UUID"}}}],
+             "type": {"kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "Expense"}}
+          },
+          {
+             "name": "invoice_updated",
+             "args": [{"name": "_id", "type": {"kind": "NON_NULL", "ofType": {"kind": "SCALAR", "name": "ID"}}}],
+             "type": {"kind": "NON_NULL", "ofType": {"kind": "OBJECT", "name": "Invoice"}}
+          }
+        ]
+      }
+    ]
   }
 }

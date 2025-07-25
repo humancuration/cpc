@@ -2,9 +2,18 @@ use async_graphql::{Context, Object, Result, ID, SimpleObject, InputObject};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use crate::{
+    invoicing::{
+        models::{
+            Customer as DbCustomer,
+            Invoice as DbInvoice,
+            InvoiceLineItem as DbInvoiceLineItem
+        },
+        pdf::generate_invoice_pdf
+    },
     services::invoicing::{InvoiceService, InvoiceStatus},
     notifications::{NotificationService, NotificationType},
 };
+use base64::{engine::general_purpose, Engine as _};
 
 /// GraphQL representation of an Invoice
 #[derive(SimpleObject)]
@@ -253,5 +262,27 @@ impl InvoicingMutation {
         // TODO: Implement add invoice item functionality
         // For now, returning placeholder
         Err(async_graphql::Error::new("Adding invoice items after creation not yet implemented"))
+    }
+
+    async fn generate_invoice_pdf(&self, ctx: &Context<'_>, invoice_id: ID) -> Result<String> {
+        let invoice_service = ctx.data::<InvoiceService>()?;
+        
+        let id = invoice_id.to_string().parse::<i64>()
+            .map_err(|_| async_graphql::Error::new("Invalid invoice ID format"))?;
+
+        // 1. Fetch data through service
+        let (invoice, customer, line_items) = invoice_service
+            .get_invoice_data_for_pdf(id)
+            .await
+            .map_err(|e| async_graphql::Error::new(format!("Failed to fetch invoice data: {}", e)))?;
+
+        // 2. Generate PDF
+        let pdf_bytes = generate_invoice_pdf(&invoice, &customer, &line_items)
+            .map_err(|e| async_graphql::Error::new(format!("Failed to generate PDF: {}", e)))?;
+
+        // 3. Base64 Encode
+        let base64_pdf = general_purpose::STANDARD.encode(&pdf_bytes);
+
+        Ok(base64_pdf)
     }
 }

@@ -6,6 +6,7 @@ use crate::graphql::supply_chain::{SupplyChainQueryRoot, SupplyChainMutationRoot
 use crate::graphql::financial_forecasting::{FinancialForecastingQueryRoot, FinancialForecastingMutationRoot, FinancialForecastingSubscriptionRoot};
 use crate::graphql::expenses::{ExpensesQueryRoot, ExpensesMutationRoot, ExpensesSubscriptionRoot};
 use crate::graphql::community::{CommunityQuery, CommunityMutation, CommunitySubscription};
+use crate::invoicing::graphql::{InvoicingQuery, InvoicingMutation, InvoicingSubscription};
 
 #[derive(MergedObject, Default)]
 pub struct RootQuery(
@@ -15,7 +16,8 @@ pub struct RootQuery(
     SupplyChainQueryRoot,
     FinancialForecastingQueryRoot,
     ExpensesQueryRoot,
-    CommunityQuery
+    CommunityQuery,
+    InvoicingQuery
 );
 
 #[derive(MergedObject, Default)]
@@ -26,7 +28,8 @@ pub struct RootMutation(
     SupplyChainMutationRoot,
     FinancialForecastingMutationRoot,
     ExpensesMutationRoot,
-    CommunityMutation
+    CommunityMutation,
+    InvoicingMutation
 );
 
 #[derive(MergedSubscription, Default)]
@@ -37,7 +40,8 @@ pub struct RootSubscription(
     SupplyChainSubscriptionRoot,
     FinancialForecastingSubscriptionRoot,
     ExpensesSubscriptionRoot,
-    CommunitySubscription
+    CommunitySubscription,
+    InvoicingSubscription
 );
 
 pub type Schema = async_graphql::Schema<RootQuery, RootMutation, RootSubscription>;

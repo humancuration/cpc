@@ -57,6 +57,9 @@ type Query {
   getProcessingStatus(jobId: ID!): ProcessingStatus
   getOrganizationImpactReport(orgId: UUID!, year: Int!): OrganizationImpactReport
   communities(first: Int!, after: String): CommunityConnection!
+  community(id: ID!): Community
+  getSupplyChainByProduct(productId: UUID!): SupplyChain
+  listProductsWithSupplyChains: [ProductSummary!]
 }
 
 type Mutation {
@@ -64,6 +67,7 @@ type Mutation {
   createCommunity(name: String!, description: String!): Community!
   joinCommunity(id: ID!): JoinResult!
   leaveCommunity(id: ID!): JoinResult!
+  updateSupplyChain(input: UpdateSupplyChainInput!): SupplyChain!
 }
 
 type Subscription {
@@ -76,6 +80,66 @@ type Community {
   description: String!
   memberCount: Int!
   isMember: Boolean!
+}
+
+type SupplyChain {
+    productId: UUID!
+    stages: [ProductionStage!]!
+    connections: [StageConnection!]!
+    cooperativeImpact: CooperativeImpactSummary!
+    timelineRange: TimelineRange!
+}
+
+type ProductionStage {
+    id: UUID!
+    name: String!
+    description: String
+    location: String!
+    startDate: String!
+    endDate: String!
+}
+
+type StageConnection {
+    fromStageId: UUID!
+    toStageId: UUID!
+    relationshipType: String!
+}
+
+type CooperativeImpactSummary {
+    workersBenefited: Int!
+    coopsInvolved: Int!
+    ethicalSourcingScore: Float!
+}
+
+type TimelineRange {
+    start: String!
+    end: String!
+}
+
+type ProductSummary {
+    id: ID!
+    name: String!
+}
+
+input UpdateSupplyChainInput {
+  productId: UUID!
+  stages: [ProductionStageInput!]!
+  connections: [StageConnectionInput!]!
+}
+
+input ProductionStageInput {
+    id: UUID!
+    name: String!
+    description: String
+    location: String!
+    startDate: String!
+    endDate: String!
+}
+
+input StageConnectionInput {
+    fromStageId: UUID!
+    toStageId: UUID!
+    relationshipType: String!
 }
 
 type CommunityEdge {

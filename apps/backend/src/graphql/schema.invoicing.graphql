@@ -1,0 +1,156 @@
+# Invoicing System GraphQL Schema Extension
+
+"""
+Represents a customer of an organization.
+"""
+type Customer {
+  id: ID!
+  organizationId: ID!
+  name: String!
+  email: String
+  address: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+"""
+Represents a single line item on an invoice.
+"""
+type InvoiceLineItem {
+  id: ID!
+  description: String!
+  quantity: Float!
+  unitPrice: Float!
+  taxRate: Float
+  total: Float!
+}
+
+"""
+Represents the status of an invoice.
+"""
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  PARTIAL
+  VOID
+}
+
+"""
+Represents an invoice.
+"""
+type Invoice {
+  id: ID!
+  organizationId: ID!
+  customer: Customer!
+  invoiceNumber: String!
+  status: InvoiceStatus!
+  currency: String!
+  issueDate: String!
+  dueDate: String!
+  notes: String
+  subtotal: Float!
+  taxTotal: Float!
+  total: Float!
+  lineItems: [InvoiceLineItem!]!
+  payments: [Payment!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+"""
+Represents a payment made against an invoice.
+"""
+type Payment {
+  id: ID!
+  invoice: Invoice!
+  paymentDate: String!
+  amount: Float!
+  paymentMethod: String
+  transactionId: String
+  createdAt: String!
+}
+
+# --- Inputs ---
+
+input CreateCustomerInput {
+  organizationId: ID!
+  name: String!
+  email: String
+  address: String
+}
+
+input CreateInvoiceLineItemInput {
+  description: String!
+  quantity: Float!
+  unitPrice: Float!
+  taxRate: Float
+}
+
+input CreateInvoiceInput {
+  organizationId: ID!
+  customerId: ID!
+  status: InvoiceStatus = DRAFT
+  currency: String!
+  issueDate: String!
+  dueDate: String!
+  notes: String
+  lineItems: [CreateInvoiceLineItemInput!]!
+}
+
+input UpdateInvoiceInput {
+  customerId: ID
+  status: InvoiceStatus
+  currency: String
+  issueDate: String
+  dueDate: String
+  notes: String
+  lineItems: [CreateInvoiceLineItemInput!]
+}
+
+input RecordPaymentInput {
+  invoiceId: ID!
+  paymentDate: String!
+  amount: Float!
+  paymentMethod: String
+  transactionId: String
+}
+
+input InvoiceFilterInput {
+  organizationId: ID!
+  customerId: ID
+  status: InvoiceStatus
+  dateFrom: String
+  dateTo: String
+}
+
+# --- Operations ---
+
+extend type Query {
+  "Get a single invoice by its ID."
+  invoice(id: ID!): Invoice
+  "Get a list of invoices, with optional filtering."
+  invoices(filter: InvoiceFilterInput): [Invoice!]!
+  "Get a single customer by ID."
+  customer(id: ID!): Customer
+  "Get all customers for an organization."
+  customers(organizationId: ID!): [Customer!]!
+}
+
+extend type Mutation {
+  "Create a new invoice."
+  createInvoice(input: CreateInvoiceInput!): Invoice
+  "Update an existing invoice."
+  updateInvoice(id: ID!, input: UpdateInvoiceInput!): Invoice
+  "Mark an invoice as sent."
+  sendInvoice(id: ID!): Invoice
+  "Record a payment against an invoice."
+  recordPayment(input: RecordPaymentInput!): Payment
+  "Create a new customer."
+  createCustomer(input: CreateCustomerInput!): Customer
+}
+
+extend type Subscription {
+  "Subscribe to updates for a specific invoice."
+  invoiceUpdated(id: ID!): Invoice
+}

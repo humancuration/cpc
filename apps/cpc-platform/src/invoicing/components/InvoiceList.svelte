@@ -1,3 +1,4 @@
+&lt;!-- DEPRECATED: Replaced by Yew component InvoiceList.rs --&gt;
 <script lang="ts">
   import { invoices, loading, errors, invoiceSummaries, invoiceActions } from '../stores/invoiceStore';
   import type { InvoiceSummary } from '../types';

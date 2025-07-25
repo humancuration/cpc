@@ -1,0 +1,12 @@
+query GetInvoiceDashboardData($organizationId: ID!) {
+  invoices(filter: { organizationId: $organizationId }) {
+    id
+    invoiceNumber
+    customer {
+      name
+    }
+    total
+    status
+    dueDate
+  }
+}

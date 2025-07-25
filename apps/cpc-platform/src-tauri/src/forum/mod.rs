@@ -6,3 +6,4 @@ pub mod comment_tree;
 pub mod voting_widget;
 pub mod mod_tools;
 pub mod community_dashboard;
+pub mod graphql;

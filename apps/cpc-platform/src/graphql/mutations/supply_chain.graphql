@@ -1,0 +1,27 @@
+mutation UpdateSupplyChain($input: UpdateSupplyChainInput!) {
+  updateSupplyChain(input: $input) {
+    productId
+    stages {
+      id
+      name
+      description
+      location
+      startDate
+      endDate
+    }
+    connections {
+      fromStageId
+      toStageId
+      relationshipType
+    }
+    cooperativeImpact {
+      workersBenefited
+      coopsInvolved
+      ethicalSourcingScore
+    }
+    timelineRange {
+      start
+      end
+    }
+  }
+}

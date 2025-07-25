@@ -1,0 +1,13 @@
+mutation UpdateExpense($id: ID!, $input: UpdateExpenseInput!) {
+  updateExpense(id: $id, input: $input) {
+    id
+    description
+    amount
+    currency
+    category
+    transaction_date
+    description
+    status
+    project_id
+  }
+}

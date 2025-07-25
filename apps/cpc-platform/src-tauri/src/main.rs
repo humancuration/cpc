@@ -11,10 +11,11 @@ mod forum;
 mod store;
 mod app;
 mod router;
+mod invoicing;
 
 #[tauri::command]
-async fn render_yew_component() -> Result<String, ()> {
-    Ok(app::render_to_string().await)
+async fn render_yew_component(route: String) -> Result<String, ()> {
+    Ok(app::render_to_string_with_route(&route).await)
 }
 
 #[tokio::main]
@@ -45,6 +46,10 @@ async fn main() {
             supply_chain_commands::get_supply_chain,
             supply_chain_commands::subscribe_to_supply_chain_updates,
             render_yew_component,
+            invoicing::commands::fetch_invoice_dashboard_data,
+            invoicing::commands::get_invoice_details,
+            invoicing::commands::generate_invoice_pdf,
+            invoicing::commands::create_invoice,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

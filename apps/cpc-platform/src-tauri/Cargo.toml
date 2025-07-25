@@ -25,6 +25,13 @@ sqlx = { version = "0.7", features = ["postgres", "runtime-tokio", "migrate"] }
 argon2 = { version = "0.5", features = ["std"] }
 dotenv = "0.15"
 regex = "1.10"  // For input validation
+graphql_client = "0.13.0"
+reqwest = { version = "0.11", features = ["json"] }
+yew-hooks = "0.3.1"
+
+# Plotting
+plotters = "0.3.5"
+plotters-canvas = "0.3.5"
 
 # Yew dependencies
 yew = { version = "0.21", features = ["csr"] }
@@ -33,7 +40,7 @@ yewdux = "0.9"
 wasm-bindgen-futures = "0.4"
 web-sys = { version = "0.3", features = ["HtmlInputElement"] }
 url = "2.5.0"
-gloo-net = "0.5.0"
+gloo-net = { version = "0.5.0", features = ["http"] }
 gloo-console = "0.3.0"
 getrandom = { version = "0.2", features = ["js"] }
 

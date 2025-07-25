@@ -17,6 +17,7 @@ pub mod business; // Business intelligence and forecasting
 pub mod impact; // Impact calculation and reporting
 pub mod serialization; // Protobuf serialization for Android
 pub mod product; // Product management module
+pub mod supply_chain; // Supply chain feature
 pub mod product::extensions; // Extension traits for protobuf models
 
 #[cfg(target_os = "android")]
@@ -57,7 +58,7 @@ pub use windows_lifecycle::*;
 pub use texture_manifest::TextureManifest;
 
 // Re-export models
-pub use models::{Proposal, FeedItem, SupplyChain};
+pub use models::{Proposal, FeedItem};
 pub use product::model::Product;
 
 // Re-export serialization function

@@ -27,10 +27,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "proto/invoicing.proto",
                 "proto/metrics.proto",
                 "proto/core/product.proto",
-                "protos/impact.proto",
-                "protos/android_data.proto"
+                "proto/impact.proto",
+                "proto/android_data.proto",
+                "proto/expenses.proto"
             ],
-            &["proto", "protos"],
+            &["proto"],
         )?;
         
     generate_jni_bindings()?;

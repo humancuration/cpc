@@ -1,3 +1,7 @@
+// DEPRECATED: This file contains a legacy Axum router and is no longer in use.
+// The invoicing frontend is now handled by Yew components and a Yew router.
+// This file is preserved for historical reference and will be removed in the future.
+/*
 use axum::{
     routing::{get, post, put, delete},
     Router,
@@ -364,7 +368,7 @@ async fn get_aging_report(
         .unwrap_or(30);
 
     match state.invoicing_service.get_aging_report(days_past_due).await {
-        Ok(report) => Ok(Json(serde_json::json!({ "data": report }))),
+        Ok(report) => Ok(Json(serde_json!({ "data": report }))),
         Err(e) => {
             let error_response = serde_json::json!({
                 "error": "Failed to fetch aging report",
@@ -382,7 +386,7 @@ async fn get_supplier_performance(
     let supplier_id = params.get("supplier_id").cloned();
 
     match state.invoicing_service.get_supplier_performance(supplier_id).await {
-        Ok(performance) => Ok(Json(serde_json::json!({ "data": performance }))),
+        Ok(performance) => Ok(Json(serde_json!({ "data": performance }))),
         Err(e) => {
             let error_response = serde_json::json!({
                 "error": "Failed to fetch supplier performance",
@@ -406,3 +410,4 @@ async fn get_summary(
     let summary = state.context.summary.read().await;
     Ok(Json(summary.clone()))
 }
+*/

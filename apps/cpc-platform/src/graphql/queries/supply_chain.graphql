@@ -1,0 +1,31 @@
+query GetSupplyChainByProduct($product_id: ID!) {
+  getSupplyChainByProduct(productId: $product_id) {
+    productId
+    stages {
+      id
+      name
+      description
+      location
+      startDate
+      endDate
+    }
+    connections {
+      fromStageId
+      toStageId
+      relationshipType
+    }
+    cooperativeImpact {
+      workersBenefited
+      coopsInvolved
+      ethicalSourcingScore
+    }
+    timelineStart
+    timelineEnd
+  }
+}
+query ListProductsWithSupplyChains {
+  listProductsWithSupplyChains {
+    id
+    name
+  }
+}

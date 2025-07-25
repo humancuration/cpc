@@ -51,6 +51,9 @@ pub enum FeedItem {
     },
     // SupplyChain variant removed from FeedItem
 
+// DEPRECATED: The old SupplyChain model is being replaced by the new implementation
+// in `packages/cpc-core/src/supply_chain/`. This will be removed in a future update.
+/*
 #[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct SupplyChain {
     pub nodes: Vec<SupplyChainNode>,
@@ -61,17 +64,17 @@ pub struct SupplyChain {
 pub struct SupplyChainNode {
     #[validate(length(min = 1, message = "ID is required"))]
     pub id: String,
-    
+
     pub node_type: NodeType,
-    
+
     #[validate(length(min = 1, message = "Location is required"))]
     pub location: String,
-    
+
     #[validate(length(min = 1, message = "Company is required"))]
     pub company: String,
-    
+
     pub timestamp: String,
-    
+
     pub coordinates: Coordinates,
 }
 
@@ -79,15 +82,15 @@ pub struct SupplyChainNode {
 pub struct TransportationSegment {
     #[validate(length(min = 1, message = "From node ID is required"))]
     pub from_node_id: String,
-    
+
     #[validate(length(min = 1, message = "To node ID is required"))]
     pub to_node_id: String,
-    
+
     pub method: TransportMethod,
-    
+
     #[validate(range(min = 0, message = "Duration must be non-negative"))]
     pub duration_hours: u32,
-    
+
     #[validate(range(min = 0.0, message = "Carbon footprint must be non-negative"))]
     pub carbon_footprint: f64,  // Changed to f64 to match protobuf
 }
@@ -113,6 +116,7 @@ pub struct Coordinates {
     pub latitude: f64,
     pub longitude: f64,
 }
+*/
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AggregatedMetrics {

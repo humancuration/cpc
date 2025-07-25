@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package expenses;
+
+service ExpenseProcessing {
+  // A worker node can subscribe to a stream of receipt processing jobs
+  rpc ProcessReceipts(stream ReceiptJobRequest) returns (stream ReceiptJobResult);
+}
+
+message ReceiptJobRequest {
+  string receipt_id = 1;
+  string file_path = 2; // Location of the uploaded file
+}
+
+message ReceiptJobResult {
+  string receipt_id = 1;
+  bool success = 2;
+  string extracted_text = 3; // e.g., from OCR
+  string error_message = 4;
+}

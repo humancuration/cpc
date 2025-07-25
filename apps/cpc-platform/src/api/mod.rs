@@ -1,2 +1,2 @@
-pub mod expenses;
-pub mod invoicing;
+pub mod client;
+pub mod supply_chain;

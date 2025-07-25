@@ -1,0 +1,9 @@
+query GetCommunityDetails($id: ID!) {
+    community(id: $id) {
+        id
+        name
+        description
+        memberCount
+        isMember
+    }
+}

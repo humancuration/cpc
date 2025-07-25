@@ -7,3 +7,4 @@ pub mod asset_browser;
 pub mod impact;
 pub mod expenses;
 pub mod community;
+pub mod supply_chain;

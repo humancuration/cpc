@@ -1,0 +1,38 @@
+query GetExpenses {
+  expenses {
+    id
+    amount
+    currency
+    description
+    category
+    status
+    transactionDate
+  }
+}
+mutation CreateExpense($input: CreateExpenseInput!) {
+  createExpense(input: $input) {
+    id
+  }
+}
+
+query GetExpense($id: ID!) {
+  expense(id: $id) {
+    id
+    amount
+    currency
+    description
+    category
+    status
+    transactionDate
+    receipts {
+      id
+      fileName
+      url
+    }
+  }
+}
+
+mutation DeleteExpense($id: ID!) {
+  deleteExpense(id: $id)
+}
+}

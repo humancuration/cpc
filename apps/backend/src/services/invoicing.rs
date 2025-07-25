@@ -3,6 +3,9 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
+use crate::invoicing::models::{
+    Customer as DbCustomer, Invoice as DbInvoice, InvoiceLineItem as DbInvoiceLineItem,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Invoice {
@@ -315,5 +318,41 @@ impl InvoiceService {
         .await?;
 
         Ok(items)
+    }
+
+    pub async fn get_invoice_data_for_pdf(
+        &self,
+        invoice_id: i64,
+    ) -> Result<(DbInvoice, DbCustomer, Vec<DbInvoiceLineItem>), sqlx::Error> {
+        let mut conn = self.db.get().await?;
+
+        // 1. Fetch Invoice
+        let invoice: DbInvoice = sqlx::query_as!(
+            DbInvoice,
+            "SELECT * FROM invoices WHERE id = $1",
+            invoice_id
+        )
+        .fetch_one(&mut *conn)
+        .await?;
+
+        // 2. Fetch Customer
+        let customer: DbCustomer = sqlx::query_as!(
+            DbCustomer,
+            "SELECT * FROM customers WHERE id = $1",
+            invoice.customer_id
+        )
+        .fetch_one(&mut *conn)
+        .await?;
+
+        // 3. Fetch Line Items
+        let line_items: Vec<DbInvoiceLineItem> = sqlx::query_as!(
+            DbInvoiceLineItem,
+            "SELECT * FROM invoice_line_items WHERE invoice_id = $1",
+            invoice_id
+        )
+        .fetch_all(&mut *conn)
+        .await?;
+
+        Ok((invoice, customer, line_items))
     }
 }

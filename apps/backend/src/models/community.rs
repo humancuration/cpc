@@ -1,7 +1,8 @@
-use async_graphql::{ID, SimpleObject};
+use async_graphql::{ID, SimpleObject, Topic};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, SimpleObject)]
+#[derive(Debug, Clone, Serialize, Deserialize, SimpleObject, Topic)]
+#[graphql(topic)]
 pub struct Community {
     pub id: ID,
     pub name: String,

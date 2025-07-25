@@ -25,6 +25,8 @@
 pub mod crypto;
 pub mod net;
 pub mod storage;
+pub mod storage;
+pub mod community_repo;
 
 // Distributed file hosting modules
 pub mod chunking;
@@ -38,3 +40,4 @@ pub use storage::{ContentStorage, LruStorage, StorageMetrics, StorageError};
 pub use chunking::{ChunkingService, FileChunk, CHUNK_SIZE};
 pub use dht::{DhtService, ChunkLocationRecord, DhtStats};
 pub use peer_manager::{PeerManager, PeerManagerEvent, PeerConnection};
+pub use community_repo::{CommunityRepo, CommunityRepoError};

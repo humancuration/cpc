@@ -1,59 +1,71 @@
+use chrono::{DateTime, Utc};
+use rust_decimal::Decimal;
+use uuid::Uuid;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+// Aggregate Root
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SupplyChain {
-    pub product_id: String,
-    pub nodes: Vec<SupplyChainNode>,
-    pub segments: Vec<TransportationSegment>,
+    pub product_id: Uuid,
+    pub stages: Vec<ProductionStage>,
+    pub connections: Vec<StageConnection>,
+    pub cooperative_impact: CooperativeImpactSummary,
+    pub timeline_range: (DateTime<Utc>, DateTime<Utc>),
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SupplyChainNode {
-    pub id: String,
-    pub node_type: NodeType,
-    pub name: String, // e.g., "FairTrade Coffee Cooperative"
-    pub location: String, // e.g., "Antioquia, Colombia"
-    pub coordinates: (f64, f64), // (latitude, longitude)
-    pub certifications: Vec<EthicalCertification>,
-    pub cooperative_metrics: Option<CooperativeMetrics>,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ProductionStage {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub location: String, // Could be a more complex type later
+    pub start_date: DateTime<Utc>,
+    pub end_date: DateTime<Utc>,
+    // Other relevant metadata
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum NodeType { RawMaterial, Manufacturer, Distributor, Retailer }
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct EthicalCertification {
-    pub name: String, // e.g., "Fair Trade Certified"
-    pub authority: String, // e.g., "Fairtrade International"
-    pub validation_date: String,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct StageConnection {
+    pub from_stage_id: Uuid,
+    pub to_stage_id: Uuid,
+    pub relationship_type: String, // e.g., "PART_OF", "TRANSFORMED_INTO"
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CooperativeMetrics {
-    pub fair_wage_verified: bool,
-    pub profit_sharing_percentage: f32,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CooperativeImpactSummary {
+    pub workers_benefited: u32,
+    pub coops_involved: u32,
+    pub ethical_sourcing_score: Decimal, // A calculated score
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TransportationSegment {
-    pub from_node_id: String,
-    pub to_node_id: String,
-    pub method: TransportMethod,
-    pub duration_hours: u32,
-    pub environmental_impact: EnvironmentalImpact,
-    pub cost: TransportCost,
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct ProductSummary {
+    pub id: Uuid,
+    pub name: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum TransportMethod { Ship, Truck, Plane, Train }
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct EnvironmentalImpact {
-    pub carbon_footprint_kg_co2: f64,
+// Data Transfer Objects for updating a supply chain
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateSupplyChainData {
+    pub product_id: Uuid,
+    pub stages: Vec<ProductionStageData>,
+    pub connections: Vec<StageConnectionData>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TransportCost {
-    pub amount: f64,
-    pub currency: String,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProductionStageData {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub location: String,
+    pub start_date: DateTime<Utc>,
+    pub end_date: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StageConnectionData {
+    pub from_stage_id: Uuid,
+    pub to_stage_id: Uuid,
+    pub relationship_type: String,
 }

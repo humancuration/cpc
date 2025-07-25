@@ -1,6 +1,8 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 use crate::forum::community_browser::ui::CommunityBrowser;
+use cpc_core::invoicing::components::invoice_list::InvoiceList;
+use cpc_core::invoicing::components::invoice_detail::InvoiceDetail;
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum AppRoute {
@@ -8,7 +10,10 @@ pub enum AppRoute {
     Home,
     #[at("/c/:slug")]
     Community { slug: String },
-    // Add other routes here as the app grows
+    #[at("/invoices")]
+    Invoices,
+    #[at("/invoices/:id")]
+    Invoice { id: String },
 }
 
 // temp component
@@ -31,5 +36,7 @@ pub fn switch(routes: AppRoute) -> Html {
     match routes {
         AppRoute::Home => html! { <CommunityBrowser /> },
         AppRoute::Community { slug } => html! { <CommunityHome slug={slug} /> },
+        AppRoute::Invoices => html! { <InvoiceList /> },
+        AppRoute::Invoice { id } => html! { <InvoiceDetail invoice_id={id} /> },
     }
 }

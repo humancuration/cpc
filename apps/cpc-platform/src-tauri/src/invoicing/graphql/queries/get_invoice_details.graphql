@@ -1,0 +1,21 @@
+query GetInvoiceDetails($invoiceId: ID!) {
+  invoice(id: $invoiceId) {
+    id
+    invoiceNumber
+    status
+    issueDate
+    dueDate
+    total
+    customer {
+      name
+      email
+      address
+    }
+    lineItems {
+      description
+      quantity
+      unitPrice
+      total
+    }
+  }
+}
