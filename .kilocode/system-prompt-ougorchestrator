@@ -66,14 +66,13 @@ cpc
 │   ├── orchestrator/        # deprecated, roll its features into backend/
 │   ├── cpc-node/            # A runnable worker node
 │   └── cpc-platform/        
-│       ├── src/               # The shared Svelte/JS source code for the UI
+│       ├── src/               # The shared Yew code for the UI
 │       ├── src-tauri/         # The shared Rust code for the desktop/mobile backend
 │       ├── android/           # The Android app (refactoring the old android/WheresThisFrom version to the new one in apps/cpc-platform/android/app/, to a thin wrapper around the shared Rust code)
 │       └── ios/               # The iOS swift/Bevy app (will also be a thin wrapper around the shared Rust code, we aren't developing this right now)
-│       └── tauri.conf.json    # Configuration for the app
 │
 ├── packages/
-│   ├── cpc-core/            # Shared logic for the engine and social features
+│   ├── cpc-core/            # Shared logic for the game engine and social features
 │   ├── cpc-net/             # Shared networking logic
 │   └── cpc-protos/          # Shared gRPC definitions
 │

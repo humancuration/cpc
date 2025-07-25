@@ -3,9 +3,9 @@ resolver = "2"
 members = [
     "lib",
     "orchestrator",
-    "pds",
     "cpc-node",
     "apps/backend",
+    "apps/pds",
     "packages/cpc-core",
     "packages/cpc-net",
     "packages/cpc-protos"

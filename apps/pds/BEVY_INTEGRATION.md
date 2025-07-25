@@ -19,15 +19,15 @@ The Bevy integration provides a 3D rendering layer within the Tauri-based deskto
 - Updated `lib.rs`: Integration with existing Tauri state management
 
 ### Frontend Components (`frontend/src/`)
-- `lib/BevyView.svelte`: Main Bevy rendering component
-- `components/BevyExperience.svelte`: Full-page Bevy experience
-- Updated `App.svelte`: Navigation integration
+- `lib/BevyView`: Main Bevy rendering component
+- `components/BevyExperience`: Full-page Bevy experience
+- Updated `App`: Navigation integration
 
 ## Usage
 
 ### Basic Usage
 ```javascript
-import BevyView from '$lib/BevyView.svelte';
+import BevyView from '$lib/BevyView';
 
 // In your component
 <BevyView width="800" height="600" show={true} />

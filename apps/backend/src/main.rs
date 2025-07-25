@@ -28,6 +28,7 @@ use cpc_core::repositories::product_repository::{ProductRepository, PgProductRep
 use cpc_protos::barcode::v1::barcode_service_server::BarcodeServiceServer;
 use cpc_core::supply_chain::service::SupplyChainService;
 use cpc_core::financial_forecasting::service::FinancialForecastingService;
+use cpc_core::expenses::service::ExpenseService;
 
 #[tokio::main]
 async fn main() {
@@ -70,6 +71,7 @@ async fn main() {
     // Initialize core services
     let supply_chain_service = Arc::new(SupplyChainService::new());
     let financial_forecasting_service = Arc::new(FinancialForecastingService::new());
+    let expense_service = Arc::new(ExpenseService::new());
 
     // Build GraphQL schema
     let schema = Schema::build(RootQuery::default(), RootMutation::default(), RootSubscription::default())
@@ -80,6 +82,7 @@ async fn main() {
         .data(impact_service.clone())
         .data(supply_chain_service.clone())
         .data(financial_forecasting_service.clone())
+        .data(expense_service.clone())
         .finish()
         .expect("Failed to build GraphQL schema");
 

@@ -1,12 +1,12 @@
 # Invoicing Module
 
-A complete invoicing system for the CPC platform built with Svelte/TypeScript.
+A complete invoicing system for the CPC platform built with Yew. We are refactoring this to Yew.
 
 ## Architecture
 
 The invoicing module follows a clean architecture pattern with:
 - **Services**: Business logic for API interactions
-- **Stores**: Svelte stores for state management
+- **Stores**: Yew stores for state management
 - **Components**: Reusable UI components
 - **Types**: Strongly typed interfaces matching backend models
 
@@ -23,8 +23,8 @@ invoicing/
 │   ├── customerStore.ts      # Customer state management
 │   └── index.ts             # Store exports
 ├── components/
-│   ├── InvoiceDashboard.svelte # Main dashboard
-│   ├── InvoiceList.svelte     # Invoice listing
+│   ├── InvoiceDashboard # Main dashboard
+│   ├── InvoiceList     # Invoice listing
 │   └── index.ts              # Component exports
 ├── types/
 │   ├── invoice.types.ts      # Core invoice interfaces
@@ -41,7 +41,7 @@ invoicing/
 // Import stores and services
 import { InvoiceService, CustomerService } from './invoicing/services';
 import { invoices, invoiceActions } from './invoicing/stores/invoiceStore';
-import InvoiceDashboard from './invoicing/components/InvoiceDashboard.svelte';
+import InvoiceDashboard from './invoicing/components/InvoiceDashboard';
 ```
 
 ### Creating an Invoice

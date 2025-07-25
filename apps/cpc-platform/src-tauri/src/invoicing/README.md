@@ -24,7 +24,7 @@ The invoicing system follows hexagonal architecture principles with the followin
 - `InMemorySyncRepository`: Development/testing repository
 
 ### 3. PDF Generator (`invoicing/pdf_generator.rs`)
-- HTML-based PDF generation (placeholder for printpdf integration)
+- HTML-based PDF generation (placeholder for pdf integration)
 - Generates invoices in PDF format with professional layout
 
 ### 4. Sync Service (`invoicing/sync.rs`)
@@ -62,7 +62,7 @@ The invoicing system follows hexagonal architecture principles with the followin
 - `sync_invoices` - Sync invoices with server
 - `get_sync_state` - Get current sync state
 
-## Usage Example (Svelte Frontend)
+## Usage Example (Yew Frontend)
 
 ```javascript
 // Create a customer

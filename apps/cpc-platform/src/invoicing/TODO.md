@@ -1,3 +1,5 @@
+This needs refactoring to Yew
+
 # Invoice Management Frontend Implementation TODO
 
 ## 1. File Structure Creation

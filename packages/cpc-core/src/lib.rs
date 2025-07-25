@@ -10,6 +10,7 @@ pub mod utils;  // Add datetime utilities module
 pub mod texture_manifest; // Add texture manifest module
 pub mod vision; // Image recognition functionality
 pub mod invoicing; // Invoice management system
+pub mod expenses; // Expense tracking system
 pub mod asset_browser; // Asset Browser module
 pub mod accounting; // Accounting and financial management
 pub mod business; // Business intelligence and forecasting

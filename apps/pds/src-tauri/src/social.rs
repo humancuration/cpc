@@ -3,6 +3,8 @@ use tauri::State;
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use cpc_core::models::social::post::{Post, Visibility};
+use cpc_core::models::social::{Comment, Like, Share, Follow, Block, Mute, FeedType, FeedAlgorithm, LikeTargetType, ShareType, MuteType};
+use cpc_core::services::social::{SocialService, CreatePostInput, CreateCommentInput, FeedParams, TimelineResult};
 use cpc_core::repositories::social::post_repository::PostRepository;
 use cpc_core::repositories::social::relationship_repository::RelationshipRepository;
 use cpc_core::error::CpcError;

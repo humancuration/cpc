@@ -5,3 +5,5 @@ pub mod financial_forecasting_dashboard;
 pub mod invoicing;
 pub mod asset_browser;
 pub mod impact;
+pub mod expenses;
+pub mod community;

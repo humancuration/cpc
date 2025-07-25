@@ -56,12 +56,44 @@ type Query {
   getImpactReport(userId: ID!): ImpactReport
   getProcessingStatus(jobId: ID!): ProcessingStatus
   getOrganizationImpactReport(orgId: UUID!, year: Int!): OrganizationImpactReport
+  communities(first: Int!, after: String): CommunityConnection!
 }
 
 type Mutation {
   generateImpactReport(userId: ID!): ProcessingStatus
+  createCommunity(name: String!, description: String!): Community!
+  joinCommunity(id: ID!): JoinResult!
+  leaveCommunity(id: ID!): JoinResult!
 }
 
 type Subscription {
   impactReportUpdated(userId: ID!): ImpactReport
+}
+
+type Community {
+  id: ID!
+  name: String!
+  description: String!
+  memberCount: Int!
+  isMember: Boolean!
+}
+
+type CommunityEdge {
+  cursor: String!
+  node: Community!
+}
+
+type CommunityConnection {
+  edges: [CommunityEdge!]!
+  pageInfo: PageInfo!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+type JoinResult {
+  community: Community!
+  isMember: Boolean!
 }

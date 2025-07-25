@@ -3,9 +3,19 @@
 
 use std::sync::Arc;
 use cpc_core::services::product_display_service::ProductDisplayService;
+use cpc_core::supply_chain::service::SupplyChainService;
 use tracing::{info, error};
 
 mod product_commands;
+mod forum;
+mod store;
+mod app;
+mod router;
+
+#[tauri::command]
+async fn render_yew_component() -> Result<String, ()> {
+    Ok(app::render_to_string().await)
+}
 
 #[tokio::main]
 async fn main() {
@@ -34,6 +44,7 @@ async fn main() {
             product_commands::update_product_validation,
             supply_chain_commands::get_supply_chain,
             supply_chain_commands::subscribe_to_supply_chain_updates,
+            render_yew_component,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

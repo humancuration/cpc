@@ -2,34 +2,68 @@
   "build": {
     "distDir": "../frontend/dist",
     "devPath": "http://localhost:3000",
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build"
+    "beforeDevCommand": "cd frontend && npm run dev",
+    "beforeBuildCommand": "cd frontend && npm run build"
   },
   "package": {
-    "productName": "CooperativePeerCloud",
+    "productName": "Cooperative Peer Cloud",
     "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
       "all": false,
       "fs": {
-        "scope": ["$APP/*"]
+        "scope": ["$APP/*", "$APPDATA/*", "$APPCONFIG/*", "$APPLOCALDATA/*"]
       },
       "window": {
         "all": true
       },
       "shell": {
         "open": true
+      },
+      "protocol": {
+        "all": false,
+        "asset": true,
+        "assetScope": ["$APPDATA/**", "$RESOURCE/**"]
       }
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "com.cpc.desktop",
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "resources": [],
+      "externalBin": [],
+      "copyright": "",
+      "category": "DeveloperTool",
+      "shortDescription": "Cooperative Peer Cloud Desktop Client",
+      "longDescription": "A decentralized platform for cooperative computing and social interaction"
+    },
+    "security": {
+      "csp": null
     },
     "windows": [
       {
         "title": "Cooperative Peer Cloud",
         "width": 1200,
         "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "center": true
       }
-    ]
+    ],
+    "systemTray": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true,
+      "menuOnLeftClick": false
+    }
   }
 }
