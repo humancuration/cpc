@@ -3,4 +3,4 @@
 pub mod datetime;
 pub mod password;
 
-pub use datetime::format_datetime;
+pub use datetime::{format_datetime, now_utc};

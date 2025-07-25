@@ -1,26 +1,17 @@
 use async_graphql::*;
-use crate::graphql::media_mutations::MediaMutations;
-use crate::graphql::media_subscriptions::MediaSubscriptions;
-use crate::bi::graphql::{BIQuery, BIMutation, BISubscription};
-use crate::graphql::financial_forecasting::{FinancialForecastingMutation, FinancialForecastingQuery};
-use crate::graphql::calendar::{CalendarMutation, CalendarQuery, CalendarSubscription};
-use crate::graphql::user_testing::Mutation as UserTestingMutation;
 use crate::graphql::asset_browser::{AssetBrowserQuery, AssetBrowserMutation, AssetBrowserSubscription};
+use crate::graphql::impact::{ImpactQuery, ImpactMutation, ImpactSubscription};
+use crate::graphql::product::{ProductQueryRoot, ProductMutationRoot, ProductSubscriptionRoot};
+use crate::graphql::supply_chain::{SupplyChainQueryRoot, SupplyChainMutationRoot, SupplyChainSubscriptionRoot};
+use crate::graphql::financial_forecasting::{FinancialForecastingQueryRoot, FinancialForecastingMutationRoot, FinancialForecastingSubscriptionRoot};
 
 #[derive(MergedObject, Default)]
-pub struct RootQuery(BIQuery, FinancialForecastingQuery, CalendarQuery, AssetBrowserQuery);
+pub struct RootQuery(AssetBrowserQuery, ImpactQuery, ProductQueryRoot, SupplyChainQueryRoot, FinancialForecastingQueryRoot);
 
 #[derive(MergedObject, Default)]
-pub struct RootMutation(
-    MediaMutations,
-    BIMutation,
-    FinancialForecastingMutation,
-    CalendarMutation,
-    UserTestingMutation,
-    AssetBrowserMutation,
-);
+pub struct RootMutation(AssetBrowserMutation, ImpactMutation, ProductMutationRoot, SupplyChainMutationRoot, FinancialForecastingMutationRoot);
 
 #[derive(MergedSubscription, Default)]
-pub struct RootSubscription(MediaSubscriptions, BISubscription, CalendarSubscription, AssetBrowserSubscription);
+pub struct RootSubscription(AssetBrowserSubscription, ImpactSubscription, ProductSubscriptionRoot, SupplyChainSubscriptionRoot, FinancialForecastingSubscriptionRoot);
 
 pub type Schema = async_graphql::Schema<RootQuery, RootMutation, RootSubscription>;

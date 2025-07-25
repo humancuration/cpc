@@ -9,9 +9,9 @@ graph TD
     A[Client UI<br>(Android, Bevy, etc.)] -- JNI/FFI Call --> B{Unified Rust Core};
     B -- Event --> C[EventSystem];
     C --- D[NetworkHandler];
-    D -- Forwards Event --> E[rust-libp2p Swarm];
+    D -- Forwards Event --> E[p2panda Swarm];
     E -- Gossip/Direct Send --> F[Other Peers];
-    F -- Receives Event --> G[rust-libp2p Swarm];
+    F -- Receives Event --> G[p2panda Swarm];
     G -- Forwards Event --> H[NetworkHandler];
     H --- I[EventSystem];
     I -- Processes Event --> J{Unified Rust Core};

@@ -1,7 +1,7 @@
 # CPC Orchestrator Architecture
 
 ## Overview
-The CPC Orchestrator provides centralized coordination for our hybrid P2P network. It handles node registration, resource allocation, identity management, and content discovery while maintaining compatibility with our libp2p-based decentralized infrastructure.
+The CPC Orchestrator provides centralized coordination for our hybrid P2P network. It handles node registration, resource allocation, identity management, and content discovery while maintaining compatibility with our p2panda-based decentralized infrastructure.
 
 ## Architecture Diagram
 ```mermaid

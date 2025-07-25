@@ -112,8 +112,8 @@ cargo test --package pds --test invoicing_test
 
 ## Future Enhancements
 
-- SeaORM database integration
-- Actual PDF generation with printpdf
+- SQLx database integration
+- Actual PDF generation with pdf-rs
 - Network sync implementation
 - Advanced conflict resolution
 - Invoice templates system

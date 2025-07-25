@@ -129,7 +129,7 @@ pub struct AssetConflictEvent {
 ```
 
 ## Storage Recommendations
-1. **Metadata Storage**: Use SQLite database with SeaORM for asset metadata
+1. **Metadata Storage**: Use SQLite database with SQLx for asset metadata
 2. **Asset Files**: Store in platform-specific user directories:
    - Windows: `%APPDATA%/cpc/assets`
    - macOS: `~/Library/Application Support/cpc/assets`

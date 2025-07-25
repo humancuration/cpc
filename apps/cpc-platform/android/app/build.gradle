@@ -47,20 +47,34 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     
+    sourceSets.main {
+        jniLibs.srcDirs = [
+            'src/main/rust/target/aarch64-linux-android/release',
+            'src/main/rust/target/armv7-linux-androideabi/release',
+            'src/main/rust/target/i686-linux-android/release',
+            'src/main/rust/target/x86_64-linux-android/release'
+        ]
+    }
+    
     packagingOptions {
         jniLibs {
             useLegacyPackaging true
         }
+        pickFirst '**/libcpc_rust.so'
     }
 }
 
-cargo {
-    module = "../../.."  // Path to workspace root
-    libname = "cpc_core"  // Build the core crate
-    targets = ["arm", "arm64", "x86", "x86_64"]
-    profile = "release"
-    extraCargoBuildArguments = ['-p', 'cpc-core']  // Build specific crate
+// Build Rust JNI library for Android for all ABIs
+def targets = ['aarch64-linux-android', 'armv7-linux-androideabi', 'i686-linux-android', 'x86_64-linux-android']
+
+targets.each { target ->
+    tasks.create(name: "buildRust_${target}", type: Exec) {
+        workingDir 'src/main/rust'
+        commandLine 'cargo', 'build', '--target', target, '--release'
+    }
 }
+
+preBuild.dependsOn tasks.withType(Exec).matching { it.name.startsWith('buildRust_') }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])

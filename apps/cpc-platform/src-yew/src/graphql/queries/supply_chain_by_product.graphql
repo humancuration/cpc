@@ -1,0 +1,34 @@
+query SupplyChainByProduct($productId: ID!) {
+  supplyChain(productId: $productId) {
+    productId
+    nodes {
+      id
+      nodeType: type
+      name
+      location
+      coordinates
+      certifications {
+        name
+        authority
+        validationDate
+      }
+      cooperativeMetrics {
+        fairWageVerified
+        profitSharingPercentage
+      }
+    }
+    segments {
+      fromNodeId
+      toNodeId
+      method
+      durationHours
+      environmentalImpact {
+        carbonFootprintKgCo2
+      }
+      cost {
+        amount
+        currency
+      }
+    }
+  }
+}

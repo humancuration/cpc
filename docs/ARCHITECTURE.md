@@ -7,11 +7,11 @@
   - Manages user identities and social graphs
   - Tracks content metadata and node locations
   - Coordinates content distribution
-  - Collects metrics via rust-libp2p-metrics (OpenMetrics format)
+  - Collects metrics via p2panda-metrics (OpenMetrics format)
 - **Key Features**:
   - REST API for client interactions
   - gRPC for internal component communication
-  - Persistent storage (PostgreSQL)
+  - Persistent storage (SQLx)
   - Uses shared `cpc-lib` for networking, cryptography, and common data structures
 
 ### 2. Personal Data Server (Tauri Desktop App)
@@ -23,7 +23,7 @@
   - Configurable storage/bandwidth limits
   - LRU cache eviction policy
   - End-to-end encryption (using Noise protocol)
-  - Local SQLite database
+  - Local database (SQLx)
   - Uses shared `cpc-lib` for networking and cryptography
 
 ### 3. Cooperative Cloud Providers (Rust Servers)
@@ -40,7 +40,7 @@
 ## Shared Library (cpc-lib)
 - **Purpose**: Common functionality used across all components
 - **Key Modules**:
-  - `net`: rust-libp2p networking setup and protocols
+  - `net`: p2panda networking setup and protocols
   - `crypto`: Encryption/decryption utilities
   - `models`: Common data structures
 - **Benefits**:
@@ -54,22 +54,16 @@
 ```mermaid
 graph LR
   A[User Device] -- HTTP/REST --> B(Orchestrator)
-  A -- rust-libp2p --> C(PDS)
-  C -- rust-libp2p --> D[Cooperative Node]
+  A -- p2panda --> C(PDS)
+  C -- p2panda --> D[Cooperative Node]
   B -- gRPC --> D
 ```
 
-### rust-rust-libp2p Protocols
-- **Peer Discovery**: Kademlia DHT using [rust-libp2p-kad]
-- **Data Transfer**: Bitswap implementation from [rust-libp2p-bitswap]
-- **Messaging**: [rust-libp2p-gossipsub] for pub/sub
-- **NAT Traversal**: [rust-libp2p-autonat] + [rust-libp2p-upnp]
-
-[rust-libp2p-kad]: https://docs.rs/rust-libp2p-kad
-[rust-libp2p-bitswap]: https://docs.rs/rust-libp2p-bitswap
-[rust-libp2p-gossipsub]: https://docs.rs/rust-libp2p-gossipsub
-[rust-libp2p-autonat]: https://docs.rs/rust-libp2p-autonat
-[rust-libp2p-upnp]: https://docs.rs/rust-libp2p-upnp
+### p2panda Protocols
+- **Peer Discovery**: Kademlia DHT using p2panda
+- **Data Transfer**: Bitswap implementation from p2panda
+- **Messaging**: p2panda gossipsub for pub/sub
+- **NAT Traversal**: p2panda autonat + upnp
 
 ## Data Structures
 
@@ -201,8 +195,8 @@ We've implemented an invoice management system with offline capabilities and cro
 See [ADR 0006](./architecture/adr/0006-invoice_system_architecture.md) for architectural details.
 
 Key features:
-- Local-first data storage using SeaORM/SQLite
+- Local-first data storage using SQLx
 - GraphQL API integration with backend
 - Real-time updates via subscriptions
-- PDF generation using printpdf
+- PDF generation using pdf-rs
 - Conflict resolution for multi-device sync

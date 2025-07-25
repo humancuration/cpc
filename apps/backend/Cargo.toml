@@ -37,6 +37,7 @@ sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid"
 tokio-stream = "0.1"
 async-stream = "0.3"
 directories = "5.0"
+pdf-rs = "0.5.1"  # PDF generation library
 
 [build-dependencies]
 tonic-build = "0.10"

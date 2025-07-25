@@ -7,7 +7,7 @@ use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use std::str::FromStr;
 
-// SeaORM entities would be defined here
+// SQLx entities would be defined here
 // For now, we'll use a simplified in-memory implementation for demonstration
 
 pub struct InMemoryInvoiceRepository {
@@ -197,7 +197,7 @@ impl CustomerRepository for InMemoryCustomerRepository {
     }
 }
 
-// This function will be used to migrate to SeaORM when ready
+// This function will be used to migrate to SQLx when ready
 pub async fn create_seaorm_repositories(_db: DatabaseConnection) -> (
     impl InvoiceRepository,
     impl CustomerRepository,

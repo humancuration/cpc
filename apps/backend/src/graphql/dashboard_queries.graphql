@@ -1,0 +1,14 @@
+type AggregatedMetrics {
+    totalMembers: Int!
+    activeMembers: Int!
+    totalProducts: Int!
+    totalSales: Float!
+    totalProfit: Float!
+    totalCarbonSaved: Float!
+    avgProfitPerMember: Float!
+    memberEngagement: Float!
+}
+
+type Query {
+    getAggregatedMetrics(timeRange: String, memberRoles: [String]): AggregatedMetrics
+}

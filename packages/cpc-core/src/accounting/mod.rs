@@ -12,12 +12,17 @@ pub mod transaction;
 pub mod account;
 pub mod report;
 pub mod service;
+pub mod dashboard;
+
+#[cfg(test)]
+mod tests;
 
 pub use ledger::*;
 pub use transaction::*;
 pub use account::*;
 pub use report::*;
 pub use service::*;
+pub use dashboard::*;
 
 /// Core accounting error type
 #[derive(Debug, thiserror::Error)]

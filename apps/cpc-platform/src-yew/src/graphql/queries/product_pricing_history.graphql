@@ -1,0 +1,7 @@
+query ProductPricingHistory($id: ID!) {
+  product_pricing_history(id: $id) {
+    date
+    price
+    cost
+  }
+}

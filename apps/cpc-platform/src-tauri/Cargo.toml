@@ -21,6 +21,10 @@ async-trait = "0.1"
 tokio = { version = "1", features = ["full"] }
 tracing = "0.1"
 thiserror = "1.0"
+sqlx = { version = "0.7", features = ["postgres", "runtime-tokio", "migrate"] }
+argon2 = { version = "0.5", features = ["std"] }
+dotenv = "0.15"
+regex = "1.10"  // For input validation
 
 [target.'cfg(target_os = "android")'.dependencies]
 android_logger = "0.13.3"

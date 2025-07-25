@@ -2,15 +2,15 @@
 
 ## 1. Executive Summary
 
-This document outlines the plan to resolve the architectural inconsistency between the main P2P networking layer and the Android-specific implementation. The current system has two separate networking stacks: one using a custom `NetworkHandler` and another on Android using `rust-libp2p` directly. This divergence prevents the Android platform from integrating with the `cpc-core` `EventSystem`.
+This document outlines the plan to resolve the architectural inconsistency between the main P2P networking layer and the Android-specific implementation. The current system has two separate networking stacks: one using a custom `NetworkHandler` and another on Android using `p2panda` directly. This divergence prevents the Android platform from integrating with the `cpc-core` `EventSystem`.
 
-The proposed solution is to refactor the `NetworkHandler` to become a unified wrapper around a `rust-libp2p` `Swarm`. This will create a single, consistent P2P interface for all platforms, allowing seamless integration with the event system while encapsulating platform-specific logic.
+The proposed solution is to refactor the `NetworkHandler` to become a unified wrapper around a `p2panda` `Swarm`. This will create a single, consistent P2P interface for all platforms, allowing seamless integration with the event system while encapsulating platform-specific logic.
 
 ## 2. Problem Analysis
 
 - **`cpc-core/src/p2p/mod.rs`**: Defines a `NetworkHandler` with event broadcasting capabilities.
 - **`cpc-core/src/events/mod.rs`**: The `EventSystem` singleton requires an instance of `NetworkHandler` for its creation, creating a hard dependency.
-- **`cpc-core/src/p2p/android.rs`**: Implements P2P logic using a raw `rust-libp2p::Swarm`, completely bypassing the `NetworkHandler` and, by extension, the `EventSystem`.
+- **`cpc-core/src/p2p/android.rs`**: Implements P2P logic using a raw `p2panda::Swarm`, completely bypassing the `NetworkHandler` and, by extension, the `EventSystem`.
 
 This split architecture leads to code duplication, maintenance overhead, and a critical functionality gap on Android.
 
@@ -20,13 +20,13 @@ The core of this plan is to refactor `NetworkHandler` to be the sole manager of 
 
 ### 3.1. `NetworkHandler` Structure
 
-The `NetworkHandler` will be modified to encapsulate the `rust-libp2p::Swarm`.
+The `NetworkHandler` will be modified to encapsulate the `p2panda::Swarm`.
 
 ```rust
 // In cpc-core/src/p2p/network.rs (new or modified file)
 
-use rust_libp2p::{Swarm, Multiaddr, identity, PeerId};
-use rust_libp2p::ping::{Ping, PingConfig}; // Or a more complex behaviour
+use p2panda::{Swarm, Multiaddr, identity, PeerId};
+use p2panda::ping::{Ping, PingConfig}; // Or a more complex behaviour
 use std::sync::{Arc, Mutex};
 use once_cell::sync::OnceCell;
 
@@ -47,7 +47,7 @@ impl NetworkHandler {
             let local_key = identity::Keypair::generate_ed25519();
             let local_peer_id = PeerId::from(local_key.public());
             
-            let transport = rust_libp2p::development_transport(local_key).unwrap();
+            let transport = p2panda::development_transport(local_key).unwrap();
             // Replace Ping with our actual, more complex network behaviour
             let behaviour = Ping::new(PingConfig::new().with_keep_alive(true)); 
             let swarm = Swarm::new(transport, behaviour, local_peer_id);
@@ -136,11 +136,11 @@ impl EventSystem {
 }
 ```
 
-This change ensures that when `EventSystem::broadcast_event` is called, it uses the same underlying `libp2p` swarm on Android as it does on other platforms.
+This change ensures that when `EventSystem::broadcast_event` is called, it uses the same underlying `p2panda` swarm on Android as it does on other platforms.
 
 ## 4. Implementation Steps
 
-1.  **Refactor `NetworkHandler`**: Move the `NetworkHandler` struct and its implementation into `cpc-core/src/p2p/network.rs`. Modify it to encapsulate the `libp2p` `Swarm` and implement it as a singleton using `once_cell`.
+1.  **Refactor `NetworkHandler`**: Move the `NetworkHandler` struct and its implementation into `cpc-core/src/p2p/network.rs`. Modify it to encapsulate the `p2panda` `Swarm` and implement it as a singleton using `once_cell`.
 2.  **Create Event Loop**: Implement the `event_loop` method for the `NetworkHandler` to poll the swarm for incoming messages and network events. This will require an async runtime like `tokio`.
 3.  **Update Android JNI**: Modify `cpc-core/src/p2p/android.rs` to remove the local `Swarm` and all related logic. The JNI functions should now call methods on the `NetworkHandler::get_instance()`.
 4.  **Update `EventSystem`**: Ensure `EventSystem::get_instance` correctly retrieves the `NetworkHandler` singleton.

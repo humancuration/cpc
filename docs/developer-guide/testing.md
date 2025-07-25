@@ -34,3 +34,70 @@ The frontend E2E tests are located in `apps/cpc-platform/cypress/e2e/`.
     *   Verifying that the post appears in the feed with the correct media attached.
 
 These tests are crucial for ensuring a seamless user experience and are run as part of our continuous integration (CI) pipeline.
+## Error Handling Examples
+
+### Handling Camera Permission Errors
+
+```rust
+use crate::types::product::{BarcodeError, BarcodeErrorCode};
+use crate::services::camera::CameraService;
+
+async fn handle_permission() {
+    match CameraService::ensure_permission().await {
+        Ok(_) => {
+            // Proceed with camera access
+        }
+        Err(e) => {
+            match e.code {
+                BarcodeErrorCode::CameraPermissionDenied => {
+                    // Show user instructions to enable camera access
+                }
+                BarcodeErrorCode::CameraNotAvailable => {
+                    // Show alternative input methods
+                }
+                _ => {
+                    // Handle other errors
+                }
+            }
+        }
+    }
+}
+```
+
+### Handling Barcode Scanning Errors
+
+```rust
+use crate::services::barcode::BarcodeService;
+use crate::types::product::{BarcodeError, BarcodeErrorCode};
+
+async fn scan_product(barcode: &str) {
+    match BarcodeService::scan_barcode(barcode).await {
+        Ok(product) => {
+            // Process product data
+        }
+        Err(e) => {
+            match e.code {
+                BarcodeErrorCode::InvalidBarcodeFormat => {
+                    // Show format error to user
+                }
+                BarcodeErrorCode::ScanTimeout => {
+                    // Suggest retry or manual entry
+                }
+                BarcodeErrorCode::NotFound => {
+                    // Offer to add new product
+                }
+                _ => {
+                    // Handle other errors
+                }
+            }
+        }
+    }
+}
+```
+
+### Error Recovery Strategies
+
+1. **Automatic retry**: For transient errors like network issues
+2. **User guidance**: Clear instructions for permission errors
+3. **Alternative flows**: Manual entry when scanning fails
+4. **Error-specific UI**: Tailored messages for each error type

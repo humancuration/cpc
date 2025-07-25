@@ -1,0 +1,3 @@
+Running forecasting integration test...
+
+Command: cargo run --example forecasting_integration

@@ -6,6 +6,16 @@ use serde::{self, Deserialize, Deserializer, Serializer};
 
 const FORMAT: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
 
+/// Returns the current UTC time
+pub fn now_utc() -> DateTime<Utc> {
+    Utc::now()
+}
+
+/// Formats a DateTime<Utc> to the standard string format
+pub fn format_datetime(date: &DateTime<Utc>) -> String {
+    date.format(FORMAT).to_string()
+}
+
 /// Serializes a DateTime<Utc> to a string in the standard format
 pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
 where

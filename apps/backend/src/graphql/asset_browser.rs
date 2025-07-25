@@ -210,11 +210,8 @@ impl AssetBrowserMutation {
         });
         
         // Emit asset created event through subscription
-        ctx.data_unchecked::<async_graphql::Data>()
-            .get::<crate::graphql::subscriptions::AssetSubscription>()
-            .map(|sub| {
-                sub.asset_created(asset_id);
-            });
+        // TODO: Implement proper subscription system
+        // This is a placeholder for now
         
         Ok(asset_id)
     }
@@ -256,11 +253,8 @@ impl AssetBrowserMutation {
             .map_err(|e| Error::new(e.to_string()))?;
         
         // Emit asset deleted event through subscription
-        ctx.data_unchecked::<async_graphql::Data>()
-            .get::<crate::graphql::subscriptions::AssetSubscription>()
-            .map(|sub| {
-                sub.asset_deleted(id);
-            });
+        // TODO: Implement proper subscription system
+        // This is a placeholder for now
         
         Ok(true)
     }

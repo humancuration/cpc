@@ -1,3 +1,5 @@
+scalar UUID
+
 type ImpactReport {
   userId: ID!
   totalImpact: Float!
@@ -28,6 +30,20 @@ type ImpactTimelinePoint {
   score: Float!
 }
 
+type OrganizationImpactReport {
+  organizationId: UUID!
+  year: Int!
+  carbonFootprint: Float!
+  communityInvestment: Float!
+  diversityMetrics: DiversityMetrics!
+  supplyChainScore: Float!
+}
+
+type DiversityMetrics {
+  genderDiversity: Float!
+  ethnicDiversity: Float!
+}
+
 type ProcessingStatus {
   jobId: ID!
   status: String!
@@ -39,6 +55,7 @@ type ProcessingStatus {
 type Query {
   getImpactReport(userId: ID!): ImpactReport
   getProcessingStatus(jobId: ID!): ProcessingStatus
+  getOrganizationImpactReport(orgId: UUID!, year: Int!): OrganizationImpactReport
 }
 
 type Mutation {

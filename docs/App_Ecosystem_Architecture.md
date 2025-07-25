@@ -32,7 +32,7 @@ Our development philosophy is rooted in leveraging best-in-class, permissively-l
 Technology	Role	License
 Rust	Primary language for all core logic, backend, and game engine.	MIT / Apache 2.0
 Bevy Engine	Core 3D game engine for all interactive experiences.	MIT / Apache 2.0
-rust-rust-libp2p	P2P networking layer for decentralized content (videos, assets) delivery.	MIT / Apache 2.0
+p2panda	P2P networking layer for decentralized content (videos, assets) delivery.	MIT / Apache 2.0
 cpc-core (Our Crate)	Shared Rust library for all platform logic.
 Tauri	Desktop application shell for the "CPC Studio" editor.	MIT / Apache 2.0
 wry	Standalone WebView renderer for diegetic UI in the Bevy engine.	Apache 2.0
@@ -71,7 +71,7 @@ The heart of the entire ecosystem are the shared Rust crates. This library is co
 
     Network Client: An API client for communicating with the Central Orchestrator.
 
-    P2P Logic: The initialized rust-rust-libp2p NetworkBehaviour for finding peers and downloading content.
+    P2P Logic: The initialized p2panda NetworkBehaviour for finding peers and downloading content.
 
     Event Forwarding Layer: Built atop the P2P logic, this layer is responsible for transmitting state changes and user actions as events across the network. It ensures that events are delivered reliably and efficiently between peers.
 
@@ -186,7 +186,7 @@ This hybrid component architecture provides a robust and scalable foundation for
 
 **Discrepancies Found:**
 1. **P2P Networking Implementation**
-    - Uses rust-rust-libp2p for decentralized content delivery
+    - Uses p2panda for decentralized content delivery
     - Android-specific swarm initialization in `cpc-core/src/p2p/android.rs`
     - JNI interface for P2P operations (upload_chunk, etc.)
     - Bootstrap node configuration through JSON
@@ -207,7 +207,7 @@ This hybrid component architecture provides a robust and scalable foundation for
     - "android" feature enables JNI and Android-specific dependencies
     - Target-specific dependencies for Android:
       - Bevy with Android features
-      - rust-libp2p with Android features
+      - p2panda with Android features
     - Proper feature activation in Cargo.toml
 
 ### Revised Architecture Diagrams

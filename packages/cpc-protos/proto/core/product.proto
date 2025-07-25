@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package cpc.core;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+message Product {
+  string id = 1;
+  string name = 2;
+  optional string brand = 3;
+  optional string description = 4;
+  optional string barcode = 5;
+  optional double carbon_footprint = 6;  // Changed to double to match Rust f64
+  optional string packaging_type = 7;
+  optional string nutritional_info = 8;
+  optional string manufacturer = 9;
+  optional double material_cost = 10;    // Changed to double to match Rust f64
+  optional double labor_cost = 11;       // Changed to double to match Rust f64
+  optional string supplier = 12;
+  optional uint32 current_stock = 13;
+  optional uint32 reorder_level = 14;
+  optional SupplyChain supply_chain = 15;
+  optional Money cost = 16;
+  optional WarehouseLocation location = 17;
+}
+
+message Money {
+  double amount = 1;
+  string currency = 2;
+}
+
+message WarehouseLocation {
+  string id = 1;
+  string name = 2;
+}
+
+message SupplyChain {
+  repeated SupplyChainNode nodes = 1;
+  repeated TransportationSegment segments = 2;
+}
+
+message SupplyChainNode {
+  string id = 1;
+  NodeType node_type = 2;
+  string location = 3;
+  string company = 4;
+  google.protobuf.Timestamp timestamp = 5;  // Changed to proper timestamp type
+  Coordinates coordinates = 6;
+  
+  enum NodeType {
+    RAW_MATERIAL = 0;
+    MANUFACTURER = 1;
+    DISTRIBUTOR = 2;
+    RETAILER = 3;
+  }
+}
+
+message Coordinates {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message TransportationSegment {
+  string from_node_id = 1;
+  string to_node_id = 2;
+  TransportMethod method = 3;
+  uint32 duration_hours = 4;
+  float carbon_footprint = 5;
+  
+  enum TransportMethod {
+    SHIP = 0;
+    TRUCK = 1;
+    PLANE = 2;
+    TRAIN = 3;
+  }
+}

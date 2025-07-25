@@ -1,7 +1,7 @@
 # Enhanced P2P Networking Architecture
 
 ## 1. Overview
-This document outlines the enhanced peer-to-peer networking architecture for the CPC platform, designed to support decentralized social media applications. The architecture builds on libp2p to provide robust, scalable, and efficient networking capabilities.
+This document outlines the enhanced peer-to-peer networking architecture for the CPC platform, designed to support decentralized social media applications. The architecture builds on p2panda to provide robust, scalable, and efficient networking capabilities.
 
 ## 2. Architecture Components
 

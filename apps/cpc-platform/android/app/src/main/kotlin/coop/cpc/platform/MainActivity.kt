@@ -55,6 +55,9 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled", "WebViewApiAvailability")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Load Rust JNI library for serialization
+        System.loadLibrary("cpc_jni")
 
         val container = FrameLayout(this).apply {
             layoutParams = FrameLayout.LayoutParams(

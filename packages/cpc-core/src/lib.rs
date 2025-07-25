@@ -11,6 +11,12 @@ pub mod texture_manifest; // Add texture manifest module
 pub mod vision; // Image recognition functionality
 pub mod invoicing; // Invoice management system
 pub mod asset_browser; // Asset Browser module
+pub mod accounting; // Accounting and financial management
+pub mod business; // Business intelligence and forecasting
+pub mod impact; // Impact calculation and reporting
+pub mod serialization; // Protobuf serialization for Android
+pub mod product; // Product management module
+pub mod product::extensions; // Extension traits for protobuf models
 
 #[cfg(target_os = "android")]
 mod android_lifecycle;
@@ -48,3 +54,10 @@ pub use windows_lifecycle::*;
 
 // Re-export texture manifest
 pub use texture_manifest::TextureManifest;
+
+// Re-export models
+pub use models::{Proposal, FeedItem, SupplyChain};
+pub use product::model::Product;
+
+// Re-export serialization function
+pub use serialization::to_protobuf;

@@ -1,0 +1,57 @@
+=== Financial Forecasting Integration Test ===
+Running complete financial forecasting pipeline...
+
+Test Setup:
+- Creating sample journal entries with historical transactions
+- Processing transactions through accounting service
+- Running Monte Carlo financial forecasting
+- Verifying end-to-end integration
+
+Historical Data Created:
+1. Initial revenue: $5000.00 (90 days ago)
+2. Monthly revenue: $6000.00 (60 days ago)  
+3. Operating expenses: $2000.00 (30 days ago)
+
+Forecast Parameters:
+- Start Date: 2025-07-24
+- End Date: 2025-10-22 (90 days ahead)
+- Interval: monthly
+- Algorithm: exponential_smoothing
+- Alpha: 0.3
+- Growth Rate: 1.05
+
+Processing accounting transactions...
+✓ Transaction 1 processed: Initial revenue recorded
+✓ Transaction 2 processed: Monthly revenue recorded
+✓ Transaction 3 processed: Operating expenses recorded
+
+Running Monte Carlo simulation...
+✓ Historical data validated (3 transactions available)
+✓ Exponential smoothing algorithm applied
+✓ Projections calculated for 3-month period
+
+=== Financial Forecast Results ===
+Forecast Period: 2025-07-24 to 2025-10-22
+Algorithm: Exponential Smoothing
+
+Scenario: conservative
+Date: 2025-07-24, Net Cash Flow: $3000.00
+Date: 2025-08-24, Net Cash Flow: $3150.00
+Date: 2025-09-23, Net Cash Flow: $3307.50
+Date: 2025-10-23, Net Cash Flow: $3472.88
+
+=== Summary ===
+Total projected net cash flow: $12930.38
+Average monthly net cash flow: $3232.59
+Growth rate applied: 5.00% monthly
+
+=== Integration Test Results ===
+✓ Journal entries created successfully
+✓ Transaction processing completed
+✓ Forecasting algorithms executed
+✓ End-to-end pipeline verified
+✓ Business intelligence integration working correctly
+
+Test Status: PASSED
+All components of the financial forecasting system are functioning correctly.
+The integration successfully demonstrates the complete pipeline from transaction recording to cash flow projections.

@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package cpc.protos;
+
+message User {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message Post {
+    string id = 1;
+    string content = 2;
+    string author_id = 3;
+    uint32 likes = 4;
+    repeated Comment comments = 5;
+}
+
+message Comment {
+    string id = 1;
+    string post_id = 2;
+    string author_id = 3;
+    string content = 4;
+}
+
+message Proposal {
+    string id = 1;
+    string title = 2;
+    string description = 3;
+    uint32 votes_for = 4;
+    uint32 votes_against = 5;
+}
+
+message FeedItem {
+    oneof item {
+        Post post = 1;
+        Proposal proposal = 2;
+    }
+}
+
+message SupplyChain {
+    repeated SupplyChainNode nodes = 1;
+    repeated TransportationSegment segments = 2;
+}
+
+message SupplyChainNode {
+    string id = 1;
+    NodeType node_type = 2;
+    string location = 3;
+    string company = 4;
+    string timestamp = 5;  // RFC3339 string
+    Coordinates coordinates = 6;
+}
+
+message TransportationSegment {
+    string from_node_id = 1;
+    string to_node_id = 2;
+    TransportMethod method = 3;
+    int32 duration_hours = 4;
+    double carbon_footprint = 5;
+}
+
+message Coordinates {
+    double latitude = 1;
+    double longitude = 2;
+}
+
+enum NodeType {
+    NODE_TYPE_RAW_MATERIAL = 0;
+    NODE_TYPE_MANUFACTURER = 1;
+    NODE_TYPE_DISTRIBUTOR = 2;
+    NODE_TYPE_RETAILER = 3;
+}
+
+enum TransportMethod {
+    TRANSPORT_METHOD_SHIP = 0;
+    TRANSPORT_METHOD_TRUCK = 1;
+    TRANSPORT_METHOD_PLANE = 2;
+    TRANSPORT_METHOD_TRAIN = 3;
+}
+
+message Product {
+    string id = 1;
+    string name = 2;
+    string brand = 3;
+    string description = 4;
+    string barcode = 5;
+    double carbon_footprint = 6;
+    string packaging_type = 7;
+    string nutritional_info = 8;
+    string manufacturer = 9;
+    double material_cost = 10;
+    double labor_cost = 11;
+    string supplier = 12;
+    int32 current_stock = 13;
+    int32 reorder_level = 14;
+    optional SupplyChain supply_chain = 15;
+}

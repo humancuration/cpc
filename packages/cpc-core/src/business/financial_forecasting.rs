@@ -1,9 +1,9 @@
 //! Financial forecasting module for cash flow projections and scenario modeling
-use chrono::{Date, Utc, Duration, Months, TimeDelta};
+use chrono::{Duration, Months};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use thiserror::Error;
-use crate::business::accounting::{Account, Transaction, FinancialStatement};
+use crate::accounting::{Account, Transaction};
 use rand::prelude::*;
 use rand_distr::Normal;
 
@@ -15,7 +15,7 @@ pub enum ForecastError {
     #[error("Insufficient historical data: {0} transactions available")]
     InsufficientData(usize),
     #[error("Invalid date range: {0} to {1}")]
-    InvalidDateRange(Date<Utc>, Date<Utc>),
+    InvalidDateRange(chrono::NaiveDate, chrono::NaiveDate),
     #[error("Data validation failed: {0}")]
     ValidationFailed(String),
     #[error("Algorithm not supported: {0}")]
@@ -32,20 +32,31 @@ pub enum ForecastError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ForecastParameters {
     /// Forecast start date
-    pub start_date: Date<Utc>,
+    pub start_date: chrono::NaiveDate,
     /// Forecast end date
-    pub end_date: Date<Utc>,
+    pub end_date: chrono::NaiveDate,
     /// Time interval for projections (e.g., "monthly", "quarterly")
     pub interval: String,
     /// Scenario parameters (key-value pairs)
     pub scenario_parameters: HashMap<String, f64>,
 }
 
+impl Default for ForecastParameters {
+    fn default() -> Self {
+        Self {
+            start_date: chrono::Utc::now().date_naive(),
+            end_date: chrono::Utc::now().date_naive() + chrono::Duration::days(90),
+            interval: "monthly".to_string(),
+            scenario_parameters: HashMap::new(),
+        }
+    }
+}
+
 /// Cash flow projection for a given period
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CashFlowProjection {
     /// Projection date
-    pub date: Date<Utc>,
+    pub date: chrono::NaiveDate,
     /// Projected cash inflow
     pub inflow: f64,
     /// Projected cash outflow
@@ -157,12 +168,31 @@ impl FinancialForecast {
     fn group_transactions(&self, transactions: &[Transaction]) -> Result<HashMap<String, (f64, f64, usize)>, ForecastError> {
         let mut grouped = HashMap::new();
         for tx in transactions {
-            let period = self.get_period_key(tx.date);
+            let period = self.get_period_key(tx.date.date_naive());
             let entry = grouped.entry(period).or_insert((0.0, 0.0, 0));
-            if tx.amount > 0.0 {
-                entry.0 += tx.amount;
+            
+            // Calculate transaction totals from journal entries
+            let mut total_debits = 0.0;
+            let mut total_credits = 0.0;
+            
+            for journal_entry in &tx.journal_entries {
+                let amount_value = journal_entry.amount.value();
+                match journal_entry.entry_type {
+                    crate::accounting::transaction::EntryType::Debit => {
+                        total_debits += amount_value;
+                    }
+                    crate::accounting::transaction::EntryType::Credit => {
+                        total_credits += amount_value;
+                    }
+                }
+            }
+            
+            // Use net amount for forecasting (debits - credits)
+            let net_amount = total_debits - total_credits;
+            if net_amount > 0.0 {
+                entry.0 += net_amount;  // Inflow
             } else {
-                entry.1 += tx.amount.abs();
+                entry.1 += net_amount.abs();  // Outflow
             }
             entry.2 += 1;
         }
@@ -261,10 +291,35 @@ impl FinancialForecast {
         Ok(())
     }
 fn apply_moving_average(&mut self, scenario: &mut Scenario, historical_transactions: &[Transaction]) -> Result<(), ForecastError> {
-    // Calculate average monthly net cash flow
-    let avg_monthly_net = historical_transactions
-        .iter()
-        .fold(0.0, |sum, t| sum + t.amount) / historical_transactions.len() as f64;
+    // Calculate average monthly net cash flow from transactions
+    let mut total_net_cash_flow = 0.0;
+    let mut count = 0;
+    
+    for tx in historical_transactions {
+        let mut total_debits = 0.0;
+        let mut total_credits = 0.0;
+        
+        for journal_entry in &tx.journal_entries {
+            let amount_value = journal_entry.amount.value();
+            match journal_entry.entry_type {
+                crate::accounting::transaction::EntryType::Debit => {
+                    total_debits += amount_value;
+                }
+                crate::accounting::transaction::EntryType::Credit => {
+                    total_credits += amount_value;
+                }
+            }
+        }
+        
+        total_net_cash_flow += total_debits - total_credits;
+        count += 1;
+    }
+    
+    let avg_monthly_net = if count > 0 {
+        total_net_cash_flow / count as f64
+    } else {
+        return Err(ForecastError::InsufficientData(0));
+    };
     
     // Extract scenario parameters
     let growth_factor = 1.0 + (scenario.parameters.scenario_parameters
@@ -384,7 +439,7 @@ fn apply_moving_average(&mut self, scenario: &mut Scenario, historical_transacti
     }
 
     /// Get period key for grouping transactions
-    fn get_period_key(&self, date: Date<Utc>) -> String {
+    fn get_period_key(&self, date: chrono::NaiveDate) -> String {
         match self.base_parameters.interval.as_str() {
             "monthly" => format!("{}-{}", date.year(), date.month()),
             "quarterly" => {

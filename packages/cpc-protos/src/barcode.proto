@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package cpc.barcode.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message BarcodeRequest {
+  string barcode = 1;
+}
+
+message ProductResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string category = 4;
+  string brand = 5;
+  string sku = 6;
+  string barcode = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+enum BarcodeErrorCode {
+  INVALID_FORMAT = 0;
+  NOT_FOUND = 1;
+}
+
+message BarcodeError {
+  BarcodeErrorCode code = 1;
+  string message = 2;
+}
+
+service BarcodeService {
+  rpc ProcessScan(BarcodeRequest) returns (ProductResponse) {
+    option (google.rpc.error) = {
+      code: INVALID_ARGUMENT, 
+      details: "BarcodeError"
+    };
+  };
+}

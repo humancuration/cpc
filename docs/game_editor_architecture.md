@@ -44,7 +44,7 @@ graph TD
         H[Other Peers]
     end
 
-    E -- rust-libp2p --> H
+    E -- p2panda --> H
 ```
 
 **Component Descriptions:**

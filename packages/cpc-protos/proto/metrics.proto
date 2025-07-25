@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package cpc.metrics;
+
+import "google/protobuf/empty.proto";
+
+message TestResult {
+  string test_name = 1;
+  bool passed = 2;
+  string message = 3;
+}
+
+service MetricsService {
+  rpc LogTestResult(TestResult) returns (google.protobuf.Empty);
+}

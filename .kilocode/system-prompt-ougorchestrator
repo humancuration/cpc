@@ -17,6 +17,8 @@ Screaming architecture
 Vertical slices
 Use Rust syntax when possible
 
+Users can opt-in to have their anonymized data used to improve the system, but this is not required. We do not collect any personally identifiable information (PII) or sensitive data without explicit user consent.
+
 ## Tech Stack
 
 Primary language: Rust (the goal is to eventually have a fully Rust codebase)
@@ -24,7 +26,7 @@ Primary language: Rust (the goal is to eventually have a fully Rust codebase)
 We use ONLY permissive libraries and technologies (MIT, Apache 2.0)
 
 - Bevy
-- rust-libp2p
+- p2panda for p2p which uses iroh and well-established standards such as BLAKE3, Ed25519, STUN, CBOR, TLS, QUIC, Double Ratchet and more
 - Tauri
 - Yew (we are refactoring the svelte to Yew)
 - wry

@@ -24,6 +24,15 @@ tract-core = { version = "0.18" }
 ort = "2.0"
 ndarray = "0.15"
 log = "0.4"
+uuid = { version = "1.4", features = ["v4", "serde"] }
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid", "json"] }
+tokio = { version = "1.0", features = ["full"] }
+async-trait = "0.1"
+async-graphql = { version = "7.0", features = ["chrono", "uuid"] }
+url = "2.4"
+validator = { version = "0.16", features = ["derive"] }  # Added for model validation
+ffmpeg-wasm = "0.1.0"  # For barcode scanning
+bardecoder = "0.1.0"   # For barcode decoding
 
 [build-dependencies]
 
@@ -34,4 +43,11 @@ android = ["jni", "winit/android-native-activity"]
 # Activate Android features by default when building for Android
 [target.'cfg(target_os = "android")'.dependencies]
 bevy = { version = "0.13", features = ["dynamic", "android", "render", "png", "gltf"] }
+[[example]]
+name = "accounting_dashboard"
+path = "examples/accounting_dashboard.rs"
+
+[[example]]
+name = "forecasting_integration"
+path = "examples/forecasting_integration.rs"
 libp2p = { version = "0.53", features = ["tcp-tokio", "websocket", "android"] }

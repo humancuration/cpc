@@ -47,7 +47,7 @@ pub struct AssetStorageService {
 }
 
 impl AssetStorageService {
-    pub fn new(db: DatabaseConnection) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new(db: PgPool) -> Result<Self, Box<dyn std::error::Error>> {
         let project_dirs = ProjectDirs::from("coop", "cpc", "cpc")
             .ok_or("Failed to get project directories")?;
         

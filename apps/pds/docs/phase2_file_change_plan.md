@@ -277,7 +277,7 @@ fn main() {
         
     let state = AppState {
         config,
-        network: Mutex::new(Box::new(libp2p_network)),
+        network: Mutex::new(Box::new(p2panda_network)),
         storage: Mutex::new(storage),
         metadata_store: Mutex::new(metadata_store),
     };

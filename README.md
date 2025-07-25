@@ -1,6 +1,6 @@
 # Cooperative Peer Cloud (CPC)
 
-A resilient P2P data network using rust-libp2p that extends equal rights to AI participants.
+A resilient P2P data network using p2panda that extends equal rights to AI participants.
 
 ## Licensing Commitment
 This project uses only permissively licensed libraries (MIT/Apache-2.0) to ensure maximum freedom and compatibility.
