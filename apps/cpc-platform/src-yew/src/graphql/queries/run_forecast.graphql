@@ -1,0 +1,3 @@
+mutation RunForecast($scenario: ForecastScenarioInput!) {
+  runForecastScenario(scenario: $scenario)
+}

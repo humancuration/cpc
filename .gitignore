@@ -2,6 +2,7 @@
 .kiro/
 .trae/
 scripts/
+docs/
 .kilocodeignore
 combined_project_cpc_markdown.txt
 combined_project_cpc.txt

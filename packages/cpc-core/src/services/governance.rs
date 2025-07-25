@@ -346,4 +346,329 @@ impl GovernanceService {
             .await?;
 
         Ok(voting_result)
+    }    //
+/ Gets governance participation for a user with incentive calculations
+    pub async fn get_user_participation(
+        &self,
+        user_id: Uuid,
+        cooperative_id: Uuid,
+    ) -> Result<GovernanceParticipation> {
+        match self
+            .governance_repo
+            .find_participation(user_id, cooperative_id)
+            .await?
+        {
+            Some(participation) => Ok(participation),
+            None => {
+                // Create new participation record
+                let participation = GovernanceParticipation::new(user_id, cooperative_id);
+                self.governance_repo.create_participation(&participation).await?;
+                Ok(participation)
+            }
+        }
     }
+
+    /// Calculates governance participation incentives for cooperative score
+    pub async fn calculate_participation_incentives(
+        &self,
+        user_id: Uuid,
+        cooperative_id: Uuid,
+    ) -> Result<f64> {
+        let participation = self.get_user_participation(user_id, cooperative_id).await?;
+        
+        // Base incentive calculation
+        let base_score = participation.participation_score;
+        
+        // Apply participation multiplier
+        let incentive_score = base_score * self.config.participation_incentive_multiplier;
+        
+        // Add bonus for recent activity
+        let recent_activity_bonus = if participation.is_active_participant() {
+            incentive_score * 0.1 // 10% bonus for recent activity
+        } else {
+            0.0
+        };
+        
+        // Add consistency bonus
+        let consistency_bonus = if participation.votes_cast > 10 && participation.proposals_created > 0 {
+            incentive_score * 0.05 // 5% bonus for consistent participation
+        } else {
+            0.0
+        };
+
+        Ok(incentive_score + recent_activity_bonus + consistency_bonus)
+    }
+
+    /// Gets proposal statistics with detailed analytics
+    pub async fn get_proposal_statistics(&self, proposal_id: Uuid) -> Result<ProposalStatistics> {
+        self.governance_repo.get_proposal_statistics(proposal_id).await
+    }
+
+    /// Gets cooperative governance statistics
+    pub async fn get_cooperative_governance_stats(
+        &self,
+        cooperative_id: Uuid,
+    ) -> Result<CooperativeGovernanceStats> {
+        self.governance_repo
+            .get_cooperative_governance_stats(cooperative_id)
+            .await
+    }
+
+    /// Gets user governance statistics
+    pub async fn get_user_governance_stats(&self, user_id: Uuid) -> Result<UserGovernanceStats> {
+        self.governance_repo.get_user_governance_stats(user_id).await
+    }
+
+    /// Finalizes expired proposals automatically
+    pub async fn finalize_expired_proposals(&self, cooperative_id: Option<Uuid>) -> Result<Vec<Uuid>> {
+        let active_proposals = self
+            .governance_repo
+            .get_active_proposals(cooperative_id, 100, 0)
+            .await?;
+
+        let mut finalized_proposals = Vec::new();
+
+        for proposal in active_proposals {
+            if proposal.is_expired() {
+                let final_status = if proposal.has_quorum() {
+                    // Calculate final tally to determine winner
+                    match self.calculate_vote_tally(proposal.id).await {
+                        Ok(result) => result.final_status,
+                        Err(_) => ProposalStatus::Failed,
+                    }
+                } else {
+                    ProposalStatus::Expired
+                };
+
+                self.governance_repo
+                    .finalize_proposal(proposal.id, final_status)
+                    .await?;
+                
+                finalized_proposals.push(proposal.id);
+            }
+        }
+
+        Ok(finalized_proposals)
+    }    //
+ Private helper methods
+
+    /// Validates proposer eligibility based on cooperative score
+    fn validate_proposer_eligibility(&self, cooperative_score: &CooperativeScore) -> Result<()> {
+        if cooperative_score.value < self.config.min_proposal_score {
+            return Err(anyhow!(
+                "Insufficient cooperative score to create proposals. Required: {}, Current: {}",
+                self.config.min_proposal_score,
+                cooperative_score.value
+            ));
+        }
+        Ok(())
+    }
+
+    /// Validates proposal content and parameters
+    fn validate_proposal_content(
+        &self,
+        title: &str,
+        description: &str,
+        options: &[String],
+        voting_deadline: &DateTime<Utc>,
+    ) -> Result<()> {
+        // Title validation
+        if title.trim().is_empty() {
+            return Err(anyhow!("Proposal title cannot be empty"));
+        }
+        if title.len() > 200 {
+            return Err(anyhow!("Proposal title must be 200 characters or less"));
+        }
+
+        // Description validation
+        if description.trim().is_empty() {
+            return Err(anyhow!("Proposal description cannot be empty"));
+        }
+        if description.len() > 5000 {
+            return Err(anyhow!("Proposal description must be 5000 characters or less"));
+        }
+
+        // Options validation
+        if options.len() < 2 {
+            return Err(anyhow!("Proposal must have at least 2 options"));
+        }
+        if options.len() > self.config.max_proposal_options {
+            return Err(anyhow!(
+                "Proposal cannot have more than {} options",
+                self.config.max_proposal_options
+            ));
+        }
+
+        for option in options {
+            if option.trim().is_empty() {
+                return Err(anyhow!("Proposal options cannot be empty"));
+            }
+            if option.len() > 500 {
+                return Err(anyhow!("Proposal options must be 500 characters or less"));
+            }
+        }
+
+        // Check for duplicate options
+        let mut unique_options = std::collections::HashSet::new();
+        for option in options {
+            if !unique_options.insert(option.trim().to_lowercase()) {
+                return Err(anyhow!("Duplicate proposal options are not allowed"));
+            }
+        }
+
+        // Voting deadline validation
+        let now = now_utc();
+        let min_deadline = now + Duration::days(self.config.min_voting_period_days);
+        let max_deadline = now + Duration::days(self.config.max_voting_period_days);
+
+        if *voting_deadline < min_deadline {
+            return Err(anyhow!(
+                "Voting deadline must be at least {} days from now",
+                self.config.min_voting_period_days
+            ));
+        }
+        if *voting_deadline > max_deadline {
+            return Err(anyhow!(
+                "Voting deadline cannot be more than {} days from now",
+                self.config.max_voting_period_days
+            ));
+        }
+
+        Ok(())
+    }
+
+    /// Validates voting eligibility
+    async fn validate_voting_eligibility(
+        &self,
+        proposal: &Proposal,
+        voter_id: Uuid,
+        cooperative_score: &CooperativeScore,
+    ) -> Result<()> {
+        // Check proposal status
+        if proposal.status != ProposalStatus::Voting {
+            return Err(anyhow!("Proposal is not open for voting"));
+        }
+
+        // Check voting deadline
+        if proposal.is_expired() {
+            return Err(anyhow!("Voting deadline has passed"));
+        }
+
+        // Check cooperative score requirement
+        if cooperative_score.value < self.config.min_voting_score {
+            return Err(anyhow!(
+                "Insufficient cooperative score to vote. Required: {}, Current: {}",
+                self.config.min_voting_score,
+                cooperative_score.value
+            ));
+        }
+
+        // Prevent self-voting on own proposals (optional rule)
+        if proposal.proposer_id == voter_id {
+            return Err(anyhow!("Cannot vote on your own proposal"));
+        }
+
+        Ok(())
+    }    /// De
+tects voting fraud patterns
+    async fn detect_voting_fraud(&self, voter_id: Uuid, choices: &[String]) -> Result<()> {
+        // Rate limiting: max 10 votes per hour
+        let now = now_utc();
+        let mut timestamps = self.user_voting_timestamps.lock().unwrap();
+        let user_votes = timestamps.entry(voter_id).or_insert_with(Vec::new);
+        
+        // Remove old timestamps (older than 1 hour)
+        user_votes.retain(|&timestamp| now - timestamp < Duration::hours(1));
+        
+        let recent_count = user_votes.len();
+        if recent_count >= 10 {
+            return Err(anyhow!("Too many votes in a short time. Please try again later."));
+        }
+        
+        user_votes.push(now);
+
+        // Pattern analysis for fraud detection
+        let fraud_patterns = vec!["spam", "fake", "test", "bot"];
+        for choice in choices {
+            let lower_choice = choice.to_lowercase();
+            if fraud_patterns.iter().any(|pattern| lower_choice.contains(pattern)) {
+                return Err(anyhow!("Vote contains suspicious patterns"));
+            }
+        }
+
+        // Artificial delay to prevent rapid automated voting
+        tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+
+        Ok(())
+    }
+
+    /// Validates vote choices against proposal options
+    fn validate_vote_choices(&self, proposal: &Proposal, choices: &[String]) -> Result<()> {
+        if choices.is_empty() {
+            return Err(anyhow!("Vote must include at least one choice"));
+        }
+
+        if choices.len() > proposal.options.len() {
+            return Err(anyhow!("Cannot rank more options than available"));
+        }
+
+        // Check that all choices are valid proposal options
+        for choice in choices {
+            if !proposal.options.contains(choice) {
+                return Err(anyhow!("Invalid vote choice: {}", choice));
+            }
+        }
+
+        // Check for duplicate choices
+        let mut unique_choices = std::collections::HashSet::new();
+        for choice in choices {
+            if !unique_choices.insert(choice) {
+                return Err(anyhow!("Duplicate choices are not allowed in ranked voting"));
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Calculates round results for RCV
+    fn calculate_round_results(
+        &self,
+        votes: &[Vote],
+        active_options: &[String],
+    ) -> HashMap<String, VoteCount> {
+        let mut results = HashMap::new();
+        let total_votes = votes.len() as i32;
+
+        // Initialize all active options with zero counts
+        for option in active_options {
+            results.insert(
+                option.clone(),
+                VoteCount::new(0, 0.0, total_votes),
+            );
+        }
+
+        // Count first-choice votes for each active option
+        for vote in votes {
+            // Find the first choice that's still active
+            for choice in &vote.choices {
+                if active_options.contains(choice) {
+                    let count = results.get_mut(choice).unwrap();
+                    count.vote_count += 1;
+                    count.weighted_count += vote.voting_weight;
+                    break; // Only count the first valid choice
+                }
+            }
+        }
+
+        // Recalculate percentages
+        for count in results.values_mut() {
+            count.percentage = if total_votes > 0 {
+                (count.vote_count as f64 / total_votes as f64) * 100.0
+            } else {
+                0.0
+            };
+        }
+
+        results
+    }
+}
