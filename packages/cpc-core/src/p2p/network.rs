@@ -1,6 +1,6 @@
-use rust_libp2p::{Swarm, Multiaddr, identity, PeerId, futures::StreamExt};
-use rust_libp2p::ping::{Ping, PingConfig};
-use rust_libp2p::swarm::{SwarmEvent, dial_opts::DialOpts};
+use libp2p::{Swarm, Multiaddr, identity, PeerId, futures::StreamExt};
+use libp2p::ping::{Ping, PingConfig};
+use libp2p::swarm::{SwarmEvent, dial_opts::DialOpts};
 use std::sync::{Arc, Mutex};
 use once_cell::sync::OnceCell;
 use crate::events::compress_event;
@@ -25,7 +25,7 @@ impl NetworkHandler {
         let local_peer_id = PeerId::from(local_key.public());
         
         // Create swarm
-        let transport = rust_libp2p::development_transport(local_key).unwrap();
+        let transport = libp2p::development_transport(local_key).unwrap();
         let behaviour = Ping::new(PingConfig::new().with_keep_alive(true));
         let swarm = Swarm::new(transport, behaviour, local_peer_id);
 

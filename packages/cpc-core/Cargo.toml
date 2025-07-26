@@ -4,51 +4,46 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = { version = "0.13", features = ["dynamic", "render", "png", "gltf"] }
-libp2p = { version = "0.53", features = ["tcp-tokio", "websocket"] }
-merkle-cbt = "3.0"
-serde = { version = "1.0", features = ["derive"] }
-chrono = { version = "0.4", features = ["serde"] }
-serde_json = "1.0"
-jni = { version = "0.21", optional = true }  # For Android
-winit = { version = "0.29", features = ["android-native-activity"] }
-image = "0.24"  # For saving PNG thumbnails
-anyhow = "1.0"   # For error handling
-thiserror = "1.0" # For structured error handling
-argon2 = { version = "0.5", features = ["std"] }
-rand = "0.8"
-rand_distr = "0.4"
-tract = { version = "0.18", features = ["onnx"] }
-tract-onnx = { version = "0.18", features = ["onnx"] }
-tract-core = { version = "0.18" }
-ort = "2.0"
-ndarray = "0.15"
-log = "0.4"
-uuid = { version = "1.4", features = ["v4", "serde"] }
-rust_decimal = { version = "1.34", features = ["serde"] }
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid", "json"] }
-tokio = { version = "1.0", features = ["full"] }
-async-trait = "0.1"
-async-graphql = { version = "7.0", features = ["chrono", "uuid"] }
-url = "2.4"
-validator = { version = "0.16", features = ["derive"] }  # Added for model validation
-ffmpeg-wasm = "0.1.0"  # For barcode scanning
-bardecoder = "0.1.0"   # For barcode decoding
+# Core Technologies
+bevy = { workspace = true }
+p2panda-core = { workspace = true }
+p2panda-net = { workspace = true }
+p2panda-store = { workspace = true }
+plotters = { workspace = true }
+sqlx = { workspace = true }
+tracing = { workspace = true }
+rodio = { workspace = true }
+pdf = { workspace = true }
 
-[build-dependencies]
+# GraphQL for Public API
+async-graphql = { workspace = true, features = ["chrono", "uuid"] }
+
+# Common dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+
+# Financial operations
+rust_decimal = { version = "1.34", features = ["serde", "std"] }
+rust_decimal_macros = "1.34"
+
+# Cryptography
+ed25519-dalek = { version = "2.1", features = ["serde"] }
+rand = "0.8"
+hex = "0.4"
+
+# HTTP client for OAuth
+reqwest = { version = "0.11", features = ["json"] }
+
+# Android support (optional)
+jni = { version = "0.21", optional = true }
+winit = { version = "0.29", features = ["android-native-activity"], optional = true }
 
 [features]
 default = []
-android = ["jni", "winit/android-native-activity"]
-
-# Activate Android features by default when building for Android
-[target.'cfg(target_os = "android")'.dependencies]
-bevy = { version = "0.13", features = ["dynamic", "android", "render", "png", "gltf"] }
-[[example]]
-name = "accounting_dashboard"
-path = "examples/accounting_dashboard.rs"
-
-[[example]]
-name = "forecasting_integration"
-path = "examples/forecasting_integration.rs"
-libp2p = { version = "0.53", features = ["tcp-tokio", "websocket", "android"] }
+android = ["jni", "winit"]

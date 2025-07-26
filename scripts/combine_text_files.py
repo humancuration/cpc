@@ -5,11 +5,13 @@ import datetime
 OUTPUT_FILENAME = "combined_project_cpc.txt"
 # Common text file extensions
 TEXT_FILE_EXTENSIONS = {
-".svelte", ".js", ".scss", ".rs", ".toml", ".html", ".proto", ".kt", ".kts", ".swift"
+".rs"
 }
 # Files and directories to ignore
 IGNORE_PATTERNS = {
     ".git", # Git directory
+    "target/", # Rust build output
+    "docs/",
     # The output file itself
 
 OUTPUT_FILENAME,

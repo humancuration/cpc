@@ -1,28 +1,51 @@
 [workspace]
 resolver = "2"
 members = [
-    "lib",
-    "orchestrator",
-    "cpc-node",
     "apps/backend",
     "apps/pds",
+    "apps/cpc-node",
     "packages/cpc-core",
     "packages/cpc-net",
     "packages/cpc-protos"
 ]
 
 [workspace.dependencies]
+# Core Technologies
+bevy = "0.13"
+p2panda-core = "0.4.0"
+p2panda-net = "0.4.0"
+p2panda-store = "0.4.0"
+tauri = "1.5"
+yew = "0.21"
+wry = "0.35"
+plotters = "0.3"
+axum = "0.7"
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "sqlite", "chrono", "uuid", "json"] }
+tracing = "0.1"
+rodio = "0.17"
+pdf = "0.7"
+
+# GraphQL for Public API
+async-graphql = "7.0"
+async-graphql-axum = "7.0"
+
+# gRPC for Internal API
+tonic = "0.11"
+prost = "0.12"
+prost-types = "0.12"
+
+# Media Processing (royalty-free codecs only)
+# Note: ffmpeg.wasm not available as Rust crate, will need WASM integration
+
+# Common dependencies
 tokio = { version = "1.0", features = ["full"] }
-libp2p-core = "0.41.0"
-libp2p-kad = "0.43.0"
-libp2p-bitswap = "0.44.0"
-libp2p-gossipsub = "0.47.0"
-libp2p-metrics = "0.16.0"
-libp2p-tcp = "0.42.0"
-libp2p-websocket = "0.45.0"
-libp2p-quic = "0.5.0"
-blake3 = "1.5.0"
-rusqlite = "0.29"
-rocksdb = "0.21.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+anyhow = "1.0"
+thiserror = "1.0"
+async-trait = "0.1"
+rust_decimal = "1.34"
+async-stream = "0.3"
+futures-util = "0.3"

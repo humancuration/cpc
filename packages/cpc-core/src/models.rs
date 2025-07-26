@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use validator::Validate;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct Money {
@@ -58,6 +59,25 @@ pub enum FeedItem {
 pub struct SupplyChain {
     pub nodes: Vec<SupplyChainNode>,
     pub segments: Vec<TransportationSegment>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Validate)]
+pub struct Vendor {
+    pub id: Uuid,
+    #[validate(length(min = 1, message = "Name must be 1-100 characters"))]
+    pub name: String,
+    #[validate(length(max = 500, message = "Description must be less than 500 characters"))]
+    pub description: Option<String>,
+    pub verification_status: VerificationStatus,
+    pub user_id: Uuid,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum VerificationStatus {
+    Pending,
+    UnderReview,
+    Verified,
+    Rejected,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Validate)]

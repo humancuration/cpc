@@ -3,6 +3,30 @@ use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum AuthMethod {
+    Email,
+    Google,
+    Tiktok,
+    Instagram,
+    Passwordless,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OneTimeToken {
+    pub id: Uuid,
+    pub token: String,
+    pub user_id: Option<Uuid>,
+    pub email: String,
+    #[serde(with = "crate::utils::datetime")]
+    pub expires_at: DateTime<Utc>,
+    #[serde(with = "crate::utils::datetime")]
+    pub created_at: DateTime<Utc>,
+    pub used: bool,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
@@ -10,6 +34,8 @@ pub struct User {
     pub username: String,
     pub email: String,
     pub password_hash: String,  // Store hashed passwords only
+    pub auth_method: AuthMethod,
+    pub social_id: Option<String>,
     #[serde(with = "crate::utils::datetime")]
     pub created_at: DateTime<Utc>,
     #[serde(with = "crate::utils::datetime")]
@@ -73,13 +99,17 @@ pub struct UserRelationship {
     #[serde(with = "crate::utils::datetime")]
     pub updated_at: DateTime<Utc>,
 }
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewUser {
     pub username: String,
     pub email: String,
     pub password: String,  // Plaintext password for registration
     pub display_name: Option<String>,
+    pub auth_method: AuthMethod,
+    pub social_id: Option<String>,
+}
+    pub auth_method: AuthMethod,
+    pub social_id: Option<String>,
 }
 
 impl NewUser {

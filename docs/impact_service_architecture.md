@@ -1,196 +1,313 @@
-# Impact Service Architecture
+<!-- DEPRECATED: Superseded by docs/architecture/impact-service.md -->
+<!-- Last valid as of: 2025-07-26 -->
+# Impact Service Architecture Design
 
 ## Overview
-The impact service provides carbon footprint, community investment, diversity metrics, and supply chain scoring for users and organizations. It follows hexagonal architecture with core domain logic in `cpc-core` and adapters for GraphQL, Tauri, and database.
+This document details the production-ready implementation for the Impact Distribution service, replacing hardcoded sample data with domain-driven business logic. The solution follows Hexagonal Architecture principles with clear separation between core business rules and infrastructure concerns.
 
-## Core Components
+## Domain Model Design
 
-### 1. Domain Layer (cpc-core)
+### Core Components (in `cpc-core`)
+
+#### 1. Domain Entities
 ```rust
-// packages/cpc-core/src/impact.rs
+// packages/cpc-core/src/business/impact.rs
+use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
-pub struct ImpactCalculator {
-    // Configuration and dependencies
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ImpactDistribution {
+    pub category: String,
+    pub weight: f64, // Validated to be between 0.0 and 1.0
 }
 
-impl ImpactCalculator {
-    pub async fn calculate_carbon_footprint(org_id: Uuid, year: i32) -> Result<f64> {
-        // Actual implementation using sustainability data
-    }
-    
-    // Similar methods for other calculations
-}
-
-pub struct DiversityMetrics {
-    pub gender_diversity: f64,
-    pub ethnic_diversity: f64,
-}
-
-pub struct OrganizationImpactReport {
-    // Fields matching GraphQL schema
+#[derive(Debug, Error)]
+pub enum CalculationError {
+    #[error("Insufficient data to calculate impact distribution")]
+    InsufficientData,
+    #[error("Invalid distribution: weights must sum to exactly 1.0")]
+    InvalidDistribution,
+    #[error("User data not found")]
+    UserNotFound,
 }
 ```
 
-### 2. Service Layer (backend)
+#### 2. Business Interface
 ```rust
-// apps/backend/src/services/impact.rs
-
-pub struct ImpactService {
-    db: DbPool,
-    calculator: ImpactCalculator,
-}
-
-impl ImpactService {
-    pub async fn get_organization_impact_report(
-        &self, 
-        org_id: Uuid, 
-        year: i32
-    ) -> Result<Option<OrganizationImpactReport>> {
-        // Database lookup + calculation
-    }
+pub trait ImpactCalculator {
+    fn calculate(&self, user_id: &str) -> Result<Vec<ImpactDistribution>, CalculationError>;
     
-    // Implement other methods
+    /// Validates that distribution weights sum to exactly 1.0
+    fn validate_distribution(weights: &[ImpactDistribution]) -> Result<(), CalculationError> {
+        let total: f64 = weights.iter().map(|w| w.weight).sum();
+        if (total - 1.0).abs() > f64::EPSILON {
+            return Err(CalculationError::InvalidDistribution);
+        }
+        Ok(())
+    }
 }
 ```
 
-### 3. Database Schema
+### Business Rules Implementation
+The concrete implementation follows patterns established in `project.rs`:
+
+```rust
+// packages/cpc-core/src/business/impact.rs
+pub struct DefaultImpactCalculator {
+    pool: PgPool,
+}
+
+impl DefaultImpactCalculator {
+    pub fn new(pool: PgPool) -> Self {
+        Self { pool }
+    }
+}
+
+impl ImpactCalculator for DefaultImpactCalculator {
+    fn calculate(&self, user_id: &str) -> Result<Vec<ImpactDistribution>, CalculationError> {
+        let user_uuid = Uuid::parse_str(user_id).map_err(|_| CalculationError::UserNotFound)?;
+        
+        // Business rule: Calculate weights based on project contributions
+        // (Reference project_queries.md for similar data access patterns)
+        let weights = sqlx::query_as!(
+            ImpactDistribution,
+            r#"
+            SELECT 
+                category AS "category: String",
+                weight AS "weight: f64"
+            FROM impact_weights
+            WHERE user_id = $1
+            "#,
+            user_uuid
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|_| CalculationError::InsufficientData)?
+        .into_iter()
+        .collect::<Vec<_>>();
+        
+        Self::validate_distribution(&weights)?;
+        Ok(weights)
+    }
+}
+```
+
+## Data Source Design
+
+### Database Schema
 ```sql
--- apps/backend/migrations/202407241300_create_impact_tables.sql
-
-CREATE TABLE organization_impact_reports (
-    id UUID PRIMARY KEY,
-    organization_id UUID NOT NULL,
-    year INT NOT NULL,
-    carbon_footprint FLOAT NOT NULL,
-    community_investment FLOAT NOT NULL,
-    gender_diversity FLOAT NOT NULL,
-    ethnic_diversity FLOAT NOT NULL,
-    supply_chain_score FLOAT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+-- migrations/20250726_impact_weights_table.sql
+CREATE TABLE impact_weights (
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    category VARCHAR(50) NOT NULL CHECK (category IN ('Community', 'Environment', 'Workers')),
+    weight DECIMAL(3,2) NOT NULL CHECK (weight BETWEEN 0 AND 1),
+    PRIMARY KEY (user_id, category)
 );
-
-CREATE INDEX idx_org_impact ON organization_impact_reports(organization_id, year);
 ```
 
-### 4. GraphQL Layer
+### Key Constraints
+1. `CHECK` constraint ensures weights remain between 0.0 and 1.0
+2. Application-level validation ensures weights sum to exactly 1.0
+3. `ON DELETE CASCADE` maintains referential integrity with users
+
+### Data Flow
+```mermaid
+graph TD
+    A[User Request] --> B[GraphQL Resolver]
+    B --> C[ImpactService]
+    C --> D[ImpactCalculator]
+    D --> E[Database Query]
+    E --> F[Domain Validation]
+    F --> D
+    D --> C
+    C --> B
+    B --> A
+```
+
+## Service Integration
+
+### Resolver Implementation
 ```rust
 // apps/backend/src/graphql/impact.rs
-
-#[derive(Default)]
-pub struct ImpactQuery;
-
 #[Object]
 impl ImpactQuery {
-    async fn get_organization_impact_report(
-        &self,
-        ctx: &Context<'_>,
-        org_id: Uuid,
-        year: i32
-    ) -> Result<Option<OrganizationImpactReport>> {
-        let service = ctx.data_unchecked::<ImpactService>();
-        service.get_organization_impact_report(org_id, year).await
-    }
-    
-    // Other resolvers
-}
-
-pub struct ImpactSubscription;
-
-#[Subscription]
-impl ImpactSubscription {
-    async fn impact_report_updated(
-        &self,
-        user_id: ID
-    ) -> impl Stream<Item = ImpactReport> {
-        // Implementation using async streams
+    async fn get_impact_report(&self, ctx: &Context<'_>, user_id: ID) -> Result<ImpactReportObject> {
+        let impact_calculator = ctx.data::<Arc<dyn ImpactCalculator>>()?;
+        let distribution = impact_calculator
+            .calculate(&user_id)
+            .map_err(|e| Error::new(e.to_string()))?;
+        
+        // ... remaining report construction
+        Ok(ImpactReportObject {
+            distribution: distribution.into_iter().map(|d| ImpactDistributionObject(d)).collect(),
+            // ... other fields
+        })
     }
 }
 ```
 
-### 5. Tauri Command Layer
+### Dependency Injection Setup
 ```rust
-// apps/cpc-platform/src-tauri/src/impact_commands.rs
-
-#[tauri::command]
-async fn get_organization_impact_report(
-    org_id: String,
-    year: i32,
-    state: State<'_, AppState>
-) -> Result<OrganizationImpactReport, Error> {
-    let uuid = Uuid::parse_str(&org_id)?;
-    state.impact_service.get_organization_impact_report(uuid, year).await?
+// apps/backend/src/main.rs
+async fn create_app(pool: PgPool) -> Router {
+    let impact_calculator: Arc<dyn ImpactCalculator> = 
+        Arc::new(DefaultImpactCalculator::new(pool.clone()));
+    
+    Router::new()
+        .route("/graphql", get(graphql_playground).post(graphql_handler))
+        .with_state(Arc::new(AppState {
+            impact_calculator,
+            // ... other services
+        }))
 }
 ```
 
-## Workflow
+## Error Handling Strategy
 
-1. **Report Generation:**
-   - Client triggers report generation via GraphQL mutation or Tauri command
-   - ImpactService orchestrates data collection from DB
-   - ImpactCalculator performs domain calculations
-   - Results stored in DB and pushed via subscription
+### Domain Error Mapping
+| Domain Error                | GraphQL Error Code     | UI Handling                     |
+|-----------------------------|------------------------|---------------------------------|
+| InsufficientData            | IMPACT_DATA_MISSING    | Show "Insufficient data" banner |
+| InvalidDistribution         | INVALID_DISTRIBUTION   | Show validation error           |
+| UserNotFound                | USER_NOT_FOUND         | Redirect to login               |
 
-2. **Data Flow:**
-   ```mermaid
-   graph LR
-   Client-->|Request|GraphQL/Tauri
-   GraphQL/Tauri-->|Call|ImpactService
-   ImpactService-->|Use|ImpactCalculator
-   ImpactService-->|Query|Database
-   ImpactService-->|Push|Subscription
+### Resolver Error Handling Pattern
+```rust
+// Follows existing patterns in project.rs
+impl From<CalculationError> for Error {
+    fn from(err: CalculationError) -> Self {
+        match err {
+            CalculationError::InsufficientData => Error::new("IMPACT_DATA_MISSING"),
+            CalculationError::InvalidDistribution => Error::new("INVALID_DISTRIBUTION"),
+            CalculationError::UserNotFound => Error::new("USER_NOT_FOUND"),
+        }
+    }
+}
+```
+
+## Validation Strategy
+
+### Multi-Layer Validation
+1. **Database Layer**: 
+   - `CHECK (weight BETWEEN 0 AND 1)`
+   - `CHECK (category IN valid_values)`
+
+2. **Domain Layer**:
+   ```rust
+   fn validate_distribution(weights: &[ImpactDistribution]) -> Result<(), CalculationError> {
+       // Sum validation with floating-point tolerance
+       let total: f64 = weights.iter().map(|w| w.weight).sum();
+       if (total - 1.0).abs() > f64::EPSILON {
+           return Err(CalculationError::InvalidDistribution);
+       }
+       Ok(())
+   }
    ```
 
+3. **GraphQL Layer**:
+   - Maintains existing UI error states for invalid distributions
+   - Preserves backward compatibility with current error handling
+
+## Migration Path
+
+### Step 1: Database Migration
+```bash
+sqlx migrate add impact_weights_table
+# Add SQL from schema design above
 ```
 
-3. **Error Handling:**
-- Domain errors mapped to GraphQL errors
-- Tauri commands return Result types
-- Comprehensive logging via tracing
+### Step 2: Data Initialization
+```sql
+-- Initialize default weights for existing users
+INSERT INTO impact_weights (user_id, category, weight)
+SELECT 
+    id, 
+    category, 
+    weight
+FROM 
+    users
+CROSS JOIN (VALUES 
+    ('Community', 0.45),
+    ('Environment', 0.30),
+    ('Workers', 0.25)
+) AS defaults(category, weight);
+```
 
-## Frontend Integration
+### Step 3: Feature Toggle
+Implement gradual rollout:
+```rust
+// apps/backend/src/graphql/impact.rs
+let distribution = if feature_flags.impact_real_data_enabled {
+    impact_calculator.calculate(&user_id)?
+} else {
+    vec![
+        ImpactDistribution { category: "Community".into(), weight: 0.45 },
+        ImpactDistribution { category: "Environment".into(), weight: 0.30 },
+        ImpactDistribution { category: "Workers".into(), weight: 0.25 },
+    ]
+};
+```
 
-The frontend integrates with the impact service through the following components:
+## File Structure
 
-### Impact Service (Rust)
-Located at `apps/cpc-platform/src-yew/src/services/impact.rs`
-- Provides async methods to call Tauri commands
-- Handles response parsing and error conversion
-- Includes:
-- `get_impact_report`: Fetches complete impact data
-- `recalculate_impact`: Triggers report recalculation
-- `subscribe_impact_updates`: Subscribes to real-time updates
+```
+cpc/
+├── packages/
+│   └── cpc-core/
+│       └── src/
+│           └── business/
+│               ├── impact.rs          # Domain model & calculator trait
+│               └── mod.rs             # pub mod impact;
+├── apps/
+│   ├── backend/
+│   │   ├── src/
+│   │   │   └── graphql/
+│   │   │       └── impact.rs          # Updated resolver
+│   │   ├── migrations/
+│   │   │   └── 20250726_impact_weights_table.sql
+│   │   └── docs/
+│   │       └── impact_service_architecture.md
+│   └── cpc-platform/
+│       └── src/
+│           └── api/
+│               └── impact.rs          # No changes needed (preserves compatibility)
+└── docs/
+    └── impact_service_architecture.md # This document
+```
 
-### Impact Dashboard
-Located at `apps/cpc-platform/src-yew/src/components/impact/impact_dashboard.rs`
-- Fetches impact data on mount and when organization changes
-- Uses Yewdux for global state management
-- Implements:
-- Loading states during data fetch
-- Error handling for failed requests
-- Real-time updates via subscriptions
-- Manual refresh button to trigger recalculation
+## Business Rules Reference
 
-### Card Components
-Located in `apps/cpc-platform/src-yew/src/components/impact/`
-- Receive data objects from dashboard
-- Render specific impact metrics:
-- `carbon_footprint_card.rs`: Carbon footprint data
-- `diversity_metrics_card.rs`: Diversity metrics
-- `community_investment_card.rs`: Community investments
-- `supply_chain_ethics_chart.rs`: Supply chain scores
+Based on analysis of `project_queries.md` patterns and cooperative requirements:
 
-### State Management
-Located at `apps/cpc-platform/src-yew/src/store.rs`
-- Stores impact data in global state
-- Provides reducers for updating impact data
-- Handles loading states and errors
+1. **Community Impact** (45% default):
+   - Measured by completed community projects
+   - Includes volunteer hours and community partnerships
 
-## Next Steps
+2. **Environment Impact** (30% default):
+   - Based on sustainable practices in projects
+   - Includes carbon reduction metrics
 
-1. Implement core calculation logic in ImpactCalculator
-2. Create database migrations
-3. Complete GraphQL resolvers
-4. Implement Tauri command layer
-5. Add integration tests
-6. Enhance frontend with additional visualization options
+3. **Workers Impact** (25% default):
+   - Reflects worker ownership and benefits
+   - Includes profit-sharing percentages
+
+*Note: Actual weight calculation will be refined with cooperative stakeholders using the established framework.*
+
+## Success Verification
+
+1. **Architecture Compliance**:
+   - Business logic isolated in `cpc-core`
+   - Infrastructure concerns contained in backend
+   - Zero changes to frontend components
+
+2. **Data Integrity**:
+   - Dual-layer validation (DB + domain)
+   - Automated sum validation in domain layer
+
+3. **Backward Compatibility**:
+   - Same GraphQL interface maintained
+   - Existing UI error states preserved
+
+This implementation provides a robust foundation for measuring cooperative impact while adhering to our architectural principles and cooperative values. The design ensures we can accurately measure what matters for cooperatives across all dimensions of their work.
+
+Free Palestine! ✊

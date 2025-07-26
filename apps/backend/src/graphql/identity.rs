@@ -151,6 +151,14 @@ impl IdentityQuery {
             .map(|u| Some(u.into()))
             .map_err(|e| e.into())
     }
+
+    /// Get multiple users by their IDs
+    async fn users(&self, ctx: &Context<'_>, ids: Vec<Uuid>) -> Result<Vec<UserType>> {
+        let app_ctx = AppContext::from(ctx);
+        let users = app_ctx.user_service.get_users_by_ids(&ids).await?;
+        let user_types = users.into_iter().map(UserType::from).collect();
+        Ok(user_types)
+    }
 }
 
 /// Identity-related GraphQL mutations

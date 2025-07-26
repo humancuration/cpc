@@ -9,6 +9,7 @@ pub fn main_menu() -> Html {
         <nav class="main-menu">
             <ul>
                 <li><Link<Route> to={Route::Home}>{"Home"}</Link<Route>></li>
+                <li><Link<Route> to={Route::Discovery}>{"Discover"}</Link<Route>></li>
                 <li><Link<Route> to={Route::ProductScan}>{"Scan Product"}</Link<Route>></li>
                 <li>
                     <Link<Route> to={Route::ProductDetails { id: "PRODUCT_ID".to_string() }}>

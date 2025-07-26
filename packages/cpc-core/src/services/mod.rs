@@ -8,3 +8,8 @@ pub mod social;
 pub mod governance;
 pub mod supply_chain;
 pub mod financial_forecasting;
+pub mod oauth;
+pub mod email;
+
+#[cfg(test)]
+mod passwordless_test;

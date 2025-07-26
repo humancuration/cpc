@@ -5,18 +5,21 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-cpc-lib = { path = "../lib" }
+# Core Technologies
+sqlx = { workspace = true }
+tracing = { workspace = true }
+
+# gRPC for Internal API
+tonic = { workspace = true }
+prost = { workspace = true }
+
+# Local packages
 cpc-core = { path = "../../packages/cpc-core" }
 cpc-protos = { path = "../../packages/cpc-protos" }
-tokio = { version = "1.0", features = ["full"] }
-rusqlite = "0.29"
-rocksdb = "0.21.0"
-libp2p-metrics = "0.16.0"
-tonic = { version = "0.9", features = ["client"] }
-prost = "0.12"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-chrono = { version = "0.4", features = ["serde"] }
-async-stream = "0.3"
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls", "uuid", "chrono", "json"] }
-uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# Common dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }

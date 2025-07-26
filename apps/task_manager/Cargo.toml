@@ -1,0 +1,36 @@
+[package]
+name = "task_manager"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+async-trait = "0.1"
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+thiserror = "1.0"
+tracing = "0.1"
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid"] }
+
+# GraphQL
+async-graphql = "7.0"
+async-graphql-actix-web = "7.0"
+
+# P2P sync
+cpc-net = { path = "../../packages/cpc-net" }
+
+# Web framework
+actix-web = "4.0"
+tokio = { version = "1.0", features = ["full"] }
+
+# Validation
+validator = { version = "0.16", features = ["derive"] }
+
+# Notifications
+notify-rust = { version = "4.0", optional = true }
+
+[dev-dependencies]
+tokio-test = "0.4"

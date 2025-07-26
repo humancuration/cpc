@@ -18,7 +18,13 @@ pub mod impact; // Impact calculation and reporting
 pub mod serialization; // Protobuf serialization for Android
 pub mod product; // Product management module
 pub mod supply_chain; // Supply chain feature
-pub mod product::extensions; // Extension traits for protobuf models
+pub mod recommendation; // Discovery feed recommendation engine
+pub mod vendor; // Vendor management and verification
+pub mod product {
+    pub mod extensions; // Extension traits for protobuf models
+}
+pub mod events; // Event compression utilities
+pub mod media; // Media processing and distribution
 
 #[cfg(target_os = "android")]
 mod android_lifecycle;

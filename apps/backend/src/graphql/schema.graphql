@@ -60,6 +60,9 @@ type Query {
   community(id: ID!): Community
   getSupplyChainByProduct(productId: UUID!): SupplyChain
   listProductsWithSupplyChains: [ProductSummary!]
+  listProductionStagesForProduct(productId: UUID!): [ProductionStage!]!
+  project(id: ID!): Project
+  projects: [Project!]!
 }
 
 type Mutation {
@@ -68,6 +71,7 @@ type Mutation {
   joinCommunity(id: ID!): JoinResult!
   leaveCommunity(id: ID!): JoinResult!
   updateSupplyChain(input: UpdateSupplyChainInput!): SupplyChain!
+  createSupplyChainStage(input: CreateSupplyChainStageInput!): ProductionStage!
 }
 
 type Subscription {
@@ -97,6 +101,7 @@ type ProductionStage {
     location: String!
     startDate: String!
     endDate: String!
+    isActive: Boolean!
 }
 
 type StageConnection {
@@ -142,6 +147,19 @@ input StageConnectionInput {
     relationshipType: String!
 }
 
+input CreateSupplyChainStageInput {
+  productId: UUID!
+  stage: CreateProductionStageInput!
+}
+
+input CreateProductionStageInput {
+    name: String!
+    description: String
+    location: String!
+    startDate: String!
+    endDate: String!
+}
+
 type CommunityEdge {
   cursor: String!
   node: Community!
@@ -160,4 +178,250 @@ type PageInfo {
 type JoinResult {
   community: Community!
   isMember: Boolean!
+}
+
+type Cooperative {
+  id: UUID!
+  name: String!
+  description: String
+  foundedDate: String!
+  website: String
+  members: [CooperativeMember!]!
+}
+
+type CooperativeMember {
+  id: UUID!
+  cooperativeId: UUID!
+  user: User!
+  role: String!
+  joinedAt: String!
+}
+
+type User {
+    id: ID!
+    username: String!
+    email: String!
+    displayName: String
+    bio: String
+    avatarUrl: String
+    createdAt: String!
+    updatedAt: String!
+    vendorProfile: Vendor
+}
+
+type Vendor {
+    id: ID!
+    name: String!
+    description: String
+    verificationStatus: VerificationStatus!
+    user: User!
+    createdAt: String!
+    updatedAt: String!
+}
+
+enum VerificationStatus {
+    PENDING
+    UNDER_REVIEW
+    VERIFIED
+    REJECTED
+}
+
+input CreateCooperativeInput {
+  name: String!
+  description: String
+  foundedDate: String!
+  website: String
+}
+
+input UpdateCooperativeInput {
+  id: UUID!
+  name: String
+  description: String
+  website: String
+}
+
+input AddMemberInput {
+  cooperativeId: UUID!
+  userId: UUID!
+  role: String!
+}
+
+input CreateProjectInput {
+  name: String!
+  description: String
+  cooperativeId: UUID!
+}
+
+input UpdateProjectInput {
+id: UUID!
+name: String
+description: String
+}
+
+type Project {
+  id: UUID!
+  name: String!
+  description: String
+  cooperativeId: UUID!
+  status: ProjectStatus!
+  startDate: String
+  endDate: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum ProjectStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+}
+
+extend type Query {
+  cooperatives: [Cooperative!]!
+  cooperative(id: UUID!): Cooperative
+  members(cooperativeId: UUID!): [CooperativeMember!]!
+  users(ids: [UUID!]!): [User!]!
+}
+
+extend type Mutation {
+  createProject(input: CreateProjectInput!): Project!
+  updateProject(input: UpdateProjectInput!): Project!
+  createCooperative(input: CreateCooperativeInput!): Cooperative!
+  updateCooperative(input: UpdateCooperativeInput!): Cooperative!
+  deleteCooperative(id: UUID!): Boolean!
+  addMember(input: AddMemberInput!): CooperativeMember!
+  removeMember(id: UUID!): Boolean!
+  updateMemberRole(memberId: UUID!, role: String!): CooperativeMember!
+  createVendor(input: VendorInput!): Vendor!
+  updateVendorVerification(input: UpdateVerificationInput!): Vendor!
+}
+
+extend type Query {
+  vendor(id: ID!): Vendor
+  vendors: [Vendor!]!
+}
+
+input VendorInput {
+  name: String!
+  description: String
+  userId: ID!
+}
+
+input UpdateVerificationInput {
+  vendorId: ID!
+  status: VerificationStatus!
+# Discovery Feed Types for TikTok-style shopping
+type DiscoveryItem {
+  id: ID!
+  productId: ID!
+  title: String!
+  description: String!
+  price: Money!
+  vendor: Vendor!
+  vendorId: ID!
+  vendorName: String!
+  vendorReputation: Float!
+  videoUrl: String!
+  thumbnailUrl: String!
+  createdAt: String!
+  likes: Int!
+  saves: Int!
+  comments: Int!
+  shares: Int!
+  viewCount: Int!
+  tags: [String!]!
+  category: String!
+  isLiked: Boolean!
+  isSaved: Boolean!
+}
+
+type DiscoveryFeed {
+  items: [DiscoveryItem!]!
+  hasMore: Boolean!
+  nextCursor: String
+}
+
+type DiscoveryEngagement {
+  itemId: ID!
+  likes: Int!
+  saves: Int!
+  comments: Int!
+  shares: Int!
+  isLiked: Boolean!
+  isSaved: Boolean!
+}
+
+# Discovery Feed Queries
+extend type Query {
+  discoveryFeed(
+    userId: ID!
+    limit: Int = 20
+    cursor: String
+    categories: [String!]
+    priceRange: PriceRangeInput
+    vendors: [ID!]
+  ): DiscoveryFeed!
+  
+  discoveryItem(id: ID!): DiscoveryItem
+  trendingItems(limit: Int = 10): [DiscoveryItem!]!
+}
+
+# Discovery Feed Mutations
+extend type Mutation {
+  likeDiscoveryItem(itemId: ID!, userId: ID!): DiscoveryEngagement!
+  unlikeDiscoveryItem(itemId: ID!, userId: ID!): DiscoveryEngagement!
+  saveDiscoveryItem(itemId: ID!, userId: ID!): DiscoveryEngagement!
+  unsaveDiscoveryItem(itemId: ID!, userId: ID!): DiscoveryEngagement!
+  incrementViewCount(itemId: ID!): Boolean!
+  shareDiscoveryItem(itemId: ID!, userId: ID!): DiscoveryEngagement!
+  
+  createDiscoveryItem(input: CreateDiscoveryItemInput!): DiscoveryItem!
+  updateDiscoveryItem(id: ID!, input: UpdateDiscoveryItemInput!): DiscoveryItem!
+}
+
+# Discovery Feed Subscriptions
+extend type Subscription {
+  discoveryFeedUpdated(userId: ID!): DiscoveryFeed!
+  discoveryEngagementUpdated(itemId: ID!): DiscoveryEngagement!
+}
+
+# Input Types
+input PriceRangeInput {
+  min: Float!
+  max: Float!
+}
+
+input CreateDiscoveryItemInput {
+  productId: ID!
+  title: String!
+  description: String!
+  price: MoneyInput!
+  vendorId: ID!
+  videoUrl: String!
+  thumbnailUrl: String!
+  tags: [String!]!
+  category: String!
+}
+
+input UpdateDiscoveryItemInput {
+  title: String
+  description: String
+  price: MoneyInput
+  videoUrl: String
+  thumbnailUrl: String
+  tags: [String!]
+  category: String
+}
+
+input MoneyInput {
+  amount: Float!
+  currency: String!
+}
+
+# Extended Money type for discovery items
+type Money {
+  amount: Float!
+  currency: String!
+}
 }

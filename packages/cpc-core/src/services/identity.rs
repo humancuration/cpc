@@ -1,8 +1,10 @@
 use crate::{
-    models::user::{User, UserProfile, CooperativeScore, ContributionFactor, UserRelationship, UserRelationshipType, NewUser},
+    models::user::{User, UserProfile, CooperativeScore, ContributionFactor, UserRelationship, UserRelationshipType, NewUser, AuthMethod},
     repositories::user_repository::UserRepository,
     utils::{datetime::now_utc, password},
     error::PublishError,
+    services::oauth::{OAuthClient, OAuthProvider},
+    services::email::{EmailService, PasswordlessEmail},
 };
 use anyhow::{anyhow, Result};
 use chrono::{DateTime, Utc, Duration};
@@ -55,23 +57,54 @@ pub struct ContributionRecord {
 pub struct IdentityService {
     user_repo: Box<dyn UserRepository>,
     jwt_secret: String,
+    oauth_client: OAuthClient,
+    email_service: EmailService,
     // In-memory fraud detection state (in production, this would be in Redis or similar)
     user_contribution_timestamps: std::sync::Mutex<HashMap<Uuid, Vec<DateTime<Utc>>>>,
 }
 
 impl IdentityService {
     /// Creates a new IdentityService instance
-    pub fn new(user_repo: Box<dyn UserRepository>, jwt_secret: String) -> Self {
-        Self {
+    pub fn new(user_repo: Box<dyn UserRepository>, jwt_secret: String) -> Result<Self> {
+        let email_service = EmailService::new()
+            .unwrap_or_else(|_| crate::services::email::MockEmailService::new());
+        
+        Ok(Self {
             user_repo,
             jwt_secret,
+            oauth_client: OAuthClient::new(),
+            email_service,
             user_contribution_timestamps: std::sync::Mutex::new(HashMap::new()),
-        }
+        })
     }
 
-    /// Registers a new user with enhanced validation and returns authentication token
-    pub async fn register(&self, new_user: NewUser) -> Result<(User, String)> {
-        // Validate user input with security focus
+    pub async fn get_users_by_ids(&self, user_ids: &[Uuid]) -> Result<Vec<User>> {
+        self.user_repo.find_many_by_ids(user_ids).await
+    }
+
+    /// Gets a user by ID
+    pub async fn get_user_by_id(&self, user_id: Uuid) -> Result<Option<User>> {
+        self.user_repo.find_by_id(user_id).await
+    }
+
+    /// Gets a user by email
+    pub async fn get_user_by_email(&self, email: &str) -> Result<Option<User>> {
+        self.user_repo.find_by_email(email).await
+    }
+
+    /// Gets a user by social ID and auth method
+    pub async fn get_user_by_social_id(&self, social_id: &str, auth_method: &crate::models::user::AuthMethod) -> Result<Option<User>> {
+        // This would need to be implemented in the repository
+        // For now, we'll filter users by social_id
+        let users = self.user_repo.find_all().await?;
+        Ok(users.into_iter().find(|u| {
+            u.social_id.as_ref() == Some(social_id) && &u.auth_method == auth_method
+        }))
+    }
+ 
+     /// Registers a new user with enhanced validation and returns authentication token
+     pub async fn register(&self, new_user: NewUser) -> Result<(User, String)> {
+         // Validate user input with security focus
         new_user.validate().map_err(|e| anyhow!(e))?;
 
         // Check if username or email already exists
@@ -88,6 +121,8 @@ impl IdentityService {
             username: new_user.username,
             email: new_user.email,
             password_hash,
+            auth_method: new_user.auth_method,
+            social_id: new_user.social_id,
             created_at: now_utc(),
             updated_at: now_utc(),
             display_name: new_user.display_name,
@@ -125,6 +160,148 @@ impl IdentityService {
         let token = self.generate_token(user.id)?;
 
         Ok((user, token))
+    }
+
+    /// Social login - validates OAuth token and creates/finds user
+    pub async fn social_login(
+        &self,
+        provider: &str,
+        access_token: &str,
+    ) -> Result<(User, String)> {
+        let oauth_provider = match provider.to_lowercase().as_str() {
+            "google" => OAuthProvider::Google,
+            "tiktok" => OAuthProvider::TikTok,
+            "instagram" => OAuthProvider::Instagram,
+            _ => return Err(anyhow!("Unsupported provider: {}", provider)),
+        };
+        
+        if !self.oauth_client.is_provider_configured(oauth_provider) {
+            return Err(anyhow!("Provider not configured: {}", provider));
+        }
+        
+        // Validate the access token with the provider
+        let user_info = self.oauth_client.validate_token(oauth_provider, access_token).await?;
+        
+        let auth_method = match provider.to_lowercase().as_str() {
+            "google" => AuthMethod::Google,
+            "tiktok" => AuthMethod::Tiktok,
+            "instagram" => AuthMethod::Instagram,
+            _ => return Err(anyhow!("Unsupported provider: {}", provider)),
+        };
+        
+        // Check if user exists with this social ID
+        let user = if let Some(existing_user) = self.get_user_by_social_id(&user_info.social_id, &auth_method).await? {
+            existing_user
+        } else {
+            // Check if email already exists
+            if let Some(existing_user) = self.get_user_by_email(&user_info.email).await? {
+                // Link social account to existing user
+                let mut user = existing_user;
+                user.social_id = Some(user_info.social_id);
+                user.auth_method = auth_method.clone();
+                if user_info.avatar_url.is_some() && user.avatar_url.is_none() {
+                    user.avatar_url = user_info.avatar_url;
+                }
+                self.user_repo.update(&user).await?;
+                user
+            } else {
+                // Create new user
+                let new_user = NewUser {
+                    username: user_info.username,
+                    email: user_info.email,
+                    password: Uuid::new_v4().to_string(), // Random password for social users
+                    display_name: user_info.display_name,
+                    auth_method,
+                    social_id: Some(user_info.social_id),
+                };
+
+                let (user, _) = self.register(new_user).await?;
+                user
+            }
+        };
+
+        // Generate JWT token
+        let token = self.generate_token(user.id)?;
+        Ok((user, token))
+    }
+
+    /// Passwordless login - creates or finds user and sends login email
+    pub async fn initiate_passwordless_login(&self, email: &str) -> Result<User> {
+        // Find or create user
+        let user = if let Some(existing_user) = self.get_user_by_email(email).await? {
+            existing_user
+        } else {
+            // Create new user for passwordless login
+            let new_user = NewUser {
+                username: email.split('@').next().unwrap_or("user").to_string(),
+                email: email.to_string(),
+                password: Uuid::new_v4().to_string(), // Random password for passwordless users
+                display_name: None,
+                auth_method: crate::models::user::AuthMethod::Passwordless,
+                social_id: None,
+            };
+
+            let (user, _) = self.register(new_user).await?;
+            user
+        };
+
+        // Generate temporary token with shorter expiration
+        let now = now_utc();
+        let expiration = (now + Duration::minutes(15)).timestamp() as usize;
+        let issued_at = now.timestamp() as usize;
+
+        let claims = Claims {
+            sub: user.id,
+            exp: expiration,
+            iat: issued_at,
+        };
+
+        let token = encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret(self.jwt_secret.as_ref()),
+        )
+        .map_err(|e| anyhow!("Failed to generate token: {}", e))?;
+
+        // Send passwordless login email
+        if self.email_service.is_configured() {
+            let email = PasswordlessEmail {
+                to_email: email.to_string(),
+                token,
+                user_name: user.display_name.clone().unwrap_or_else(|| user.username.clone()),
+            };
+            
+            if let Err(e) = self.email_service.send_passwordless_email(email).await {
+                tracing::warn!("Failed to send passwordless email: {}", e);
+            }
+        } else {
+            tracing::info!("Email service not configured, token: {}", token);
+        }
+
+        Ok(user)
+    }
+
+    /// Verifies a passwordless login token and returns the authenticated user
+    pub async fn verify_passwordless_login(&self, email: &str, token: &str) -> Result<(User, String)> {
+        // Validate the token
+        let user_id = self.validate_token(token)?;
+        
+        // Find the user by ID and email
+        let user = self
+            .user_repo
+            .find_by_id(user_id)
+            .await?
+            .ok_or_else(|| anyhow!("User not found"))?;
+            
+        // Verify the email matches
+        if user.email != email {
+            return Err(anyhow!("Email does not match token"));
+        }
+        
+        // Generate a new long-term JWT token
+        let new_token = self.generate_token(user.id)?;
+        
+        Ok((user, new_token))
     }
 
     /// Generates a JWT token with enhanced security
@@ -530,9 +707,18 @@ mod tests {
             Ok(users.get(&user_id).cloned())
         }
 
-        async fn find_by_email(&self, email: &str) -> Result<Option<User>> {
+        async fn find_many_by_ids(&self, user_ids: &[Uuid]) -> Result<Vec<User>> {
             let users = self.users.lock().unwrap();
-            Ok(users.values().find(|u| u.email == email).cloned())
+            let found_users = user_ids
+                .iter()
+                .filter_map(|id| users.get(id).cloned())
+                .collect();
+            Ok(found_users)
+        }
+ 
+         async fn find_by_email(&self, email: &str) -> Result<Option<User>> {
+             let users = self.users.lock().unwrap();
+             Ok(users.values().find(|u| u.email == email).cloned())
         }
 
         async fn update(&self, user: &User) -> Result<()> {
@@ -558,6 +744,8 @@ mod tests {
             email: "test@example.com".to_string(),
             password: "password123".to_string(),
             display_name: Some("Test User".to_string()),
+            auth_method: AuthMethod::Email,
+            social_id: None,
         };
 
         let result = service.register(new_user).await;

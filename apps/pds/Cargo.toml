@@ -4,19 +4,20 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = "0.7"
-tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
-tracing = "0.1"
-tracing-subscriber = "0.3"
-cpc-core = { path = "../../../packages/cpc-core" }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-rmp-serde = "1.1"
-anyhow = "1.0"
-jsonwebtoken = "8.3"
-axum-extra = { version = "0.7", features = ["typed-header"] }
-once_cell = "1.18"
-uuid = { version = "1.3", features = ["v4"] }
-headers = "0.3"
-async-graphql = "7.0"
-async-graphql-axum = "7.0"
+# Core Technologies
+axum = { workspace = true }
+tracing = { workspace = true }
+
+# GraphQL for Public API
+async-graphql = { workspace = true }
+async-graphql-axum = { workspace = true }
+
+# Local packages
+cpc-core = { path = "../../packages/cpc-core" }
+
+# Common dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+anyhow = { workspace = true }

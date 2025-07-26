@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package cpc.finance;
+
+import "google/protobuf/timestamp.proto";
+
+service FinanceService {
+    rpc ProcessTransaction(TransactionRequest) returns (stream TransactionStatus) {}
+    rpc CalculateRoyalties(RoyaltyCalculation) returns (stream RoyaltyDistribution) {}
+    rpc InitiateUbiDisbursement(UbiRequest) returns (stream UbiDisbursement) {}
+}
+
+message TransactionRequest {
+    string transaction_id = 1;
+    string amount = 2;  // String representation of Decimal
+    string currency = 3;
+    string source_wallet = 4;
+    string destination_wallet = 5;
+    string description = 6;
+    bytes signature = 7;
+}
+
+message TransactionStatus {
+    string transaction_id = 1;
+    Status status = 2;
+    string message = 3;
+    google.protobuf.Timestamp timestamp = 4;
+
+    enum Status {
+        PENDING = 0;
+        PROCESSING = 1;
+        COMPLETED = 2;
+        FAILED = 3;
+    }
+}
+
+message RoyaltyCalculation {
+    string work_id = 1;
+    string total_amount = 2;
+    string currency = 3;
+}
+
+message RoyaltyDistribution {
+    string recipient_wallet = 1;
+    string amount = 2;
+    string currency = 3;
+    string work_id = 4;
+}
+
+message UbiRequest {
+    string disbursement_period = 1;  // e.g., "monthly"
+    string currency = 2;
+}
+
+message UbiDisbursement {
+    string recipient_wallet = 1;
+    string amount = 2;
+    string currency = 3;
+    google.protobuf.Timestamp disbursed_at = 4;
+}

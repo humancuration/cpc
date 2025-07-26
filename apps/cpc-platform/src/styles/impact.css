@@ -1,0 +1,198 @@
+/* Impact Dashboard Styles */
+.impact-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.impact-page h1 {
+    color: #1a1a1a;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+/* Loading and Error States */
+.loading-container,
+.error-container,
+.auth-required {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 400px;
+}
+
+.error-message h3 {
+    color: #c33;
+    margin-bottom: 0.5rem;
+}
+
+.auth-required {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 3rem;
+}
+
+/* Tab Navigation */
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e1e5e9;
+}
+
+.tab {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #666;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.tab:hover {
+    color: #333;
+    background: #f8f9fa;
+}
+
+.tab.active {
+    color: #0066cc;
+    border-bottom-color: #0066cc;
+    font-weight: 600;
+}
+
+/* Impact Reports */
+.impact-report {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.impact-report h2 {
+    color: #1a1a1a;
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+}
+
+/* Metric Cards */
+.impact-summary,
+.impact-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.metric-card h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .impact-page {
+        padding: 1rem;
+    }
+    
+    .impact-page h1 {
+        font-size: 2rem;
+    }
+    
+    .tabs {
+        flex-direction: column;
+    }
+    
+    .tab {
+        text-align: left;
+        border-bottom: none;
+        border-left: 2px solid transparent;
+    }
+    
+    .tab.active {
+        border-left-color: #0066cc;
+    }
+    
+    .impact-summary,
+    .impact-metrics {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .impact-page {
+        background: #1a1a1a;
+        color: #e1e1e1;
+    }
+    
+    .impact-page h1 {
+        color: #ffffff;
+    }
+    
+    .impact-report {
+        background: #2d2d2d;
+        color: #e1e1e1;
+    }
+    
+    .impact-report h2 {
+        color: #ffffff;
+    }
+    
+    .tab {
+        color: #b0b0b0;
+    }
+    
+    .tab:hover {
+        color: #ffffff;
+        background: #3d3d3d;
+    }
+    
+    .auth-required {
+        background: #2d2d2d;
+    }
+}

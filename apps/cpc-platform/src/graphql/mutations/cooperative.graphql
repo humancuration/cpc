@@ -1,0 +1,22 @@
+mutation CreateCooperative($input: CreateCooperativeInput!) {
+  createCooperative(input: $input) {
+    id
+    name
+    description
+    founded_date
+    website
+  }
+}
+
+mutation UpdateCooperative($input: UpdateCooperativeInput!) {
+  updateCooperative(input: $input) {
+    id
+    name
+    description
+    website
+  }
+}
+
+mutation DeleteCooperative($id: UUID!) {
+  deleteCooperative(id: $id)
+}

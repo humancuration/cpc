@@ -32,6 +32,8 @@ yew-hooks = "0.3.1"
 # Plotting
 plotters = "0.3.5"
 plotters-canvas = "0.3.5"
+plotters-svg = "0.3.5"
+plotters-yew = { version = "0.3.5", default-features = false }
 
 # Yew dependencies
 yew = { version = "0.21", features = ["csr"] }

@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use uuid::Uuid;
-use crate::supply_chain::models::{ProductSummary, SupplyChain, UpdateSupplyChainData};
+use crate::supply_chain::models::{CreateProductionStageData, UpdateProductionStageData, ProductSummary, ProductionStage, SupplyChain, UpdateSupplyChainData};
 
 // Using a more specific error type is better than anyhow::Error for libraries
 #[derive(Debug, thiserror::Error)]
@@ -33,4 +33,21 @@ pub trait SupplyChainRepository: Send + Sync {
         &self,
         data: &UpdateSupplyChainData,
     ) -> Result<SupplyChain, RepositoryError>;
+
+    /// Creates a new production stage for a given product.
+    async fn create_production_stage(
+        &self,
+        product_id: Uuid,
+        stage_data: &CreateProductionStageData,
+    ) -> Result<ProductionStage, RepositoryError>;
+
+    /// Updates an existing production stage
+    async fn update_production_stage(
+        &self,
+        stage_id: Uuid,
+        stage_data: &UpdateProductionStageData,
+    ) -> Result<ProductionStage, RepositoryError>;
+
+    /// Fetches all production stages for a specific product.
+    async fn list_stages_for_product(&self, product_id: Uuid) -> Result<Vec<ProductionStage>, RepositoryError>;
 }

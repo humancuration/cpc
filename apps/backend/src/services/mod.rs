@@ -8,3 +8,4 @@ pub mod asset_storage;
 pub mod asset_preview;
 pub mod impact;
 pub mod metrics_service;
+pub mod integration;

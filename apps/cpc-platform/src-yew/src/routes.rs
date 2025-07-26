@@ -5,6 +5,7 @@ use crate::pages::home::HomePage;
 use crate::pages::product::scan::ProductScanPage;
 use crate::pages::product::details::ProductDetails;
 use crate::pages::invoicing::InvoicingPage;
+use crate::pages::discovery::DiscoveryPage;
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {
@@ -16,6 +17,8 @@ pub enum Route {
     ProductScan,
     #[at("/product/:id")]
     ProductDetails { id: String },
+    #[at("/discovery")]
+    Discovery,
     #[not_found]
     #[at("/404")]
     NotFound,
@@ -27,6 +30,7 @@ pub fn switch(routes: Route) -> Html {
         Route::NewInvoice => html! { <InvoicingPage /> },
         Route::ProductScan => html! { <ProductScanPage /> },
         Route::ProductDetails { id } => html! { <ProductDetails id={id} /> },
+        Route::Discovery => html! { <DiscoveryPage /> },
         Route::NotFound => html! { <h1>{"404 Not Found"}</h1> },
     }
 }

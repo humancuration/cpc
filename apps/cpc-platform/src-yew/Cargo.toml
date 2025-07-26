@@ -23,7 +23,15 @@ web-sys = { version = "0.3", features = [
     "MediaDeviceInfo",
     "MediaDevices",
     "Navigator",
-    "HtmlVideoElement"
+    "HtmlVideoElement",
+    "IntersectionObserver",
+    "IntersectionObserverEntry",
+    "TouchEvent",
+    "Touch",
+    "TouchList",
+    "EventTarget",
+    "MouseEvent",
+    "DragEvent"
 ]}
 uuid = { version = "1.0", features = ["serde", "v4"] }
 cpc-core = { path = "../../packages/cpc-core" }
@@ -37,3 +45,5 @@ graphql-client = "0.11"
 reqwest = { version = "0.11", features = ["json"] }
 yew-hooks = "0.4"
 gloo-timers = "0.2"
+yew-router = "0.18"
+anyhow = "1.0"

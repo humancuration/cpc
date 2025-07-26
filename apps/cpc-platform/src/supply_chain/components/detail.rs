@@ -1,7 +1,9 @@
 use yew::prelude::*;
+use yew_router::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 
 use crate::api::supply_chain::{get_supply_chain_by_product, get_supply_chain_details};
+use crate::supply_chain::routing::SupplyChainRoute;
 
 type SupplyChain = get_supply_chain_by_product::GetSupplyChainByProductGetSupplyChainByProduct;
 
@@ -58,7 +60,15 @@ pub fn supply_chain_detail(props: &SupplyChainDetailProps) -> Html {
                     </div>
 
                     <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                        <h2 class="text-2xl font-bold mb-2">{"Production Stages"}</h2>
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="text-2xl font-bold">{"Production Stages"}</h2>
+                             <Link<SupplyChainRoute>
+                                to={SupplyChainRoute::CreateStage{product_id: props.id.clone()}}
+                                classes="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                            >
+                                { "New Stage" }
+                            </Link<SupplyChainRoute>>
+                        </div>
                         { for sc.stages.iter().map(|stage| html! {
                             <div class="mb-4 p-4 border rounded">
                                 <h3 class="font-bold text-xl">{ &stage.name }</h3>

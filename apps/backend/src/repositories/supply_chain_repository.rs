@@ -2,8 +2,8 @@ use anyhow::Context;
 use async_trait::async_trait;
 use cpc_core::supply_chain::{
     models::{
-        CooperativeImpactSummary, ProductSummary, ProductionStage, StageConnection, SupplyChain,
-        UpdateSupplyChainData,
+        CooperativeImpactSummary, CreateProductionStageData, ProductSummary, ProductionStage,
+        StageConnection, SupplyChain, UpdateSupplyChainData,
     },
     repository::{RepositoryError, SupplyChainRepository},
 };
@@ -35,6 +35,7 @@ struct ProductionStageDb {
     location: String,
     start_date: DateTime<Utc>,
     end_date: DateTime<Utc>,
+    is_active: bool,
 }
 
 #[derive(FromRow, Debug)]
@@ -61,11 +62,13 @@ impl From<ProductionStageDb> for ProductionStage {
     fn from(db: ProductionStageDb) -> Self {
         Self {
             id: db.id,
+            product_id: db.product_id,
             name: db.name,
             description: db.description,
             location: db.location,
             start_date: db.start_date,
             end_date: db.end_date,
+            is_active: db.is_active,
         }
     }
 }
@@ -106,7 +109,7 @@ impl SupplyChainRepository for SupplyChainRepositoryImpl {
         let stages_db: Vec<ProductionStageDb> = sqlx::query_as!(
             ProductionStageDb,
             r#"
-            SELECT id, product_id, name, description, location, start_date, end_date
+            SELECT id, product_id, name, description, location, start_date, end_date, is_active
             FROM production_stages WHERE product_id = $1
             "#,
             product_id
@@ -163,6 +166,38 @@ impl SupplyChainRepository for SupplyChainRepositoryImpl {
             cooperative_impact,
             timeline_range,
         })
+    }
+
+    async fn update_production_stage(
+        &self,
+        stage_id: Uuid,
+        stage_data: &UpdateProductionStageData,
+    ) -> Result<ProductionStage, RepositoryError> {
+        let updated_stage_db = sqlx::query_as!(
+            ProductionStageDb,
+            r#"
+            UPDATE production_stages
+            SET
+                name = $2,
+                description = $3,
+                location = $4,
+                start_date = $5,
+                end_date = $6
+            WHERE id = $1
+            RETURNING id, product_id, name, description, location, start_date, end_date, is_active
+            "#,
+            stage_id,
+            stage_data.name,
+            stage_data.description,
+            stage_data.location,
+            stage_data.start_date,
+            stage_data.end_date
+        )
+        .fetch_one(&self.pool)
+        .await
+        .context("Failed to update production stage")?;
+
+        Ok(updated_stage_db.into())
     }
 
     async fn list_products_with_supply_chains(
@@ -253,4 +288,86 @@ impl SupplyChainRepository for SupplyChainRepositoryImpl {
         // The timestamp is ignored, as per existing logic.
         self.get_full_supply_chain(data.product_id, None).await
     }
+
+    async fn create_production_stage(
+        &self,
+        product_id: Uuid,
+        stage_data: &CreateProductionStageData,
+    ) -> Result<ProductionStage, RepositoryError> {
+        let new_stage_id = Uuid::new_v4();
+
+        let inserted_stage_db = sqlx::query_as!(
+            ProductionStageDb,
+            r#"
+            INSERT INTO production_stages (id, product_id, name, description, location, start_date, end_date)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING id, product_id, name, description, location, start_date, end_date, is_active
+            "#,
+            new_stage_id,
+            product_id,
+            stage_data.name,
+            stage_data.description,
+            stage_data.location,
+            stage_data.start_date,
+            stage_data.end_date
+        )
+        .fetch_one(&self.pool)
+        .await
+        .context("Failed to insert new production stage")?;
+
+        Ok(inserted_stage_db.into())
+    }
+}
+
+async fn update_production_stage(
+    &self,
+    stage_id: Uuid,
+    stage_data: &UpdateProductionStageData,
+) -> Result<ProductionStage, RepositoryError> {
+    let updated_stage_db = sqlx::query_as!(
+        ProductionStageDb,
+        r#"
+        UPDATE production_stages
+        SET
+            name = $2,
+            description = $3,
+            location = $4,
+            start_date = $5,
+            end_date = $6
+        WHERE id = $1
+        RETURNING id, product_id, name, description, location, start_date, end_date, is_active
+        "#,
+        stage_id,
+        stage_data.name,
+        stage_data.description,
+        stage_data.location,
+        stage_data.start_date,
+        stage_data.end_date
+    )
+    .fetch_one(&self.pool)
+    .await
+    .context("Failed to update production stage")?;
+
+    Ok(updated_stage_db.into())
+}
+
+async fn list_stages_for_product(
+    &self,
+    product_id: Uuid,
+) -> Result<Vec<ProductionStage>, RepositoryError> {
+    let stages = sqlx::query_as!(
+        ProductionStage,
+        r#"
+        SELECT id, product_id, name, description, location, start_date, end_date, is_active
+        FROM production_stages
+        WHERE product_id = $1
+        ORDER BY start_date
+        "#,
+        product_id
+    )
+    .fetch_all(&self.pool)
+    .await
+    .context("Failed to fetch production stages for product")?;
+
+    Ok(stages)
 }

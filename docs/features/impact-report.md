@@ -1,3 +1,5 @@
+<!-- DEPRECATED: Superseded by docs/architecture/impact-service.md -->
+<!-- Last valid as of: 2025-07-26 -->
 # Impact Report Architecture
 
 ## Overview

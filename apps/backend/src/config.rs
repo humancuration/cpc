@@ -39,11 +39,29 @@ impl FromStr for Environment {
 }
 
 #[derive(Debug, Clone)]
+#[derive(Debug, Clone)]
+pub struct UiThresholds {
+    pub degradation: f64,
+}
+
+impl UiThresholds {
+    pub fn from_env() -> Self {
+        let degradation = std::env::var("CPC_UI_DEGRADATION_THRESHOLD")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(0.15);
+        
+        Self { degradation }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Config {
     pub port: u16,
     pub jwt_secret: String,
     pub encryption_key: [u8; 32],
     pub environment: Environment,
+    pub ui_thresholds: UiThresholds,
 }
 
 impl Config {
@@ -96,7 +114,6 @@ impl Config {
 
         let mut encryption_key = [0u8; 32];
         encryption_key.copy_from_slice(&encryption_key_bytes);
-
         let env_str = env::var("CPC_ENV")
             .unwrap_or_else(|_| "dev".to_string());
         let environment = Environment::from_str(&env_str)?;
@@ -106,6 +123,7 @@ impl Config {
             jwt_secret,
             encryption_key,
             environment,
+            ui_thresholds: UiThresholds::from_env(),
         })
     }
 }

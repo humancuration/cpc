@@ -19,6 +19,18 @@ query GetSupplyChainByProduct($product_id: ID!) {
       coopsInvolved
       ethicalSourcingScore
     }
+    
+    query GetStage($id: UUID!) {
+      getStage(id: $id) {
+        id
+        name
+        description
+        location
+        startDate
+        endDate
+        productId
+      }
+    }
     timelineStart
     timelineEnd
   }
@@ -27,5 +39,16 @@ query ListProductsWithSupplyChains {
   listProductsWithSupplyChains {
     id
     name
+  }
+}
+
+query ListProductionStagesForProduct($productId: UUID!) {
+  listProductionStagesForProduct(productId: $productId) {
+    id
+    name
+    description
+    location
+    startDate
+    endDate
   }
 }

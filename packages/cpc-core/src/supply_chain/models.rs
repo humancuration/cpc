@@ -13,15 +13,16 @@ pub struct SupplyChain {
     pub timeline_range: (DateTime<Utc>, DateTime<Utc>),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct ProductionStage {
     pub id: Uuid,
+    pub product_id: Uuid,
     pub name: String,
     pub description: Option<String>,
     pub location: String, // Could be a more complex type later
     pub start_date: DateTime<Utc>,
     pub end_date: DateTime<Utc>,
-    // Other relevant metadata
+    pub is_active: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -68,4 +69,22 @@ pub struct StageConnectionData {
     pub from_stage_id: Uuid,
     pub to_stage_id: Uuid,
     pub relationship_type: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateProductionStageData {
+    pub name: String,
+    pub description: Option<String>,
+    pub location: String,
+    pub start_date: DateTime<Utc>,
+    pub end_date: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateProductionStageData {
+    pub name: String,
+    pub description: Option<String>,
+    pub location: String,
+    pub start_date: DateTime<Utc>,
+    pub end_date: DateTime<Utc>,
 }

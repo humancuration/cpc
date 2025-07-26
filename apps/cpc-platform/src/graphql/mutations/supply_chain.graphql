@@ -1,27 +1,30 @@
-mutation UpdateSupplyChain($input: UpdateSupplyChainInput!) {
-  updateSupplyChain(input: $input) {
-    productId
-    stages {
-      id
-      name
-      description
-      location
-      startDate
-      endDate
-    }
-    connections {
-      fromStageId
-      toStageId
-      relationshipType
-    }
-    cooperativeImpact {
-      workersBenefited
-      coopsInvolved
-      ethicalSourcingScore
-    }
-    timelineRange {
-      start
-      end
-    }
+mutation CreateSupplyChainStage($input: CreateSupplyChainStageInput!) {
+  createSupplyChainStage(input: $input) {
+    id
+    name
+    description
+    location
+    startDate
+    endDate
+  }
+}
+
+input UpdateProductionStageInput {
+  id: ID!
+  name: String!
+  description: String
+  location: String!
+  startDate: DateTime!
+  endDate: DateTime!
+}
+
+mutation UpdateSupplyChainStage($input: UpdateProductionStageInput!) {
+  updateSupplyChainStage(input: $input) {
+    id
+    name
+    description
+    location
+    startDate
+    endDate
   }
 }
