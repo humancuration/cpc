@@ -8,13 +8,15 @@ This project uses only permissively licensed libraries (MIT/Apache-2.0) to ensur
 ## Project Structure
 ```
 cpc/
-├── orchestrator/      # Central orchestrator (Rust)
-├── pds/               # Personal data server (Tauri + Rust)
-├── cpc-node/          # Cooperative cloud provider node (Rust)
-├── lib/               # Shared Rust library
-│   ├── crypto/        # Cryptographic operations
-│   ├── net/           # Network abstractions
-│   └── storage/       # Storage backends
+├── apps/
+│   ├── backend/       # Backend server (Axum + Rust)
+│   ├── pds/           # Personal data server (Tauri + Rust)
+│   ├── cpc-node/      # Cooperative cloud provider node (Rust)
+│   └── [module-name]/ # App modules
+├── packages/
+│   ├── cpc-core/      # Shared core logic
+│   ├── cpc-net/       # Network abstractions
+│   └── cpc-protos/    # Shared gRPC definitions
 ├── docs/              # Documentation
 │   └── ARCHITECTURE.md
 └── README.md
@@ -31,7 +33,9 @@ cpc/
 - User-controlled encrypted storage
 - Content-addressable data distribution
 - Cryptographic identity management
+- Modular architecture with runtime module management
 - Exclusively permissive dependencies (MIT/Apache-2.0)
 
 ## Documentation
 See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed system design and specifications.
+See [apps/backend/MODULE_MANAGEMENT.md](apps/backend/MODULE_MANAGEMENT.md) for information about module management.

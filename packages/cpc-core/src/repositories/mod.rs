@@ -1,3 +1,8 @@
+#[cfg(test)]
+mod user_repository_integration_test;
+#[cfg(test)]
+mod social_repository_integration_test;
+
 pub mod social;
 pub mod user_repository;
 pub mod social_repository;

@@ -10,6 +10,9 @@ rodio = "0.17"
 # Unique identifiers
 uuid = { version = "1.4", features = ["v4", "serde"] }
 
+# Date and time handling
+chrono = { version = "0.4", features = ["serde"] }
+
 # GraphQL API
 async-graphql = "6.0"
 

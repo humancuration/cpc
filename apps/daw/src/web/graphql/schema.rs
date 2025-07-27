@@ -1,6 +1,6 @@
 use async_graphql::*;
-use crate::domain::models::{Project, Track, Effect, AutomationPoint, AutomationLane};
-use crate::domain::types::InterpolationType;
+use crate::domain::models::{Project, Track, Effect, EffectInstance, AutomationPoint, AutomationLane};
+use crate::domain::models::automation::InterpolationType;
 use uuid::Uuid;
 
 /// GraphQL type for automation interpolation
@@ -15,7 +15,7 @@ impl From<InterpolationType> for GraphQLInterpolationType {
     fn from(value: InterpolationType) -> Self {
         match value {
             InterpolationType::Linear => GraphQLInterpolationType::Linear,
-            InterpolationType::Bezier => GraphQLInterpolationType::Bezier,
+            InterpolationType::Bezier { .. } => GraphQLInterpolationType::Bezier,
             InterpolationType::Hold => GraphQLInterpolationType::Hold,
         }
     }
@@ -25,7 +25,10 @@ impl From<GraphQLInterpolationType> for InterpolationType {
     fn from(value: GraphQLInterpolationType) -> Self {
         match value {
             GraphQLInterpolationType::Linear => InterpolationType::Linear,
-            GraphQLInterpolationType::Bezier => InterpolationType::Bezier,
+            GraphQLInterpolationType::Bezier => InterpolationType::Bezier {
+                handle_left: (0.0, 0.0),
+                handle_right: (1.0, 1.0),
+            },
             GraphQLInterpolationType::Hold => InterpolationType::Hold,
         }
     }
@@ -37,24 +40,43 @@ pub struct GraphQLAutomationPoint {
     pub position: u64,
     pub value: f32,
     pub interpolation: GraphQLInterpolationType,
+    pub handle_left: Option<(f32, f32)>,
+    pub handle_right: Option<(f32, f32)>,
 }
 
 impl From<AutomationPoint> for GraphQLAutomationPoint {
     fn from(point: AutomationPoint) -> Self {
+        let (handle_left, handle_right) = match point.interpolation {
+            InterpolationType::Bezier { handle_left, handle_right } => (Some(handle_left), Some(handle_right)),
+            _ => (None, None),
+        };
+        
         Self {
             position: point.position,
             value: point.value,
             interpolation: point.interpolation.into(),
+            handle_left,
+            handle_right,
         }
     }
 }
 
 impl From<GraphQLAutomationPoint> for AutomationPoint {
     fn from(point: GraphQLAutomationPoint) -> Self {
+        let interpolation = match point.interpolation {
+            GraphQLInterpolationType::Bezier => {
+                InterpolationType::Bezier {
+                    handle_left: point.handle_left.unwrap_or((0.0, 0.0)),
+                    handle_right: point.handle_right.unwrap_or((1.0, 1.0)),
+                }
+            }
+            _ => point.interpolation.into(),
+        };
+        
         Self {
             position: point.position,
             value: point.value,
-            interpolation: point.interpolation.into(),
+            interpolation,
         }
     }
 }
@@ -73,6 +95,7 @@ impl From<AutomationLane> for GraphQLAutomationLane {
     fn from(lane: AutomationLane) -> Self {
         Self {
             parameter_id: lane.parameter_id,
+            lane_id: ID::from(lane.lane_id.to_string()),
             track_id: lane.track_id.map(|id| ID::from(id.to_string())),
             effect_id: lane.effect_id.map(|id| ID::from(id.to_string())),
             points: lane.points.into_iter().map(|p| p.into()).collect(),
@@ -83,6 +106,7 @@ impl From<AutomationLane> for GraphQLAutomationLane {
 impl From<GraphQLAutomationLane> for AutomationLane {
     fn from(lane: GraphQLAutomationLane) -> Self {
         Self {
+            lane_id: uuid::Uuid::parse_str(&lane.lane_id.to_string()).unwrap_or_default(),
             parameter_id: lane.parameter_id,
             track_id: lane.track_id
                 .map(|id| uuid::Uuid::parse_str(&id.to_string()).unwrap_or_default()),
@@ -158,12 +182,16 @@ impl MutationRoot {
         position: u64,
         value: f32,
         interpolation: GraphQLInterpolationType,
+        handle_left: Option<(f32, f32)>,
+        handle_right: Option<(f32, f32)>,
     ) -> Result<GraphQLAutomationPoint> {
         // Placeholder implementation
         Ok(GraphQLAutomationPoint {
             position,
             value,
             interpolation,
+            handle_left,
+            handle_right,
         })
     }
 
@@ -199,9 +227,17 @@ impl MutationRoot {
         old_position: u64,
         new_position: u64,
         new_value: f32,
+        new_handle_left: Option<(f32, f32)>,
+        new_handle_right: Option<(f32, f32)>,
     ) -> Result<GraphQLAutomationPoint> {
         // Implementation will move point in backend
-        Ok(GraphQLAutomationPoint::default())
+        Ok(GraphQLAutomationPoint {
+            position: new_position,
+            value: new_value,
+            interpolation: GraphQLInterpolationType::Linear,
+            handle_left: new_handle_left,
+            handle_right: new_handle_right,
+        })
     }
 
     /// Set the interpolation type for an automation point
@@ -211,6 +247,17 @@ impl MutationRoot {
         interpolation: GraphQLInterpolationType,
     ) -> Result<bool> {
         // Implementation will update interpolation type
+        Ok(true)
+    }
+
+    /// Set the handle information for a Bezier automation point
+    async fn set_bezier_handles(
+        &self,
+        point_id: ID,
+        handle_left: (f32, f32),
+        handle_right: (f32, f32),
+    ) -> Result<bool> {
+        // Implementation will update handle information
         Ok(true)
     }
 }
@@ -238,6 +285,7 @@ impl Default for GraphQLAutomationLane {
     fn default() -> Self {
         Self {
             parameter_id: String::new(),
+            lane_id: ID::from(uuid::Uuid::new_v4().to_string()),
             track_id: None,
             effect_id: None,
             points: Vec::new(),
@@ -251,6 +299,8 @@ impl Default for GraphQLAutomationPoint {
             position: 0,
             value: 0.0,
             interpolation: GraphQLInterpolationType::Linear,
+            handle_left: None,
+            handle_right: None,
         }
     }
 }

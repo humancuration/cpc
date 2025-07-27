@@ -4,6 +4,7 @@ members = [
     "apps/backend",
     "apps/pds",
     "apps/cpc-node",
+    "apps/website-builder",
     "packages/cpc-core",
     "packages/cpc-net",
     "packages/cpc-protos"

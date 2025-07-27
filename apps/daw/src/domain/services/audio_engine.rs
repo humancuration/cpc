@@ -139,8 +139,12 @@ impl AudioEngine {
         self.automation_service.apply_track_automation(track, time);
 
         // Apply automation to effect parameters
-        for effect_id in &track.effects {
-            if let Some(effect) = effects.iter_mut().find(|e| &e.id == effect_id) {
+        // In our model, effects are stored directly in the track, not as references
+        // So we need to apply automation to the effects in the effects array that match
+        // the effect instances in the track
+        for effect_instance in &track.effects {
+            // Find the corresponding effect in the effects array
+            if let Some(effect) = effects.iter_mut().find(|e| e.effect_type == effect_instance.effect_type) {
                 self.automation_service.apply_effect_automation(effect, time);
             }
         }

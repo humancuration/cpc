@@ -1,11 +1,5 @@
-.kilocode/
-.kiro/
-.trae/
-scripts/
-.kilocodeignore
 target/
 combined_project_cpc_markdown.txt
 combined_project_cpc.txt
 WheresThisFrom/combined_project_text_markdown.txt
 WheresThisFrom/combined_project_text.txt
-WheresThisFrom/scripts/

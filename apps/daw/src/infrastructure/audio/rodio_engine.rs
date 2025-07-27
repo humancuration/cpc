@@ -378,14 +378,11 @@ mod tests {
     #[test]
     fn test_process_single_track() {
         let engine = RodioEngine::new(44100, 512).unwrap();
-        let track = Track {
-            id: "test".to_string(),
-            name: "Test Track".to_string(),
-            audio_data: vec![0.5; 512],
-            volume: 0.8,
-            pan: 0.0,
-            muted: false,
-        };
+        let mut track = Track::new_audio("Test Track".to_string());
+        track.audio_data = vec![0.5; 512];
+        track.volume = 0.8;
+        track.pan = 0.0;
+        track.muted = false;
         
         let processed = engine.process_single_track(&track).unwrap();
         assert_eq!(processed.len(), 1024); // Stereo output
@@ -394,28 +391,20 @@ mod tests {
     #[tokio::test]
     async fn test_process_project() {
         let engine = RodioEngine::new(44100, 512).unwrap();
-        let project = Project {
-            id: "test".to_string(),
-            name: "Test Project".to_string(),
-            tracks: vec![
-                Track {
-                    id: "track1".to_string(),
-                    name: "Track 1".to_string(),
-                    audio_data: vec![0.5; 512],
-                    volume: 0.8,
-                    pan: -0.5,
-                    muted: false,
-                },
-                Track {
-                    id: "track2".to_string(),
-                    name: "Track 2".to_string(),
-                    audio_data: vec![0.3; 512],
-                    volume: 0.6,
-                    pan: 0.5,
-                    muted: false,
-                },
-            ],
-        };
+        let mut project = Project::new("Test Project".to_string(), 44100);
+        let mut track1 = Track::new_audio("Track 1".to_string());
+        track1.audio_data = vec![0.5; 512];
+        track1.volume = 0.8;
+        track1.pan = -0.5;
+        track1.muted = false;
+        project.tracks.push(track1);
+        
+        let mut track2 = Track::new_audio("Track 2".to_string());
+        track2.audio_data = vec![0.3; 512];
+        track2.volume = 0.6;
+        track2.pan = 0.5;
+        track2.muted = false;
+        project.tracks.push(track2);
         
         let result = engine.process_project(&project).await;
         assert!(result.is_ok());

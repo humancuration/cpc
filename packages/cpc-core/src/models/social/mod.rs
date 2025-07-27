@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod post_test;
+
 pub mod post;
 pub mod relationship;
 pub mod forum;

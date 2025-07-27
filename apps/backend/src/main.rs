@@ -1,5 +1,5 @@
 use axum::{
-    extract::State,
+    extract::{State, Json},
     routing::{get, post},
     Router,
 };
@@ -10,6 +10,7 @@ use tower_http::cors::CorsLayer;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use std::fs;
 use tonic::transport::Server;
+use serde::{Deserialize, Serialize};
 
 mod db;
 mod routes;
@@ -26,6 +27,16 @@ mod config;
 mod middleware;
 mod integration_docs;
 pub mod project;
+mod module_registry;
+mod migration_system;
+mod graphql_schema_builder;
+
+// Import the website builder module
+use cpc_website_builder::web::module as website_builder;
+use cpc_website_builder::web::modular_module::ModularWebsiteBuilder;
+
+// Import the music player module
+use cpc_music_player::web::modular_module::ModularMusicPlayer;
 
 use crate::db::{DbPool, init_db};
 use crate::bi::{BIService, BIConfig};
@@ -34,7 +45,7 @@ use crate::services::asset_storage::AssetStorageService;
 use crate::services::asset_preview::AssetPreviewService;
 use crate::services::impact::ImpactService;
 use crate::services::barcode::BarcodeServiceImpl;
-use crate::graphql::schema::{Schema, RootQuery, RootMutation, RootSubscription};
+use crate::graphql::static_schema::{Schema, RootQuery, RootMutation, RootSubscription};
 use crate::invoicing::graphql::CustomerLoader;
 use crate::expenses::grpc::ExpenseProcessingService;
 use crate::auth::{AuthState, auth_middleware, optional_auth_middleware, create_rate_limiter, create_security_middleware};
@@ -63,6 +74,25 @@ use crate::repositories::supply_chain_repository::SupplyChainRepositoryImpl;
 use cpc_net::community_repo::CommunityRepo;
 // use p2panda::prelude::NodeClient; // Package not available
 use axum::middleware;
+use crate::module_registry::{ModuleRegistry, Module};
+use crate::migration_system::MigrationSystem;
+use crate::graphql_schema_builder::SchemaBuilder;
+
+#[derive(Deserialize)]
+struct EnableModuleRequest {
+    module_name: String,
+}
+
+#[derive(Deserialize)]
+struct DisableModuleRequest {
+    module_name: String,
+}
+
+#[derive(Serialize)]
+struct ModuleResponse {
+    success: bool,
+    message: String,
+}
 
 #[tokio::main]
 async fn main() {
@@ -86,7 +116,37 @@ async fn main() {
         .await
         .expect("Failed to initialize database");
 
-    // Run migrations
+    // Initialize module registry
+    let mut module_registry = ModuleRegistry::new(db.clone());
+    
+    // Register available modules
+    let website_builder_module = Arc::new(tokio::sync::RwLock::new(
+        ModularWebsiteBuilder::new(db.clone())
+    ));
+    module_registry.register_module_with_dependencies(
+        website_builder_module,
+        vec![]  // No dependencies for website-builder
+    ).expect("Failed to register website-builder module");
+    
+    // Register music player module
+    let music_player_module = Arc::new(tokio::sync::RwLock::new(
+        ModularMusicPlayer::new(db.clone())
+    ));
+    module_registry.register_module_with_dependencies(
+        music_player_module,
+        vec![]  // No dependencies for music-player
+    ).expect("Failed to register music-player module");
+    
+    // Load enabled modules from database
+    module_registry.load_enabled_modules().await
+        .expect("Failed to load enabled modules");
+
+    // Run migrations for enabled modules
+    let migration_system = MigrationSystem::new(db.clone()).await;
+    migration_system.run_migrations(&module_registry).await
+        .expect("Failed to run module migrations");
+
+    // Run core migrations
     sqlx::migrate!("./migrations")
         .run(&db)
         .await
@@ -181,43 +241,19 @@ async fn main() {
 
     // Initialize Dataloaders
     let customer_loader = DataLoader::new(CustomerLoader { pool: db.clone() }, tokio::spawn);
-
-    // Create royalty subscription channel
-    let (royalty_tx, royalty_rx) = tokio::sync::mpsc::unbounded_channel();
     
-    // Build GraphQL schema
-    let schema = Schema::build(RootQuery::default(), RootMutation::default(), RootSubscription::default())
-        .data(db.clone())
-        .data(customer_loader)
-        .data(bi_service.clone())
-        .data(asset_storage.clone())
-        .data(asset_preview.clone())
-        .data(impact_service.clone())
-        .data(impact_calculator.clone())
-        .data(feature_flags.clone())
-        .data(supply_chain_service.clone())
-        .data(financial_forecasting_service.clone())
-        .data(expense_service.clone())
-        .data(community_repo.clone())
-        // Add new services for android-rust-migration
-        .data(identity_service.clone())
-        .data(social_service.clone())
-        .data(forum_service.clone())
-        .data(governance_service.clone())
-       .data(project_service.clone())
-        // Add finance services
-        .data(royalty_service.clone())
-        .data(royalty_rx)
-        // Note: SimpleBroker is not a service, it does not need to be Arc-wrapped
-        // and it is thread-safe. It's added directly to the schema data.
-        .finish()
-        .expect("Failed to build GraphQL schema");
+    // Build GraphQL schema using the dynamic schema builder
+    let schema = SchemaBuilder::build(&module_registry);
 
     // Build our application with routes
     let app = Router::new()
         .route("/health", get(routes::health_check))
         .route("/graphql", post(graphql_handler))
         .route("/graphql", get(graphql_playground))
+        // Add module management API endpoints
+        .route("/api/modules/enable", post(enable_module))
+        .route("/api/modules/disable", post(disable_module))
+        .route("/api/modules/available", get(list_available_modules))
         .nest("/api", create_api_router(
             social_service.clone(),
             forum_service.clone(),
@@ -226,7 +262,10 @@ async fn main() {
             auth_state.clone(),
         ))
         .nest("/bi", BIService::router(bi_service.clone()))
-        .with_state(schema)
+        .with_state(Arc::new(AppState {
+            schema,
+            module_registry: Arc::new(tokio::sync::RwLock::new(module_registry)),
+        }))
         .layer(middleware::from_fn_with_state(
             security_middleware_service.clone(),
             security_middleware,
@@ -252,6 +291,11 @@ async fn main() {
     
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+struct AppState {
+    schema: async_graphql::Schema<async_graphql::Object, async_graphql::Object, async_graphql::EmptySubscription>,
+    module_registry: Arc<tokio::sync::RwLock<ModuleRegistry>>,
 }
 
 fn create_api_router(
@@ -307,10 +351,10 @@ fn create_api_router(
 }
 
 async fn graphql_handler(
-    State(schema): State<Schema>,
+    State(state): State<Arc<AppState>>,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
-    schema.execute(req.into_inner()).await.into()
+    state.schema.execute(req.into_inner()).await.into()
 }
 
 async fn graphql_playground() -> impl axum::response::IntoResponse {
@@ -320,6 +364,49 @@ async fn graphql_playground() -> impl axum::response::IntoResponse {
     .endpoint("/graphql")
     .subscription_endpoint("/graphql")
     .finish()
+}
+
+async fn enable_module(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<EnableModuleRequest>,
+) -> Json<ModuleResponse> {
+    let result = state.module_registry.write().await.enable_module(&payload.module_name).await;
+    
+    match result {
+        Ok(_) => Json(ModuleResponse {
+            success: true,
+            message: format!("Module {} enabled successfully", payload.module_name),
+        }),
+        Err(e) => Json(ModuleResponse {
+            success: false,
+            message: format!("Failed to enable module {}: {}", payload.module_name, e),
+        }),
+    }
+}
+
+async fn disable_module(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<DisableModuleRequest>,
+) -> Json<ModuleResponse> {
+    let result = state.module_registry.write().await.disable_module(&payload.module_name).await;
+    
+    match result {
+        Ok(_) => Json(ModuleResponse {
+            success: true,
+            message: format!("Module {} disabled successfully", payload.module_name),
+        }),
+        Err(e) => Json(ModuleResponse {
+            success: false,
+            message: format!("Failed to disable module {}: {}", payload.module_name, e),
+        }),
+    }
+}
+
+async fn list_available_modules(
+    State(state): State<Arc<AppState>>,
+) -> Json<Vec<String>> {
+    let modules = state.module_registry.read().await.available_modules();
+    Json(modules)
 }
 
 async fn export_schema() {

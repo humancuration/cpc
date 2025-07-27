@@ -18,10 +18,12 @@ async-graphql-axum = { workspace = true }
 tonic = { workspace = true }
 prost = { workspace = true }
 
-# Local packages
+// Local packages
 cpc-core = { path = "../../packages/cpc-core" }
 cpc-net = { path = "../../packages/cpc-net" }
 cpc-protos = { path = "../../packages/cpc-protos" }
+cpc-website-builder = { path = "../website-builder" }
+cpc-music-player = { path = "../music-player" }
 
 # Common dependencies
 tokio = { workspace = true }
@@ -34,6 +36,7 @@ thiserror = { workspace = true }
 async-stream = { workspace = true }
 rust_decimal = { workspace = true }
 futures-util = { workspace = true }
+semver = "1.0"
 
 [build-dependencies]
 tonic-build = "0.11"

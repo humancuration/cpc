@@ -19,3 +19,13 @@ pub mod social_interactions;
 pub mod forum_system;
 pub mod governance_system;
 pub mod subscription_events;
+
+// Modular architecture modules
+pub mod static_schema;
+pub mod schema_builder;
+
+#[cfg(test)]
+mod schema_builder_test;
+
+#[cfg(test)]
+mod schema_merging_test;

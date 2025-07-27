@@ -81,6 +81,7 @@ impl AutomationLane {
     /// Create a new automation lane for a parameter
     pub fn new(parameter_id: String) -> Self {
         Self {
+            lane_id: Uuid::new_v4(),
             parameter_id,
             track_id: None,
             effect_id: None,
@@ -91,6 +92,7 @@ impl AutomationLane {
     /// Create a new track parameter automation lane
     pub fn for_track(parameter_id: String, track_id: Uuid) -> Self {
         Self {
+            lane_id: Uuid::new_v4(),
             parameter_id,
             track_id: Some(track_id),
             effect_id: None,
@@ -101,6 +103,7 @@ impl AutomationLane {
     /// Create a new effect parameter automation lane
     pub fn for_effect(parameter_id: String, effect_id: Uuid) -> Self {
         Self {
+            lane_id: Uuid::new_v4(),
             parameter_id,
             track_id: None,
             effect_id: Some(effect_id),

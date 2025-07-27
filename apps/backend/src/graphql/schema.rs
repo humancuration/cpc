@@ -13,6 +13,8 @@ use crate::graphql::finance::{FinanceQuery, FinanceMutation, FinanceSubscription
 use crate::config::UiThresholds;
 
 // New GraphQL modules for android-rust-migration
+// Website builder module
+use cpc_website_builder::web::graphql::{WebsiteBuilderQuery, WebsiteBuilderMutation, WebsiteBuilderSubscription};
 use crate::graphql::user_management::{UserQuery, UserMutation, UserSubscription};
 use crate::graphql::social_interactions::{SocialQuery, SocialMutation, SocialSubscription};
 use crate::graphql::forum_system::{ForumQuery, ForumMutation, ForumSubscription};
@@ -34,6 +36,7 @@ pub struct RootQuery(
     // New queries for android-rust-migration
     UserQuery,
     SocialQuery,
+WebsiteBuilderQuery
     ForumQuery,
     GovernanceQuery
 );
@@ -52,6 +55,7 @@ pub struct RootMutation(
     FinanceMutation,
     // New mutations for android-rust-migration
     UserMutation,
+WebsiteBuilderMutation
     SocialMutation,
     ForumMutation,
     GovernanceMutation
@@ -69,6 +73,7 @@ pub struct RootSubscription(
     InvoicingSubscription,
     FinanceSubscription,
     // New subscriptions for android-rust-migration
+WebsiteBuilderSubscription
     UserSubscription,
     SocialSubscription,
     ForumSubscription,

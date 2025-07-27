@@ -119,6 +119,8 @@ The Android integration is a key component of our mobile strategy. It follows th
 
 For a detailed breakdown of the JNI bridge, lifecycle management, texture exchange protocols, and event handling, please refer to the [Android-Rust Integration Documentation](./android_rust_integration.md).
 
+For information about our Android integration architecture for CPC modules, see [Android Architecture](android_architecture.md).
+
 **Cross-Platform Interface Boundaries**
 
 The boundary between the native Android (Kotlin) code and the shared Rust code is strictly defined by the JNI (Java Native Interface). This interface is managed in two key files:

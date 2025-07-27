@@ -65,6 +65,9 @@ impl AutomationService {
                                 "feedback" => {
                                     effect.parameters.delay_feedback = Some(automation_utils::scale_value(value, 0.0, 0.99));
                                 }
+                                "mix" => {
+                                    effect.parameters.delay_mix = Some(automation_utils::scale_value(value, 0.0, 1.0));
+                                }
                                 _ => {}
                             }
                         }
@@ -85,8 +88,14 @@ impl AutomationService {
                             }
                         }
                         crate::domain::models::EffectType::Distortion => {
-                            if lane.parameter_id == "gain" {
-                                effect.parameters.distortion_gain = Some(automation_utils::scale_value(value, 0.0, 10.0));
+                            match lane.parameter_id.as_str() {
+                                "gain" => {
+                                    effect.parameters.distortion_gain = Some(automation_utils::scale_value(value, 0.0, 10.0));
+                                }
+                                "tone" => {
+                                    effect.parameters.distortion_tone = Some(automation_utils::scale_value(value, 0.0, 1.0));
+                                }
+                                _ => {}
                             }
                         }
                         crate::domain::models::EffectType::Chorus => {
@@ -96,6 +105,9 @@ impl AutomationService {
                                 }
                                 "depth" => {
                                     effect.parameters.chorus_depth = Some(automation_utils::scale_value(value, 0.0, 1.0));
+                                }
+                                "mix" => {
+                                    effect.parameters.chorus_mix = Some(automation_utils::scale_value(value, 0.0, 1.0));
                                 }
                                 _ => {}
                             }
@@ -143,6 +155,7 @@ impl AutomationService {
                 vec![
                     AutomationLane::for_effect("time".to_string(), effect_id),
                     AutomationLane::for_effect("feedback".to_string(), effect_id),
+                    AutomationLane::for_effect("mix".to_string(), effect_id),
                 ]
             }
             crate::domain::models::EffectType::Compressor => {
@@ -166,6 +179,7 @@ impl AutomationService {
                 vec![
                     AutomationLane::for_effect("rate".to_string(), effect_id),
                     AutomationLane::for_effect("depth".to_string(), effect_id),
+                    AutomationLane::for_effect("mix".to_string(), effect_id),
                 ]
             }
         }
@@ -212,7 +226,7 @@ mod tests {
     }
 
     #[test]
-    fn test_effect_automation() {
+    fn test_reverb_automation() {
         let mut service = AutomationService::new();
         let mut effect = Effect::new("Test Reverb".to_string(), EffectType::Reverb);
         
@@ -225,6 +239,54 @@ mod tests {
         // Apply automation
         service.apply_effect_automation(&mut effect, 500);
         assert!((effect.parameters.reverb_size.unwrap() - 0.5).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_delay_automation() {
+        let mut service = AutomationService::new();
+        let mut effect = Effect::new("Test Delay".to_string(), EffectType::Delay);
+        
+        // Add time automation
+        let mut lane = AutomationLane::for_effect("time".to_string(), effect.id);
+        lane.add_point(crate::domain::models::automation::AutomationPoint::new(0, 0.0)).unwrap();
+        lane.add_point(crate::domain::models::automation::AutomationPoint::new(1000, 1.0)).unwrap();
+        effect.automation_lanes.push(lane);
+        
+        // Apply automation
+        service.apply_effect_automation(&mut effect, 500);
+        assert!((effect.parameters.delay_time.unwrap() - 1.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_distortion_automation() {
+        let mut service = AutomationService::new();
+        let mut effect = Effect::new("Test Distortion".to_string(), EffectType::Distortion);
+        
+        // Add gain automation
+        let mut lane = AutomationLane::for_effect("gain".to_string(), effect.id);
+        lane.add_point(crate::domain::models::automation::AutomationPoint::new(0, 0.0)).unwrap();
+        lane.add_point(crate::domain::models::automation::AutomationPoint::new(1000, 1.0)).unwrap();
+        effect.automation_lanes.push(lane);
+        
+        // Apply automation
+        service.apply_effect_automation(&mut effect, 500);
+        assert!((effect.parameters.distortion_gain.unwrap() - 5.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_chorus_automation() {
+        let mut service = AutomationService::new();
+        let mut effect = Effect::new("Test Chorus".to_string(), EffectType::Chorus);
+        
+        // Add rate automation
+        let mut lane = AutomationLane::for_effect("rate".to_string(), effect.id);
+        lane.add_point(crate::domain::models::automation::AutomationPoint::new(0, 0.0)).unwrap();
+        lane.add_point(crate::domain::models::automation::AutomationPoint::new(1000, 1.0)).unwrap();
+        effect.automation_lanes.push(lane);
+        
+        // Apply automation
+        service.apply_effect_automation(&mut effect, 500);
+        assert!((effect.parameters.chorus_rate.unwrap() - 2.55).abs() < 0.01);
     }
 
     #[test]
@@ -250,7 +312,29 @@ mod tests {
         assert!(track_lanes.iter().any(|l| l.parameter_id == "volume"));
         
         let effect_lanes = AutomationService::create_default_effect_lanes(effect_id, EffectType::Delay);
-        assert_eq!(effect_lanes.len(), 2);
+        assert_eq!(effect_lanes.len(), 3);
         assert!(effect_lanes.iter().any(|l| l.parameter_id == "time"));
+        assert!(effect_lanes.iter().any(|l| l.parameter_id == "mix"));
+
+        let effect_lanes = AutomationService::create_default_effect_lanes(effect_id, EffectType::Chorus);
+        assert_eq!(effect_lanes.len(), 3);
+        assert!(effect_lanes.iter().any(|l| l.parameter_id == "rate"));
+        assert!(effect_lanes.iter().any(|l| l.parameter_id == "mix"));
+
+        let effect_lanes = AutomationService::create_default_effect_lanes(effect_id, EffectType::Distortion);
+        assert_eq!(effect_lanes.len(), 1);
+        assert!(effect_lanes.iter().any(|l| l.parameter_id == "gain"));
+
+        let effect_lanes = AutomationService::create_default_effect_lanes(effect_id, EffectType::Compressor);
+        assert_eq!(effect_lanes.len(), 1);
+        assert!(effect_lanes.iter().any(|l| l.parameter_id == "ratio"));
+
+        let effect_lanes = AutomationService::create_default_effect_lanes(effect_id, EffectType::Equalizer);
+        assert_eq!(effect_lanes.len(), 3);
+        assert!(effect_lanes.iter().any(|l| l.parameter_id == "band0"));
+
+        let effect_lanes = AutomationService::create_default_effect_lanes(effect_id, EffectType::Reverb);
+        assert_eq!(effect_lanes.len(), 1);
+        assert!(effect_lanes.iter().any(|l| l.parameter_id == "size"));
     }
 }

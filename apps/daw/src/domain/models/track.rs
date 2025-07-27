@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::sync::Arc;
 use crate::domain::models::automation::AutomationLane;
+use crate::domain::models::effect::EffectInstance;
 
 /// Represents the type of track in the DAW
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -180,10 +181,11 @@ pub struct Track {
     pub pan: f32,
     pub muted: bool,
     pub solo: bool,
-    pub effects: Vec<Uuid>,
+    pub effects: Vec<EffectInstance>,
     pub input_channels: Vec<String>, // Input channel configuration
     pub output_channels: Vec<String>, // Output channel configuration
     pub automation_lanes: Vec<AutomationLane>,
+    pub audio_data: Vec<f32>, // Audio data for the track
 }
 
 impl Track {
@@ -201,6 +203,7 @@ impl Track {
             input_channels: Vec::new(),
             output_channels: Vec::new(),
             automation_lanes: Vec::new(),
+            audio_data: Vec::new(),
         }
     }
 
@@ -569,4 +572,4 @@ mod tests {
         assert!(bus_track.add_clip(Clip::new_midi("Test".to_string(), 0, 1000)).is_err());
     }
 }
-    #[test
+}

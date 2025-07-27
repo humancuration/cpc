@@ -1,3 +1,5 @@
+**Executive Summary**: The Android-Rust integration for the Music Player now includes comprehensive consent management with five consent types, each requiring specific authorization tokens. All privacy-sensitive operations (playback, recommendations, social interactions, and offline downloads) require valid consent tokens, with proper error handling for expired or missing consents. The Kotlin bridge interface mirrors the Rust implementation with dedicated data classes and privacy-aware methods.
+
 # Android-Rust Integration Architecture
 
 **Version:** 1.0
@@ -133,7 +135,165 @@ To ensure stability and prevent breaking changes as the platform evolves, the JN
 2.  **Log Warnings:** When a deprecated function is called, a warning is logged on both the Android (Logcat) and Rust (stdout) sides.
 3.  **Removal:** After the grace period, the deprecated function is removed, and the bridge version is updated.
 
-## 7. Troubleshooting Common JNI Issues
+## 7. Music Player Bridge Implementation
+
+The Music Player module implements a comprehensive bridge interface that handles both functionality and privacy requirements through consent-aware methods.
+
+### Kotlin Data Classes
+
+The bridge uses the following data classes for communication between Kotlin and Rust:
+
+```kotlin
+data class PlaySession(
+    val sessionId: String,
+    val trackId: String,
+    val positionMs: Int
+)
+
+data class Track(
+    val id: String,
+    val title: String,
+    val artistId: String,
+    val durationMs: Int,
+    val albumId: String? = null,
+    val coverArtUrl: String? = null
+)
+
+data class DownloadStatus(
+    val trackId: String,
+    val status: String, // "pending", "downloading", "completed", "failed"
+    val progress: Float = 0.0f,
+    val offlineUrl: String? = null
+)
+
+data class ConsentStatus(
+    val consentType: String,
+    val granted: Boolean,
+    val expiresAt: Long? // Unix timestamp in milliseconds
+)
+
+data class ConsentRequestResult(
+    val consentType: String,
+    val granted: Boolean,
+    val newToken: String? = null
+)
+```
+
+### Consent-Aware Bridge Methods
+
+All privacy-sensitive operations require consent tokens to verify permissions:
+
+#### 1. Playback Operations
+```kotlin
+/**
+ * Starts playback of a track with position (requires playback consent)
+ * @throws MusicPlayerError if consent verification fails
+ */
+fun playTrack(trackId: UUID, positionMs: Int?): PlaySession {
+    return nativePlayTrack(trackId.toString(), positionMs ?: 0)
+}
+```
+#### 2. Recommendation Requests
+```kotlin
+/**
+ * Gets personalized recommendations (requires recommendations consent)
+ * @param userId User identifier
+ * @param consentToken Token verifying recommendations consent
+ * @return List of recommended tracks
+ * @throws MusicPlayerError if consent verification fails
+ */
+fun getRecommendations(userId: UUID, consentToken: String): List<Track> {
+    return nativeGetRecommendations(userId.toString(), consentToken)
+}
+```
+```
+
+#### 3. Social Interactions
+```kotlin
+/**
+ * Likes a track (requires social consent)
+ * @return true if successful, false otherwise
+ * @throws MusicPlayerError if consent verification fails
+ */
+fun likeTrack(userId: UUID, trackId: UUID, consentToken: String): Boolean {
+    return nativeLikeTrack(userId.toString(), trackId.toString(), consentToken)
+}
+```
+
+```kotlin
+/**
+ * Comments on a track (requires social consent)
+ * @return true if successful, false otherwise
+ * @throws MusicPlayerError if consent verification fails
+ */
+fun commentOnTrack(userId: UUID, trackId: UUID, comment: String, consentToken: String): Boolean {
+    return nativeCommentOnTrack(userId.toString(), trackId.toString(), comment, consentToken)
+#### 4. Offline Downloads
+```kotlin
+/**
+ * Downloads a track for offline use (requires offline_download consent)
+ * @param includeWaveform Whether to include waveform data
+ * @param consentToken Token verifying offline download consent
+ * @return Download status object
+ * @throws MusicPlayerError if consent verification fails
+ */
+fun downloadTrack(trackId: UUID, includeWaveform: Boolean, consentToken: String): DownloadStatus {
+    return nativeDownloadTrack(trackId.toString(), includeWaveform, consentToken)
+}
+```
+}
+```
+
+### Consent Management Methods
+
+```kotlin
+/**
+ * Verifies if a specific consent type is valid
+ * @return ConsentStatus object with current status
+ */
+fun verifyConsent(userId: UUID, consentType: String): ConsentStatus {
+    return nativeVerifyConsent(userId.toString(), consentType)
+}
+
+/**
+ * Requests user consent for a specific operation
+ * @return Result of consent request
+ */
+fun requestConsent(userId: UUID, consentType: String): ConsentRequestResult {
+    return nativeRequestConsent(userId.toString(), consentType)
+}
+### Error Handling for Privacy Operations
+
+All privacy-sensitive operations must handle the following error cases:
+
+```kotlin
+try {
+    val recommendations = musicPlayerBridge.getRecommendations(
+        userId = currentUser.id,
+        consentToken = currentUser.consentTokens["recommendations"] ?: ""
+    )
+    // Process recommendations
+} catch (e: MusicPlayerError) {
+    when {
+        e.message?.contains("Consent renewal required") == true -> {
+            // Handle expired consent (show renewal UI)
+            showConsentRenewalDialog(ConsentType.RECOMMENDATIONS)
+        }
+        e.message?.contains("Consent required") == true || e.message?.contains("Consent denied") == true -> {
+            // Handle missing consent (show request UI)
+            showConsentRequestDialog(ConsentType.RECOMMENDATIONS)
+        }
+        else -> {
+            // Handle other privacy errors
+            showError("Privacy error: ${e.message}")
+        }
+    }
+}
+```
+}
+```
+
+## 8. Troubleshooting Common JNI Issues
 
 - **`UnsatisfiedLinkError`**:
   - **Cause:** The native library (`libcpc_core.so`) is not loaded correctly, or the JNI function signature in Kotlin does not exactly match the mangled name in Rust.
@@ -148,3 +308,5 @@ To ensure stability and prevent breaking changes as the platform evolves, the JN
 - **Incorrect Data Marshaling:**
   - **Cause:** `serde_json` fails to parse a string, or byte buffers are misinterpreted.
   - **Solution:** Add robust error handling and logging around all `env.get_string`, `serde_json::from_str`, and buffer manipulation calls to catch malformed data.
+
+For information about our Android integration architecture for CPC modules, see [Android Architecture](android_architecture.md).
