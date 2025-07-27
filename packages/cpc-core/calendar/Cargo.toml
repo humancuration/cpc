@@ -1,0 +1,27 @@
+[package]
+name = "cpc-core-calendar"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+chrono-tz = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+async-trait = "0.1"
+
+# For p2p synchronization
+p2panda = { version = "0.1" }
+
+# For database integration
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
+
+# For GraphQL API
+async-graphql = "6.0"
+
+[dev-dependencies]
+# For testing
+tokio = { version = "1.0", features = ["full"] }
