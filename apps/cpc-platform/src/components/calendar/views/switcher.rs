@@ -18,6 +18,18 @@ pub struct CalendarViewSwitcherProps {
     pub on_date_change: Callback<DateTime<Utc>>,
 }
 
+/// Check if the current device is mobile
+fn check_is_mobile() -> bool {
+    if let Some(window) = web_sys::window() {
+        if let Ok(media) = window.match_media("(max-width: 600px)") {
+            if let Some(media) = media {
+                return media.matches();
+            }
+        }
+    }
+    false
+}
+
 /// Calendar view switcher component
 #[function_component(CalendarViewSwitcher)]
 pub fn calendar_view_switcher(props: &CalendarViewSwitcherProps) -> Html {
@@ -55,3 +67,81 @@ pub fn calendar_view_switcher(props: &CalendarViewSwitcherProps) -> Html {
     
     let on_prev = Callback::from(move |_| {
         let new_date = match props.current_view {
+            CalendarView::Month => selected_date - Duration::days(30),
+            CalendarView::Week => selected_date - Duration::days(7),
+            CalendarView::Day => selected_date - Duration::days(1),
+            CalendarView::Shift => selected_date - Duration::days(7),
+        };
+        on_date_change.emit(new_date);
+    });
+    
+    let on_next = Callback::from(move |_| {
+        let new_date = match props.current_view {
+            CalendarView::Month => selected_date + Duration::days(30),
+            CalendarView::Week => selected_date + Duration::days(7),
+            CalendarView::Day => selected_date + Duration::days(1),
+            CalendarView::Shift => selected_date + Duration::days(7),
+        };
+        on_date_change.emit(new_date);
+    });
+    
+    let on_today = Callback::from(move |_| {
+        on_date_change.emit(Utc::now());
+    });
+    
+    // Format date for display
+    let date_display = match props.current_view {
+        CalendarView::Month => format!("{} {}", selected_date.format("%B"), selected_date.year()),
+        CalendarView::Week => {
+            let start_of_week = selected_date - Duration::days(selected_date.weekday().num_days_from_monday() as i64);
+            let end_of_week = start_of_week + Duration::days(6);
+            format!("{} - {}", start_of_week.format("%b %d"), end_of_week.format("%b %d, %Y"))
+        },
+        CalendarView::Day => format!("{}", selected_date.format("%A, %B %d, %Y")),
+        CalendarView::Shift => format!("Shifts for {}", selected_date.format("%B %Y")),
+    };
+    
+    html! {
+        <div class="calendar-view-switcher">
+            <div class="view-switcher-header">
+                <div class="date-navigation">
+                    <button class="nav-button" onclick={on_prev}>{"<"}</button>
+                    <button class="today-button" onclick={on_today}>{"Today"}</button>
+                    <button class="nav-button" onclick={on_next}>{">"}</button>
+                    <span class="date-display">{date_display}</span>
+                </div>
+                
+                <div class="view-switcher-buttons">
+                    <button 
+                        class={classes!("view-button", if props.current_view == CalendarView::Month { "active" } else { "" })}
+                        onclick={on_month_view}
+                    >
+                        {"Month"}
+                    </button>
+                    <button 
+                        class={classes!("view-button", if props.current_view == CalendarView::Week { "active" } else { "" })}
+                        onclick={on_week_view}
+                    >
+                        {"Week"}
+                    </button>
+                    <button 
+                        class={classes!("view-button", if props.current_view == CalendarView::Day { "active" } else { "" })}
+                        onclick={on_day_view}
+                    >
+                        {"Day"}
+                    </button>
+                    <button 
+                        class={classes!("view-button", if props.current_view == CalendarView::Shift { "active" } else { "" })}
+                        onclick={on_shift_view}
+                    >
+                        {"Shift"}
+                    </button>
+                </div>
+            </div>
+            
+            <div class="view-content">
+                {for props.children.iter()}
+            </div>
+        </div>
+    }
+}
