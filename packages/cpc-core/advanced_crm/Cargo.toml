@@ -1,0 +1,39 @@
+[package]
+name = "cpc-advanced-crm"
+version = "0.1.0"
+edition = "2021"
+authors = ["CPC Cooperative Developers"]
+description = "Advanced CRM module for CPC platform"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# Core dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+thiserror = "1.0"
+async-trait = "0.1"
+
+# CPC core modules
+cpc-core = { path = "../.." }
+cpc-crm = { path = "../crm" }
+cpc-hr = { path = "../hr" }
+
+# Network and data sharing
+cpc-net = { path = "../../../cpc-net" }
+
+# Audio and PDF generation
+rodio = "0.17"
+pdf-rs = "0.1"
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
+
+# Web framework
+axum = "0.7"
+async-graphql = "7.0"
+tokio = { version = "1.0", features = ["full"] }
+
+# Testing
+tokio-test = "0.4"

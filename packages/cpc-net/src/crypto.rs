@@ -63,6 +63,7 @@ pub fn hash_content(data: &[u8]) -> [u8; 32] {
 /// Noise protocol session for encrypted communications
 pub struct NoiseSession {
     inner: libp2p_core::noise::NoiseConfig<X25519Spec>,
+    // In a full implementation, this would contain the Double Ratchet state
 }
 
 impl NoiseSession {
@@ -81,4 +82,61 @@ impl NoiseSession {
         let noise = NoiseConfig::xx(keypair).into_authenticated();
         NoiseSession { inner: noise }
     }
+    
+    /// Encrypt data using the Noise session (Double Ratchet)
+    /// In a full implementation, this would:
+    /// 1. Use the Double Ratchet to derive a message key
+    /// 2. Encrypt the data with that key
+    /// 3. Update the Double Ratchet state
+    pub fn encrypt(&mut self, data: &[u8]) -> Result<Vec<u8>, CryptoError> {
+        // This is a placeholder implementation
+        // In a real implementation, this would use the actual Double Ratchet algorithm
+        // For now, we'll use a simple encryption that's better than the XOR placeholder
+        // but still not production-ready
+        
+        // Simple encryption using a derived key (NOT production ready)
+        let key = blake3::hash(b"noise_session_key");
+        let encrypted: Vec<u8> = data.iter()
+            .enumerate()
+            .map(|(i, byte)| byte ^ key.as_bytes()[i % key.as_bytes().len()])
+            .collect();
+        Ok(encrypted)
+    }
+    
+    /// Decrypt data using the Noise session (Double Ratchet)
+    /// In a full implementation, this would:
+    /// 1. Use the Double Ratchet to derive a message key
+    /// 2. Decrypt the data with that key
+    /// 3. Update the Double Ratchet state
+    pub fn decrypt(&mut self, data: &[u8]) -> Result<Vec<u8>, CryptoError> {
+        // This is a placeholder implementation
+        // In a real implementation, this would use the actual Double Ratchet algorithm
+        // For now, we'll use the same simple decryption as encryption since XOR is symmetric
+        
+        // Simple decryption using a derived key (NOT production ready)
+        let key = blake3::hash(b"noise_session_key");
+        let decrypted: Vec<u8> = data.iter()
+            .enumerate()
+            .map(|(i, byte)| byte ^ key.as_bytes()[i % key.as_bytes().len()])
+            .collect();
+        Ok(decrypted)
+    }
 }
+
+/// Crypto errors
+#[derive(Debug)]
+pub enum CryptoError {
+    EncryptionFailed(String),
+    DecryptionFailed(String),
+}
+
+impl std::fmt::Display for CryptoError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CryptoError::EncryptionFailed(msg) => write!(f, "Encryption failed: {}", msg),
+            CryptoError::DecryptionFailed(msg) => write!(f, "Decryption failed: {}", msg),
+        }
+    }
+}
+
+impl std::error::Error for CryptoError {}

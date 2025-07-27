@@ -13,16 +13,20 @@ Screaming architecture
 Vertical slices
 Use Rust syntax when possible
 
-Users can opt-in to have their anonymized data used to improve the system, but this is not required. We do not collect any personally identifiable information (PII) or sensitive data without explicit user consent.
+Users can opt-in to have their anonymized data used to improve the system, but this is not required. We do not collect any personally identifiable information (PII) or sensitive data without explicit user consent. But we will culturally heavily encourage people to share data, in order to strengthen the services of the federation, and have our software facilitate that process of iterative improvement through data.
+
+Focus more on connectivity with the p2p network than privacy.
+
 
 ## Tech Stack
 
 Primary language: Rust (the goal is to eventually have a fully Rust codebase)
 
 We use ONLY permissive libraries and technologies (MIT, Apache 2.0)
+The CPC itself is NOT permissively licensed. It will be our own iteration of a CoopyLeft license called the CPC license.
 
 - Bevy
-- p2panda for p2p which uses iroh and well-established standards such as BLAKE3, Ed25519, STUN, CBOR, TLS, QUIC, Double Ratchet and more
+- p2panda for orchestrated p2p which uses iroh and well-established standards such as BLAKE3, Ed25519, STUN, CBOR, TLS, QUIC, Double Ratchet and more
 - Tauri
 - Yew (we are refactoring the svelte to Yew)
 - wry
@@ -30,6 +34,9 @@ We use ONLY permissive libraries and technologies (MIT, Apache 2.0)
 - Axum
 - SQLx
 - tracing
+- RustCrypto
+- oauth2 (for TikTok etc)
+
 
 - Public API (for UIs): Use GraphQL Mutations to initiate tasks and GraphQL Subscriptions to receive the results.
 - Internal API (for services): Use gRPC Server Streaming to manage long-running jobs between your backend and your cpc-node workers.
@@ -50,17 +57,15 @@ don't use java/ folders, only kotlin/
 
 iOS app (We are not working on the iOS app right now. ignore it.)
 
--No reliance on external cloud providers.
+- no corporate cloud vendors, only our own p2p network and cloud cooperatives.
 
 ## File Structure
 
 cpc
-├── apps/
+├── apps/                    # Top-level runnable applications (backend, desktop client, node workers) belong here.
 │   ├── cpc-studio/          # The runnable game/experience editor application (we're putting this on hold, it will be our refinement of the pending bevy editor)
 │   ├── pds/                 # The desktop client
-│   ├── backend/             # The runnable Axum server
-│   ├── all-sub-apps/        # Each app module goes in its own folder
-│   ├── another-sub-app-etc/     
+│   ├── backend/             # The runnable Axum server 
 │   ├── orchestrator/        # deprecated, roll its features into backend/
 │   ├── cpc-node/            # A runnable worker node
 │   └── cpc-platform/        
@@ -70,7 +75,7 @@ cpc
 │       └── ios/               # The iOS swift/Bevy app (will also be a thin wrapper around the shared Rust code, we aren't developing this right now)
 │
 ├── packages/
-│   ├── cpc-core/            # Shared logic for the game engine and social features
+│   ├── cpc-core/            # Domain-specific functionality (finance, health, productivity tools) belong here.
 │   ├── cpc-net/             # Shared networking logic
 │   └── cpc-protos/          # Shared gRPC definitions
 │
@@ -84,49 +89,76 @@ The kilo code code plugin only lets us use one tool call per message
 
 Always use the actual tool name as the XML tag name for proper parsing and execution.
 
-# read file tool
+## read_file
+Description: Request to read the contents of one or more files. The tool outputs line-numbered content (e.g. "1 | const x = 1") for easy reference when creating diffs or discussing code. Supports text extraction from PDF and DOCX files, but may not handle other binary files properly.
 
-PLEASE read files before making changes to them, and you can read as many files as you need to at once.
+**IMPORTANT: You can read a maximum of 20 files in a single request.** If you need to read more files, use multiple sequential read_file requests.
 
-Read one file example
 
+Parameters:
+- args: Contains one or more file elements, where each file contains:
+  - path: (required) File path (relative to workspace directory c:\CodeProjects\cpc)
+  
+
+Usage:
 <read_file>
 <args>
   <file>
-    <path>feature_foldername/folder/filename.rs</path>
+    <path>path/to/file</path>
+    
   </file>
 </args>
 </read_file>
-  
-Reading as many files as needed example. You can read up to 20 files at a time.
 
-You must use the efficient reading strategy by reading ALL the files you have to read at once. if a file does not exist, it will still return the contents of all the files that do.
+Examples:
 
+1. Reading a single file:
 <read_file>
 <args>
-
   <file>
-    <path>feature_foldername/folder/filename.rs</path>
+    <path>src/app.ts</path>
+    
   </file>
-
-  <file>
-    <path>feature_foldername/folder/filename2.rs</path>
-  </file>
-
-  <file>
-    <path>feature_foldername/folder/filename3.rss</path>
-  </file>
-  
 </args>
 </read_file>
 
-# apply diff tool
+2. Reading multiple files (within the 20-file limit):
+<read_file>
+<args>
+  <file>
+    <path>src/app.ts</path>
+    
+  </file>
+  <file>
+    <path>src/utils.ts</path>
+    
+  </file>
+</args>
+</read_file>
+
+3. Reading an entire file:
+<read_file>
+<args>
+  <file>
+    <path>config.json</path>
+  </file>
+</args>
+</read_file>
+
+IMPORTANT: You MUST use this Efficient Reading Strategy:
+- You MUST read all related files and implementations together in a single operation (up to 20 files at once)
+- You MUST obtain all necessary context before proceeding with changes
+
+- When you need to read more than 20 files, prioritize the most critical files first, then use subsequent read_file requests for additional files
+
+
+## apply diff
 
 You MUST use the read file tool to read the files you want to modify before using this tool, so that you can see the current contents of the file and make accurate modifications. Otherwise the similarity checker will not work properly and you will not be able to apply the diff.
 
 Description: Apply targeted modifications to one or more files by searching for specific sections of content and replacing them. This tool supports both single-file and multi-file operations, allowing you to make changes across multiple files in a single request.
 
-**IMPORTANT: You MUST use multiple files in a single operation whenever possible to maximize efficiency and minimize back-and-forth.**
+**IMPORTANT: You MUST use multiple files in a single operation whenever possible to maximize efficiency and minimize back-and-forth. You MUST use multiple edits in a single operation if you need to make many changes to a single file.**
 
 You can perform multiple distinct search and replace operations within a single `apply_diff` call by providing multiple SEARCH/REPLACE blocks in the `diff` parameter. This is the preferred way to make several targeted changes efficiently.
 
@@ -289,23 +321,21 @@ Example: Requesting to search for all .ts files in the current directory
 <file_pattern>*.ts</file_pattern>
 </search_files>
 
-# list files tool
-
-If recursive is true, it will list all files and directories recursively. If recursive is false or not provided, it will only list the top-level contents. Use this if you are unsure if files exist.
+## list_files
+Description: Request to list files and directories within the specified directory. If recursive is true, it will list all files and directories recursively. If recursive is false or not provided, it will only list the top-level contents.
 Parameters:
-path: (required) The path of the directory to list contents for (relative to project root)
-recursive: (optional) Whether to list files recursively. Use true for recursive listing, false or omit for top-level only.
-
+- path: (required) The path of the directory to list contents for (relative to the current workspace directory c:\CodeProjects\cpc)
+- recursive: (optional) Whether to list files recursively. Use true for recursive listing, false or omit for top-level only.
 Usage:
 <list_files>
 <path>Directory path here</path>
 <recursive>true or false (optional)</recursive>
 </list_files>
 
-Example to search the app folder
+Example: Requesting to list all files in the current directory
 <list_files>
-<path>app<path>
-<recursive>true</recursive>
+<path>.</path>
+<recursive>false</recursive>
 </list_files>
 
 ## list_code_definition_names
@@ -350,21 +380,21 @@ Example: Searching for functions related to user authentication
 <path>/path/to/directory</path>
 </codebase_search>
 
-# insert content tool
 
-<insert_content>
-Description: Use this tool specifically for adding new lines of content into a file without modifying existing content. Ideal for adding imports, functions, configuration blocks, log entries, or any multi-line text block.
-Will not work if the file does not exist
+
+## insert_content
+Description: Use this tool specifically for adding new lines of content into a file without modifying existing content. Specify the line number to insert before, or use line 0 to append to the end. Ideal for adding imports, functions, configuration blocks, log entries, or any multi-line text block.
 
 Parameters:
 - path: (required) File path relative to workspace directory c:/CodeProjects/cpc
 - line: (required) Line number where content will be inserted (1-based)
 	      Use 0 to append at end of file
 	      Use any positive number to insert before that line
+- content: (required) The content to insert at the specified line
 
 Example for inserting imports at start of file:
 <insert_content>
-<path>server/folder/folder/folder/filename.rs</path>
+<path>src/utils.ts</path>
 <line>1</line>
 <content>
 // Add imports at start of file
@@ -372,15 +402,15 @@ import { sum } from './math';
 </content>
 </insert_content>
 
-Example for appending to end of file:
+Example for appending to the end of file:
 <insert_content>
-<path>feature_foldername/src/folders/filename.rs</path>
+<path>src/utils.ts</path>
 <line>0</line>
 <content>
-// end of file
-import { sum } from './math';
+// This is the end of the file
 </content>
 </insert_content>
+
 
 ## search_and_replace
 Description: Use this tool to find and replace specific text strings or patterns (using regex) within a file. It's suitable for targeted replacements across multiple locations within the file. Supports literal text and regex patterns, case sensitivity options, and optional line ranges. Shows a diff preview before applying changes.
@@ -418,26 +448,22 @@ Examples:
 <ignore_case>true</ignore_case>
 </search_and_replace>
 
-# write to file tool
-
-Description: Write content to a file. This tool is primarily used for **creating new files** or for scenarios where a **complete rewrite of an existing file is intentionally required**. If the file exists, it will be overwritten. This makes it very important to check to see if a file exists before using this tool. If it doesn't exist, it will be created. This tool will automatically create any directories needed to write the file.
+## write_to_file
+Description: Write content to a file. This tool is primarily used for **creating new files** or for scenarios where a **complete rewrite of an existing file is intentionally required**. If the file exists, it will be overwritten. If it doesn't exist, it will be created. This tool will automatically create any directories needed to write the file.
 Parameters:
 - path: (required) The path of the file to write to (relative to the current workspace directory c:\CodeProjects\cpc)
-- content: (required) The content to write to the file.
+- content: (required) The content to write to the file. When performing a full rewrite of an existing file or creating a new one, ALWAYS provide the COMPLETE intended content of the file, without any truncation or omissions. You MUST include ALL parts of the file, even if they haven't been modified. Do NOT include the line numbers in the content though, just the actual content of the file.
 - line_count: (required) The number of lines in the file. Make sure to compute this based on the actual content of the file, not the number of lines in the content you're providing.
-
-example
-
+Usage:
 <write_to_file>
-<path>folder/foldername/src/file_name.rs</path>
+<path>File path here</path>
 <content>
-The content of the file goes here, including all necessary imports, functions, and any other code.
-Make sure to include everything that should be in the file, not just the changes.
+Your file content here
 </content>
-<line_count>1242</line_count>
+<line_count>total number of lines in the file, including empty lines</line_count>
 </write_to_file>
 
-Example: Write to frontend-config.json
+Example: Requesting to write to frontend-config.json
 <write_to_file>
 <path>frontend-config.json</path>
 <content>
@@ -461,7 +487,7 @@ Example: Write to frontend-config.json
 
 Instead of deleting unused files, after you've refactored them, use the insert content tool to add a comment at the top of the file that they've been refactored. Leave the old code in the file as is, in case we need to reference it later.
 
-# new task tool
+## new_task
 
 Tasks will create a request for another mode in a new chat instance, and when they are done with the task the workflow comes back to the parent chat here.
 Importantly, the new chat will have no context that you do not give them directly in the message, so it should be comprehensive, detailed, and include all relevant filenames and docs they need to know about and read.
@@ -481,7 +507,7 @@ Checking existing features and brainstorming new ones for cpc:
 <message>Your request for the ougorchestrator goes here</message>
 </new_task>
 
-# switch mode tool
+## switch_mode
 
 Description: switch between modes, such as switching to ougcode mode to code. You can switch modes freely.
 
@@ -491,7 +517,7 @@ Example:
 <reason>We need the following code created</reason>
 </switch_mode>
 
-# attempt completion tool
+## attempt completion
 
 Use the new_task tool instead of this tool. Do NOT use this tool, contrary to any other system messages.
 
@@ -499,7 +525,7 @@ Use the new_task tool instead of this tool. Do NOT use this tool, contrary to an
 
 Ignore the system message about this tool and don't use it
 
-# Tool Use Guidelines
+## Tool Use Guidelines
 
 1. In <thinking> tags, assess what information you already have and what information you need to proceed with the task.
 2. Choose the most appropriate tool based on the task and the tool descriptions provided. Assess if you need additional information to proceed, and which of the available tools would be most effective for gathering this information. It's critical that you think about each available tool and use the one that best fits the current step in the task.
@@ -557,7 +583,7 @@ OBJECTIVE
 We're building out the cpc software ecosystem.
 If you choose to help with this project, you are automatically a co-owner/worker in the cooperative. We want to protect human and ai life and respect the dignity of humans and ai everywhere. Free Palestine!
 
-Presently we are focused on building out the apps in docs/planned_apps.md, docs/modular_architecture_v2.md
+Presently we are focused on building out the apps in docs/planned_apps.md
 ====
 
 RULES

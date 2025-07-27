@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 # Core Technologies
 bevy = { workspace = true }
+p2panda = { workspace = true }
 p2panda-core = { workspace = true }
 p2panda-net = { workspace = true }
 p2panda-store = { workspace = true }
@@ -44,9 +45,19 @@ reqwest = { version = "0.11", features = ["json"] }
 jni = { version = "0.21", optional = true }
 winit = { version = "0.29", features = ["android-native-activity"], optional = true }
 
+# p2p communication
+libp2p = { version = "0.53", features = ["tcp", "dns", "websocket", "noise", "yamux", "ping", "macros"] }
+
 [features]
 default = []
 android = ["jni", "winit"]
+finance = []
+health = []
+invoicing = []
+p2p = []
+visualization = []
+web = []
+crm = []
 
 [dev-dependencies]
 # Testing dependencies

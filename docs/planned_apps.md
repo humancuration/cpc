@@ -4,6 +4,8 @@ Each module is to be a self-contained Rust crate that the main backend applicati
 
 Each app module is to be a self-contained Rust crate that the main backend application depends on. Feel free to add to this list of apps with others that you think would be a good idea! (Always check to see the progress of the app before making further plans for it)
 
+We should implement oauth2 with support for TikTok, Facebook, YouTube, WhatsApp, Instagram, Threads, WeChat, Messenger, Snapchat, Discord, X, Twitch, Gmail, etc.
+
 ## Entertainment
 
 For information about our privacy policies and consent management, see our [Privacy Policy](privacy_policy.md).
@@ -46,13 +48,23 @@ This is a powerful category that can provide immense value to users by helping t
 
 Integrating wellness features can make the app a daily companion for users looking to improve their physical and mental well-being.
 
-- [ ] **Habit Tracker**: A tool to help users build positive habits like drinking enough water, exercising, reading, or meditating.
+- [ ] **Habit Tracker**: Part of the health domain module (`packages/cpc-core/health/`) for tracking positive habits like drinking enough water, exercising, or meditating. See [Health Module Documentation](docs/architecture/health.md) for implementation details.
 
-- [ ] **Mood Journal**: A simple and private space for users to log their mood each day, perhaps with a short note. Over time, this can help identify patterns.
+- [ ] **Mood Journal**: Part of the health domain module (`packages/cpc-core/health/`) for logging mood with privacy controls. See [Health Module Documentation](docs/architecture/health.md) for implementation details.
 
-- [ ] **Meditation & Mindfulness**: A small library of guided meditations, breathing exercises, or calming ambient sounds to help users de-stress.
+- [ ] **Meditation & Mindfulness**: Part of the health domain module (`packages/cpc-core/health/`) with guided meditations and breathing exercises. See [Health Module Documentation](docs/architecture/health.md) for implementation details.
 
-- [ ] **Meal & Hydration Planner**: A simple tool for planning weekly meals, creating shopping lists, and tracking daily water intake.
+- [ ] **Meal & Hydration Planner**: Part of the health domain module (`packages/cpc-core/health/`) for planning meals and tracking water intake. See [Health Module Documentation](docs/architecture/health.md) for implementation details.
+
+- [x] **HIPAA-compliant audit trails**: COMPLETE implementation with comprehensive logging of all Protected Health Information (PHI) access events. Technical highlights include:
+  - Research access patterns with NULL user_id handling for anonymization
+  - Purpose code tracking (UserView, ProviderAccess, Research, DataSync, Admin)
+  - Wearable sync logging with automatic data minimization
+  - Fail-safe pattern implementation ensuring system continuity if logging fails
+  - AES-256 encryption at rest for all audit logs
+  - 1-year active storage with 5-year archival (6-year total retention)
+  Compliance roadmap: Q3: Automated audit log certification process
+  See [Health Module Documentation](docs/architecture/health.md) for implementation details.
 
 ## Personal Organization & Utilities
 
@@ -70,9 +82,13 @@ These are the digital equivalents of a Swiss Army knife—small tools that are i
 
 The key here is simplicity, affordability, and integration. Small business owners often wear many hats, so tools that save time and consolidate tasks are a huge win.
 
-- [ ] **Invoicing & Quoting**: A simple tool to create, send, and track professional invoices and quotes. Features could include payment integration (with Stripe, PayPal, etc.), automatic payment reminders, and status tracking (sent, viewed, paid).
+- [/] **Invoicing & Quoting**: A simple tool to create, send, and track professional invoices and quotes. Features could include payment integration (with Stripe, PayPal, etc.), automatic payment reminders, and status tracking (sent, viewed, paid).
 
-- [ ] **Simple CRM (Customer Relationship Management)**: A lightweight contact manager to track customer interactions, notes, and sales pipelines. It wouldn't need the complexity of a Salesforce, but just enough to manage leads and nurture client relationships effectively.
+- [x] **Simple CRM (Customer Relationship Management)**: A lightweight contact manager to track customer interactions, notes, and sales pipelines. It wouldn't need the complexity of a Salesforce, but just enough to manage leads and nurture client relationships effectively. Features include:
+  - Platform-native contact management with consent-based data sharing
+  - Sales pipeline visualization with Bevy
+  - Consent settings visualization with Yew
+  - Interaction tracking and deal management
 
 - [ ] **Project Management Lite**: A visual project management tool, perhaps using Kanban boards (like Trello), to track tasks, assign them to team members, set deadlines, and attach relevant files.
 
@@ -133,7 +149,17 @@ Cooperatives have unique needs centered around member engagement, democratic gov
 
 
 
+
+
 ## Architecture Notes
+
+### Critical Correction: Domain Module Placement
+
+⚠️ **Domain modules (Personal Finance, Health, etc.) MUST be implemented as vertical slices within `packages/cpc-core/`, NOT in `apps/` directory.** Standalone application folders for domain modules violate our screaming architecture principles.
+
+- Top-level runnable applications (backend, desktop client, node workers) belong in `apps/`
+- Domain-specific functionality (finance, health, productivity tools) belongs in `packages/cpc-core/`
+- Migration files must reside in `packages/cpc-core/migrations/`, never in app-specific migration directories
 
 ### Modular Approach
 - Don't force every feature on every user
@@ -146,172 +172,33 @@ Cooperatives have unique needs centered around member engagement, democratic gov
 - Unified design language across all modules
 - Focus on providing the most essential 80% of functionality in a clean and accessible way
 
-### Example Architecture
+## Revised Architecture Principles
 
-Each module is to be a self-contained Rust crate that the main backend application depends on.
+### 1. Core Design Philosophy
 
-Anatomy of a Module Crate
+* **True Modularity**: Each app module must function as a standalone, self-contained unit that can be developed, tested, and deployed independently
+* **User Empowerment**: Users should be able to enable/disable modules at runtime without restarting the application
+* **Cooperative Values**: Architecture must support transparency, user control, and community participation in feature development
+* **Domain Module Placement**: Domain-specific modules (such as finance, health, etc.) must be implemented as vertical slices within `packages/cpc-core/`, NOT in `apps/`. Standalone application folders for domain modules are strictly forbidden. Only top-level runnable applications (backend, desktop client, node workers) belong in `apps/`.
+* **Critical Distinction**: `apps/` contains executable applications, while `packages/cpc-core/` contains business domain capabilities implemented as vertical slices. This separation ensures screaming architecture where the structure reflects business capabilities, not technical concerns.
 
-Let's imagine you want to formalize your Invoicing feature into a proper module. You would create a new crate, for example, at apps/invoicing.
+### 2. Directory Structure & Crate Organization
 
-This crate would have a structure that mirrors your hexagonal architecture:
-Generated code
+The current structure largely aligns with our vision, but needs some refinements:
 
-      
-apps/invoicing/
-├── Cargo.toml
-└── src/
-    ├── lib.rs          # Main crate entry, exports the module
-    ├── domain/         # Core business models (Invoice, Customer)
-    │   └── models.rs
-    ├── application/    # Services that orchestrate business logic
-    │   └── service.rs
-    ├── infrastructure/ # Implementations of ports (e.g., database)
-    │   └── repository.rs
-    └── web/            # Adapters for the web layer (Axum/GraphQL)
-        ├── routes.rs
-        ├── graphql.rs
-        └── module.rs   # The "wiring" file for this module
-
-        domain: Contains your pure business models (Invoice, InvoiceStatus, etc.). These should have no knowledge of databases or web frameworks. This is the "hexagon."
-
-    application: Contains the InvoiceService, which uses traits (ports) to talk to the outside world (like an InvoiceRepository trait).
-
-    infrastructure: Contains the PgInvoiceRepository that implements the InvoiceRepository trait using sqlx.
-
-    web: This is the key adapter layer. It contains the Axum routes, GraphQL resolvers, and input/output types specific to this module.
-
-2. The "Wiring" File (web/module.rs)
-
-This is the most important part for making your system plug-and-play. Each module crate will expose a struct and a function to hand its components to the main backend.
-
-// In apps/invoicing/src/web/module.rs
-
-use axum::Router;
-use crate::web::{graphql::{InvoicingQuery, InvoicingMutation, InvoicingSubscription}, routes::create_invoicing_router};
-use crate::application::service::InvoiceService;
-use crate::db::DbPool;
-
-// This struct holds all the pieces the backend needs from this module
-pub struct InvoicingModule {
-    pub router: Router,
-    pub query: InvoicingQuery,
-    pub mutation: InvoicingMutation,
-    pub subscription: InvoicingSubscription,
-}
-
-// This function initializes the module and its dependencies
-pub fn initialize(db_pool: DbPool) -> InvoicingModule {
-    let invoice_service = InvoiceService::new(db_pool.clone());
-    
-    InvoicingModule {
-        router: create_invoicing_router(invoice_service.clone()),
-        query: InvoicingQuery::new(invoice_service.clone()),
-        mutation: InvoicingMutation::new(invoice_service.clone()),
-        subscription: InvoicingSubscription,
-    }
-}
-
-3. Wiring it All Together in backend/src/main.rs
-
-Your main.rs will become much simpler. Instead of initializing every service itself, it will just call the initialize function from each module it wants to include.
-
-Before (Simplified from your current code):
-      
-// In backend/src/main.rs (current)
-
-async fn main() {
-    // ... setup ...
-    let db = init_db().await.unwrap();
-
-    // Initialize individual services
-    let social_service = Arc::new(SocialService::new(...));
-    let forum_service = Arc::new(ForumService::new(...));
-    // ... and so on for every service
-
-    // Build GraphQL schema by adding each service
-    let schema = Schema::build(...)
-        .data(social_service.clone())
-        .data(forum_service.clone())
-        // ... and so on
-        .finish();
-
-    // Build Axum router by merging each route
-    let app = Router::new()
-        .nest("/api/social", routes::social::router().with_state(...))
-        .nest("/api/forum", routes::forum::router().with_state(...))
-        // ... and so on
-        .with_state(schema);
-    
-    // ... run server ...
-}
-
-After (Using the modular approach):
-      
-// In backend/src/main.rs (proposed)
-use cpc_invoicing::web::module as invoicing; // Import the module
-use cpc_social::web::module as social;     // Example for another module
-
-async fn main() {
-    // ... setup ...
-    let db = init_db().await.unwrap();
-
-    // Initialize modules
-    let invoicing_module = invoicing::initialize(db.clone());
-    let social_module = social::initialize(db.clone());
-    // ... initialize other modules as needed
-
-    // Build GraphQL schema by merging module components
-    let schema = Schema::build(
-        RootQuery(invoicing_module.query, social_module.query),
-        RootMutation(invoicing_module.mutation, social_module.mutation),
-        RootSubscription(invoicing_module.subscription, social_module.subscription)
-    )
-    .data(db.clone()) // Add shared state like the DB pool
-    .finish();
-
-    // Build Axum router by merging module routers
-    let app = Router::new()
-        .nest("/api/invoicing", invoicing_module.router)
-        .nest("/api/social", social_module.router)
-        // ... and so on
-        .with_state(schema);
-        
-    // ... run server ...
-}
-
-Adding a new "app" to your multi-use app would then be as simple as:
-
-    Adding the new module crate to your workspace.
-
-    Adding it as a dependency in backend/Cargo.toml.
-
-    Calling its initialize() function in main.rs and adding its components to the Router and Schema.
-
-Step-by-Step Refactoring Plan
-
-    Choose One Feature to Start: Let's use Invoicing as the example.
-
-    Create the New Crate: In your workspace, create the apps/invoicing crate.
-
-    Update Cargo.toml:
-
-        In apps/invoicing/Cargo.toml, add dependencies like axum, async-graphql, sqlx, cpc-core, etc.
-
-        In apps/backend/Cargo.toml, add the new invoicing crate as a dependency: cpc-invoicing = { path = "../invoicing" }.
-
-    Move the Code:
-
-        Move the contents of apps/backend/src/invoicing/ to apps/invoicing/src/.
-
-        Organize the files into the domain, application, infrastructure, and web directories as described above.
-
-        Move the relevant routes from apps/backend/src/routes/ and GraphQL definitions from apps/backend/src/graphql/ into the new crate's web directory.
-
-    Create the module.rs: Implement the initialize() function in apps/invoicing/src/web/module.rs to wire up and return the module's router and GraphQL components.
-
-    Update backend/main.rs: Modify your main.rs to import and use the invoicing module as shown in the "After" example. You will remove the direct initialization of InvoiceService and its routes from main.rs.
-
-    Repeat: Repeat this process for your other vertical slices (social, forum, governance, etc.).
-
-    This approach provides very clear boundaries, allows modules to be developed and tested more independently, and makes your main backend crate a lightweight "aggregator" of modules, which is exactly what you want for a plug-and-play system.
+#### For Executable Applications (apps/ directory)
+```
+apps/
+├── [module-name]/
+│   ├── Cargo.toml
+│   ├── migrations/             # Database migrations (for apps with DB)
+│   └── src/
+│       ├── lib.rs
+│       ├── domain/             # Pure business logic, no external dependencies
+│       ├── application/        # Use cases and service orchestrations
+│       ├── infrastructure/     # Concrete implementations (DB, network, etc.)
+│       └── web/                # API adapters (GraphQL, REST)
+│           ├── routes.rs
+│           ├── graphql.rs      # Query, Mutation, Subscription types
+│           └── module.rs       # Module initialization & wiring
+```

@@ -13,39 +13,20 @@ We collect only the minimum amount of data necessary to provide our services:
 - Interaction data for improving the platform
 - Content created by users (music, posts, etc.)
 
-### No PII Storage
-We do not store personally identifiable information (PII) in our local databases. All PII is stored in a secure, encrypted format in compliance with privacy regulations.
+BUT if a user opts-in to data collection, the system can and will collect extremely fine-grained data of all kinds, with advanced telemetry.
+
+### PII Storage
+We do not store personally identifiable information (PII) in our local databases unless they consent. All PII is stored in a secure, encrypted format in compliance with privacy regulations.
 
 ## Consent Management
 
 ### Explicit Consent
 Users must provide explicit consent for data collection and processing:
-- Consent is required for recommendation engines
-- Consent is required for social features
-- Consent is required for offline downloads
-- Consent is required for following artists
+
+There will be checkboxes in the privacy options for which data users want to share. But their personal information, shopping habits, medical information, etc can be used to help the federation, so it will be encouraged. We can improve the services offered by cooperatives within the federation. We can use that data to create data lakes to train coopy-left licensed AI on, so we should create different data lakes of different types for easy sorting. Information from an individual should be anonymized but grouped together for research that requires it, as specific data can highlight nuance in various interconnected datapoints. Everyone within the federation who want to use data for their endeavors can do so as well under a specific coopyleft license which we will develop.
 
 ### Consent Verification
 All user data operations go through a PrivacyConsentService that verifies user consent before processing data:
-
-```rust
-// Example from apps/music-player/src/application/streaming_service.rs
-pub async fn get_recommended_tracks(&self, user_id: Option<Uuid>) -> Result<Vec<Track>> {
-    if let Some(user_id) = user_id {
-        // Verify explicit consent for recommendation data
-        // Verify explicit consent for recommendation data
-        self.privacy_service
-            .verify_consent(user_id, ConsentType::Recommendations)
-            .await?;
-        
-        // Implementation continues with actual repository-based consent verification
-    } else {
-        // Return popular tracks for anonymous users with data minimization
-        let tracks = self.track_repository.find_popular_tracks(10).await?;
-        Ok(self.privacy_service.apply_data_minimization(tracks))
-    }
-}
-```
 
 ## Data Minimization
 
@@ -55,10 +36,15 @@ For anonymous users, we apply data minimization techniques:
 - Remove personally identifiable information from responses
 - Use generic recommendations instead of personalized ones
 
+## For Data Sharing Users
+We store all of the data types they consent to.
+- Advanced telemetry
+- Many datapoints for every type they allow
+- Used to improve BI, AI, recommendation AI, supply chains, etc.
+
 ### Data Retention
 We retain user data only for as long as necessary:
 - Account data is retained until user requests deletion
-- Interaction data is retained for 2 years for analytics
 - Content data is retained until creator deletes it
 
 ## Security Measures
@@ -95,44 +81,12 @@ We comply with CCPA requirements for California residents.
 ### Other Regulations
 We comply with other applicable privacy regulations in jurisdictions where we operate.
 
-## Music Player Module Privacy Implementation
-
-The music player module implements privacy-by-design requirements through a layered consent system:
-
-### Consent Types
-- `Playback` - Required for playing tracks
-- `Recommendations` - Required for personalized recommendations
-- `Social` - Required for social interactions
-- `Following` - Required for following artists
-- `OfflineDownload` - Required for offline downloads
-
 ### Implementation
 For details on how the music player module implements privacy features, see [Music Player Integration](music_player_integration.md).
 
 ## Consent Management Framework
 
 Our consent management system implements a robust framework designed to comply with global privacy regulations while providing users with meaningful control over their data.
-
-### Consent Types and Lifecycles
-
-We implement five distinct consent types, each with specific purposes and lifecycle management:
-
-- `Playback`: Required for basic track playback functionality
-- `Recommendations`: Required for personalized recommendations
-- `Social`: Required for social interactions like sharing, liking, and commenting
-- `Following`: Required for following artists and receiving updates
-- `OfflineDownload`: Required for downloading content for offline use
-
-Each consent has a default expiration period of 1 year (configurable via system settings), after which it must be renewed. Users can revoke consent at any time through their account settings.
-
-### Data Minimization for Anonymous Users
-
-For users who have not authenticated or provided explicit consent:
-
-- Only basic track information is available (title, artist, duration)
-- Personalized features are disabled
-- No user behavior is tracked or stored
-- Recommendations are based on global popularity metrics only
 
 ### GDPR/CCPA Compliance Features
 
@@ -145,7 +99,6 @@ For users who have not authenticated or provided explicit consent:
 
 Our data handling processes incorporate consent verification at multiple levels to ensure regulatory compliance.
 
-### Consent Verification Failures
 ### Consent Verification Failures
 
 When operations fail due to consent issues, the system returns specific error types:
@@ -175,7 +128,3 @@ When operations fail due to consent issues, the system returns specific error ty
 This document has been updated to reflect our completed consent management implementation. Key changes include detailed explanations of our consent framework, specific error handling patterns, and enhanced data minimization practices for anonymous users.
 
 We may update this privacy policy from time to time. Users will be notified of significant changes.
-
-## Contact Information
-
-For privacy-related questions or concerns, please contact our Data Protection Officer at privacy@cpc.coop.

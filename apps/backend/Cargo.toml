@@ -19,11 +19,12 @@ tonic = { workspace = true }
 prost = { workspace = true }
 
 // Local packages
-cpc-core = { path = "../../packages/cpc-core" }
+cpc-core = { path = "../../packages/cpc-core", features = ["finance", "health", "invoicing"] }
 cpc-net = { path = "../../packages/cpc-net" }
 cpc-protos = { path = "../../packages/cpc-protos" }
 cpc-website-builder = { path = "../website-builder" }
 cpc-music-player = { path = "../music-player" }
+cpc-health = { path = "../../packages/cpc-core/health" }
 
 # Common dependencies
 tokio = { workspace = true }

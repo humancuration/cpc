@@ -1,31 +1,41 @@
 # Personal Finance Module Architecture
 
-## Module Structure (Hexagonal Architecture)
+## Module Structure (Hexagonal Architecture with Vertical Slices)
+
+The personal finance module has been moved from `apps/personal-finance/` to `packages/cpc-core/finance/` to follow the screaming architecture principles. All finance domain logic now exists as vertical slices within the core package.
 
 ```rust
-apps/personal-finance/
+packages/cpc-core/finance/
 ├── Cargo.toml
+├── MIGRATION_GUIDE.md  # Migration instructions from old personal-finance app
+├── README.md           # Module documentation
 └── src/
     ├── lib.rs
-    ├── domain/
-    │   ├── models.rs
+    ├── domain/          # Pure business models (Budget, SavingsGoal)
+    │   ├── budget.rs
+    │   ├── savings_goal.rs
+    │   ├── primitives.rs
+    │   └── mod.rs
+    ├── application/     # Service orchestration (BudgetService, SavingsService)
     │   ├── budget_service.rs
-    │   ├── expense_service.rs
     │   ├── savings_service.rs
     │   └── mod.rs
-    ├── application/
-    │   ├── finance_service.rs
+    ├── infrastructure/  # Concrete implementations (repositories, p2p)
+    │   ├── database/
+    │   │   ├── models.rs
+    │   │   ├── repositories.rs
+    │   │   └── mod.rs
+    │   ├── p2p/
+    │   │   ├── data_sharing.rs
+    │   │   └── mod.rs
     │   └── mod.rs
-    ├── infrastructure/
-    │   ├── repository.rs
-    │   └── mod.rs
-    └── web/
-        ├── graphql/
-        │   ├── mutations.rs
-        │   ├── queries.rs
-        │   ├── subscriptions.rs
+    └── presentation/    # UI components (Bevy, Yew)
+        ├── bevy/
+        │   ├── financial_viz.rs
         │   └── mod.rs
-        ├── routes.rs
+        ├── yew/
+        │   ├── components.rs
+        │   └── mod.rs
         └── mod.rs
 ```
 
@@ -37,8 +47,8 @@ pub struct Budget {
     pub id: Uuid,
     pub user_id: Uuid,
     pub category: String,
-    pub allocated_amount: Decimal,
-    pub spent_amount: Decimal,
+    pub allocated_amount: Money,  // Using Money type from primitives
+    pub spent_amount: Money,
     pub period: BudgetPeriod, // Monthly, Weekly, etc.
     pub start_date: DateTime<Utc>,
     pub end_date: DateTime<Utc>,
@@ -52,91 +62,64 @@ pub enum BudgetPeriod {
 }
 ```
 
-### Expense Model
-```rust
-pub struct Expense {
-    pub id: Uuid,
-    pub user_id: Uuid,
-    pub amount: Decimal,
-    pub currency: String,
-    pub category: String,
-    pub description: String,
-    pub date: DateTime<Utc>,
-    pub receipt_id: Option<Uuid>, // For scanned receipts
-    pub payment_method: String,
-}
-```
-
 ### SavingsGoal Model
 ```rust
 pub struct SavingsGoal {
     pub id: Uuid,
     pub user_id: Uuid,
     pub name: String,
-    pub target_amount: Decimal,
-    pub current_amount: Decimal,
+    pub target_amount: Money,
+    pub current_amount: Money,
     pub target_date: DateTime<Utc>,
     pub auto_deduct: bool,
     pub deduction_percentage: Decimal,
+    pub description: Option<String>,
+    pub category: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 ```
 
 ## Service Interfaces
 
-### Monthly Budget Calculation (UBI Integration)
+### Budget Service
 ```rust
 pub struct BudgetService {
-    ubi_service: Arc<dyn UbiServiceInterface>,
+    repository: Arc<dyn BudgetRepository>,
 }
 
 impl BudgetService {
-    pub async fn calculate_monthly_budget(
-        &self, 
-        user_id: Uuid
+    pub async fn create_budget(
+        &self,
+        user_id: Uuid,
+        category: String,
+        allocated_amount: Money,
+        period: BudgetPeriod,
     ) -> Result<Budget, FinanceError> {
-        let ubi_balance = self.ubi_service.get_ubi_balance(user_id).await?;
-        // Calculate budget allocation based on UBI income
-        // ... business logic ...
+        let budget = Budget::new(user_id, category, allocated_amount, period, Utc::now(), calculate_end_date(Utc::now(), period));
+        self.repository.save(&budget).await?;
+        Ok(budget)
     }
 }
 ```
 
-### Expense Categorization (Royalty Service Pattern)
+### Savings Service
 ```rust
-pub struct ExpenseService {
-    categorization_rules: Arc<RwLock<HashMap<String, CategoryRule>>>,
+pub struct SavingsService {
+    repository: Arc<dyn SavingsGoalRepository>,
 }
-
-impl ExpenseService {
-    pub async fn categorize_expense(
-        &self, 
-        expense: &mut Expense,
-        receipt_data: Option<Vec<u8>>
-    ) -> Result<(), FinanceError> {
-        // Use royalty service pattern for rule-based categorization
-        if let Some(data) = receipt_data {
-            let ocr_text = self.scan_receipt(data).await?;
-            expense.category = self.apply_categorization_rules(&ocr_text);
-        }
-        // ... additional processing ...
-    }
-}
-```
-
-### Savings Progress Tracking
-```rust
-pub struct SavingsService;
 
 impl SavingsService {
     pub fn calculate_progress(&self, goal: &SavingsGoal) -> SavingsProgress {
-        let percentage = (goal.current_amount / goal.target_amount) * dec!(100);
+        let percentage = (goal.current_amount.amount / goal.target_amount.amount) * dec!(100);
         let days_remaining = (goal.target_date - Utc::now()).num_days();
         
         SavingsProgress {
-            current: goal.current_amount,
-            target: goal.target_amount,
+            current: goal.current_amount.clone(),
+            target: goal.target_amount.clone(),
             percentage,
             days_remaining,
+            monthly_savings_needed: goal.monthly_savings_needed(),
         }
     }
 }
@@ -148,13 +131,12 @@ impl SavingsService {
 ```graphql
 input CreateBudgetInput {
     category: String!
-    allocatedAmount: Decimal!
+    allocatedAmount: MoneyInput!
     period: BudgetPeriod!
 }
 
 input RecordExpenseInput {
-    amount: Decimal!
-    currency: String!
+    amount: MoneyInput!
     category: String
     description: String!
     receiptImage: Upload
@@ -162,7 +144,7 @@ input RecordExpenseInput {
 
 input CreateSavingsGoalInput {
     name: String!
-    targetAmount: Decimal!
+    targetAmount: MoneyInput!
     targetDate: DateTime!
     autoDeduct: Boolean
     deductionPercentage: Decimal
@@ -205,14 +187,19 @@ type Subscription {
    - Monthly budget calculation incorporates UBI income
    - Uses `UbiService` from `cpc-core` via trait interface
 
-2. Receipt Scanning:
-   - Uses ffmpeg.wasm for image processing
-   - Integrates with OCR services for text extraction
+2. p2p Data Sharing:
+   - All sensitive financial data is shared exclusively through p2panda peer channels
+   - Uses Double Ratchet encryption for privacy-preserving data sharing
+   - Implements explicit user consent flows for data sharing
 
-3. Royalty Service Patterns:
-   - Rule-based expense categorization similar to royalty distribution rules
-   - Dynamic rule management interface
+3. Visualization Components:
+   - Bevy-based 3D financial visualizations
+   - Yew-based web components for dashboard views
 
 4. Treasury Service:
    - Deducts savings automatically when auto_deduct is enabled
    - Creates transactions through `TransactionLedger`
+
+## Migration from Old Structure
+
+If you were previously using the standalone `apps/personal-finance` application, please see [MIGRATION_GUIDE.md](../cpc-core/finance/MIGRATION_GUIDE.md) for detailed instructions on migrating to this module.

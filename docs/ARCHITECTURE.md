@@ -18,7 +18,6 @@
 - **Responsibilities**:
   - User-controlled encrypted storage
   - P2P network participation
-  - Local-first data management
 - **Key Features**:
   - Configurable storage/bandwidth limits
   - LRU cache eviction policy
@@ -200,3 +199,38 @@ Key features:
 - Real-time updates via subscriptions
 - PDF generation using pdf-rs
 - Conflict resolution for multi-device sync
+
+## Finance Module Architecture
+
+### Correct Vertical Slice Structure
+```
+packages/cpc-core/finance/
+├── domain/
+│   ├── budget.rs
+│   ├── savings_goal.rs
+│   └── primitives.rs
+├── application/
+│   ├── budget_service.rs
+│   └── savings_service.rs
+├── infrastructure/
+│   ├── database/
+│   │   ├── models.rs
+│   │   └── repositories.rs
+│   └── p2p/
+│       └── data_sharing.rs
+└── presentation/
+    ├── bevy/
+    │   └── financial_viz.rs
+    └── yew/
+        └── components.rs
+```
+
+### Bevy Visualization Requirements
+- **Budget Charts**: Plotters integration for budget vs actual comparisons
+- **Savings Goals**: 3D progress rings using Bevy's 3D rendering
+- **Theming**: Strict adherence to `cpc-core::visualization::FinanceTheme`
+- **Data Binding**: Direct connection to domain models (no intermediate GraphQL)
+
+### Migration Placement
+- Database migrations MUST reside in `packages/cpc-core/migrations/`
+- Never in `apps/backend/migrations/` (violation of screaming architecture)

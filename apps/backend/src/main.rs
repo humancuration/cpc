@@ -137,6 +137,15 @@ async fn main() {
         vec![]  // No dependencies for music-player
     ).expect("Failed to register music-player module");
     
+    // Register invoicing module
+    let invoicing_module = Arc::new(tokio::sync::RwLock::new(
+        crate::invoicing::modular_module::ModularInvoicing::new(db.clone(), network.clone())
+    ));
+    module_registry.register_module_with_dependencies(
+        invoicing_module,
+        vec![]  // No dependencies for invoicing
+    ).expect("Failed to register invoicing module");
+    
     // Load enabled modules from database
     module_registry.load_enabled_modules().await
         .expect("Failed to load enabled modules");
@@ -198,6 +207,15 @@ async fn main() {
     // let community_repo = Arc::new(CommunityRepo::new(p2panda_client));
     // For now, create a mock community repo
     let community_repo = Arc::new(CommunityRepo::new_mock());
+    
+    // Initialize network with STUN servers
+    let network = Arc::new(
+        cpc_net::net::NetworkBuilder::new()
+            .with_quic()
+            .with_tcp()
+            .with_kademlia()
+            .build()
+    );
 
     // Initialize new repositories for android-rust-migration
     let user_repository = Arc::new(PgUserRepository::new(db.clone()));
@@ -218,6 +236,14 @@ async fn main() {
     let ledger = cpc_core::finance::transactions::InMemoryLedger::new();
     let engine = Arc::new(cpc_core::finance::royalty_engine::RoyaltyEngine::new(ledger.clone()));
     let royalty_service = Arc::new(RoyaltyService::new(engine));
+    
+    // Initialize personal finance module
+    #[cfg(feature = "finance")]
+    let finance_module = cpc_core::finance::initialize_finance_module(
+        db.clone(),
+        Arc::new(cpc_net::p2p::P2PManager::new()), // Placeholder - in a real implementation this would be properly initialized
+        Arc::new(MockUserConsentStore), // Placeholder - in a real implementation this would be properly initialized
+    );
 
    // Define feature flags structure
    #[derive(Clone)]

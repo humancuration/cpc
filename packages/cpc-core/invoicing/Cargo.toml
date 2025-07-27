@@ -1,0 +1,30 @@
+[package]
+name = "cpc-invoicing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cpc-core = { path = "../", features = ["invoicing"] }
+cpc-net = { path = "../../cpc-net" }
+async-graphql = "4.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_cbor = "0.11"
+thiserror = "1.0"
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "rust_decimal"] }
+rust-decimal = "1.29"
+uuid = { version = "1.4", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+async-trait = "0.1"
+tracing = "0.1"
+p2panda = { version = "0.1", optional = true }
+libp2p = { version = "0.53", features = ["tcp", "noise", "yamux", "ping"] }
+libp2p-core = "0.40"
+
+[features]
+default = []
+p2p = ["p2panda"]
+web = ["yew"]
+visualization = ["bevy", "plotters"]

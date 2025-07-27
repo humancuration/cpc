@@ -1,0 +1,30 @@
+//! Domain layer for the finance module
+//!
+//! Contains the core business logic and models for personal finance management.
+
+pub mod budget;
+pub mod savings_goal;
+pub mod primitives;
+
+/// Common error types for the finance domain
+#[derive(thiserror::Error, Debug)]
+pub enum FinanceError {
+    #[error("Database error: {0}")]
+    DatabaseError(String),
+    
+    #[error("Savings goal not found: {0}")]
+    SavingsGoalNotFound(uuid::Uuid),
+    
+    #[error("Budget not found for user {0} and category {1}")]
+    BudgetNotFound(uuid::Uuid, String),
+    
+    #[error("Invalid amount: {0}")]
+    InvalidAmount(String),
+    
+    #[error("Financial error: {0}")]
+    FinancialError(#[from] crate::domain::primitives::FinancialError),
+    
+    #[error("p2p error: {0}")]
+    #[cfg(feature = "p2p")]
+    P2PError(String),
+}

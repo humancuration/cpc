@@ -25,7 +25,8 @@
 pub mod crypto;
 pub mod net;
 pub mod storage;
-pub mod storage;
+pub mod secure_storage;
+pub mod circuit_breaker;
 pub mod community_repo;
 
 // Distributed file hosting modules
@@ -34,9 +35,11 @@ pub mod dht;
 pub mod peer_manager;
 
 // Re-export key types from modules
-pub use crypto::{KeyPair, NoiseSession, hash_content};
+pub use crypto::{KeyPair, NoiseSession, hash_content, CryptoError};
 pub use net::{NetworkBuilder, Network, NetworkEvent};
 pub use storage::{ContentStorage, LruStorage, StorageMetrics, StorageError};
+pub use secure_storage::{SecureStorage, SecureData, SecureStorageError};
+pub use circuit_breaker::{NetworkCircuitBreaker, CircuitBreakerConfig};
 pub use chunking::{ChunkingService, FileChunk, CHUNK_SIZE};
 pub use dht::{DhtService, ChunkLocationRecord, DhtStats};
 pub use peer_manager::{PeerManager, PeerManagerEvent, PeerConnection};

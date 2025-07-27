@@ -20,6 +20,8 @@ pub mod product; // Product management module
 pub mod supply_chain; // Supply chain feature
 pub mod recommendation; // Discovery feed recommendation engine
 pub mod vendor; // Vendor management and verification
+pub mod finance; // Personal finance management
+pub mod crm; // Customer relationship management
 pub mod product {
     pub mod extensions; // Extension traits for protobuf models
 }
