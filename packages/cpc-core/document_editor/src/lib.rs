@@ -10,6 +10,8 @@ pub mod presentation;
 pub mod web;
 pub mod modular_module;
 pub mod module_registry;
+pub mod crdt;
+pub mod collaboration;
 
 // Re-export key types
 pub use domain::models::{Document, DocumentShare, DocumentVersion};

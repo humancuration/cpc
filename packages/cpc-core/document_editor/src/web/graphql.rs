@@ -186,8 +186,34 @@ impl DocumentEditorSubscription {
         ctx: &Context<'_>,
         document_id: Uuid,
     ) -> impl Stream<Item = DocumentUpdateEvent> {
-        // TODO: Implement real-time document updates
-        // This would use a pub/sub system like Redis or a broadcast channel
-        futures_util::stream::empty()
+        // Get the collaboration service
+        let collaboration_service = ctx.data_unchecked::<Arc<crate::collaboration::service::RealtimeCollaborationService>>();
+        
+        // Subscribe to document operations
+        let receiver = match collaboration_service.subscribe_to_operations(document_id) {
+            Ok(receiver) => receiver,
+            Err(_) => return futures_util::stream::empty(),
+        };
+        
+        // Convert the receiver to a stream
+        tokio_stream::wrappers::BroadcastStream::new(receiver)
+            .filter_map(|result| async move {
+                match result {
+                    Ok(operation) => {
+                        // Get the updated content
+                        let content = collaboration_service.get_document_content(document_id).ok();
+                        let content_str = content.map(|c| serde_json::to_string(c.as_json()).unwrap_or_default());
+                        
+                        Some(DocumentUpdateEvent {
+                            document_id,
+                            updated_at: chrono::Utc::now(),
+                            updated_by: Uuid::nil(), // In a real implementation, this would be the user who made the operation
+                            operation: Some(serde_json::to_string(&operation).unwrap_or_default()),
+                            content: content_str,
+                        })
+                    }
+                    Err(_) => None,
+                }
+            })
     }
 }

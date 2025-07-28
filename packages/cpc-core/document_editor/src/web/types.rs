@@ -100,4 +100,6 @@ pub struct DocumentUpdateEvent {
     pub document_id: Uuid,
     pub updated_at: DateTime<Utc>,
     pub updated_by: Uuid,
+    pub operation: Option<String>, // JSON string representation of the operation
+    pub content: Option<String>, // JSON string representation of the updated content
 }
