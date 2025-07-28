@@ -4,6 +4,7 @@ use yew::prelude::*;
 use crate::domain::{
     budget::Budget,
     savings_goal::SavingsGoal,
+    wallet::{Wallet, WalletTransaction},
 };
 
 /// Props for the BudgetChart component
@@ -76,6 +77,105 @@ pub fn savings_goal_card(props: &SavingsGoalCardProps) -> Html {
                         } }
                     </span>
                 </div>
+            </div>
+        </div>
+    }
+}
+
+/// Props for the WalletBalance component
+#[derive(Properties, PartialEq)]
+pub struct WalletBalanceProps {
+    pub wallet: Wallet,
+}
+
+/// Component to display wallet balance
+#[function_component(WalletBalance)]
+pub fn wallet_balance(props: &WalletBalanceProps) -> Html {
+    html! {
+        <div class="wallet-balance">
+            <h3>{ "Wallet Balance" }</h3>
+            <div class="balance-amount">
+                <span class="amount">{ format!("{} Dabloons", props.wallet.balance.amount) }</span>
+            </div>
+            <div class="balance-info">
+                <span>{ format!("Last updated: {}", props.wallet.updated_at.format("%Y-%m-%d %H:%M")) }</span>
+            </div>
+        </div>
+    }
+}
+
+/// Props for the WalletTransactionItem component
+#[derive(Properties, PartialEq)]
+pub struct WalletTransactionItemProps {
+    pub transaction: WalletTransaction,
+}
+
+/// Component to display a single wallet transaction
+#[function_component(WalletTransactionItem)]
+pub fn wallet_transaction_item(props: &WalletTransactionItemProps) -> Html {
+    let transaction_type_class = match props.transaction.transaction_type {
+        crate::domain::wallet::TransactionType::Credit => "credit",
+        crate::domain::wallet::TransactionType::Debit => "debit",
+    };
+    
+    html! {
+        <div class={format!("transaction-item {}", transaction_type_class)}>
+            <div class="transaction-details">
+                <div class="transaction-amount">
+                    <span class="amount">{ format!("{} Dabloons", props.transaction.amount.amount) }</span>
+                </div>
+                <div class="transaction-meta">
+                    <span class="timestamp">{ props.transaction.timestamp.format("%Y-%m-%d %H:%M") }</span>
+                    if let Some(description) = &props.transaction.description {
+                        <span class="description">{ description }</span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+
+/// Props for the WalletTransactionHistory component
+#[derive(Properties, PartialEq)]
+pub struct WalletTransactionHistoryProps {
+    pub transactions: Vec<WalletTransaction>,
+}
+
+/// Component to display wallet transaction history
+#[function_component(WalletTransactionHistory)]
+pub fn wallet_transaction_history(props: &WalletTransactionHistoryProps) -> Html {
+    html! {
+        <div class="transaction-history">
+            <h3>{ "Transaction History" }</h3>
+            <div class="transactions-list">
+                { for props.transactions.iter().map(|transaction| {
+                    html! { <WalletTransactionItem transaction={transaction.clone()} /> }
+                }) }
+            </div>
+        </div>
+    }
+}
+
+/// Props for the WalletOverview component
+#[derive(Properties, PartialEq)]
+pub struct WalletOverviewProps {
+    pub wallet: Wallet,
+    pub transactions: Vec<WalletTransaction>,
+}
+
+/// Component to display a complete wallet overview
+#[function_component(WalletOverview)]
+pub fn wallet_overview(props: &WalletOverviewProps) -> Html {
+    html! {
+        <div class="wallet-overview">
+            <h2>{ "Wallet" }</h2>
+            
+            <div class="wallet-section">
+                <WalletBalance wallet={props.wallet.clone()} />
+            </div>
+            
+            <div class="transactions-section">
+                <WalletTransactionHistory transactions={props.transactions.clone()} />
             </div>
         </div>
     }

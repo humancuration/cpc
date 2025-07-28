@@ -34,10 +34,12 @@ pub trait UserConsentStore {
 #[async_trait]
 pub trait SavingsService {
     async fn create_goal(&self, user_id: Uuid, name: String, target_amount: Money, target_date: DateTime<Utc>) -> Result<SavingsGoal, FinanceError>;
+    async fn create_mixed_goal(&self, user_id: Uuid, name: String, primary_target: Money, dabloons_target: Money, target_date: DateTime<Utc>) -> Result<SavingsGoal, FinanceError>;
     async fn get_user_goals(&self, user_id: Uuid) -> Result<Vec<SavingsGoal>, FinanceError>;
     async fn get_active_goals(&self, user_id: Uuid) -> Result<Vec<SavingsGoal>, FinanceError>;
     async fn get_goal_progress(&self, goal_id: Uuid) -> Result<SavingsProgress, FinanceError>;
     async fn update_goal_progress(&self, goal_id: Uuid, amount: Money) -> Result<SavingsGoal, FinanceError>;
+    async fn add_contribution(&self, goal_id: Uuid, amount: Money) -> Result<SavingsGoal, FinanceError>;
     async fn delete_goal(&self, goal_id: Uuid) -> Result<(), FinanceError>;
     async fn get_data_sharing_preference(&self, user_id: Uuid) -> Result<DataSharingPreference, FinanceError>;
     async fn update_data_sharing_preference(&self, user_id: Uuid, enabled: bool, anonymized: bool) -> Result<DataSharingPreference, FinanceError>;
@@ -58,13 +60,19 @@ impl SavingsServiceImpl {
             data_sharing_repo,
         }
     }
-}
-
 #[async_trait]
 impl SavingsService for SavingsServiceImpl {
     async fn create_goal(&self, user_id: Uuid, name: String, target_amount: Money, target_date: DateTime<Utc>) -> Result<SavingsGoal, FinanceError> {
         let goal = SavingsGoal::new(user_id, name, target_amount, target_date);
         self.savings_repo.save(&goal).await?;
+        Ok(goal)
+    }
+    
+    async fn create_mixed_goal(&self, user_id: Uuid, name: String, primary_target: Money, dabloons_target: Money, target_date: DateTime<Utc>) -> Result<SavingsGoal, FinanceError> {
+        let goal = SavingsGoal::new_mixed(user_id, name, primary_target, dabloons_target, target_date)?;
+        self.savings_repo.save(&goal).await?;
+        Ok(goal)
+    }
         Ok(goal)
     }
 
@@ -91,6 +99,15 @@ impl SavingsService for SavingsServiceImpl {
         goal.current_amount = new_amount;
         goal.updated_at = Utc::now();
         
+        self.savings_repo.save(&goal).await?;
+        Ok(goal)
+    }
+    
+    async fn add_contribution(&self, goal_id: Uuid, amount: Money) -> Result<SavingsGoal, FinanceError> {
+        let mut goal = self.savings_repo.find_by_id(goal_id).await?
+            .ok_or(FinanceError::SavingsGoalNotFound(goal_id))?;
+        
+        goal.add_contribution(amount)?;
         self.savings_repo.save(&goal).await?;
         Ok(goal)
     }

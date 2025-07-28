@@ -203,10 +203,40 @@ apps/
 │           └── module.rs       # Module initialization & wiring
 ```
 
-
-#### Non-executable Modules go in
-
-packages
+#### For Modules (packages/cpc-core/ directory)
+```
+packages/
 ├── cpc-core/
-│   └── [module-name]]
-│       ├──
+│   ├── Cargo.toml
+│   ├── migrations/             # Database migrations (for apps with DB)
+│   └── [module-name]/
+│       └──src      
+│          ├── lib.rs
+│          ├── domain/             # Pure business logic, no external dependencies
+│          ├── application/        # Use cases and service orchestrations
+│          ├── infrastructure/     # Concrete implementations (DB, network, etc.)
+│          └── presentation
+```
+
+
+## File Structure
+
+cpc
+├── apps/                    # Top-level runnable applications (backend, desktop client, node workers) belong here.
+│   ├── cpc-studio/          # The runnable game/experience editor application (we're putting this on hold, it will be our refinement of the pending bevy editor)
+│   ├── cpc-pds/             # The desktop client
+│   ├── backend/             # The runnable Axum server 
+│   ├── cpc-node/            # A runnable worker node
+│   ├── android/           # The Android app
+│   ├── ios/               # The iOS swift/Bevy app
+│   └── cpc-platform/        
+│       ├── src/
+│       ├── src-yew/
+│       └── src-tauri/         # The shared Rust code for the desktop/mobile backend
+│
+├── packages/
+│   ├── cpc-core/            # Domain-specific functionality modules (finance, health, productivity tools) belong here.
+│   ├── cpc-net/             # Shared networking logic
+│   └── cpc-protos/          # Shared gRPC definitions
+│
+└── Cargo.toml               # Unified workspace root

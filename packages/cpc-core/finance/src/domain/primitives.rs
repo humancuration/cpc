@@ -52,8 +52,8 @@ pub enum Currency {
     BRL,
     /// South African Rand
     ZAR,
-}
-
+    /// Internal currency for the CPC platform
+    Dabloons,
 impl Currency {
     /// Get the ISO 4217 currency code
     pub fn code(&self) -> &'static str {
@@ -78,13 +78,16 @@ impl Currency {
             Currency::INR => "INR",
             Currency::BRL => "BRL",
             Currency::ZAR => "ZAR",
+            Currency::Dabloons => "DABLOONS",
+        }
+    }
         }
     }
 
     /// Get the number of decimal places for this currency
     pub fn decimal_places(&self) -> u32 {
         match self {
-            Currency::JPY | Currency::KRW => 0,
+            Currency::JPY | Currency::KRW | Currency::Dabloons => 0,
             _ => 2,
         }
     }
@@ -101,6 +104,88 @@ impl std::fmt::Display for Currency {
 pub struct Money {
     pub amount: Decimal,
     pub currency: Currency,
+}
+
+impl Money {
+    /// Create a new Money instance
+    pub fn new(amount: Decimal, currency: Currency) -> Self {
+        Self { amount, currency }
+    }
+
+    /// Create a zero amount in the specified currency
+    pub fn zero(currency: Currency) -> Self {
+        Self {
+            amount: Decimal::ZERO,
+            currency,
+        }
+    }
+
+    /// Check if the amount is zero
+    pub fn is_zero(&self) -> bool {
+        self.amount.is_zero()
+    }
+
+    /// Check if the amount is positive
+    pub fn is_positive(&self) -> bool {
+        self.amount.is_sign_positive() && !self.amount.is_zero()
+    }
+
+    /// Check if the amount is negative
+    pub fn is_negative(&self) -> bool {
+        self.amount.is_sign_negative()
+    }
+
+    /// Add two Money amounts
+    /// Returns an error if the currencies don't match
+    pub fn add(&self, other: &Self) -> Result<Self, FinancialError> {
+        if self.currency != other.currency {
+            return Err(FinancialError::CurrencyMismatch {
+                expected: self.currency.code().to_string(),
+                actual: other.currency.code().to_string(),
+            });
+        }
+        
+        Ok(Self {
+            amount: self.amount + other.amount,
+            currency: self.currency.clone(),
+        })
+    }
+
+    /// Subtract two Money amounts
+    /// Returns an error if the currencies don't match
+    pub fn subtract(&self, other: &Self) -> Result<Self, FinancialError> {
+        if self.currency != other.currency {
+            return Err(FinancialError::CurrencyMismatch {
+                expected: self.currency.code().to_string(),
+                actual: other.currency.code().to_string(),
+            });
+        }
+        
+        Ok(Self {
+            amount: self.amount - other.amount,
+            currency: self.currency.clone(),
+        })
+    }
+
+    /// Multiply the amount by a decimal factor
+    pub fn multiply(&self, factor: Decimal) -> Self {
+        Self {
+            amount: self.amount * factor,
+            currency: self.currency.clone(),
+        }
+    }
+
+    /// Divide the amount by a decimal divisor
+    pub fn divide(&self, divisor: Decimal) -> Result<Self, FinancialError> {
+        if divisor.is_zero() {
+            return Err(FinancialError::DivisionByZero);
+        }
+        
+        Ok(Self {
+            amount: self.amount / divisor,
+            currency: self.currency.clone(),
+        })
+    }
 }
 
 impl Money {
@@ -227,6 +312,12 @@ pub enum FinancialError {
     
     #[error("Invalid amount")]
     InvalidAmount,
+    
+    #[error("Insufficient funds in {0}")]
+    InsufficientFunds(Currency),
+    
+    #[error("Invalid currency")]
+    InvalidCurrency,
 }
 
 #[cfg(test)]

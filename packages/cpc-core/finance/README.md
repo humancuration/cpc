@@ -10,6 +10,7 @@ The CPC Finance Module provides comprehensive personal finance management functi
 - **Privacy-Preserving Data Sharing**: Securely share financial data with explicit user consent
 - **p2p Data Sharing**: Utilize p2panda with Double Ratchet encryption for secure communication
 - **Visualization**: Bevy 3D visualizations and Yew web components for financial data
+- **Wallet**: Manage dabloons, the internal currency of the CPC platform
 
 ## Architecture
 
@@ -37,6 +38,9 @@ Represents a financial target with progress tracking.
 
 ### Money
 A monetary amount with currency, supporting arithmetic operations.
+
+### Wallet
+Represents a user's wallet for storing dabloons, the internal currency of the CPC platform. Includes functionality for adding, subtracting, and transferring dabloons between users.
 
 ## Installation
 
@@ -85,6 +89,23 @@ let goal = SavingsGoal::new(
 );
 ```
 
+### Managing a Wallet
+
+```rust
+use cpc_core::finance::{Wallet, Money, Currency};
+use uuid::Uuid;
+use rust_decimal::Decimal;
+
+let user_id = Uuid::new_v4();
+let mut wallet = Wallet::new(user_id);
+
+// Add dabloons to the wallet
+wallet.add_dabloons(Money::new(Decimal::new(100, 0), Currency::Dabloons)).unwrap();
+
+// Check balance
+assert_eq!(wallet.balance.amount, Decimal::new(100, 0));
+```
+
 ## Database Migrations
 
 The finance module includes SQL migrations for PostgreSQL:
@@ -92,6 +113,8 @@ The finance module includes SQL migrations for PostgreSQL:
 - `20250728000000_create_budgets_table.sql`
 - `20250728000001_create_savings_goals_table.sql`
 - `20250728000002_create_data_sharing_preferences_table.sql`
+- `20250728000003_create_wallets_table.sql`
+- `20250728000004_create_wallet_transactions_table.sql`
 
 ## p2p Data Sharing
 

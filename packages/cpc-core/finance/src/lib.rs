@@ -37,6 +37,7 @@ pub use domain::{
     budget::Budget,
     savings_goal::SavingsGoal,
     primitives::{Money, Currency, Amount},
+    wallet::{Wallet, WalletTransaction, TransactionType},
 };
 
 #[cfg(test)]
@@ -84,3 +85,6 @@ mod tests {
         assert_eq!(goal.current_amount.amount, Decimal::new(0, 0));
     }
 }
+
+#[cfg(test)]
+mod wallet_test;

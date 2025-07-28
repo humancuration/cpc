@@ -4,3 +4,4 @@
 
 pub mod budget_service;
 pub mod savings_service;
+pub mod wallet_service;

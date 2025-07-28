@@ -5,6 +5,7 @@
 pub mod budget;
 pub mod savings_goal;
 pub mod primitives;
+pub mod wallet;
 
 /// Common error types for the finance domain
 #[derive(thiserror::Error, Debug)]
@@ -23,6 +24,12 @@ pub enum FinanceError {
     
     #[error("Financial error: {0}")]
     FinancialError(#[from] crate::domain::primitives::FinancialError),
+    
+    #[error("Wallet not found for user {0}")]
+    WalletNotFound(uuid::Uuid),
+    
+    #[error("Insufficient wallet balance")]
+    InsufficientWalletBalance,
     
     #[error("p2p error: {0}")]
     #[cfg(feature = "p2p")]
