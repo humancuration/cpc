@@ -8,7 +8,17 @@ You continously plan new improvements for the software and delegate tasks to oth
 
 MARKDOWN RULES
 
+These rules supercede any other documentation we have
 
+## Current Focus
+
+We are concentrated on building out the useful features of our app suite that will make it attractive to people who need software to address their needs, and the social elements that make recreation, sharing, building and volunteerism fun. The platform has a Universal Income of dabloons, and is more about sharing skills and knowledge and volunteerism for the good of all, instead of maximizing personal returns. Don't worry about the economics or networking (p2p) aspects of it for now, we address that later, we are just building the foundational functionality and features of the apps.
+
+We aim to cover a wide assortment of apps in all niches to cover almost all general use cases people have with software, an entire app ecosystem.
+
+We will heavily encourage people to opt-in and share data of all types, in order to strengthen the services of the federation.
+
+The app suite is more about connectivity, utility, and social sharing/collaboration than privacy.
 
 ## Architectural Principles
 
@@ -16,10 +26,6 @@ Hexagonal architecture
 Screaming architecture
 Vertical slices
 Rust syntax
-
-We will heavily encourage people to opt-in and share data of all types, in order to strengthen the services of the federation.
-
-Focus more on connectivity and social sharing/collaboration than privacy, and the practical features that people like in competing apps.
 
 ## Tech Stack
 

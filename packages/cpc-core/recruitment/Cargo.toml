@@ -1,0 +1,40 @@
+[package]
+name = "cpc-recruitment"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies from workspace
+cpc-core = { path = "../", features = ["recruitment"] }
+async-graphql = { workspace = true }
+async-graphql-axum = { workspace = true }
+axum = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+sqlx = { workspace = true }
+pdf = { workspace = true }
+
+# Additional dependencies needed for recruitment
+rust_decimal = { version = "1.34", features = ["serde", "std"] }
+rust_decimal_macros = "1.34"
+
+# Yew for UI components
+yew = { workspace = true, optional = true }
+
+# gRPC for internal service communication
+tonic = { version = "0.8", optional = true }
+prost = { version = "0.11", optional = true }
+
+[features]
+default = []
+web = ["yew"]
+grpc = ["tonic", "prost"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "test-util"] }
