@@ -210,14 +210,21 @@ impl AuditLogRepository for PostgresAuditLogRepository {
         .fetch_one(&self.connection)
         .await?;
 
-        // In a real implementation, we would parse the JSON fields back to enums
-        // For now, we'll create a simplified AuditLog
+        // Parse JSON fields back to enums
+        let purpose_str: String = row.get("purpose");
+        let purpose = serde_json::from_str(&purpose_str)
+            .map_err(|e| AuditError::ValidationError(format!("Failed to parse purpose: {}", e)))?;
+        
+        let action_str: String = row.get("action");
+        let action = serde_json::from_str(&action_str)
+            .map_err(|e| AuditError::ValidationError(format!("Failed to parse action: {}", e)))?;
+        
         Ok(AuditLog {
             id: row.get("id"),
             user_id: row.get("user_id"),
             asset_id: row.get("asset_id"),
-            purpose: AccessPurpose::UserView, // Placeholder
-            action: DataAction::Read, // Placeholder
+            purpose,
+            action,
             timestamp: row.get("timestamp"),
             source_ip: row.get("source_ip"),
             device_info: row.get("device_info"),
@@ -234,19 +241,28 @@ impl AuditLogRepository for PostgresAuditLogRepository {
         .fetch_all(&self.connection)
         .await?;
 
-        // In a real implementation, we would parse the JSON fields back to enums
-        // For now, we'll create simplified AuditLogs
-        let logs = rows.into_iter().map(|row| AuditLog {
-            id: row.get("id"),
-            user_id: row.get("user_id"),
-            asset_id: row.get("asset_id"),
-            purpose: AccessPurpose::UserView, // Placeholder
-            action: DataAction::Read, // Placeholder
-            timestamp: row.get("timestamp"),
-            source_ip: row.get("source_ip"),
-            device_info: row.get("device_info"),
-            data_content: row.get("data_content"),
-        }).collect();
+        // Parse JSON fields back to enums
+        let logs = rows.into_iter().map(|row| {
+            let purpose_str: String = row.get("purpose");
+            let purpose = serde_json::from_str(&purpose_str)
+                .map_err(|e| AuditError::ValidationError(format!("Failed to parse purpose: {}", e)))?;
+            
+            let action_str: String = row.get("action");
+            let action = serde_json::from_str(&action_str)
+                .map_err(|e| AuditError::ValidationError(format!("Failed to parse action: {}", e)))?;
+            
+            Ok(AuditLog {
+                id: row.get("id"),
+                user_id: row.get("user_id"),
+                asset_id: row.get("asset_id"),
+                purpose,
+                action,
+                timestamp: row.get("timestamp"),
+                source_ip: row.get("source_ip"),
+                device_info: row.get("device_info"),
+                data_content: row.get("data_content"),
+            })
+        }).collect::<Result<Vec<AuditLog>, AuditError>>()?;
 
         Ok(logs)
     }
@@ -260,19 +276,28 @@ impl AuditLogRepository for PostgresAuditLogRepository {
         .fetch_all(&self.connection)
         .await?;
 
-        // In a real implementation, we would parse the JSON fields back to enums
-        // For now, we'll create simplified AuditLogs
-        let logs = rows.into_iter().map(|row| AuditLog {
-            id: row.get("id"),
-            user_id: row.get("user_id"),
-            asset_id: row.get("asset_id"),
-            purpose: AccessPurpose::UserView, // Placeholder
-            action: DataAction::Read, // Placeholder
-            timestamp: row.get("timestamp"),
-            source_ip: row.get("source_ip"),
-            device_info: row.get("device_info"),
-            data_content: row.get("data_content"),
-        }).collect();
+        // Parse JSON fields back to enums
+        let logs = rows.into_iter().map(|row| {
+            let purpose_str: String = row.get("purpose");
+            let purpose = serde_json::from_str(&purpose_str)
+                .map_err(|e| AuditError::ValidationError(format!("Failed to parse purpose: {}", e)))?;
+            
+            let action_str: String = row.get("action");
+            let action = serde_json::from_str(&action_str)
+                .map_err(|e| AuditError::ValidationError(format!("Failed to parse action: {}", e)))?;
+            
+            Ok(AuditLog {
+                id: row.get("id"),
+                user_id: row.get("user_id"),
+                asset_id: row.get("asset_id"),
+                purpose,
+                action,
+                timestamp: row.get("timestamp"),
+                source_ip: row.get("source_ip"),
+                device_info: row.get("device_info"),
+                data_content: row.get("data_content"),
+            })
+        }).collect::<Result<Vec<AuditLog>, AuditError>>()?;
 
         Ok(logs)
     }

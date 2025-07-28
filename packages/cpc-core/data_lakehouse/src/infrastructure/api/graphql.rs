@@ -1,9 +1,11 @@
 //! GraphQL API implementation for the data lakehouse
 
 use crate::domain::models::{DataAsset, IngestionJob, DataAssetType, StorageFormat, DataSource, JobSchedule, JobExecutionResult};
-use async_graphql::{Object, Result, Schema, EmptyMutation, EmptySubscription, ID};
+use crate::application::ingestion_service::IngestionService;
+use async_graphql::{Object, Result, Schema, EmptyMutation, EmptySubscription, ID, Context};
 use serde_json::Value as JsonValue;
 use uuid::Uuid;
+use std::sync::Arc;
 
 /// GraphQL query root
 pub struct QueryRoot;
@@ -11,8 +13,15 @@ pub struct QueryRoot;
 #[Object]
 impl QueryRoot {
     /// Get a data asset by ID
-    async fn get_data_asset(&self, ctx: &async_graphql::Context<'_>, id: ID) -> Result<Option<DataAsset>> {
+    async fn get_data_asset(&self, ctx: &Context<'_>, id: ID) -> Result<Option<DataAsset>> {
+        // Extract the data asset repository from context
+        // This would typically be injected during schema creation
+        // let repository = ctx.data::<Arc<dyn DataAssetRepository>>()?;
+        
         // In a real implementation, this would fetch from a repository
+        // let asset = repository.get(Uuid::parse_str(&id)?).await?;
+        // Ok(Some(asset))
+        
         // For now, we'll return None as a placeholder
         Ok(None)
     }
@@ -20,20 +29,34 @@ impl QueryRoot {
     /// List data assets with optional filtering
     async fn list_data_assets(
         &self,
-        ctx: &async_graphql::Context<'_>,
+        ctx: &Context<'_>,
         types: Option<Vec<DataAssetType>>,
         tags: Option<Vec<String>>,
         limit: Option<i32>,
         offset: Option<i32>,
     ) -> Result<Vec<DataAsset>> {
+        // Extract the data asset repository from context
+        // let repository = ctx.data::<Arc<dyn DataAssetRepository>>()?;
+        
         // In a real implementation, this would fetch from a repository
+        // let assets = repository.list(types, tags, limit, offset).await?;
+        // Ok(assets)
+        
         // For now, we'll return an empty vector as a placeholder
         Ok(vec![])
     }
 
     /// Get an ingestion job by ID
-    async fn get_ingestion_job(&self, ctx: &async_graphql::Context<'_>, id: ID) -> Result<Option<IngestionJob>> {
-        // In a real implementation, this would fetch from a repository
+    async fn get_ingestion_job(&self, ctx: &Context<'_>, id: ID) -> Result<Option<IngestionJob>> {
+        // Extract the ingestion service from context
+        // This would typically be injected during schema creation
+        // let service = ctx.data::<Arc<IngestionService>>()?;
+        
+        // In a real implementation, this would fetch from the service
+        // Note: This would require a get_job method in the service
+        // let job = service.get_job(Uuid::parse_str(&id)?).await?;
+        // Ok(Some(job))
+        
         // For now, we'll return None as a placeholder
         Ok(None)
     }
@@ -41,12 +64,19 @@ impl QueryRoot {
     /// List ingestion jobs with optional filtering
     async fn list_ingestion_jobs(
         &self,
-        ctx: &async_graphql::Context<'_>,
+        ctx: &Context<'_>,
         status: Option<String>, // Would be JobStatus in real implementation
         limit: Option<i32>,
         offset: Option<i32>,
     ) -> Result<Vec<IngestionJob>> {
-        // In a real implementation, this would fetch from a repository
+        // Extract the ingestion service from context
+        // let service = ctx.data::<Arc<IngestionService>>()?;
+        
+        // In a real implementation, this would fetch from the service
+        // Note: This would require a list_jobs method in the service
+        // let jobs = service.list_jobs(status, limit, offset).await?;
+        // Ok(jobs)
+        
         // For now, we'll return an empty vector as a placeholder
         Ok(vec![])
     }
@@ -60,27 +90,52 @@ impl MutationRoot {
     /// Create a new ingestion job
     async fn create_ingestion_job(
         &self,
-        ctx: &async_graphql::Context<'_>,
+        ctx: &Context<'_>,
         input: CreateIngestionJobInput,
     ) -> Result<IngestionJob> {
+        // Extract the ingestion service from context
+        let service = ctx.data::<Arc<IngestionService>>()?;
+        
+        // Convert input to domain models
+        let source: DataSource = input.source.into();
+        let schedule: Option<JobSchedule> = input.schedule.map(|s| s.into());
+        let target_asset_id = Uuid::parse_str(&input.target_asset_id)
+            .map_err(|_| async_graphql::Error::new("Invalid UUID"))?;
+        
         // In a real implementation, this would create the job via the IngestionService
+        // let job = service.create_job(
+        //     input.name,
+        //     source,
+        //     target_asset_id,
+        //     schedule,
+        //     input.transformation_logic,
+        // ).await?;
+        
         // For now, we'll create a placeholder job
         let job = IngestionJob::new(
             input.name,
-            input.source.into(),
-            Uuid::parse_str(&input.target_asset_id).map_err(|_| async_graphql::Error::new("Invalid UUID"))?,
-            input.schedule.map(|s| s.into()),
+            source,
+            target_asset_id,
+            schedule,
             input.transformation_logic,
         );
         Ok(job)
     }
 
     /// Run an ingestion job
-    async fn run_ingestion_job(&self, ctx: &async_graphql::Context<'_>, id: ID) -> Result<JobExecutionResult> {
+    async fn run_ingestion_job(&self, ctx: &Context<'_>, id: ID) -> Result<JobExecutionResult> {
+        // Extract the ingestion service from context
+        let service = ctx.data::<Arc<IngestionService>>()?;
+        
+        let job_id = Uuid::parse_str(&id)
+            .map_err(|_| async_graphql::Error::new("Invalid UUID"))?;
+        
         // In a real implementation, this would run the job via the IngestionService
+        // let result = service.run_job(job_id).await?;
+        
         // For now, we'll create a placeholder result
         let result = JobExecutionResult {
-            job_id: Uuid::parse_str(&id).map_err(|_| async_graphql::Error::new("Invalid UUID"))?,
+            job_id,
             success: true,
             records_processed: 0,
             error_message: None,
@@ -93,10 +148,24 @@ impl MutationRoot {
     /// Apply a transformation to a data asset
     async fn apply_transformation(
         &self,
-        ctx: &async_graphql::Context<'_>,
+        ctx: &Context<'_>,
         input: TransformationInput,
     ) -> Result<DataAsset> {
+        // Extract the processing service from context
+        // let service = ctx.data::<Arc<ProcessingService>>()?;
+        
+        // Convert input parameters
+        let asset_id = Uuid::parse_str(&input.asset_id)
+            .map_err(|_| async_graphql::Error::new("Invalid UUID"))?;
+        let transformation_type = input.transformation_type.into();
+        
         // In a real implementation, this would apply the transformation via the ProcessingService
+        // let result = service.apply_transformation(
+        //     asset_id,
+        //     transformation_type,
+        //     input.parameters,
+        // ).await?;
+        
         // For now, we'll return a placeholder
         Err(async_graphql::Error::new("Not implemented"))
     }

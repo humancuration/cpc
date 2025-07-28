@@ -22,6 +22,30 @@ pub struct DataAsset {
     pub lineage: DataLineage,  // Reference to lineage tracking
 }
 
+impl DataAsset {
+    pub fn new(
+        name: String,
+        asset_type: DataAssetType,
+        storage_format: StorageFormat,
+        schema: JsonValue,
+    ) -> Self {
+        let now = Utc::now();
+        Self {
+            id: crate::domain::primitives::new_uuid(),
+            name,
+            description: None,
+            asset_type,
+            storage_format,
+            schema,
+            tags: Vec::new(),
+            created_at: now,
+            updated_at: now,
+            version: 1,
+            lineage: DataLineage::new(),
+        }
+    }
+}
+
 /// Types of data assets
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum DataAssetType {
@@ -44,8 +68,8 @@ pub enum StorageFormat {
 /// Data lineage tracking
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DataLineage {
-    pub sources: Vec<Uuid>,  // Source data asset IDs
-    pub transformations: Vec<String>,  // Applied transformations
+    pub sources: Vec<LineageSource>,  // Source data asset IDs with record tracking
+    pub transformations: Vec<TransformationRecord>,  // Applied transformations
     pub created_by: Option<Uuid>,  // User or process that created this asset
 }
 
@@ -57,6 +81,21 @@ impl DataLineage {
             created_by: None,
         }
     }
+}
+
+/// Represents a source of data with optional record-level tracking
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LineageSource {
+    pub asset_id: Uuid,
+    pub record_ids: Option<Vec<String>>, // Specific records used, if tracked
+}
+
+/// Represents a transformation applied to data
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TransformationRecord {
+    pub transformation_type: String,
+    pub parameters: serde_json::Value,
+    pub timestamp: DateTime<Utc>,
 }
 
 impl Default for DataLineage {
@@ -90,7 +129,7 @@ impl IngestionJob {
         transformation_logic: Option<String>,
     ) -> Self {
         Self {
-            id: Uuid::new_v4(),
+            id: crate::domain::primitives::new_uuid(),
             name,
             source,
             target_asset_id,
@@ -185,7 +224,7 @@ impl AuditLog {
         timestamp: DateTime<Utc>,
     ) -> Self {
         Self {
-            id: Uuid::new_v4(),
+            id: crate::domain::primitives::new_uuid(),
             user_id,
             asset_id,
             purpose,
