@@ -82,10 +82,10 @@ impl WalletService for WalletServiceImpl {
     
     async fn add_dabloons(&self, user_id: Uuid, amount: Money, description: Option<String>) -> Result<Wallet, FinanceError> {
         if amount.currency != Currency::Dabloons {
-            return Err(FinancialError::CurrencyMismatch {
+            return Err(FinanceError::FinancialError(FinancialError::CurrencyMismatch {
                 expected: Currency::Dabloons.code().to_string(),
                 actual: amount.currency.code().to_string(),
-            });
+            }));
         }
         
         let mut wallet = self.get_or_create_wallet(user_id).await?;
@@ -105,10 +105,10 @@ impl WalletService for WalletServiceImpl {
     
     async fn subtract_dabloons(&self, user_id: Uuid, amount: Money, description: Option<String>) -> Result<Wallet, FinanceError> {
         if amount.currency != Currency::Dabloons {
-            return Err(FinancialError::CurrencyMismatch {
+            return Err(FinanceError::FinancialError(FinancialError::CurrencyMismatch {
                 expected: Currency::Dabloons.code().to_string(),
                 actual: amount.currency.code().to_string(),
-            });
+            }));
         }
         
         let mut wallet = self.get_or_create_wallet(user_id).await?;
@@ -128,10 +128,10 @@ impl WalletService for WalletServiceImpl {
     
     async fn transfer_dabloons(&self, from_user_id: Uuid, to_user_id: Uuid, amount: Money, description: Option<String>) -> Result<(Wallet, Wallet), FinanceError> {
         if amount.currency != Currency::Dabloons {
-            return Err(FinancialError::CurrencyMismatch {
+            return Err(FinanceError::FinancialError(FinancialError::CurrencyMismatch {
                 expected: Currency::Dabloons.code().to_string(),
                 actual: amount.currency.code().to_string(),
-            });
+            }));
         }
         
         // Get both wallets
@@ -140,7 +140,7 @@ impl WalletService for WalletServiceImpl {
         
         // Check if the sender has sufficient balance
         if !from_wallet.has_sufficient_balance(&amount)? {
-            return Err(FinanceError::InsufficientWalletBalance);
+            return Err(FinanceError::InsufficientFunds(Currency::Dabloons));
         }
         
         // Perform the transfer
@@ -182,7 +182,7 @@ impl WalletService for WalletServiceImpl {
         // In a real implementation, this would update the budget service
         // For now, we'll just validate the inputs
         if amount.currency != Currency::Dabloons {
-            return Err(FinancialError::InvalidCurrency);
+            return Err(FinanceError::FinancialError(crate::domain::primitives::FinancialError::InvalidCurrency));
         }
         
         // This is a placeholder implementation

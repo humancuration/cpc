@@ -37,6 +37,8 @@ impl BudgetServiceImpl {
     pub fn new(budget_repo: std::sync::Arc<dyn BudgetRepository>) -> Self {
         Self { budget_repo }
     }
+}
+
 #[async_trait]
 impl BudgetService for BudgetServiceImpl {
     async fn create_budget(&self, user_id: Uuid, category: String, allocated_amount: Money, period: BudgetPeriod, start_date: DateTime<Utc>, end_date: DateTime<Utc>) -> Result<Budget, FinanceError> {
@@ -57,8 +59,6 @@ impl BudgetService for BudgetServiceImpl {
         
         budget.update_spent_with_dabloons(amount)?;
         self.budget_repo.save(&budget).await?;
-        Ok(budget)
-    }
         Ok(budget)
     }
 

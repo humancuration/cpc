@@ -31,6 +31,12 @@ pub enum FinanceError {
     #[error("Insufficient wallet balance")]
     InsufficientWalletBalance,
     
+    #[error("Insufficient funds in {0}")]
+    InsufficientFunds(crate::domain::primitives::Currency),
+    
+    #[error("Budget exceeded for category {0}")]
+    BudgetExceeded(String),
+    
     #[error("p2p error: {0}")]
     #[cfg(feature = "p2p")]
     P2PError(String),

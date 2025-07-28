@@ -60,6 +60,8 @@ impl SavingsServiceImpl {
             data_sharing_repo,
         }
     }
+}
+
 #[async_trait]
 impl SavingsService for SavingsServiceImpl {
     async fn create_goal(&self, user_id: Uuid, name: String, target_amount: Money, target_date: DateTime<Utc>) -> Result<SavingsGoal, FinanceError> {

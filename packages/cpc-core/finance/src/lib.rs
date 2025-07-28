@@ -88,3 +88,12 @@ mod tests {
 
 #[cfg(test)]
 mod wallet_test;
+
+#[cfg(test)]
+mod budget_test;
+
+#[cfg(test)]
+mod savings_goal_test;
+
+#[cfg(test)]
+mod wallet_budget_test;
