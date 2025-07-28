@@ -10,7 +10,8 @@ members = [
     "packages/cpc-core/invoicing",
     "packages/cpc-core/crm",
     "packages/cpc-net",
-    "packages/cpc-protos"
+    "packages/cpc-protos",
+    "packages/cpc-core/document_editor"
 ]
 
 [workspace.dependencies]

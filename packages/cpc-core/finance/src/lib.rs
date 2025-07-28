@@ -25,12 +25,14 @@
 //! - p2p data sharing using p2panda with Double Ratchet encryption
 //! - Bevy visualization components
 //! - Yew web components
+//! - Expense tracking with receipt scanning
 
 // Vertical slices
 pub mod domain;
 pub mod application;
 pub mod infrastructure;
 pub mod presentation;
+pub mod expense_tracker;
 
 /// Re-export commonly used types
 pub use domain::{
@@ -97,3 +99,6 @@ mod savings_goal_test;
 
 #[cfg(test)]
 mod wallet_budget_test;
+
+#[cfg(test)]
+mod expense_tracker_test;

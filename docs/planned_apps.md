@@ -14,11 +14,18 @@ For information about our privacy policies and consent management, see our [Priv
 
 - [/] **DAW**: Fully featured, allows for creating new tracks, mixing, mastering, and remixing. [Architecture Plan](apps/daw/ARCHITECTURE.md)
 
+    Podcast Studio: Record, edit, and publish podcasts with noise reduction, multi-track editing, and direct publishing to major platforms
+
+    Video Editor: Lightweight video editing with trimming, filters, captions, and social media optimization
+
+    Karaoke Hub: With pitch adjustment, background removal, and real-time duet capabilities
+     
+
 ## Productivity & Work
 
 These tools can help users manage their work, studies, and personal projects.
 
-- [ ] **Docs**: A streamlined word processor for writing and editing documents. Key features would include basic formatting (bold, italics, lists), the ability to insert images, and options to export to PDF or .docx formats.
+- [/] **Docs**: A streamlined word processor for writing and editing documents. Key features would include basic formatting (bold, italics, lists), the ability to insert images, and options to export to PDF or .docx formats. Implementation in progress with database schema and repository layer complete.
 
 - [ ] **Sheets**: A simple spreadsheet application for creating budgets, tracking lists, or managing simple data. It should handle basic formulas, charts, and be compatible with formats like .xlsx.
 
@@ -29,6 +36,15 @@ These tools can help users manage their work, studies, and personal projects.
 - [/] **Calendar**: An integrated calendar that can sync with external services like Google Calendar and Outlook. It would manage events, set reminders, and offer different views (daily, weekly, monthly).
 
 - [/] **Website Builder**: This is for everyone from individuals to large businesses, fully featured, easy to use, feature rich. Also have a link-in-bio site builder. Both have great UI to let users build for both web and mobile, and both integrate well with things like payment processors (including our own) and sales platforms (or from their own shop, with a storebuilder wizard).
+
+- [ ]    Mind Mapping Tool: Visual brainstorming with export to task lists, presentation formats, and collaborative editing
+
+- [ ]    Email Suite: Secure email client with advanced filtering, scheduling, templates, and integration with your calendar
+
+- [ ]   Presentation Designer: Create professional slides with AI-assisted design, presenter notes, and real-time collaboration
+
+- [ ]   Code Sandbox: For developers to write, test, and share code snippets with syntax highlighting for multiple languages
+     
 
 ## Personal Finance
 
@@ -43,6 +59,15 @@ This is a powerful category that can provide immense value to users by helping t
 - [ ] **Savings Goals**: A feature that allows users to set specific savings goals (e.g., "Vacation Fund," "New Laptop") and track their progress.
 
 - [ ] **Personal BI Dashboard**: This is where your BI idea comes to life for the average person. It wouldn't be complex business intelligence, but rather a personal dashboard that provides simple, clear insights into their finances. This could include charts showing spending trends over time, a breakdown of income versus expenses, and a net worth tracker.
+
+- [ ]    Investment Tracker: Monitor portfolios across multiple brokers with performance analytics and tax-lot optimization
+
+- [ ]Debt Snowball Planner: Visualize and optimize debt repayment strategies with interest calculations
+
+- [ ]    Tax Assistant: Guide users through tax preparation with automatic form population and deadline reminders
+
+- [ ]    Credit Score Monitor: Track credit health with improvement suggestions and fraud alerts
+     
 
 ## Health & Wellness
 
@@ -66,6 +91,15 @@ Integrating wellness features can make the app a daily companion for users looki
   Compliance roadmap: Q3: Automated audit log certification process
   See [Health Module Documentation](docs/architecture/health.md) for implementation details.
 
+- [ ]    Sleep Tracker: Analyze sleep patterns with smart alarm, sleep environment recommendations, and integration with wearables
+
+- [ ]    Workout Planner: Custom exercise routines with video demonstrations, progress tracking, and form correction
+
+- [ ]    Telehealth Portal: Schedule virtual appointments, store medical records, and connect with healthcare providers
+
+- [ ]    Nutrition Analyzer: Scan food items/barcodes, track macros, and generate meal plans based on dietary goals
+     
+
 ## Personal Organization & Utilities
 
 These are the digital equivalents of a Swiss Army knife—small tools that are incredibly useful to have in one place.
@@ -77,6 +111,15 @@ These are the digital equivalents of a Swiss Army knife—small tools that are i
 - [ ] **Unit Converter**: A handy utility for converting currencies, weights, measurements, and temperatures.
 
 - [ ] **QR Code Scanner**: A built-in tool to quickly scan QR codes, which have become increasingly common.
+
+- [ ]    Digital Whiteboard: Infinite canvas for brainstorming with sticky notes, drawing tools, and real-time collaboration
+
+- [ ]    Bookmark Manager: Organize web links with tagging, search, and automatic categorization by content type
+
+- [ ]    Voice Recorder & Transcriber: High-quality audio capture with AI-powered transcription and keyword search
+
+- [ ]   Digital Signature Tool: Create legally-binding signatures with document tracking and verification
+     
 
 ## Small Businesses & Startups
 
@@ -96,6 +139,15 @@ The key here is simplicity, affordability, and integration. Small business owner
 
 - [ ] **Business Health Dashboard**: A simplified BI tool that connects to other modules (Invoicing, Expense Tracking) to provide at-a-glance metrics like revenue, outstanding invoices, profit and loss, and cash flow.
 
+- [ ]    Social Media Scheduler: Plan and publish content across multiple platforms with analytics and engagement tracking
+
+- [ ]    Customer Support Hub: Ticket system with canned responses, knowledge base integration, and satisfaction surveys
+
+- [ ]    E-commerce Storefront: Mobile-optimized online store with inventory sync, abandoned cart recovery, and reviews
+
+- [ ]    Loyalty Program Builder: Create custom reward systems with tiered benefits and redemption tracking
+     
+
 ## Medium-Sized Businesses (SMBs)
 
 As businesses grow, their needs shift towards more robust collaboration, process management, and data analysis.
@@ -113,6 +165,15 @@ As businesses grow, their needs shift towards more robust collaboration, process
 
 - [ ] **Internal Knowledge Base**: A dedicated space for creating and organizing internal documentation, company policies, training materials, and how-to guides for employees.
 
+- [ ]    Recruitment System: Job posting, applicant tracking, interview scheduling, and candidate evaluation tools
+
+- [ ]    Vendor Management: Track supplier relationships, contracts, performance metrics, and payment terms
+
+- [ ]   Training Academy: Create and deliver employee training with progress tracking and certification
+
+- [ ]    Facility Management: Office space planning, maintenance requests, and resource booking system
+     
+
 ## Large Businesses & Enterprise
 
 Large enterprises require tools that focus on scalability, security, compliance, and deep data integration across departments.
@@ -129,6 +190,15 @@ Large enterprises require tools that focus on scalability, security, compliance,
 
 - [ ] **API & Integration Hub**: For large businesses, the ability to connect your app to their existing software ecosystem (like Oracle, SAP, or custom internal tools) is critical. An easy-to-use API and pre-built connectors would be a major selling point.
 
+- [ ]    Project Portfolio Management: Strategic oversight of multiple projects with resource allocation and risk assessment
+
+- [ ]    Compliance Audit Manager: Track regulatory requirements, conduct internal audits, and document remediation
+
+- [ ]    Executive Dashboard: Customizable high-level metrics for C-suite with drill-down capabilities
+    
+- [ ]    M&A Integration Toolkit: Specialized tools for mergers and acquisitions including cultural integration planning
+     
+
 ## Cooperatives
 
 Cooperatives have unique needs centered around member engagement, democratic governance, and surplus distribution.
@@ -143,13 +213,35 @@ Cooperatives have unique needs centered around member engagement, democratic gov
 
 - [ ] **Resource & Document Library**: A central place to store and share important documents with members, such as the cooperative's bylaws, meeting minutes, annual reports, and educational materials.
 
+- [ ]    Community Event Planner: Coordinate member events with RSVP tracking, resource allocation, and feedback collection
+
+- [ ]    Skill-Sharing Platform: Match members based on expertise for peer-to-peer learning opportunities
+
+- [ ]    Equity Tracking System: Visualize member ownership stakes and voting power distribution
+
+- [ ]    Cooperative Education Hub: Curated resources about cooperative principles and best practices
+     
+
 ## Scientific
 
 - [ ] ** Scientific Journal like Jupyter Notebook**:
 
+- [ ]    Data Visualization Studio: Create interactive charts, graphs, and custom visualizations from research data
 
+- [ ]    Literature Review Assistant: Organize academic papers with citation management and summary generation
 
+- [ ]    Lab Inventory Manager: Track lab equipment, chemicals, and consumables with reorder alerts
 
+- [ ]    Collaborative Research Workspace: Shared environment for researchers to work on projects with version control
+     
+Cross-Cutting Tools 
+
+- [ ]    Accessibility Suite: Tools to make content accessible including screen reader testing and color contrast analysis
+
+- [ ]    Localization Manager: Translate app content into multiple languages with context-aware suggestion
+
+- [ ]    API Integration Marketplace: Pre-built connectors for popular third-party services beyond your current OAuth2 implementation
+     
 
 ## Architecture Notes
 

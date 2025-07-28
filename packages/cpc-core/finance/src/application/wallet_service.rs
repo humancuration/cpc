@@ -37,6 +37,13 @@ pub trait WalletService {
     async fn subtract_dabloons(&self, user_id: Uuid, amount: Money, description: Option<String>) -> Result<Wallet, FinanceError>;
     
     /// Transfer dabloons between users
+    /// Add traditional currency to a user's wallet
+    async fn add_traditional_currency(&self, user_id: Uuid, amount: Money, description: Option<String>) -> Result<Wallet, FinanceError>;
+    
+    /// Subtract traditional currency from a user's wallet
+    async fn subtract_traditional_currency(&self, user_id: Uuid, amount: Money, description: Option<String>) -> Result<Wallet, FinanceError>;
+    
+    /// Transfer dabloons between users
     async fn transfer_dabloons(&self, from_user_id: Uuid, to_user_id: Uuid, amount: Money, description: Option<String>) -> Result<(Wallet, Wallet), FinanceError>;
     
     /// Get transaction history for a user's wallet
@@ -46,6 +53,9 @@ pub trait WalletService {
     async fn link_to_budget(&self, user_id: Uuid, category: &str, amount: Money) -> Result<(), FinanceError>;
     
     /// Get budgets linked to this wallet
+    /// Distribute Universal Income to a user's wallet
+    async fn distribute_universal_income(&self, user_id: Uuid, amount: Money, distribution_date: chrono::NaiveDate) -> Result<Wallet, FinanceError>;
+    
     async fn get_linked_budgets(&self, user_id: Uuid) -> Result<Vec<(String, Money)>, FinanceError>;
 }
 
@@ -200,5 +210,75 @@ impl WalletService for WalletServiceImpl {
         // to get all budgets linked to this user's wallet
         
         Ok(vec![])
+        
+        async fn add_traditional_currency(&self, user_id: Uuid, amount: Money, description: Option<String>) -> Result<Wallet, FinanceError> {
+            if amount.currency == Currency::Dabloons {
+                return Err(FinanceError::FinancialError(FinancialError::CurrencyMismatch {
+                    expected: "Traditional Currency".to_string(),
+                    actual: amount.currency.code().to_string(),
+                }));
+            }
+            
+            let mut wallet = self.get_or_create_wallet(user_id).await?;
+            wallet.add_traditional_currency(amount.clone())?;
+            self.wallet_repo.save_wallet(&wallet).await?;
+            
+            // Record the transaction
+            self.create_transaction(
+                wallet.id,
+                TransactionType::Credit,
+                amount,
+                description
+            ).await?;
+            
+            Ok(wallet)
+        }
+        
+        async fn subtract_traditional_currency(&self, user_id: Uuid, amount: Money, description: Option<String>) -> Result<Wallet, FinanceError> {
+            if amount.currency == Currency::Dabloons {
+                return Err(FinanceError::FinancialError(FinancialError::CurrencyMismatch {
+                    expected: "Traditional Currency".to_string(),
+                    actual: amount.currency.code().to_string(),
+                }));
+            }
+            
+            let mut wallet = self.get_or_create_wallet(user_id).await?;
+            wallet.subtract_traditional_currency(amount.clone())?;
+            self.wallet_repo.save_wallet(&wallet).await?;
+            
+            // Record the transaction
+            self.create_transaction(
+                wallet.id,
+                TransactionType::Debit,
+                amount,
+                description
+            ).await?;
+            
+            Ok(wallet)
+        }
+    }
+    
+    async fn distribute_universal_income(&self, user_id: Uuid, amount: Money, distribution_date: chrono::NaiveDate) -> Result<Wallet, FinanceError> {
+        if amount.currency != Currency::Dabloons {
+            return Err(FinanceError::FinancialError(crate::domain::primitives::FinancialError::CurrencyMismatch {
+                expected: Currency::Dabloons.code().to_string(),
+                actual: amount.currency.code().to_string(),
+            }));
+        }
+        
+        let mut wallet = self.get_or_create_wallet(user_id).await?;
+        wallet.add_dabloons(amount.clone())?;
+        self.wallet_repo.save_wallet(&wallet).await?;
+        
+        // Record the transaction with a special description for Universal Income
+        let description = Some(format!("Universal Income distribution for {}", distribution_date));
+        self.create_transaction(
+            wallet.id,
+            TransactionType::Credit,
+            amount,
+            description
+        ).await?;
+        
+        Ok(wallet)
     }
 }

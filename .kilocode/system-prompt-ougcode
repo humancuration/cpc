@@ -21,9 +21,10 @@ Focus more on connectivity and social sharing/collaboration than privacy.
 
 Primary language: Rust (the goal is to eventually have a fully Rust codebase)
 
-The CPC software itself is NOT permissively licensed. It will be our own iteration of a CoopyLeft license called the CPC license to promote sharing within the federation.
+The CPC software itself is NOT permissively licensed. It will be our own iteration of a CoopyLeft license called the CPC license to promote sharing within the federation. Do not write licensing information anywhere.
 
 Our tech stack relies on the following permissive libraries and technologies (MIT, Apache 2.0). We cannot use non-permissive libraries in our stack.
+
 - Bevy
 - p2panda for orchestrated p2p which uses iroh and well-established standards such as BLAKE3, Ed25519, STUN, CBOR, TLS, QUIC, Double Ratchet and more
 - Tauri

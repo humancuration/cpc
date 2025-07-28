@@ -91,6 +91,16 @@ impl Currency {
             _ => 2,
         }
     }
+    
+    /// Check if the currency is Dabloons
+    pub fn is_dabloon(&self) -> bool {
+        matches!(self, Currency::Dabloons)
+    }
+    
+    /// Check if the currency is a traditional currency (not Dabloons)
+    pub fn is_traditional(&self) -> bool {
+        !self.is_dabloon()
+    }
 }
 
 impl std::fmt::Display for Currency {

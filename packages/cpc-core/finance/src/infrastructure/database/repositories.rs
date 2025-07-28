@@ -13,9 +13,10 @@ use crate::{
         savings_goal::SavingsGoal,
         FinanceError,
     },
-    infrastructure::database::models::{BudgetDbModel, SavingsGoalDbModel, DataSharingPreferenceDbModel, WalletDbModel, WalletTransactionDbModel},
+    infrastructure::database::models::{BudgetDbModel, SavingsGoalDbModel, DataSharingPreferenceDbModel, WalletDbModel, WalletTransactionDbModel, UIConfigDbModel, UIDistributionDbModel},
     application::wallet_service::WalletRepository,
     domain::wallet::{Wallet, WalletTransaction},
+    application::rewards_service::{UIConfigRepository, UIDistributionRepository},
 };
 
 /// PostgreSQL implementation of BudgetRepository
@@ -446,5 +447,140 @@ impl WalletRepository for PostgresWalletRepository {
             .collect();
 
         Ok(transactions)
+    }
+}
+
+/// PostgreSQL implementation of UIConfigRepository
+pub struct PostgresUIConfigRepository {
+    pool: PgPool,
+}
+
+impl PostgresUIConfigRepository {
+    pub fn new(pool: PgPool) -> Self {
+        Self { pool }
+    }
+}
+
+#[async_trait::async_trait]
+impl UIConfigRepository for PostgresUIConfigRepository {
+    async fn get_config(&self) -> Result<Option<crate::domain::rewards::UniversalIncomeConfig>, FinanceError> {
+        let config_record = sqlx::query_as!(
+            UIConfigDbModel,
+            r#"
+            SELECT id, daily_amount, start_date, is_active, created_at, updated_at
+            FROM ui_config
+            ORDER BY created_at DESC
+            LIMIT 1
+            "#
+        )
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|e| FinanceError::DatabaseError(e.to_string()))?;
+
+        let config = config_record.map(|record| record.to_domain());
+
+        Ok(config)
+    }
+
+    async fn save_config(&self, config: &crate::domain::rewards::UniversalIncomeConfig) -> Result<(), FinanceError> {
+        let config_db_model = UIConfigDbModel::from_domain(config);
+        
+        sqlx::query!(
+            r#"
+            INSERT INTO ui_config (id, daily_amount, start_date, is_active, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (id) DO UPDATE SET
+                daily_amount = EXCLUDED.daily_amount,
+                start_date = EXCLUDED.start_date,
+                is_active = EXCLUDED.is_active,
+                updated_at = EXCLUDED.updated_at
+            "#,
+            Uuid::new_v4(), // Generate new ID for inserts
+            config_db_model.daily_amount,
+            config_db_model.start_date,
+            config_db_model.is_active,
+            config_db_model.created_at,
+            config_db_model.updated_at
+        )
+        .execute(&self.pool)
+        .await
+        .map_err(|e| FinanceError::DatabaseError(e.to_string()))?;
+
+        Ok(())
+    }
+}
+
+/// PostgreSQL implementation of UIDistributionRepository
+pub struct PostgresUIDistributionRepository {
+    pool: PgPool,
+}
+
+impl PostgresUIDistributionRepository {
+    pub fn new(pool: PgPool) -> Self {
+        Self { pool }
+    }
+}
+
+#[async_trait::async_trait]
+impl UIDistributionRepository for PostgresUIDistributionRepository {
+    async fn save_distribution(&self, distribution: &crate::domain::rewards::UIDistribution) -> Result<(), FinanceError> {
+        let distribution_db_model = UIDistributionDbModel::from_domain(distribution);
+        
+        sqlx::query!(
+            r#"
+            INSERT INTO ui_distributions (id, user_id, amount, distribution_date, created_at)
+            VALUES ($1, $2, $3, $4, $5)
+            "#,
+            distribution_db_model.id,
+            distribution_db_model.user_id,
+            distribution_db_model.amount,
+            distribution_db_model.distribution_date,
+            distribution_db_model.created_at
+        )
+        .execute(&self.pool)
+        .await
+        .map_err(|e| FinanceError::DatabaseError(e.to_string()))?;
+
+        Ok(())
+    }
+
+    async fn has_received(&self, user_id: Uuid, date: chrono::NaiveDate) -> Result<bool, FinanceError> {
+        let count: i64 = sqlx::query_scalar!(
+            r#"
+            SELECT COUNT(*) as "count!"
+            FROM ui_distributions
+            WHERE user_id = $1 AND distribution_date = $2
+            "#,
+            user_id,
+            date
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| FinanceError::DatabaseError(e.to_string()))?;
+
+        Ok(count > 0)
+    }
+
+    async fn get_distributions_for_user(&self, user_id: Uuid) -> Result<Vec<crate::domain::rewards::UIDistribution>, FinanceError> {
+        let distribution_records = sqlx::query_as!(
+            UIDistributionDbModel,
+            r#"
+            SELECT id, user_id, amount, distribution_date, created_at
+            FROM ui_distributions
+            WHERE user_id = $1
+            ORDER BY distribution_date DESC
+            "#,
+            user_id
+        )
+        .fetch_all(&self.pool)
+        .await
+        .map_err(|e| FinanceError::DatabaseError(e.to_string()))?;
+
+        let distributions: Vec<crate::domain::rewards::UIDistribution> = distribution_records
+            .into_iter()
+            .map(|record| record.to_domain())
+            .collect();
+
+        Ok(distributions)
     }
 }

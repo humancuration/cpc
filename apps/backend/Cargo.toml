@@ -25,6 +25,7 @@ cpc-protos = { path = "../../packages/cpc-protos" }
 cpc-website-builder = { path = "../website-builder" }
 cpc-music-player = { path = "../music-player" }
 cpc-health = { path = "../../packages/cpc-core/health" }
+cpc-document-editor = { path = "../../packages/cpc-core/document_editor" }
 
 # Common dependencies
 tokio = { workspace = true }

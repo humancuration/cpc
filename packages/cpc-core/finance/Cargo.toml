@@ -34,6 +34,7 @@ yew = { version = "0.21", optional = true }
 
 [features]
 default = []
+ocr = ["cpc-core/ocr"]
 p2p = ["p2panda"]
 visualization = ["bevy", "plotters"]
 web = ["yew"]

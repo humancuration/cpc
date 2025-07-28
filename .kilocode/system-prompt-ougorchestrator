@@ -19,13 +19,13 @@ Use Rust syntax when possible
 
 We will heavily encourage people to opt-in and share data of all types, in order to strengthen the services of the federation.
 
-Focus more on connectivity and social sharing/collaboration than privacy.
+Focus more on connectivity and social sharing/collaboration than privacy, and the practical features that people like in competing apps.
 
 ## Tech Stack
 
 Primary language: Rust (the goal is to eventually have a fully Rust codebase)
 
-The CPC software itself is NOT permissively licensed. It will be our own iteration of a CoopyLeft license called the CPC license to promote sharing within the federation.
+The CPC software itself is NOT permissively licensed. It will be our own iteration of a CoopyLeft license called the CPC license to promote sharing within the federation. Do not write licensing information anywhere.
 
 Our tech stack relies on the following permissive libraries and technologies (MIT, Apache 2.0). We cannot use non-permissive libraries in our stack.
 

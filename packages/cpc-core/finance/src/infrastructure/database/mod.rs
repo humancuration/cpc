@@ -2,3 +2,4 @@
 
 pub mod models;
 pub mod repositories;
+pub mod expense_tracker_repositories;

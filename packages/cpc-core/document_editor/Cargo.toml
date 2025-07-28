@@ -1,0 +1,46 @@
+[package]
+name = "cpc-document-editor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+cpc-core = { path = "../", features = ["document_editor"] }
+cpc-net = { path = "../../cpc-net" }
+async-graphql = { workspace = true }
+async-graphql-axum = { workspace = true }
+axum = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+futures = "0.3"
+async-trait = { workspace = true }
+tracing = { workspace = true }
+sqlx = { workspace = true }
+pdf = { workspace = true }
+docx-rs = "0.7"
+semver = "1.0"
+
+# p2p dependencies
+p2panda = { workspace = true, optional = true }
+libp2p = { version = "0.53", features = ["tcp", "dns", "websocket", "noise", "yamux", "ping", "macros"], optional = true }
+
+# Media processing
+image = "0.24"
+
+# Encoding
+base64 = "0.21"
+
+# Yew for UI components
+yew = { workspace = true, optional = true }
+
+[features]
+default = []
+p2p = ["p2panda", "libp2p"]
+web = ["yew"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "test-util"] }

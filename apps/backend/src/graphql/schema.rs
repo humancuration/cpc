@@ -10,6 +10,7 @@ use crate::invoicing::graphql::{InvoicingQuery, InvoicingMutation, InvoicingSubs
 use crate::graphql::project::{ProjectQuery, ProjectMutation};
 use crate::graphql::feature_flags::FeatureFlagsQuery;
 use crate::graphql::finance::{FinanceQuery, FinanceMutation, FinanceSubscription};
+use crate::graphql::document_editor::{DocumentEditorQuery, DocumentEditorMutation, DocumentEditorSubscription};
 use crate::config::UiThresholds;
 
 // New GraphQL modules for android-rust-migration
@@ -33,6 +34,7 @@ pub struct RootQuery(
     ProjectQuery,
     FeatureFlagsQuery, // Add feature flags query
     FinanceQuery,
+    DocumentEditorQuery,
     // New queries for android-rust-migration
     UserQuery,
     SocialQuery,
@@ -53,6 +55,7 @@ pub struct RootMutation(
     InvoicingMutation,
     ProjectMutation,
     FinanceMutation,
+    DocumentEditorMutation,
     // New mutations for android-rust-migration
     UserMutation,
 WebsiteBuilderMutation
@@ -72,6 +75,7 @@ pub struct RootSubscription(
     CommunitySubscription,
     InvoicingSubscription,
     FinanceSubscription,
+    DocumentEditorSubscription,
     // New subscriptions for android-rust-migration
 WebsiteBuilderSubscription
     UserSubscription,

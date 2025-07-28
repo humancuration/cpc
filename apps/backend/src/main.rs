@@ -74,7 +74,7 @@ use crate::repositories::supply_chain_repository::SupplyChainRepositoryImpl;
 use cpc_net::community_repo::CommunityRepo;
 // use p2panda::prelude::NodeClient; // Package not available
 use axum::middleware;
-use crate::module_registry::{ModuleRegistry, Module};
+use crate::module_registry::ModuleRegistry;
 use crate::migration_system::MigrationSystem;
 use crate::graphql_schema_builder::SchemaBuilder;
 
@@ -145,6 +145,15 @@ async fn main() {
         invoicing_module,
         vec![]  // No dependencies for invoicing
     ).expect("Failed to register invoicing module");
+    
+    // Register document editor module
+    let document_editor_module = Arc::new(tokio::sync::RwLock::new(
+        cpc_document_editor::modular_module::ModularDocumentEditor::new(db.clone())
+    ));
+    module_registry.register_module_with_dependencies(
+        document_editor_module,
+        vec![]  // No dependencies for document editor
+    ).expect("Failed to register document editor module");
     
     // Load enabled modules from database
     module_registry.load_enabled_modules().await

@@ -60,38 +60,6 @@ impl Wallet {
         })
     }
 
-impl Wallet {
-    /// Create a new wallet for a user
-    pub fn new(user_id: Uuid) -> Self {
-        let now = Utc::now();
-        Self {
-            id: Uuid::new_v4(),
-            user_id,
-            balance: Money::zero(Currency::Dabloons),
-            created_at: now,
-            updated_at: now,
-        }
-    }
-    
-    /// Create a wallet with a specific balance
-    pub fn with_balance(user_id: Uuid, balance: Money) -> Result<Self, FinancialError> {
-        if balance.currency != Currency::Dabloons {
-            return Err(FinancialError::CurrencyMismatch {
-                expected: Currency::Dabloons.code().to_string(),
-                actual: balance.currency.code().to_string(),
-            });
-        }
-        
-        let now = Utc::now();
-        Ok(Self {
-            id: Uuid::new_v4(),
-            user_id,
-            balance,
-            created_at: now,
-            updated_at: now,
-        })
-    }
-    
     /// Add dabloons to the wallet
     pub fn add_dabloons(&mut self, amount: Money) -> Result<(), FinancialError> {
         if amount.currency != Currency::Dabloons {
@@ -169,6 +137,36 @@ pub struct WalletTransaction {
     
     /// When the transaction occurred
     pub timestamp: DateTime<Utc>,
+    
+    /// Add traditional currency to the wallet
+    pub fn add_traditional_currency(&mut self, amount: Money) -> Result<(), FinancialError> {
+        if amount.currency == Currency::Dabloons {
+            return Err(FinancialError::CurrencyMismatch {
+                expected: "Traditional Currency".to_string(),
+                actual: amount.currency.code().to_string(),
+            });
+        }
+        
+        // For traditional currency, we don't track the balance in the wallet
+        // This is just a placeholder implementation
+        self.updated_at = Utc::now();
+        Ok(())
+    }
+    
+    /// Subtract traditional currency from the wallet
+    pub fn subtract_traditional_currency(&mut self, amount: Money) -> Result<(), FinancialError> {
+        if amount.currency == Currency::Dabloons {
+            return Err(FinancialError::CurrencyMismatch {
+                expected: "Traditional Currency".to_string(),
+                actual: amount.currency.code().to_string(),
+            });
+        }
+        
+        // For traditional currency, we don't track the balance in the wallet
+        // This is just a placeholder implementation
+        self.updated_at = Utc::now();
+        Ok(())
+    }
 }
 
 impl WalletTransaction {

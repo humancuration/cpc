@@ -75,8 +75,6 @@ impl SavingsService for SavingsServiceImpl {
         self.savings_repo.save(&goal).await?;
         Ok(goal)
     }
-        Ok(goal)
-    }
 
     async fn get_user_goals(&self, user_id: Uuid) -> Result<Vec<SavingsGoal>, FinanceError> {
         self.savings_repo.find_by_user_id(user_id).await

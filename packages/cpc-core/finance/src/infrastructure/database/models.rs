@@ -262,3 +262,71 @@ impl WalletTransactionDbModel {
         }
     }
 }
+
+/// Database model for ui_config table
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct UIConfigDbModel {
+    pub id: Uuid,
+    pub daily_amount: Decimal,
+    pub start_date: chrono::NaiveDate,
+    pub is_active: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+impl UIConfigDbModel {
+    /// Convert domain UniversalIncomeConfig to database model
+    pub fn from_domain(config: &crate::domain::rewards::UniversalIncomeConfig) -> Self {
+        Self {
+            id: Uuid::new_v4(), // For new records
+            daily_amount: config.daily_amount().amount,
+            start_date: config.start_date,
+            is_active: config.is_active(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        }
+    }
+
+    /// Convert database model to domain UniversalIncomeConfig
+    pub fn to_domain(&self) -> crate::domain::rewards::UniversalIncomeConfig {
+        crate::domain::rewards::UniversalIncomeConfig {
+            daily_amount: crate::domain::primitives::Money::new(self.daily_amount, crate::domain::primitives::Currency::Dabloons),
+            start_date: self.start_date,
+            is_active: self.is_active,
+        }
+    }
+}
+
+/// Database model for ui_distributions table
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct UIDistributionDbModel {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub amount: Decimal,
+    pub distribution_date: chrono::NaiveDate,
+    pub created_at: DateTime<Utc>,
+}
+
+impl UIDistributionDbModel {
+    /// Convert domain UIDistribution to database model
+    pub fn from_domain(distribution: &crate::domain::rewards::UIDistribution) -> Self {
+        Self {
+            id: distribution.id,
+            user_id: distribution.user_id,
+            amount: distribution.amount.amount,
+            distribution_date: distribution.distribution_date,
+            created_at: distribution.created_at,
+        }
+    }
+
+    /// Convert database model to domain UIDistribution
+    pub fn to_domain(&self) -> crate::domain::rewards::UIDistribution {
+        crate::domain::rewards::UIDistribution {
+            id: self.id,
+            user_id: self.user_id,
+            amount: crate::domain::primitives::Money::new(self.amount, crate::domain::primitives::Currency::Dabloons),
+            distribution_date: self.distribution_date,
+            created_at: self.created_at,
+        }
+    }
+}

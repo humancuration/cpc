@@ -1,11 +1,13 @@
 //! Domain layer for the finance module
 //!
 //! Contains the core business logic and models for personal finance management.
+pub mod rewards;
 
 pub mod budget;
 pub mod savings_goal;
 pub mod primitives;
 pub mod wallet;
+pub mod expense_tracker;
 
 /// Common error types for the finance domain
 #[derive(thiserror::Error, Debug)]

@@ -10,6 +10,7 @@ pub mod community;
 pub mod supply_chain;
 pub mod cooperative;
 pub mod project;
+pub mod document_editor;
 
 pub mod finance;
 
