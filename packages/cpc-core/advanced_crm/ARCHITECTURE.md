@@ -1,8 +1,8 @@
-# Advanced CRM & Sales Pipeline Module Architecture
+# Advanced CRM & Sales Pipeline Module Architecture (v2)
 
 This document outlines the architecture for the advanced CRM module that extends the simple CRM for SMB needs.
 
-## 1. Module Structure
+## 1. Module Structure (Updated)
 
 ```
 packages/cpc-core/advanced_crm/
@@ -32,20 +32,22 @@ packages/cpc-core/advanced_crm/
             └── advanced_viz.rs  # Enhanced visualizations
 ```
 
-## 2. Core Domain Models
+## 2. Core Domain Models (Updated)
 
-### Lead Scoring System
+### Lead Scoring System (Enhanced)
 
-```rust
+```
 // domain/lead_scoring.rs
 pub struct LeadScore {
     pub lead_id: Uuid,
     pub base_score: u8,       // 0-100
     pub engagement_score: u8, // 0-100
     pub fit_score: u8,        // 0-100
+    pub wellness_score: u8,   // 0-100 (new health integration)
     pub total_score: u8,      // 0-100
     pub scoring_factors: ScoringFactors,
     pub last_updated: DateTime<Utc>,
+    pub scoring_model_id: Uuid, // References active scoring model
 }
 
 pub struct ScoringFactors {
@@ -55,10 +57,17 @@ pub struct ScoringFactors {
     pub social_engagement: u32,
     pub company_size: CompanySize,
     pub industry_fit: f32,
+    pub wellness_metrics: WellnessMetrics, // New health integration
+}
+
+pub struct WellnessMetrics {
+    pub stress_level: Option<u8>,
+    pub focus_level: Option<u8>,
+    pub burnout_risk: Option<f32>,
 }
 ```
 
-### Email Campaign Model
+### Email Marketing Integration (New)
 
 ```rust
 pub struct EmailCampaign {
@@ -83,25 +92,28 @@ pub enum CampaignStatus {
 }
 ```
 
-## 3. Key Application Services
+## 3. Key Application Services (Updated)
 
-### LeadScoringService
-- `calculate_lead_score(lead_id: Uuid) -> Result<LeadScore>`: Calculates lead score using multiple factors
-- `get_top_leads(limit: u32) -> Result<Vec<(Lead, LeadScore)>>`: Gets highest scoring leads
-- `update_scoring_model(model: ScoringModel) -> Result<()>`: Updates scoring algorithm
+### LeadScoringService (Enhanced)
+- `calculate_lead_score(lead_id: Uuid, external_data: Option<ExternalLeadData>) -> Result<LeadScore>`: Calculates lead score using multiple factors including external data sources
+- `get_top_leads(limit: u32, filter: LeadFilter) -> Result<Vec<(Lead, LeadScore)>>`: Gets highest scoring leads with filtering capability
+- `update_scoring_model(model: ScoringModel) -> Result<()>`: Updates scoring algorithm with validation
+- `get_scoring_history(lead_id: Uuid) -> Result<Vec<LeadScore>>`: Retrieves historical scoring data for trend analysis
 
-### EmailCampaignService
-- `create_campaign(campaign: NewCampaign) -> Result<EmailCampaign>`: Creates new email campaign
-- `schedule_campaign(campaign_id: Uuid, time: DateTime<Utc>) -> Result<()>`: Schedules campaign
-- `send_test_email(campaign_id: Uuid, email: String) -> Result<()>`: Sends test email
-- `get_campaign_metrics(campaign_id: Uuid) -> Result<CampaignMetrics>`: Gets campaign performance
+### EmailMarketingService (New)
+- `connect_provider(provider: EmailProviderConfig) -> Result<()>`: Establishes connection to Mailchimp/SendGrid
+- `sync_contact_lists() -> Result<Vec<ContactList>>`: Synchronizes contact lists from external providers
+- `create_campaign(campaign: NewCampaign, provider: EmailProvider) -> Result<EmailCampaign>`: Creates campaign on selected provider
+- `get_campaign_metrics(campaign_id: Uuid) -> Result<CampaignMetrics>`: Aggregates metrics from multiple providers
+- `handle_webhook_event(event: WebhookEvent) -> Result<()>`: Processes webhook events from email providers
 
-### HrIntegrationService
-- `sync_sales_performance(user_id: Uuid) -> Result<SalesPerformanceData>`: Syncs sales data with HR
-- `get_team_performance(team_id: Uuid) -> Result<TeamPerformance>`: Gets team metrics
-- `calculate_commissions(user_id: Uuid, period: Period) -> Result<CommissionCalculation>`: Calculates commissions
+### AdvancedReportingService (New)
+- `generate_sales_report(filters: ReportFilters) -> Result<SalesReport>`: Generates comprehensive sales reports
+- `get_pipeline_analysis() -> Result<PipelineAnalysis>`: Provides deep analysis of sales pipeline health
+- `export_to_csv(report: SalesReport) -> Result<Vec<u8>>`: Exports reports to CSV format
+- `get_realtime_dashboard_data() -> Result<DashboardData>`: Supplies data for Bevy visualizations
 
-## 4. Key Design Decisions
+## 4. Key Design Decisions (Enhanced)
 
 ### Extending Simple CRM
 The Advanced CRM extends the Simple CRM through:
@@ -159,6 +171,14 @@ pub struct SalesPerformanceData {
     pub conversion_rate: f32,
     pub sales_velocity: f32,
     pub pipeline_health: PipelineHealth,
+    pub wellness_impact: Option<WellnessImpact>, // New health integration
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct WellnessImpact {
+    pub stress_impact: f32,
+    pub focus_impact: f32,
+    pub burnout_risk_factor: f32,
 }
 
 pub enum PipelineHealth {
@@ -166,18 +186,38 @@ pub enum PipelineHealth {
     Moderate,
     Weak,
 }
+
+// New Email Provider Integration Model
+#[derive(Serialize, Deserialize)]
+pub struct EmailProviderConfig {
+    pub provider: EmailProvider,
+    pub api_key: String,
+    pub connected_at: DateTime<Utc>,
+    pub sync_contacts: bool,
+    pub sync_campaigns: bool,
+    pub last_sync: Option<DateTime<Utc>>,
+}
+
+pub enum EmailProvider {
+    Mailchimp,
+    SendGrid,
+    CustomSmtp,
+}
 ```
 
 2. **Two-way Data Flow**:
-- CRM sends sales performance data to HR
+- CRM sends sales performance data to HR (with optional wellness metrics)
 - HR sends team structure and role information to CRM
+- CRM integrates with email providers via webhook-based synchronization
 
 ### Data Privacy Considerations
-- All HR integration data is shared with explicit consent
+- All integrations require explicit user consent with granular permissions
 - Performance data is anonymized for team-level reports
 - Individual performance data requires manager+ permissions
+- Email marketing data follows GDPR/CCPA compliance requirements
+- Health data integration is completely opt-in with separate consent flows
 
-## 5. Database Schema Extensions
+## 5. Database Schema Extensions (Updated)
 
 ### Lead Scoring Tables
 
@@ -201,11 +241,65 @@ CREATE TABLE lead_scores (
     scoring_factors JSONB NOT NULL,
     last_updated TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+// New Scoring Models Table
+CREATE TABLE lead_scoring_models (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    weights JSONB NOT NULL,  // Scoring weights configuration
+    is_default BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+// New Email Provider Configuration
+CREATE TABLE email_provider_configs (
+    id UUID PRIMARY KEY,
+    provider VARCHAR(20) NOT NULL CHECK (provider IN ('mailchimp', 'sendgrid', 'custom_smtp')),
+    api_key TEXT NOT NULL,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    sync_contacts BOOLEAN NOT NULL DEFAULT true,
+    sync_campaigns BOOLEAN NOT NULL DEFAULT true,
+    last_sync TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+// New Email Provider Webhook Events
+CREATE TABLE email_webhook_events (
+    id UUID PRIMARY KEY,
+    provider VARCHAR(20) NOT NULL,
+    event_type VARCHAR(50) NOT NULL,
+    payload JSONB NOT NULL,
+    processed BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+// New Sales Reporting Tables
+CREATE TABLE sales_report_definitions (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    filters JSONB NOT NULL,
+    visualization_type VARCHAR(50) NOT NULL,
+    created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE sales_report_instances (
+    id UUID PRIMARY KEY,
+    report_id UUID NOT NULL REFERENCES sales_report_definitions(id) ON DELETE CASCADE,
+    generated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    data JSONB NOT NULL,
+    format VARCHAR(20) NOT NULL CHECK (format IN ('csv', 'pdf', 'json')),
+    generated_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE
+);
+
+### Email Campaign Tables (Enhanced)
+
 ```
-
-### Email Campaign Tables
-
-```sql
 CREATE TABLE email_campaigns (
     id UUID PRIMARY KEY,
     name VARCHAR(255) NOT NULL,

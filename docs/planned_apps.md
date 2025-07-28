@@ -12,7 +12,7 @@ For information about our privacy policies and consent management, see our [Priv
 
 - [x] **Music player**: COMPLETE implementation with all features including timestamped comments, visualizer presets, offline downloads, and social interactions. Fully validated as architectural blueprint. See [music_player_integration.md](docs/music_player_integration.md) for implementation details.
 
-- [ ] **DAW**: Fully featured, allows for creating new tracks, mixing, mastering, and remixing. [Architecture Plan](apps/daw/ARCHITECTURE.md)
+- [/] **DAW**: Fully featured, allows for creating new tracks, mixing, mastering, and remixing. [Architecture Plan](apps/daw/ARCHITECTURE.md)
 
 ## Productivity & Work
 
@@ -26,9 +26,9 @@ These tools can help users manage their work, studies, and personal projects.
 
 - [ ] **Task Manager**: A dedicated to-do list function where users can create tasks, set deadlines and reminders, and categorize them into different projects or lists.
 
-- [ ] **Calendar**: An integrated calendar that can sync with external services like Google Calendar and Outlook. It would manage events, set reminders, and offer different views (daily, weekly, monthly).
+- [/] **Calendar**: An integrated calendar that can sync with external services like Google Calendar and Outlook. It would manage events, set reminders, and offer different views (daily, weekly, monthly).
 
-- [ ] **Website Builder**: This is for everyone from individuals to large businesses, fully featured, easy to use, feature rich. Also have a link-in-bio site builder. Both have great UI to let users build for both web and mobile, and both integrate well with things like payment processors (including our own) and sales platforms (or from their own shop, with a storebuilder wizard).
+- [/] **Website Builder**: This is for everyone from individuals to large businesses, fully featured, easy to use, feature rich. Also have a link-in-bio site builder. Both have great UI to let users build for both web and mobile, and both integrate well with things like payment processors (including our own) and sales platforms (or from their own shop, with a storebuilder wizard).
 
 ## Personal Finance
 
@@ -100,7 +100,7 @@ The key here is simplicity, affordability, and integration. Small business owner
 
 As businesses grow, their needs shift towards more robust collaboration, process management, and data analysis.
 
-- [ ] **Advanced CRM & Sales Pipeline**: An expanded CRM that can handle a larger sales team, with features for lead scoring, email marketing integration, detailed sales reporting, and customizable pipelines.
+- [/] **Advanced CRM & Sales Pipeline**: An expanded CRM that can handle a larger sales team, with features for lead scoring, email marketing integration, detailed sales reporting, and customizable pipelines.
 
 - [ ] **HR & Team Management Suite**: This module would be a central place for human resources management.
   - [ ] **Employee Directory**: A central database of employee information.
@@ -118,7 +118,7 @@ As businesses grow, their needs shift towards more robust collaboration, process
 Large enterprises require tools that focus on scalability, security, compliance, and deep data integration across departments.
 
 - [ ] **Enterprise Resource Planning (ERP) Modules**: This is the core of enterprise software. Your multi-use app could offer modular versions of ERP components.
-  - [ ] **Supply Chain Management (SCM)**: Tools to manage the entire flow of goods, from procurement of raw materials to delivery of the final product.
+  - [/] **Supply Chain Management (SCM)**: Tools to manage the entire flow of goods, from procurement of raw materials to delivery of the final product.
   - [ ] **Advanced Financials & Compliance**: Sophisticated accounting tools that can handle multiple currencies, complex tax regulations, and generate audit-ready reports.
 
 - [ ] **Business Intelligence (BI) & Analytics**: Powerful, customizable dashboards that can pull data from all other modules to provide deep insights into business operations, market trends, and performance metrics.
@@ -202,3 +202,11 @@ apps/
 │           ├── graphql.rs      # Query, Mutation, Subscription types
 │           └── module.rs       # Module initialization & wiring
 ```
+
+
+#### Non-executable Modules go in
+
+packages
+├── cpc-core/
+│   └── [module-name]]
+│       ├──

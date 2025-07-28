@@ -13,7 +13,7 @@ We collect only the minimum amount of data necessary to provide our services:
 - Interaction data for improving the platform
 - Content created by users (music, posts, etc.)
 
-BUT if a user opts-in to data collection, the system can and will collect extremely fine-grained data of all kinds, with advanced telemetry.
+BUT if a user opts-in to data collection, the system can and will collect extremely fine-grained data of all kinds, with advanced telemetry. Our entire platform will lean heavily into this.
 
 ### PII Storage
 We do not store personally identifiable information (PII) in our local databases unless they consent. All PII is stored in a secure, encrypted format in compliance with privacy regulations.
@@ -80,9 +80,6 @@ We comply with CCPA requirements for California residents.
 
 ### Other Regulations
 We comply with other applicable privacy regulations in jurisdictions where we operate.
-
-### Implementation
-For details on how the music player module implements privacy features, see [Music Player Integration](music_player_integration.md).
 
 ## Consent Management Framework
 

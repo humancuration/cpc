@@ -1,8 +1,8 @@
-# Invoicing & Quoting Module Architecture
+# Invoicing & Quoting Module Architecture (v2)
 
-## Domain Model Primitives
+## Domain Model Primitives (Enhanced)
 
-### Invoice
+### Invoice (Enhanced)
 ```rust
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Invoice {
@@ -16,6 +16,15 @@ pub struct Invoice {
     pub status: PaymentStatus,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub payment_provider: Option<PaymentProvider>,
+    pub payment_intent_id: Option<String>,
+    pub next_reminder_date: Option<DateTime<Utc>>,
+}
+
+pub enum PaymentProvider {
+    Stripe,
+    PayPal,
+    Manual,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -62,29 +71,42 @@ pub enum QuoteStatus {
 }
 ```
 
-## Application Service Boundaries
+## Application Service Boundaries (Enhanced)
 
-### InvoiceService
-```rust
+### InvoiceService (Enhanced)
+```
 pub trait InvoiceRepository {
     async fn create(&self, invoice: Invoice) -> Result<Invoice, RepositoryError>;
     async fn update_status(&self, id: Uuid, status: PaymentStatus) -> Result<Invoice, RepositoryError>;
+    async fn update_payment(&self, id: Uuid, provider: PaymentProvider, intent_id: String) -> Result<Invoice, RepositoryError>;
     async fn find_by_id(&self, id: Uuid) -> Result<Invoice, RepositoryError>;
+    async fn get_pending_reminders(&self) -> Result<Vec<Invoice>, RepositoryError>;
 }
 
 pub struct InvoiceService {
     repo: Arc<dyn InvoiceRepository>,
     p2p_manager: Arc<P2PManager>,
+    payment_processor: Arc<dyn PaymentProcessor>,
+    reminder_service: Arc<ReminderService>,
 }
 
 impl InvoiceService {
-    pub fn new(repo: Arc<dyn InvoiceRepository>, p2p_manager: Arc<P2PManager>) -> Self {
-        Self { repo, p2p_manager }
+    pub fn new(
+        repo: Arc<dyn InvoiceRepository>,
+        p2p_manager: Arc<P2PManager>,
+        payment_processor: Arc<dyn PaymentProcessor>,
+        reminder_service: Arc<ReminderService>
+    ) -> Self {
+        Self { repo, p2p_manager, payment_processor, reminder_service }
     }
 
     pub async fn create_invoice(&self, input: CreateInvoiceInput) -> Result<Invoice, ServiceError> {
         // Domain validation occurs here
-        let invoice = Invoice::new(input)?;
+        let mut invoice = Invoice::new(input)?;
+        
+        // Set next reminder date based on configuration
+        invoice.next_reminder_date = self.calculate_next_reminder_date(&invoice);
+        
         let invoice = self.repo.create(invoice).await?;
         self.p2p_manager.share_invoice(&invoice).await?;
         Ok(invoice)
@@ -94,12 +116,100 @@ impl InvoiceService {
         let mut invoice = self.repo.find_by_id(id).await?;
         invoice.status = PaymentStatus::Sent;
         invoice.updated_at = Utc::now();
+        
+        // Schedule first reminder if needed
+        if invoice.due_date - Utc::now() <= chrono::Duration::days(3) {
+            self.reminder_service.schedule_reminder(&invoice).await?;
+        }
+        
         let updated = self.repo.update_status(invoice.id, invoice.status).await?;
         self.p2p_manager.notify_client(&updated).await?;
         Ok(updated)
     }
+    
+    pub async fn process_payment(&self, id: Uuid, payment_data: PaymentData) -> Result<Invoice, ServiceError> {
+        let mut invoice = self.repo.find_by_id(id).await?;
+        
+        // Process payment through selected provider
+        let payment_result = self.payment_processor.process_payment(&invoice, payment_data).await?;
+        
+        // Update invoice status based on payment result
+        match payment_result {
+            PaymentResult::Success(provider, intent_id) => {
+                invoice.payment_provider = Some(provider);
+                invoice.payment_intent_id = Some(intent_id);
+                invoice.status = PaymentStatus::Paid;
+                invoice.updated_at = Utc::now();
+            }
+            PaymentResult::Pending => {
+                invoice.status = PaymentStatus::Pending;
+            }
+            PaymentResult::Failed => {
+                invoice.status = PaymentStatus::PaymentFailed;
+            }
+        }
+        
+        let updated = self.repo.update(invoice).await?;
+        self.p2p_manager.notify_payment_status(&updated).await?;
+        Ok(updated)
+    }
+    
+    fn calculate_next_reminder_date(&self, invoice: &Invoice) -> Option<DateTime<Utc>> {
+        // Implementation based on PaymentReminderConfig
+        None
+    }
 }
-```
+
+// New Payment Processor Trait
+pub trait PaymentProcessor: Send + Sync {
+    async fn process_payment(&self, invoice: &Invoice, payment_data: PaymentData) -> Result<PaymentResult, PaymentError>;
+    async fn get_payment_status(&self, provider: PaymentProvider, intent_id: &str) -> Result<PaymentStatus, PaymentError>;
+}
+
+pub struct PaymentData {
+    pub provider: PaymentProvider,
+    pub token: String,
+    // Additional provider-specific data
+}
+
+pub enum PaymentResult {
+    Success(PaymentProvider, String), // (provider, intent_id)
+    Pending,
+    Failed,
+}
+
+// New Reminder Service
+pub struct ReminderService {
+    repo: Arc<dyn InvoiceRepository>,
+    notifier: Arc<dyn NotificationService>,
+}
+
+impl ReminderService {
+    pub async fn process_pending_reminders(&self) -> Result<(), ServiceError> {
+        let invoices = self.repo.get_pending_reminders().await?;
+        
+        for invoice in invoices {
+            if let Some(next_date) = invoice.next_reminder_date {
+                if Utc::now() >= next_date {
+                    self.send_reminder(&invoice).await?;
+                    self.schedule_next_reminder(&invoice).await?;
+                }
+            }
+        }
+        
+        Ok(())
+    }
+    
+    async fn send_reminder(&self, invoice: &Invoice) -> Result<(), ServiceError> {
+        self.notifier.send_invoice_reminder(invoice).await
+    }
+    
+    async fn schedule_next_reminder(&self, invoice: &Invoice) -> Result<(), ServiceError> {
+        // Update invoice with next reminder date
+        Ok(())
+    }
+}
+
 
 ### QuoteService
 ```rust
