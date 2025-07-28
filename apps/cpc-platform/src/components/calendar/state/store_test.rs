@@ -1,13 +1,15 @@
 //! Tests for the CalendarStore
 #[cfg(test)]
 mod tests {
-    use super::*;
     use chrono::Utc;
     use uuid::Uuid;
-    use yewdux::prelude::*;
     
     // Import domain models
     use packages::cpc_core::calendar::domain::event::{CalendarEvent, EventType, EventVisibility};
+    
+    // Import local modules
+    use crate::components::calendar::state::store::CalendarStore;
+    use crate::components::calendar::state::view::CalendarView;
     
     #[test]
     fn test_calendar_store_initial_state() {
