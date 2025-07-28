@@ -1,5 +1,7 @@
 Each module is to be a self-contained Rust crate that the main backend application depends on, and users can install/uninstall them from the options menu (in an app options submenu).
 
+All modules will be available to all members of the federation. The small, medium, large business categorizations are just for conceptualizing the average use cases, but anyone can use any app/tool.
+
 # Apps Checklist
 
 Each app module is to be a self-contained Rust crate that the main backend application depends on. Feel free to add to this list of apps with others that you think would be a good idea! (Always check to see the progress of the app before making further plans for it)
@@ -14,18 +16,18 @@ For information about our privacy policies and consent management, see our [Priv
 
 - [/] **DAW**: Fully featured, allows for creating new tracks, mixing, mastering, and remixing. [Architecture Plan](apps/daw/ARCHITECTURE.md)
 
-    Podcast Studio: Record, edit, and publish podcasts with noise reduction, multi-track editing, and direct publishing to major platforms
+- [ ]    Podcast Studio: Record, edit, and publish podcasts with noise reduction, multi-track editing, and direct publishing to major platforms
 
-    Video Editor: Lightweight video editing with trimming, filters, captions, and social media optimization
+- [ ]    Video Editor: Lightweight video editing with trimming, filters, captions, and social media optimization
 
-    Karaoke Hub: With pitch adjustment, background removal, and real-time duet capabilities
+- [ ]    Karaoke Hub: With pitch adjustment, background removal, and real-time duet capabilities
      
 
 ## Productivity & Work
 
 These tools can help users manage their work, studies, and personal projects.
 
-- [/] **Docs**: A streamlined word processor for writing and editing documents. Key features would include basic formatting (bold, italics, lists), the ability to insert images, and options to export to PDF or .docx formats. Implementation in progress with database schema and repository layer complete.
+- [x] **Docs**: A streamlined word processor for writing and editing documents. Key features include basic formatting (bold, italics, lists), the ability to insert images, options to export to PDF or .docx formats, and real-time collaboration using CRDTs and p2panda.
 
 - [ ] **Sheets**: A simple spreadsheet application for creating budgets, tracking lists, or managing simple data. It should handle basic formulas, charts, and be compatible with formats like .xlsx.
 
@@ -165,7 +167,7 @@ As businesses grow, their needs shift towards more robust collaboration, process
 
 - [ ] **Internal Knowledge Base**: A dedicated space for creating and organizing internal documentation, company policies, training materials, and how-to guides for employees.
 
-- [ ]    Recruitment System: Job posting, applicant tracking, interview scheduling, and candidate evaluation tools
+- [ ]    Recruitment System and jobs board: Job posting, jobs wanted/resume posting, applicant tracking, interview scheduling, and candidate evaluation tools and more. Like Linkedin but way better!
 
 - [ ]    Vendor Management: Track supplier relationships, contracts, performance metrics, and payment terms
 

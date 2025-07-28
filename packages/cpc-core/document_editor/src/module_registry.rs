@@ -10,6 +10,14 @@ use axum::Router;
 use async_graphql::{EmptySubscription, Object, SchemaBuilder as GraphQLSchemaBuilder};
 use anyhow::Result;
 use semver::{Version, VersionReq};
+use uuid::Uuid;
+
+use crate::application::document_service::DocumentService;
+use crate::application::export_service::ExportService;
+use crate::application::collaboration_service::CollaborationService;
+use crate::infrastructure::repository::PgDocumentRepository;
+use crate::collaboration::panda_network::{PandaNetwork, PandaSyncService};
+use crate::collaboration::service::RealtimeCollaborationService;
 
 /// Trait that all modules must implement to be registered in the system
 #[async_trait::async_trait]
@@ -34,6 +42,15 @@ pub trait Module: Send + Sync {
     
     /// Disable the module
     async fn disable(&mut self, pool: &PgPool) -> Result<()>;
+    
+    /// Get the document service
+    fn get_document_service(&self) -> Option<Arc<DocumentService>>;
+    
+    /// Get the export service
+    fn get_export_service(&self) -> Option<Arc<ExportService>>;
+    
+    /// Get the collaboration service
+    fn get_collaboration_service(&self) -> Option<Arc<CollaborationService>>;
 }
 
 /// Module dependency requirement

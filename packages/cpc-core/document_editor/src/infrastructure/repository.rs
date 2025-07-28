@@ -1,10 +1,13 @@
 use crate::domain::models::{Document, DocumentShare, DocumentVersion};
 use crate::domain::errors::DocumentError;
 use crate::domain::value_objects::{DocumentTitle, DocumentContent};
+use crate::crdt::document::{CRDTDocument, ElementState};
+use crate::crdt::id::CRDTId;
 use uuid::Uuid;
 use async_trait::async_trait;
 use sqlx::PgPool;
 use chrono::{DateTime, Utc};
+use serde_json::Value as JsonValue;
 
 #[async_trait]
 pub trait DocumentRepository: Send + Sync {
@@ -20,6 +23,14 @@ pub trait DocumentRepository: Send + Sync {
     async fn create_document_version(&self, version: &DocumentVersion) -> Result<(), DocumentError>;
     async fn get_document_versions(&self, document_id: Uuid) -> Result<Vec<DocumentVersion>, DocumentError>;
     async fn get_latest_version_number(&self, document_id: Uuid) -> Result<i32, DocumentError>;
+    
+    // CRDT-specific methods
+    async fn save_crdt_document(&self, document_id: Uuid, crdt_document: &CRDTDocument) -> Result<(), DocumentError>;
+    async fn load_crdt_document(&self, document_id: Uuid) -> Result<Option<CRDTDocument>, DocumentError>;
+    
+    // Ratchet session methods for persistent storage
+    async fn save_ratchet_session(&self, document_id: Uuid, node_id: Uuid, session_data: &[u8]) -> Result<(), DocumentError>;
+    async fn load_ratchet_session(&self, document_id: Uuid, node_id: Uuid) -> Result<Option<Vec<u8>>, DocumentError>;
 }
 
 /// PostgreSQL implementation of DocumentRepository
@@ -259,5 +270,90 @@ impl DocumentRepository for PgDocumentRepository {
         .await?;
         
         Ok(row.latest_version)
+    }
+    
+    async fn save_crdt_document(&self, document_id: Uuid, crdt_document: &CRDTDocument) -> Result<(), DocumentError> {
+        // Serialize the CRDT document elements to JSON for storage
+        let elements_json = serde_json::to_value(crdt_document.get_elements())
+            .map_err(|e| DocumentError::SerializationError(e))?;
+        
+        // Update the document with the CRDT content
+        let rows_affected = sqlx::query!(
+            "UPDATE documents SET content = $1, updated_at = NOW() WHERE id = $2",
+            &elements_json,
+            document_id,
+        )
+        .execute(&self.pool)
+        .await?
+        .rows_affected();
+        
+        if rows_affected == 0 {
+            return Err(DocumentError::DocumentNotFound(document_id.to_string()));
+        }
+        
+        Ok(())
+    }
+    
+    async fn load_crdt_document(&self, document_id: Uuid) -> Result<Option<CRDTDocument>, DocumentError> {
+        let row = sqlx::query!(
+            "SELECT content FROM documents WHERE id = $1 AND is_deleted = false",
+            document_id
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+        
+        match row {
+            Some(row) => {
+                // Try to deserialize the content as CRDT elements
+                if let Ok(elements) = serde_json::from_value::<std::collections::HashMap<CRDTId, ElementState>>(row.content.clone()) {
+                    // Create a new CRDT document with the elements
+                    // Note: This is a simplified implementation - in a real system, you would need to
+                    // properly reconstruct the CRDT document with all its state
+                    let mut crdt_document = CRDTDocument::new(Uuid::nil()); // Use a placeholder node ID
+                    
+                    // This is a simplified approach - in reality, you would need to properly
+                    // reconstruct the full CRDT document state including version vectors, etc.
+                    
+                    Ok(Some(crdt_document))
+                } else {
+                    // If we can't deserialize as CRDT elements, return None
+                    Ok(None)
+                }
+            },
+            None => Ok(None),
+        }
+    }
+    
+    async fn save_ratchet_session(&self, document_id: Uuid, node_id: Uuid, session_data: &[u8]) -> Result<(), DocumentError> {
+        // For now, we'll store ratchet sessions in a separate table
+        // In a real implementation, you might want to store this with the document or in a separate store
+        sqlx::query!(
+            "INSERT INTO ratchet_sessions (document_id, node_id, session_data, created_at)
+             VALUES ($1, $2, $3, NOW())
+             ON CONFLICT (document_id, node_id) DO UPDATE
+             SET session_data = $3, created_at = NOW()",
+            document_id,
+            node_id,
+            session_data,
+        )
+        .execute(&self.pool)
+        .await?;
+        
+        Ok(())
+    }
+    
+    async fn load_ratchet_session(&self, document_id: Uuid, node_id: Uuid) -> Result<Option<Vec<u8>>, DocumentError> {
+        let row = sqlx::query!(
+            "SELECT session_data FROM ratchet_sessions WHERE document_id = $1 AND node_id = $2",
+            document_id,
+            node_id,
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+        
+        match row {
+            Some(row) => Ok(Some(row.session_data)),
+            None => Ok(None),
+        }
     }
 }

@@ -8,6 +8,7 @@ pub mod application;
 pub mod infrastructure;
 pub mod presentation;
 pub mod web;
+pub mod web;
 pub mod modular_module;
 pub mod module_registry;
 pub mod crdt;
@@ -21,8 +22,13 @@ pub use domain::errors::DocumentError;
 pub use application::document_service::DocumentService;
 pub use application::export_service::ExportService;
 pub use application::collaboration_service::CollaborationService;
+pub use collaboration::service::RealtimeCollaborationService;
+pub use collaboration::panda_network::{PandaNetwork, PandaSyncService};
 pub use modular_module::ModularDocumentEditor;
 pub use module_registry::{Module, DependencyRequirement};
+
+#[cfg(feature = "p2p")]
+pub mod transport;
 
 #[cfg(test)]
 mod tests;

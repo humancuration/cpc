@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use std::net::SocketAddr;
 use uuid::Uuid;
 use tokio::sync::broadcast;
 use async_trait::async_trait;
@@ -9,12 +10,15 @@ use crate::domain::models::{Document, DocumentVersion};
 use crate::domain::value_objects::DocumentContent;
 use crate::domain::errors::DocumentError;
 use crate::infrastructure::repository::DocumentRepository;
-use crate::collaboration::p2p::{P2PNetwork, P2PSyncService};
+use crate::collaboration::panda_network::{PandaNetwork, PandaSyncService, NetworkInterface};
+
+#[cfg(feature = "p2p")]
+use crate::collaboration::transport::turn::TurnServerConfig;
 
 pub struct RealtimeCollaborationService {
     repository: Arc<dyn DocumentRepository>,
-    p2p_network: Arc<Mutex<P2PNetwork>>,
-    p2p_sync_service: Arc<P2PSyncService>,
+    p2p_network: Arc<Mutex<PandaNetwork>>,
+    p2p_sync_service: Arc<PandaSyncService>,
     documents: Arc<Mutex<HashMap<Uuid, CRDTDocument>>>, // document_id -> CRDTDocument
     operation_broadcasters: Arc<Mutex<HashMap<Uuid, broadcast::Sender<DocumentOperation>>>>, // document_id -> broadcaster
 }
@@ -22,9 +26,33 @@ pub struct RealtimeCollaborationService {
 impl RealtimeCollaborationService {
     pub fn new(
         repository: Arc<dyn DocumentRepository>,
-        p2p_network: Arc<Mutex<P2PNetwork>>,
-        p2p_sync_service: Arc<P2PSyncService>,
+        p2p_network: Arc<Mutex<PandaNetwork>>,
+        p2p_sync_service: Arc<PandaSyncService>,
     ) -> Self {
+        // Initialize QUIC transport with STUN fallback
+        #[cfg(feature = "p2p")]
+        {
+            let mut network = p2p_network.lock().unwrap();
+            // TODO: Load these from configuration
+            let local_addr: SocketAddr = "0.0.0.0:0".parse().unwrap();
+            let stun_servers = vec![
+                // TODO: Replace with actual cooperative-run STUN servers
+                "stun.cooperative.example:3478".parse().unwrap(),
+            ];
+            let turn_servers = vec![
+                // TODO: Replace with actual cooperative-run TURN servers
+                TurnServerConfig {
+                    address: "turn.cooperative.example:3478".parse().unwrap(),
+                    username: "user".to_string(),
+                    password: "password".to_string(),
+                    realm: "cooperative".to_string(),
+                },
+            ];
+            
+            // Initialize transport (ignore errors in this example)
+            let _ = network.initialize_transport(local_addr, stun_servers, turn_servers);
+        }
+        
         Self {
             repository,
             p2p_network,
@@ -73,6 +101,12 @@ impl RealtimeCollaborationService {
             broadcasters.insert(document_id, sender);
         }
         
+        // Initialize ratchet session for this document
+        {
+            let network = self.p2p_network.lock().unwrap();
+            network.initialize_ratchet_session(document_id)?;
+        }
+        
         // Add document to P2P sync service
         if let Some(crdt_document) = {
             let documents = self.documents.lock().unwrap();
@@ -82,6 +116,16 @@ impl RealtimeCollaborationService {
         }
         
         Ok(())
+    }
+    
+    /// Save ratchet session to persistent storage
+    pub async fn save_ratchet_session(&self, document_id: Uuid, node_id: Uuid, session_data: &[u8]) -> Result<(), DocumentError> {
+        self.repository.save_ratchet_session(document_id, node_id, session_data).await
+    }
+    
+    /// Load ratchet session from persistent storage
+    pub async fn load_ratchet_session(&self, document_id: Uuid, node_id: Uuid) -> Result<Option<Vec<u8>>, DocumentError> {
+        self.repository.load_ratchet_session(document_id, node_id).await
     }
     
     pub fn apply_operation(&self, document_id: Uuid, operation: DocumentOperation) -> Result<(), DocumentError> {
@@ -100,7 +144,7 @@ impl RealtimeCollaborationService {
         {
             let network = self.p2p_network.lock().unwrap();
             tokio::runtime::Handle::current().block_on(
-                network.broadcast_operation(operation)
+                network.broadcast_operation(document_id, operation.clone())
             )?;
         }
         
@@ -167,5 +211,17 @@ impl RealtimeCollaborationService {
         )?;
         
         Ok(version)
+    }
+    
+    /// Process queued operations when network is restored
+    pub async fn process_queued_operations(&self) -> Result<usize, DocumentError> {
+        let network = self.p2p_network.lock().unwrap();
+        network.process_queued_operations().await
+    }
+    
+    /// Set network connection status
+    pub fn set_network_connected(&self, connected: bool) {
+        let network = self.p2p_network.lock().unwrap();
+        network.set_connected(connected);
     }
 }

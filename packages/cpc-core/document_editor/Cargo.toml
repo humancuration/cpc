@@ -25,8 +25,23 @@ docx-rs = "0.7"
 semver = "1.0"
 
 # p2p dependencies
-p2panda = { workspace = true, optional = true }
+p2panda-core = { workspace = true }
+p2panda-net = { workspace = true }
+p2panda-store = { workspace = true }
 libp2p = { version = "0.53", features = ["tcp", "dns", "websocket", "noise", "yamux", "ping", "macros"], optional = true }
+
+# QUIC transport dependencies
+quinn = "0.10.0"
+rustls = "0.21"
+rcgen = "0.11"
+
+# STUN/TURN dependencies
+stun_codec = "0.7.0"
+
+# Cryptographic dependencies
+blake3 = "1.5"
+ciborium = "0.2"
+double-ratchet = "0.5"
 
 # Media processing
 image = "0.24"
@@ -39,7 +54,7 @@ yew = { workspace = true, optional = true }
 
 [features]
 default = []
-p2p = ["p2panda", "libp2p"]
+p2p = ["p2panda-core", "p2panda-net", "p2panda-store", "libp2p", "quinn", "stun_codec"]
 web = ["yew"]
 
 [dev-dependencies]

@@ -11,7 +11,7 @@ These rules supercede any other documentation we have
 Hexagonal architecture
 Screaming architecture
 Vertical slices
-Use Rust syntax when possible
+Rust syntax
 
 We will heavily encourage people to opt-in and share data of all types, in order to strengthen the services of the federation.
 
@@ -25,26 +25,36 @@ The CPC software itself is NOT permissively licensed. It will be our own iterati
 
 Our tech stack relies on the following permissive libraries and technologies (MIT, Apache 2.0). We cannot use non-permissive libraries in our stack.
 
-- Bevy
-- p2panda for orchestrated p2p which uses iroh and well-established standards such as BLAKE3, Ed25519, STUN, CBOR, TLS, QUIC, Double Ratchet and more
-- Tauri
-- Yew (we are refactoring the svelte to Yew)
-- wry
+- Tauri 2.0
+- Yew 0.21.0
+- stylist
+- wry 0.52.1
 - plotters
-- Axum
+
+- PostgreSQL 17.5
+System of record
 - SQLx
+Database access
+- Sled	
+Edge intelligence
+- GraphQL
+Public API
+- gRPC 1.73.1
+Internal services
+
+- p2panda
+(Our p2p implementation is on hold as we wait for p2panda to be developed)
+
+- Axum 0.8.4
 - tracing
-- RustCrypto
+- RustCrypto 0.2.36
 - oauth2 (for TikTok etc)
 
-
-- Public API (for UIs): Use GraphQL Mutations to initiate tasks and GraphQL Subscriptions to receive the results.
-- Internal API (for services): Use gRPC Server Streaming to manage long-running jobs between your backend and your cpc-node workers.
-
-- ffmpeg.wasm and ONLY the royalty-free codecs AV1 for video, Opus for audio, WebM for video container
-- rodio for audio
+- ffmpeg.wasm/main 0.13.1
+ONLY the royalty-free codecs AV1 for video, Opus for audio, WebM for video container
+- rodio 0.21
 - pdf-rs
-
+- Bevy 0.16
 
 Android app (we will refactor to use as much of the shared Rust code as possible)
 

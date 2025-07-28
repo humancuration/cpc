@@ -2,6 +2,7 @@ use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use crate::crdt::id::CRDTId;
+use ciborium;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum FormattingStyle {
@@ -53,5 +54,15 @@ impl DocumentOperation {
             DocumentOperation::Update { id, .. } => Some(id),
             DocumentOperation::Formatting { id, .. } => Some(id),
         }
+    }
+    
+    pub fn to_cbor(&self) -> Result<Vec<u8>, ciborium::ser::Error<std::io::Error>> {
+        let mut buffer = Vec::new();
+        ciborium::ser::into_writer(self, &mut buffer)?;
+        Ok(buffer)
+    }
+    
+    pub fn from_cbor(data: &[u8]) -> Result<Self, ciborium::de::Error<std::io::Error>> {
+        ciborium::de::from_reader(data)
     }
 }

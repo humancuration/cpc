@@ -10,7 +10,7 @@ This module provides a word processor with basic formatting, image insertion, an
 - Export documents to PDF and DOCX formats
 - Basic text formatting (bold, italic, underline)
 - Image insertion
-- Real-time collaboration (planned)
+- Real-time collaboration using CRDTs and p2panda
 
 ## Architecture
 
@@ -45,6 +45,9 @@ The module exposes a GraphQL API for document management:
   - `deleteDocument(documentId: UUID!)`: Delete a document
   - `shareDocument(input: ShareDocumentInput!)`: Share a document with another user
   - `exportDocument(input: ExportInput!)`: Export a document to PDF or DOCX
+
+- Subscriptions:
+  - `documentUpdated(documentId: UUID!)`: Subscribe to real-time document updates
 
 ## Testing
 

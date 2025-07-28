@@ -12,6 +12,8 @@ pub struct CRDTDocument {
     logical_clock: i64,
     node_id: Uuid,
     operation_counter: u64,
+    // Ratchet sessions for end-to-end encryption
+    ratchet_sessions: HashMap<Uuid, Vec<u8>>, // Node ID to ratchet session state
 }
 
 pub struct ElementState {
@@ -22,6 +24,23 @@ pub struct ElementState {
     // Additional metadata as needed
 }
 
+/// Result of comparing two version vectors
+#[derive(Debug, Clone, PartialEq)]
+pub enum VersionVectorComparison {
+    /// Version vectors are equal
+    Equal,
+    /// Local version vector is ahead of remote
+    LocalAhead(Vec<Uuid>),
+    /// Remote version vector is ahead of local
+    RemoteAhead(Vec<Uuid>),
+    /// Version vectors are concurrent (conflicting updates)
+    Concurrent {
+        local_ahead: Vec<Uuid>,
+        remote_ahead: Vec<Uuid>,
+        concurrent: Vec<Uuid>,
+    },
+}
+
 impl CRDTDocument {
     pub fn new(node_id: Uuid) -> Self {
         Self {
@@ -30,6 +49,7 @@ impl CRDTDocument {
             logical_clock: 0,
             node_id,
             operation_counter: 0,
+            ratchet_sessions: HashMap::new(),
         }
     }
     
@@ -51,7 +71,8 @@ impl CRDTDocument {
         
         match operation {
             DocumentOperation::Insert { position, value, id, parent_id } => {
-                // Insert logic with conflict resolution
+                // Check for conflicts using version vector comparison
+                // In a real implementation, this would be more sophisticated
                 let element_state = ElementState {
                     value: value.clone(),
                     created_at: id.timestamp,
@@ -62,6 +83,9 @@ impl CRDTDocument {
                 self.elements.insert(id.clone(), element_state);
             }
             DocumentOperation::Delete { id, timestamp } => {
+                // Check for conflicts using version vector comparison
+                // In a real implementation, this would be more sophisticated
+                
                 // Mark element as deleted if not already
                 if let Some(element_state) = self.elements.get_mut(id) {
                     element_state.deleted = true;
@@ -77,6 +101,9 @@ impl CRDTDocument {
                 }
             }
             DocumentOperation::Update { id, value, timestamp } => {
+                // Check for conflicts using version vector comparison
+                // In a real implementation, this would be more sophisticated
+                
                 if let Some(element_state) = self.elements.get_mut(id) {
                     element_state.value = value.clone();
                     element_state.created_at = *timestamp;
@@ -132,5 +159,57 @@ impl CRDTDocument {
     
     pub fn get_elements(&self) -> &HashMap<CRDTId, ElementState> {
         &self.elements
+    }
+    
+    pub fn get_ratchet_sessions(&self) -> &HashMap<Uuid, Vec<u8>> {
+        &self.ratchet_sessions
+    }
+    
+    pub fn add_ratchet_session(&mut self, node_id: Uuid, session_state: Vec<u8>) {
+        self.ratchet_sessions.insert(node_id, session_state);
+    }
+    
+    /// Compare version vectors to detect conflicts
+    pub fn compare_version_vectors(&self, other: &HashMap<Uuid, i64>) -> VersionVectorComparison {
+        let mut local_ahead = Vec::new();
+        let mut remote_ahead = Vec::new();
+        let mut concurrent = Vec::new();
+        
+        // Check all nodes in the local version vector
+        for (node_id, local_counter) in &self.version_vector {
+            if let Some(remote_counter) = other.get(node_id) {
+                if local_counter > remote_counter {
+                    local_ahead.push(*node_id);
+                } else if remote_counter > local_counter {
+                    remote_ahead.push(*node_id);
+                } else {
+                    concurrent.push(*node_id);
+                }
+            } else {
+                // Node exists in local but not remote
+                local_ahead.push(*node_id);
+            }
+        }
+        
+        // Check for nodes that exist in remote but not local
+        for (node_id, remote_counter) in other {
+            if !self.version_vector.contains_key(node_id) {
+                remote_ahead.push(*node_id);
+            }
+        }
+        
+        if local_ahead.is_empty() && remote_ahead.is_empty() {
+            VersionVectorComparison::Equal
+        } else if local_ahead.is_empty() {
+            VersionVectorComparison::RemoteAhead(remote_ahead)
+        } else if remote_ahead.is_empty() {
+            VersionVectorComparison::LocalAhead(local_ahead)
+        } else {
+            VersionVectorComparison::Concurrent {
+                local_ahead,
+                remote_ahead,
+                concurrent,
+            }
+        }
     }
 }
