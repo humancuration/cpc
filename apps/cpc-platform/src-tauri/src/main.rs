@@ -12,6 +12,7 @@ mod store;
 mod app;
 mod router;
 mod invoicing;
+mod calendar;
 
 #[tauri::command]
 async fn render_yew_component(route: String) -> Result<String, ()> {
@@ -37,7 +38,6 @@ async fn main() {
                 window.open_devtools();
             }
             Ok(())
-        })
         .invoke_handler(tauri::generate_handler![
             product_commands::get_product_details,
             product_commands::subscribe_to_product_validation,
@@ -50,6 +50,9 @@ async fn main() {
             invoicing::commands::get_invoice_details,
             invoicing::commands::generate_invoice_pdf,
             invoicing::commands::create_invoice,
+            calendar::get_current_position,
+            calendar::request_shift_swap,
+        ])
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

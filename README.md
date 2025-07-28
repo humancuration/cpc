@@ -2,7 +2,8 @@
 
 A resilient P2P data network using p2panda that extends equal rights to AI participants.
 
-## Licensing Commitment
+No license is offered with this software, the license is pending. It will be a coopyleft license aimed at use within the federation.
+
 This project uses only permissively licensed libraries (MIT/Apache-2.0) to ensure maximum freedom and compatibility.
 
 ## Project Structure
