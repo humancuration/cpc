@@ -200,14 +200,72 @@ mod tests {
     }
 }
 
+// ========================
+// CRM & Invoicing Event Types
+// ========================
+
+/// Sales pipeline stages for CRM integration
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum SalesStage {
+    Lead,
+    Qualified,
+    DemoScheduled,
+    ProposalSent,
+    Negotiation,
+    ClosedWon,
+    ClosedLost,
+}
+
 /// Types of events in the calendar
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum EventType {
+    // Existing types...
     Personal,
     Business,
     Cooperative(String), // Cooperative ID for shared co-op events
     TaskDeadline(Uuid),  // References Task Manager module
     HealthAppointment,   // References Health module
+    
+    // CRM integration types
+    SalesPipelineMilestone {
+        opportunity_id: Uuid,
+        stage: SalesStage,
+    },
+    LeadFollowUp {
+        lead_id: Uuid,
+        score_change: i32,
+        wellness_threshold: Option<u8>,
+    },
+    EmailCampaignTimeline {
+        campaign_id: Uuid,
+        campaign_name: String,
+        total_recipients: u32,
+    },
+    
+    // Invoicing integration types
+    PaymentDue {
+        invoice_id: Uuid,
+        amount: f64,
+        status: PaymentStatus,
+        payment_reminder_id: Option<Uuid>,
+    },
+    PaymentStatusChange {
+        invoice_id: Uuid,
+        previous_status: PaymentStatus,
+        new_status: PaymentStatus,
+        timestamp: DateTime<Utc>,
+    },
+}
+
+/// Payment status for invoice integration
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum PaymentStatus {
+    Draft,
+    Sent,
+    Viewed,
+    Paid,
+    Overdue,
+    Partial,
 }
 
 /// Visibility settings for events
@@ -256,9 +314,10 @@ pub enum Weekday {
 pub struct Location {
     pub name: String,
     pub address: Option<String>,
-    pub latitude: Option<f64>,
-    pub longitude: Option<f64>,
-    pub radius: Option<f64>, // For geofencing
+    pub latitude: Option<f64>;
+    pub longitude: Option<f64>;
+    pub radius: Option<f64>; // For geofencing
+    pub cooperative_id: Option<Uuid>, // For cooperative-specific events
 }
 
 /// Attachment to an event

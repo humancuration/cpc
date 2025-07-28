@@ -1,0 +1,155 @@
+syntax = "proto3";
+
+package cpc.calendar;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// ======================
+// Shared Data Structures
+// ======================
+
+message Uuid {
+  string value = 1;
+}
+
+message EventRegistrationResponse {
+  Uuid event_id = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message IntegrationFilter {
+  google.protobuf.Timestamp start_date = 1;
+  google.protobuf.Timestamp end_date = 2;
+  repeated string event_types = 3; // EventType enum values
+  bool include_private = 4;
+  bool include_shared = 5;
+}
+
+// ======================
+// CRM Integration
+// ======================
+
+message CrmEventRequest {
+  oneof event_type {
+    SalesPipelineMilestoneEvent sales_pipeline = 1;
+    LeadFollowUpEvent lead_follow_up = 2;
+    EmailCampaignTimelineEvent email_campaign = 3;
+  }
+  Uuid user_id = 4;
+}
+
+message SalesPipelineMilestoneEvent {
+  Uuid opportunity_id = 1;
+  SalesStage stage = 2;
+}
+
+enum SalesStage {
+  LEAD = 0;
+  QUALIFIED = 1;
+  DEMO_SCHEDULED = 2;
+  PROPOSAL_SENT = 3;
+  NEGOTIATION = 4;
+  CLOSED_WON = 5;
+  CLOSED_LOST = 6;
+}
+
+message LeadFollowUpEvent {
+  Uuid lead_id = 1;
+  int32 score_change = 2;
+  optional uint32 wellness_threshold = 3;
+}
+
+message EmailCampaignTimelineEvent {
+  Uuid campaign_id = 1;
+  string campaign_name = 2;
+  uint32 total_recipients = 3;
+}
+
+// ======================
+// Invoicing Integration
+// ======================
+
+message InvoiceEventRequest {
+  oneof event_type {
+    PaymentDueEvent payment_due = 1;
+    PaymentStatusChangeEvent payment_status_change = 2;
+  }
+  Uuid user_id = 3;
+}
+
+message PaymentDueEvent {
+  Uuid invoice_id = 1;
+  double amount = 2;
+  PaymentStatus status = 3;
+  optional Uuid payment_reminder_id = 4;
+}
+
+message PaymentStatusChangeEvent {
+  Uuid invoice_id = 1;
+  PaymentStatus previous_status = 2;
+  PaymentStatus new_status = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+enum PaymentStatus {
+  DRAFT = 0;
+  SENT = 1;
+  VIEWED = 2;
+  PAID = 3;
+  OVERDUE = 4;
+  PARTIAL = 5;
+}
+
+// ======================
+// Timeline Response
+// ======================
+
+message TimelineEvent {
+  Uuid id = 1;
+  Uuid user_id = 2;
+  string title = 3;
+  string description = 4;
+  google.protobuf.Timestamp start = 5;
+  google.protobuf.Timestamp end = 6;
+  EventType event_type = 7;
+  EventVisibility visibility = 8;
+  optional string color_code = 9; // Hex color for visualization
+  optional string visualization_data = 10; // JSON for custom visual elements
+}
+
+enum EventType {
+  PERSONAL = 0;
+  BUSINESS = 1;
+  COOPERATIVE = 2;
+  TASK_DEADLINE = 3;
+  HEALTH_APPOINTMENT = 4;
+  SALES_PIPELINE_MILESTONE = 5;
+  LEAD_FOLLOW_UP = 6;
+  EMAIL_CAMPAIGN_TIMELINE = 7;
+  PAYMENT_DUE = 8;
+  PAYMENT_STATUS_CHANGE = 9;
+}
+
+enum EventVisibility {
+  PRIVATE = 0;
+  SHARED = 1;
+  PUBLIC = 2;
+  COOPERATIVE_MEMBERS = 3;
+}
+
+// ======================
+// Service Definition
+// ======================
+
+service CalendarIntegration {
+  // Register CRM events with the calendar
+  rpc RegisterCrmEvent(CrmEventRequest) returns (EventRegistrationResponse);
+  
+  // Register invoice-related events with the calendar
+  rpc RegisterInvoiceEvent(InvoiceEventRequest) returns (EventRegistrationResponse);
+  
+  // Stream integrated timeline events
+  rpc GetIntegratedTimeline(IntegrationFilter) returns (stream TimelineEvent);
+}

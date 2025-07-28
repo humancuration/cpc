@@ -137,4 +137,4 @@ If you were previously using the standalone `apps/personal-finance` application,
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](../../../LICENSE) file for details.
+This project will be licensed under a new type of CoopyLeft license which we will address later. This has no license for now.

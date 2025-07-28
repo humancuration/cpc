@@ -1,6 +1,9 @@
 //! Invoice application service
+//!
+//! This module contains the application service for managing invoices, including payment processing.
 
 use crate::domain::{Invoice, PaymentStatus, InvoiceItem};
+use crate::domain::payment::{PaymentProcessor, PaymentData, PaymentResult, PaymentProvider};
 use async_trait::async_trait;
 use uuid::Uuid;
 use rust_decimal::Decimal;
@@ -30,6 +33,7 @@ pub enum RepositoryError {
 pub trait InvoiceRepository {
     async fn create(&self, invoice: Invoice) -> Result<Invoice, RepositoryError>;
     async fn update_status(&self, id: Uuid, status: PaymentStatus) -> Result<Invoice, RepositoryError>;
+    async fn update(&self, invoice: &Invoice) -> Result<Invoice, RepositoryError>;
     async fn find_by_id(&self, id: Uuid) -> Result<Invoice, RepositoryError>;
 }
 
@@ -78,16 +82,29 @@ impl Invoice {
 pub struct InvoiceService {
     repo: Arc<dyn InvoiceRepository>,
     p2p_manager: Arc<P2PManager>,
+    payment_processor: Arc<dyn PaymentProcessor>,
+    calendar_integration: Arc<dyn CalendarEventRegistrar>,
 }
 
 impl InvoiceService {
-    pub fn new(repo: Arc<dyn InvoiceRepository>, p2p_manager: Arc<P2PManager>) -> Self {
-        Self { repo, p2p_manager }
+    pub fn new(
+        repo: Arc<dyn InvoiceRepository>,
+        p2p_manager: Arc<P2PManager>,
+        payment_processor: Arc<dyn PaymentProcessor>,
+    ) -> Self {
+        Self { repo, p2p_manager, payment_processor }
     }
 
     pub async fn create_invoice(&self, input: CreateInvoiceInput) -> Result<Invoice, ServiceError> {
         // Domain validation occurs here
-        let invoice = Invoice::new(input)?;
+        let invoice = Invoice::new(
+            input.client_id,
+            input.client_name,
+            input.client_email,
+            input.items,
+            input.total_amount,
+            input.due_date,
+        );
         let invoice = self.repo.create(invoice).await
             .map_err(|e| ServiceError::RepositoryError(e.to_string()))?;
         self.p2p_manager.share_invoice(&invoice).await?;
@@ -106,5 +123,54 @@ impl InvoiceService {
             .map_err(|e| ServiceError::RepositoryError(e.to_string()))?;
         self.p2p_manager.notify_client(&updated).await?;
         Ok(updated)
+    }
+
+    /// Process payment for an invoice
+    pub async fn process_payment(&self, id: Uuid, payment_data: PaymentData) -> Result<Invoice, ServiceError> {
+        let mut invoice = self.repo.find_by_id(id).await
+            .map_err(|e| match e {
+                RepositoryError::NotFound(_) => ServiceError::InvoiceNotFound(id),
+                _ => ServiceError::RepositoryError(e.to_string()),
+            })?;
+
+        // Process payment through selected provider
+        let payment_result = self.payment_processor.process_payment(&invoice, payment_data).await
+            .map_err(|e| ServiceError::RepositoryError(e.to_string()))?;
+
+        // Update invoice status based on payment result
+        match payment_result {
+            PaymentResult::Success(provider, intent_id) => {
+                invoice.update_payment_info(provider, intent_id);
+                invoice.update_status(PaymentStatus::Paid);
+            }
+            PaymentResult::Pending => {
+                invoice.update_status(PaymentStatus::Pending);
+            }
+            PaymentResult::Failed => {
+                invoice.update_status(PaymentStatus::PaymentFailed);
+            }
+        }
+
+        let updated = self.repo.update(&invoice).await
+            .map_err(|e| ServiceError::RepositoryError(e.to_string()))?;
+        self.p2p_manager.notify_client(&updated).await?;
+        Ok(updated)
+    }
+
+    /// Get payment status from provider
+    pub async fn get_payment_status(&self, id: Uuid) -> Result<PaymentStatus, ServiceError> {
+        let invoice = self.repo.find_by_id(id).await
+            .map_err(|e| match e {
+                RepositoryError::NotFound(_) => ServiceError::InvoiceNotFound(id),
+                _ => ServiceError::RepositoryError(e.to_string()),
+            })?;
+
+        if let (Some(provider), Some(intent_id)) = (&invoice.payment_provider, &invoice.payment_intent_id) {
+            let status = self.payment_processor.get_payment_status(*provider, intent_id).await
+                .map_err(|e| ServiceError::RepositoryError(e.to_string()))?;
+            Ok(status)
+        } else {
+            Err(ServiceError::InvalidInput("Invoice has no payment information".to_string()))
+        }
     }
 }

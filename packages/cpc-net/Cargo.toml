@@ -2,7 +2,7 @@
 name = "cpc-net"
 version = "0.1.0"
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "This project will be licensed under a new type of CoopyLeft license which we will address later. This has no license for now."
 
 [dependencies]
 # Core Technologies

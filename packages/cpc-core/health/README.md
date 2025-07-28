@@ -75,4 +75,4 @@ Please read our contributing guidelines before submitting pull requests. All hea
 
 ## License
 
-This module is licensed under the MIT License.
+This project will be licensed under a new type of CoopyLeft license which we will address later. This has no license for now.

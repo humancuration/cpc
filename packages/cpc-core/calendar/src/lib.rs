@@ -14,5 +14,5 @@ pub mod presentation;
 
 // Re-export key types for convenience
 pub use domain::{CalendarEvent, WorkShift, EventReminder, CalendarError};
-pub use application::{SchedulingService, ShiftManagementService, ReminderService};
+pub use application::{SchedulingService, ShiftManagementService, ReminderService, CalendarIntegrationService, ConsentService};
 pub use infrastructure::{EventRepositoryImpl, ShiftRepositoryImpl, ReminderRepositoryImpl, P2PSyncManager};

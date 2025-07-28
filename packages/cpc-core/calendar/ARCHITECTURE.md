@@ -313,6 +313,15 @@ type Subscription {
 
 ## Integration Points
 
+### 0. **Integration Principles**
+
+All integrations follow these principles:
+- **Vertical Slice Preservation**: Each module remains independently deployable
+- **Data Minimization**: Only share necessary data between modules
+- **Consent-First**: All cross-module data sharing requires explicit user consent
+- **Privacy by Default**: Sensitive data is encrypted end-to-end
+- **Event-Driven**: Modules communicate through domain events, not direct dependencies
+
 ### 1. **Task Manager Integration**
 - Deadline events automatically created from tasks
 - Bidirectional sync: Calendar event completion → task progress update
@@ -334,6 +343,28 @@ type Subscription {
 - Privacy-preserving data sharing with anonymization
 
 ## p2p Synchronization Strategy
+
+### SyncableEvent Trait
+
+All integrated events must implement the `SyncableEvent` trait from cpc-net:
+
+```rust
+pub trait SyncableEvent {
+    fn event_id(&self) -> Uuid;
+    fn user_id(&self) -> Uuid;
+    fn created_at(&self) -> DateTime<Utc>;
+    fn updated_at(&self) -> DateTime<Utc>;
+    fn vector_clock(&self) -> VectorClock;
+    fn merge(&mut self, other: Self) -> MergeResult;
+    fn encrypt(&self, key: &EncryptionKey) -> EncryptedEvent;
+    fn decrypt(encrypted: EncryptedEvent, key: &EncryptionKey) -> Result<Self, DecryptionError>;
+}
+
+impl SyncableEvent for CalendarEvent {
+    // Implementation using Double Ratchet for encryption
+    // and vector clocks for conflict resolution
+}
+```
 
 ### Conflict Resolution
 - **Vector Clocks**: Each event maintains a vector clock tracking modifications across peers
@@ -509,6 +540,148 @@ impl ReminderScheduler {
 | **Hexagonal Architecture** | Clear ports for sync adapters         | Dependency analysis                     |
 | **Vertical Slice**      | All calendar functionality in one crate  | File structure validation               |
 | **Cooperative Values**  | Shared calendars for co-ops             | User scenario testing                   |
+
+## Next Steps for Implementation
+
+### CRM & Invoicing Integration Plan
+
+#### Phase 1: Event Model Extensions
+1. Extend EventType with CRM & Invoicing specific event types (completed)
+2. Add wellness threshold to LeadFollowUp events
+3. Implement enum conversion utilities for external modules
+
+#### Phase 2: gRPC Integration Layer
+1. Define calendar_integration.proto with following services:
+   ```protobuf
+   service CalendarIntegration {
+       rpc RegisterCrmEvent(CrmEventRequest) returns (EventRegistrationResponse);
+       rpc RegisterInvoiceEvent(InvoiceEventRequest) returns (EventRegistrationResponse);
+       rpc GetIntegratedTimeline(IntegrationFilter) returns (stream TimelineEvent);
+   }
+   ```
+2. Generate gRPC code using prost
+3. Implement server-side handlers in CalendarService
+
+#### Phase 3: CRM Integration
+1. Add CalendarService dependency to LeadScoringService
+2. Implement event registration in CRM services:
+   - Pipeline milestones → Calendar events
+   - Lead scoring thresholds → Follow-up events
+   - Email campaign schedules → Timeline markers
+3. Create CRM-specific visualization components:
+   - Sales pipeline progress indicators
+   - Lead scoring trend visualizations
+
+#### Phase 4: Invoicing Integration
+1. Add CalendarService dependency to ReminderService
+2. Implement invoice event registration:
+   - Payment due dates → Calendar events
+   - Payment status changes → Timeline annotations
+   - Reminder configurations → Notification markers
+3. Create invoice-specific visualization components:
+   - Payment status color coding
+   - Urgency indicators (red = overdue)
+   - Payment history timelines
+
+#### Phase 5: Privacy & Compliance
+1. Implement GDPR/CCPA consent checking:
+   - Add consent verification to event registration
+   - Implement data minimization for cross-module sharing
+2. Integrate Double Ratchet encryption:
+   - Key rotation strategy for calendar events
+   - Secure key exchange with CRM/Invoicing modules
+
+#### Phase 6: Testing & Documentation
+1. Write integration tests for cross-module event flow
+2. Update architecture documentation with integration diagrams
+3. Document privacy implications in docs/privacy_integration_guidelines.md
+
+## Integration Sequence Diagrams
+
+### CRM → Calendar Event Registration
+```mermaid
+sequenceDiagram
+    participant CRM as CRM Service
+    participant Calendar as Calendar Service
+    participant UI as Bevy Timeline
+    
+    CRM->>Calendar: RegisterCrmEvent(SalesPipelineMilestone)
+    Calendar->>Calendar: Validate consent & privacy
+    Calendar->>Calendar: Convert to CalendarEvent
+    Calendar->>Calendar: Store in database
+    Calendar->>UI: eventCreated (GraphQL Subscription)
+    UI->>UI: Render sales pipeline visualization
+```
+
+### Invoicing → Calendar Event Flow
+```mermaid
+sequenceDiagram
+    participant Invoice as Invoicing Service
+    participant Calendar as Calendar Service
+    participant UI as Bevy Timeline
+    
+    Invoice->>Calendar: RegisterInvoiceEvent(PaymentDue)
+    Calendar->>Calendar: Validate payment data
+    Calendar->>Calendar: Apply urgency indicators
+    Calendar->>Calendar: Store encrypted event
+    Calendar->>UI: eventCreated (GraphQL Subscription)
+    UI->>UI: Render payment status visualization
+    loop Daily check
+        Calendar->>Invoice: Check payment status
+        Invoice->>Calendar: Status update
+        Calendar->>UI: eventUpdated (GraphQL Subscription)
+    end
+```
+
+## Privacy Integration Guidelines
+
+### Consent Management
+- All cross-module data sharing requires explicit user consent
+- Users can manage consent at granular level (per module, per data type)
+- Default: no cross-module data sharing enabled
+
+### Data Minimization
+- Only share minimum necessary data between modules
+- Example: For payment due events, share only:
+  - Invoice ID (for reference)
+  - Due date (for calendar)
+  - Amount (for visualization)
+  - NOT full invoice details
+
+### End-to-End Encryption
+- All integrated events use Double Ratchet encryption
+- Keys are rotated with each event update
+- Decryption only occurs in the user's trusted environment
+
+### Audit Trail
+- All cross-module data access is logged
+- Logs include:
+  - Timestamp
+  - Data type accessed
+  - Purpose code (UserView, Integration, Analytics)
+  - Consent verification status
+
+## Visualization Guidelines
+
+### CRM Events
+- **Sales Pipeline Events**: Horizontal progress bar showing stage advancement
+- **Lead Follow-ups**: Triangle marker with color indicating urgency (red = high score change)
+- **Email Campaigns**: Timeline bar showing campaign duration with recipient count
+
+### Invoicing Events
+- **Payment Due**: Circle marker with color coding:
+  - Green: Paid
+  - Yellow: Due soon (3+ days)
+  - Orange: Due tomorrow
+  - Red: Overdue
+- **Payment Status**: Vertical timeline annotations showing status transitions
+- **Reminders**: Small bell icon indicating upcoming reminders
+
+### Unified Timeline View
+- Toggle to filter by module (CRM, Invoicing, Personal)
+- Color-coded event categories
+- Interactive tooltips showing full details
+- Drag-and-drop rescheduling for user-controlled events
 
 ## Next Steps for Implementation
 

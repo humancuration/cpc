@@ -96,4 +96,4 @@ For detailed security standards, see [Security Standards](../../../docs/tech_sta
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project will be licensed under a new type of CoopyLeft license which we will address later. This has no license for now.

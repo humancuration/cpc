@@ -14,9 +14,11 @@ pub struct LeadScore {
     pub base_score: u8,       // 0-100
     pub engagement_score: u8, // 0-100
     pub fit_score: u8,        // 0-100
+    pub wellness_score: u8,   // 0-100 (new health integration)
     pub total_score: u8,      // 0-100
     pub scoring_factors: ScoringFactors,
     pub last_updated: DateTime<Utc>,
+    pub scoring_model_id: Uuid, // References active scoring model
 }
 
 /// Factors that contribute to lead scoring
@@ -28,6 +30,15 @@ pub struct ScoringFactors {
     pub social_engagement: u32,
     pub company_size: CompanySize,
     pub industry_fit: f32,
+    pub wellness_metrics: WellnessMetrics, // New health integration
+}
+
+/// Wellness metrics from health module
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct WellnessMetrics {
+    pub stress_level: Option<u8>,
+    pub focus_level: Option<u8>,
+    pub burnout_risk: Option<f32>,
 }
 
 /// Company size categories for lead scoring
@@ -75,6 +86,19 @@ pub struct ScoringThresholds {
     pub hot_lead: u8,     // 0-100 (e.g., 80)
     pub warm_lead: u8,    // 0-100 (e.g., 60)
     pub cold_lead: u8,    // 0-100 (e.g., 40)
+}
+
+/// Scoring model definition
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct ScoringModel {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub weights: ScoringWeights,
+    pub thresholds: ScoringThresholds,
+    pub is_default: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 /// Error types for lead scoring operations

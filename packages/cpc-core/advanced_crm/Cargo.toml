@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 authors = ["CPC Cooperative Developers"]
 description = "Advanced CRM module for CPC platform"
-license = "MIT OR Apache-2.0"
 
 [dependencies]
 # Core dependencies
