@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package consent_manager;
+
+// Consent manager service
+service ConsentManager {
+  // Get consent level for a user and domain
+  rpc GetConsentLevel(GetConsentLevelRequest) returns (GetConsentLevelResponse);
+  
+  // Update consent level for a user and domain
+  rpc UpdateConsentLevel(UpdateConsentLevelRequest) returns (UpdateConsentLevelResponse);
+  
+  // Revoke consent for a domain
+  rpc RevokeDomain(RevokeDomainRequest) returns (RevokeDomainResponse);
+  
+  // Get audit events for a user
+  rpc GetAuditEvents(GetAuditEventsRequest) returns (GetAuditEventsResponse);
+}
+
+// Data sharing levels
+enum DataSharingLevel {
+  DATA_SHARING_LEVEL_UNSPECIFIED = 0;
+  DATA_SHARING_LEVEL_NONE = 1;
+  DATA_SHARING_LEVEL_MINIMAL = 2;
+  DATA_SHARING_LEVEL_STANDARD = 3;
+  DATA_SHARING_LEVEL_FULL = 4;
+}
+
+// Application domains
+enum Domain {
+  DOMAIN_UNSPECIFIED = 0;
+  DOMAIN_FINANCIAL_DATA = 1;
+  DOMAIN_HEALTH_DATA = 2;
+  DOMAIN_CALENDAR_DATA = 3;
+  DOMAIN_CRM_DATA = 4;
+  DOMAIN_SCM_DATA = 5;
+  DOMAIN_DOCUMENT_DATA = 6;
+  DOMAIN_WEBSITE_DATA = 7;
+  DOMAIN_RECRUITMENT_DATA = 8;
+  DOMAIN_DATA_LAKEHOUSE = 9;
+  DOMAIN_FORECASTING_DATA = 10;
+}
+
+// Actor types
+enum ActorType {
+  ACTOR_TYPE_UNSPECIFIED = 0;
+  ACTOR_TYPE_USER = 1;
+  ACTOR_TYPE_SERVICE = 2;
+  ACTOR_TYPE_ADMIN = 3;
+}
+
+// Consent actions
+enum ConsentAction {
+  CONSENT_ACTION_UNSPECIFIED = 0;
+  CONSENT_ACTION_GRANTED = 1;
+  CONSENT_ACTION_REVOKED = 2;
+  CONSENT_ACTION_MODIFIED = 3;
+}
+
+// Get consent level request
+message GetConsentLevelRequest {
+  string user_id = 1;
+  Domain domain = 2;
+}
+
+// Get consent level response
+message GetConsentLevelResponse {
+  DataSharingLevel level = 1;
+}
+
+// Update consent level request
+message UpdateConsentLevelRequest {
+  string user_id = 1;
+  Domain domain = 2;
+  DataSharingLevel level = 3;
+  ActorType actor_type = 4;
+  string actor_id = 5;
+}
+
+// Update consent level response
+message UpdateConsentLevelResponse {
+  bool success = 1;
+}
+
+// Revoke domain request
+message RevokeDomainRequest {
+  string user_id = 1;
+  Domain domain = 2;
+  ActorType actor_type = 3;
+  string actor_id = 4;
+}
+
+// Revoke domain response
+message RevokeDomainResponse {
+  bool success = 1;
+}
+
+// Get audit events request
+message GetAuditEventsRequest {
+  string user_id = 1;
+}
+
+// Get audit events response
+message GetAuditEventsResponse {
+  repeated AuditEvent events = 1;
+}
+
+// Audit event
+message AuditEvent {
+  string id = 1;
+  string user_id = 2;
+  Domain domain = 3;
+  ConsentAction action = 4;
+  optional DataSharingLevel previous_level = 5;
+  DataSharingLevel new_level = 6;
+  ActorType actor_type = 7;
+  string actor_id = 8;
+  int64 timestamp = 9; // Unix timestamp in seconds
+}

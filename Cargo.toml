@@ -9,6 +9,7 @@ members = [
     "packages/cpc-core/finance",
     "packages/cpc-core/invoicing",
     "packages/cpc-core/crm",
+    "packages/cpc-core/consent_manager",
     "packages/cpc-net",
     "packages/cpc-protos",
     "packages/cpc-core/document_editor"

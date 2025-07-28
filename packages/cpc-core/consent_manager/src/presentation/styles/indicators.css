@@ -1,0 +1,30 @@
+.consent-indicator {
+  display: inline-block;
+  font-size: 1.2em;
+  margin: 0 2px;
+  transition: transform 0.2s ease;
+}
+
+.consent-indicator.small {
+  font-size: 1em;
+}
+
+.consent-indicator:hover {
+  transform: scale(1.1);
+}
+
+.consent-none {
+  color: #dc3545; /* Red */
+}
+
+.consent-minimal {
+  color: #ffc107; /* Yellow */
+}
+
+.consent-standard {
+  color: #28a745; /* Green */
+}
+
+.consent-full {
+  color: #007bff; /* Blue */
+}
