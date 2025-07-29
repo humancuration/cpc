@@ -17,6 +17,7 @@ pub fn create_routes() -> Router {
         .route("/sheets/:id/charts/:chart_id", delete(remove_chart))
         .route("/sheets/:id/permissions", post(set_permission))
         .route("/sheets/user/:user_id", get(get_sheets_by_user))
+        .route("/sheets/:id/import/expenses", post(import_expenses))
 }
 
 /// Create a new sheet
@@ -72,4 +73,9 @@ async fn set_permission() -> String {
 /// Get sheets by user
 async fn get_sheets_by_user() -> String {
     "Get sheets by user endpoint".to_string()
+}
+
+/// Import expenses from a sheet
+async fn import_expenses() -> String {
+    "Import expenses endpoint".to_string()
 }

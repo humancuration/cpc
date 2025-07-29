@@ -57,6 +57,21 @@ impl FormulaEvaluator {
             return self.evaluate_pmt(args_str, sheet);
         }
         
+        if expr.starts_with("FV(") && expr.ends_with(')') {
+            let args_str = &expr[3..expr.len()-1];
+            return self.evaluate_fv(args_str, sheet);
+        }
+        
+        if expr.starts_with("NPV(") && expr.ends_with(')') {
+            let args_str = &expr[4..expr.len()-1];
+            return self.evaluate_npv(args_str, sheet);
+        }
+        
+        if expr.starts_with("IRR(") && expr.ends_with(')') {
+            let args_str = &expr[4..expr.len()-1];
+            return self.evaluate_irr(args_str, sheet);
+        }
+        
         // Handle cell references
         if self.is_cell_reference(expr) {
             return self.get_cell_value(expr, sheet);
@@ -314,5 +329,128 @@ impl FormulaEvaluator {
         let denominator = (1.0 + if payment_at_beginning { rate } else { 0.0 }) * (rate_factor - 1.0);
         
         -numerator / denominator
+    }
+    
+    /// Evaluate FV (Future Value) function
+    fn evaluate_fv(&self, args_str: &str, sheet: &Sheet) -> Result<CellValue, String> {
+        // Parse comma-separated arguments (rate, nper, pmt, [pv], [type])
+        let args = self.parse_function_args(args_str, sheet)?;
+        if args.len() < 3 || args.len() > 5 {
+            return Err("FV requires 3-5 arguments: rate, nper, pmt, [pv], [type]".to_string());
+        }
+        
+        let rate = self.to_number(&args[0])?;
+        let nper = self.to_number(&args[1])?;
+        let pmt = self.to_number(&args[2])?;
+        let pv = if args.len() > 3 { self.to_number(&args[3])? } else { 0.0 };
+        let payment_type = if args.len() > 4 { self.to_number(&args[4])? } else { 0.0 };
+        
+        // FV calculation
+        let fv = self.calculate_fv(rate, nper, pmt, pv, payment_type);
+        Ok(CellValue::Number(fv))
+    }
+    
+    fn calculate_fv(&self, rate: f64, nper: f64, pmt: f64, pv: f64, payment_type: f64) -> f64 {
+        if rate == 0.0 {
+            return -pv - pmt * nper;
+        }
+        
+        let payment_at_beginning = payment_type != 0.0;
+        let rate_factor = (1.0 + rate).powf(nper);
+        
+        let fv_pv = pv * rate_factor;
+        let fv_pmt = if payment_at_beginning {
+            pmt * (1.0 + rate) * (rate_factor - 1.0) / rate
+        } else {
+            pmt * (rate_factor - 1.0) / rate
+        };
+        
+        -(fv_pv + fv_pmt)
+    }
+    
+    /// Evaluate NPV (Net Present Value) function
+    fn evaluate_npv(&self, args_str: &str, sheet: &Sheet) -> Result<CellValue, String> {
+        // Parse comma-separated arguments (rate, value1, [value2], ...)
+        let args = self.parse_function_args(args_str, sheet)?;
+        if args.len() < 2 {
+            return Err("NPV requires at least 2 arguments: rate, value1, [value2], ...".to_string());
+        }
+        
+        let rate = self.to_number(&args[0])?;
+        if rate == -1.0 {
+            return Err("Rate cannot be -100%".to_string());
+        }
+        
+        let mut npv = 0.0;
+        for (i, arg) in args[1..].iter().enumerate() {
+            let value = self.to_number(arg)?;
+            npv += value / (1.0 + rate).powf((i + 1) as f64);
+        }
+        
+        Ok(CellValue::Number(npv))
+    }
+    
+    /// Evaluate IRR (Internal Rate of Return) function
+    fn evaluate_irr(&self, args_str: &str, sheet: &Sheet) -> Result<CellValue, String> {
+        // Parse comma-separated arguments (values, [guess])
+        let args = self.parse_function_args(args_str, sheet)?;
+        if args.is_empty() {
+            return Err("IRR requires at least 1 argument: values, [guess]".to_string());
+        }
+        
+        // Convert all arguments to a vector of cash flows
+        let mut cash_flows = Vec::new();
+        for arg in &args {
+            let values = self.to_vector(arg, sheet)?;
+            cash_flows.extend(values);
+        }
+        
+        if cash_flows.is_empty() {
+            return Err("No cash flows provided".to_string());
+        }
+        
+        // IRR calculation using Newton-Raphson method
+        let irr = self.calculate_irr(&cash_flows)?;
+        Ok(CellValue::Number(irr))
+    }
+    
+    fn calculate_irr(&self, cash_flows: &[f64]) -> Result<f64, String> {
+        if cash_flows.is_empty() {
+            return Err("No cash flows provided".to_string());
+        }
+        
+        // Initial guess
+        let mut rate = 0.1; // 10%
+        let tolerance = 1e-10;
+        let max_iterations = 100;
+        
+        for _ in 0..max_iterations {
+            let mut npv = 0.0;
+            let mut npv_derivative = 0.0;
+            
+            for (i, &cash_flow) in cash_flows.iter().enumerate() {
+                let time = i as f64;
+                let discount_factor = (1.0 + rate).powf(time);
+                
+                npv += cash_flow / discount_factor;
+                
+                if i > 0 {
+                    npv_derivative -= cash_flow * time / (discount_factor * (1.0 + rate));
+                }
+            }
+            
+            if npv_derivative.abs() < tolerance {
+                break;
+            }
+            
+            let rate_change = npv / npv_derivative;
+            rate -= rate_change;
+            
+            if rate_change.abs() < tolerance {
+                break;
+            }
+        }
+        
+        Ok(rate)
     }
 }
