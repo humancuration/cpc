@@ -10,6 +10,8 @@ members = [
     "packages/cpc-core/invoicing",
     "packages/cpc-core/crm",
     "packages/cpc-core/consent_manager",
+    "packages/cpc-core/storage_abstraction",
+    "packages/cpc-core/event_bus",
     "packages/cpc-net",
     "packages/cpc-protos",
     "packages/cpc-core/document_editor"
