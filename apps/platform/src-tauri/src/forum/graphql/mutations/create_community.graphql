@@ -1,9 +1,0 @@
-mutation CreateCommunity($name: String!, $description: String!) {
-  createCommunity(name: $name, description: $description) {
-    id
-    name
-    description
-    memberCount
-    isMember
-  }
-}

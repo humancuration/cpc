@@ -1,7 +1,0 @@
-Device Model,OS Version,Screen Size,Resolution,Chipset,RAM (GB),Network Types,GPU,Test Status
-Google Pixel 8,Android 14,6.2",2400x1080,Google Tensor G3,8,WiFi6/5G,ARM Mali-G715,Not Started
-Samsung Galaxy S24,Android 14,6.7",3088x1440,Qualcomm Snapdragon 8 Gen 3,12,WiFi6E/5G,Adreno 750,Not Started
-OnePlus 12,Android 14,6.82",3168x1440,Qualcomm Snapdragon 8 Gen 3,16,WiFi7/5G,Adreno 750,Not Started
-Xiaomi 14,Android 14,6.36",2670x1200,Qualcomm Snapdragon 8 Gen 3,12,WiFi6/5G,Adreno 750,Not Started
-Samsung Galaxy Tab S9,Android 13,11",2560x1600,Qualcomm Snapdragon 8 Gen 2,12,WiFi6,Adreno 740,Not Started
-Google Pixel Fold,Android 14,7.6",2208x1840,Google Tensor G2,12,WiFi6/5G,ARM Mali-G710,Not Started

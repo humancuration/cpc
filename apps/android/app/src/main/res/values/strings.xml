@@ -1,8 +1,0 @@
-<resources>
-    <string name="app_name">CPC Platform</string>
-    <string name="image_recognition_title">Image Recognition</string>
-    <string name="camera_permission_required">Camera permission is required for image recognition</string>
-    <string name="no_objects_detected">No objects detected</string>
-    <string name="chevron_icon">Chevron icon</string>
-    <string name="processing_image">Processing image...</string>
-</resources>

@@ -1,8 +1,0 @@
-mutation CreateInvoice($input: CreateInvoiceInput!) {
-  createInvoice(input: $input) {
-    id
-    invoiceNumber
-    status
-    total
-  }
-}

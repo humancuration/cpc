@@ -1,1 +1,0 @@
-// This file is obsolete and its contents have been moved to apps/cpc-platform/src/api/supply_chain.rs

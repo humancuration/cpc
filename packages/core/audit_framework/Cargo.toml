@@ -1,0 +1,40 @@
+[package]
+name = "audit_framework"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+tokio = { workspace = true, features = ["sync"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+
+# Cryptography
+rust-crypto = { version = "0.2.36" }
+rand = "0.8"
+
+# Storage abstraction (for persistence)
+storage_abstraction = { path = "../storage_abstraction" }
+
+# Optional dependencies
+async-trait = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+storage_abstraction = { path = "../storage_abstraction", features = ["in_memory"] }
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
+
+[[example]]
+name = "health_integration"
+path = "examples/health_integration.rs"
+
+[[example]]
+name = "finance_integration"
+path = "examples/finance_integration.rs"

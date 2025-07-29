@@ -27,6 +27,10 @@ Screaming architecture
 Vertical slices
 Rust syntax
 
+Keep only true cross-cutting concerns in packages/core/
+Non-core domain modules (invoicing, crm, scm, etc) are in packages/domains/
+Runnable apps are in apps/
+
 ## Tech Stack
 
 Primary language: Rust (the goal is to eventually have a fully Rust codebase)

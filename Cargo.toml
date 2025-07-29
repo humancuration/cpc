@@ -12,6 +12,9 @@ members = [
     "packages/cpc-core/consent_manager",
     "packages/cpc-core/storage_abstraction",
     "packages/cpc-core/event_bus",
+    "packages/cpc-core/audit_framework",
+    "packages/cpc-core/notification_core",
+    "packages/cpc-core/bi_visualization",
     "packages/cpc-net",
     "packages/cpc-protos",
     "packages/cpc-core/document_editor"

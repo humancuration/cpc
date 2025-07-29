@@ -1,7 +1,0 @@
-query Project($id: ID!) {
-  project(id: $id) {
-    id
-    name
-    description
-  }
-}

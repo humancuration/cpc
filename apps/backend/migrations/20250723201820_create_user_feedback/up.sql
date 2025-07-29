@@ -1,7 +1,0 @@
-CREATE TABLE user_feedback (
-    id SERIAL PRIMARY KEY,
-    rating INTEGER NOT NULL,
-    comment TEXT NOT NULL,
-    contact_email TEXT,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
-);

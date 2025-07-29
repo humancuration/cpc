@@ -1,0 +1,45 @@
+[package]
+name = "notification_core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+tokio = { workspace = true, features = ["sync", "time"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+
+# Event bus (for real-time delivery)
+event_bus = { path = "../event_bus" }
+
+# Optional dependencies
+async-trait = { workspace = true }
+
+# OAuth2 for social notifications
+oauth2 = "4.4"
+
+# Email library
+lettre = { version = "0.11", optional = true }
+
+[features]
+email = ["lettre"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+event_bus = { path = "../event_bus" }
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
+
+[[example]]
+name = "calendar_integration"
+path = "examples/calendar_integration.rs"
+
+[[example]]
+name = "health_integration"
+path = "examples/health_integration.rs"
