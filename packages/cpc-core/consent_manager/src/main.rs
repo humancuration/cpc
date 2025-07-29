@@ -1,89 +1,127 @@
-//! Example usage of the consent manager.
+//! Example application demonstrating the consent manager
+//!
+//! This example shows how to use the consent manager in a complete application,
+//! including integration with Bevy ECS for real-time updates.
 
 use consent_manager::{
     domain::{
-        consent::{ConsentProfile, DataSharingLevel, Domain},
-        audit::Actor,
+        consent::{DataSharingLevel, Domain, ConsentProfile},
+        audit::{AuditEvent, Actor, ConsentAction},
+        errors::ConsentError,
     },
     application::service::{ConsentService, ConsentStorage},
-    infrastructure::storage::sled_adapter::SledAdapter,
+    infrastructure::events::bevy::{ConsentEventChannel, ConsentEventPlugin, handle_consent_updates},
 };
-use sled::Config;
-use std::error::Error;
+use std::collections::HashMap;
+use bevy_app::{App, ScheduleRunnerPlugin};
+use bevy_ecs::prelude::*;
+use std::time::Duration;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    println!("Consent Manager Example");
+/// In-memory storage implementation for demonstration purposes
+struct InMemoryStorage {
+    profiles: std::sync::Mutex<HashMap<String, ConsentProfile>>,
+    audit_events: std::sync::Mutex<HashMap<String, Vec<AuditEvent>>>,
+}
+
+impl InMemoryStorage {
+    fn new() -> Self {
+        Self {
+            profiles: std::sync::Mutex::new(HashMap::new()),
+            audit_events: std::sync::Mutex::new(HashMap::new()),
+        }
+    }
+}
+
+#[async_trait::async_trait]
+impl ConsentStorage for InMemoryStorage {
+    async fn get_consent_profile(&self, user_id: &str, domain: &Domain) -> Result<Option<ConsentProfile>, ConsentError> {
+        let key = format!("{}:{:?}", user_id, domain);
+        let profiles = self.profiles.lock().unwrap();
+        Ok(profiles.get(&key).cloned())
+    }
+
+    async fn save_consent_profile(&self, profile: &ConsentProfile) -> Result<(), ConsentError> {
+        let key = format!("{}:{:?}", profile.user_id, profile.domain);
+        let mut profiles = self.profiles.lock().unwrap();
+        profiles.insert(key, profile.clone());
+        Ok(())
+    }
+
+    async fn revoke_domain(&self, user_id: &str, domain: &Domain) -> Result<(), ConsentError> {
+        let key = format!("{}:{:?}", user_id, domain);
+        let mut profiles = self.profiles.lock().unwrap();
+        profiles.remove(&key);
+        Ok(())
+    }
+
+    async fn get_audit_events(&self, user_id: &str) -> Result<Vec<AuditEvent>, ConsentError> {
+        let audit_events = self.audit_events.lock().unwrap();
+        Ok(audit_events.get(user_id).cloned().unwrap_or_default())
+    }
+
+    async fn save_audit_event(&self, event: &AuditEvent) -> Result<(), ConsentError> {
+        let mut audit_events = self.audit_events.lock().unwrap();
+        audit_events.entry(event.user_id.clone()).or_insert_with(Vec::new).push(event.clone());
+        Ok(())
+    }
+}
+
+/// Component that represents a UI element that needs to be updated when consent changes
+#[derive(Component)]
+struct ConsentIndicator {
+    user_id: String,
+    domain: Domain,
+    level: DataSharingLevel,
+}
+
+fn main() {
+    // Initialize the tracing subscriber for logging
+    tracing_subscriber::fmt::init();
     
-    // Create a temporary sled database for demonstration
-    let config = Config::new().temporary(true);
-    let db = config.open()?;
-    
-    // Create the sled adapter
-    let sled_adapter = SledAdapter::new(db);
+    // Create the storage backend
+    let storage = Box::new(InMemoryStorage::new());
     
     // Create the consent service
-    let consent_service = ConsentService::new(Box::new(sled_adapter));
+    let consent_service = ConsentService::new(storage);
     
-    // Example user ID
-    let user_id = "user123";
+    // Create a Bevy app with the consent event plugin
+    let mut app = App::new();
+    app
+        .add_plugins((
+            ScheduleRunnerPlugin::run_loop(Duration::from_secs(5)),
+            ConsentEventPlugin,
+        ))
+        .add_systems(Update, handle_consent_updates)
+        .add_systems(Update, update_consent_example);
     
-    // Set consent level for financial data
-    consent_service
-        .update_consent_level(
-            user_id,
-            Domain::FinancialData,
-            DataSharingLevel::Standard,
-            Actor::User(user_id.to_string()),
-        )
-        .await?;
+    // Insert the consent service as a resource so systems can access it
+    app.insert_resource(consent_service);
     
-    println!("Set financial data consent to Standard");
+    // Run the app
+    app.run();
+}
+
+/// Example system that updates consent and shows how the event system works
+fn update_consent_example(
+    consent_service: Res<ConsentService>,
+) {
+    // In a real application, this would be triggered by user actions
+    // For this example, we'll just update consent for a test user
     
-    // Set consent level for health data
-    consent_service
-        .update_consent_level(
-            user_id,
-            Domain::HealthData,
-            DataSharingLevel::Minimal,
-            Actor::User(user_id.to_string()),
-        )
-        .await?;
+    let user_id = "test_user_123";
+    let domain = Domain::FinancialData;
+    let new_level = DataSharingLevel::Standard;
+    let actor = Actor::User(user_id.to_string());
     
-    println!("Set health data consent to Minimal");
-    
-    // Get current consent levels
-    let financial_level = consent_service
-        .get_consent_level(user_id, Domain::FinancialData)
-        .await?;
-        
-    let health_level = consent_service
-        .get_consent_level(user_id, Domain::HealthData)
-        .await?;
-    
-    println!("Financial data consent level: {:?}", financial_level);
-    println!("Health data consent level: {:?}", health_level);
-    
-    // Check if a requested level is allowed
-    let can_share_financial = match financial_level {
-        DataSharingLevel::None => false,
-        DataSharingLevel::Minimal => true,  // For this example, minimal is sufficient
-        DataSharingLevel::Standard => true,
-        DataSharingLevel::Full => true,
-    };
-    
-    println!("Can share financial data: {}", can_share_financial);
-    
-    // Get audit events
-    let audit_events = consent_service
-        .get_audit_events(user_id)
-        .await?;
-    
-    println!("Audit events:");
-    for event in audit_events {
-        println!("  - {:?} {:?} by {:?}", event.domain, event.action, event.actor);
-    }
-    
-    println!("Example completed successfully!");
-    Ok(())
+    // Spawn a task to update consent asynchronously
+    tokio::spawn(async move {
+        match consent_service.update_consent_level(user_id, domain, new_level, actor).await {
+            Ok(()) => {
+                tracing::info!("Successfully updated consent for user {}", user_id);
+            }
+            Err(e) => {
+                tracing::error!("Failed to update consent for user {}: {:?}", user_id, e);
+            }
+        }
+    });
 }

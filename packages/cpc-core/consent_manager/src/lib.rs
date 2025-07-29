@@ -3,6 +3,13 @@
 //! A unified consent management system for the CPC ecosystem that provides
 //! centralized control over data sharing preferences across all applications.
 
+// Include the generated gRPC code
+#[allow(dead_code)]
+#[allow(clippy::all)]
+mod consent_manager_proto {
+    include!(concat!(env!("OUT_DIR"), "/consent_manager.rs"));
+}
+
 /// Domain layer containing core business logic and entities
 pub mod domain;
 

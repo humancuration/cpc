@@ -48,16 +48,19 @@ pub trait SavingsService {
 pub struct SavingsServiceImpl {
     savings_repo: std::sync::Arc<dyn SavingsRepository>,
     data_sharing_repo: std::sync::Arc<dyn DataSharingRepository>,
+    consent_service: std::sync::Arc<consent_manager::application::service::ConsentService>,
 }
 
 impl SavingsServiceImpl {
     pub fn new(
         savings_repo: std::sync::Arc<dyn SavingsRepository>,
         data_sharing_repo: std::sync::Arc<dyn DataSharingRepository>,
+        consent_service: std::sync::Arc<consent_manager::application::service::ConsentService>,
     ) -> Self {
         Self {
             savings_repo,
             data_sharing_repo,
+            consent_service,
         }
     }
 }
@@ -117,14 +120,65 @@ impl SavingsService for SavingsServiceImpl {
     }
 
     async fn get_data_sharing_preference(&self, user_id: Uuid) -> Result<DataSharingPreference, FinanceError> {
-        match self.data_sharing_repo.find_by_user_id(user_id).await? {
-            Some(preference) => Ok(preference),
-            None => self.data_sharing_repo.create_default(user_id).await,
+        // Use the new consent manager instead of the legacy data sharing repo
+        let user_id_str = user_id.to_string();
+        let level = self.consent_service
+            .get_consent_level(&user_id_str, consent_manager::domain::consent::Domain::FinancialData)
+            .await
+            .map_err(|e| FinanceError::InvalidData(format!("Consent service error: {:?}", e)))?;
+        
+        // Convert the new consent level to the legacy preference format
+        let mut preference = match self.data_sharing_repo.find_by_user_id(user_id).await? {
+            Some(preference) => preference,
+            None => self.data_sharing_repo.create_default(user_id).await?,
+        };
+        
+        // Map the new consent level to the legacy preference format
+        match level {
+            consent_manager::domain::consent::DataSharingLevel::None => {
+                preference.disable_sharing();
+                preference.disable_anonymization();
+            },
+            consent_manager::domain::consent::DataSharingLevel::Minimal => {
+                preference.enable_sharing();
+                preference.enable_anonymization();
+            },
+            consent_manager::domain::consent::DataSharingLevel::Standard => {
+                preference.enable_sharing();
+                preference.disable_anonymization();
+            },
+            consent_manager::domain::consent::DataSharingLevel::Full => {
+                preference.enable_sharing();
+                preference.disable_anonymization();
+            },
         }
+        
+        Ok(preference)
     }
 
     async fn update_data_sharing_preference(&self, user_id: Uuid, enabled: bool, anonymized: bool) -> Result<DataSharingPreference, FinanceError> {
-        let mut preference = self.get_data_sharing_preference(user_id).await?;
+        // Convert the legacy preference to the new consent level and update via consent manager
+        let level = if !enabled {
+            consent_manager::domain::consent::DataSharingLevel::None
+        } else if anonymized {
+            consent_manager::domain::consent::DataSharingLevel::Minimal
+        } else {
+            consent_manager::domain::consent::DataSharingLevel::Standard
+        };
+        
+        let user_id_str = user_id.to_string();
+        let actor = consent_manager::domain::audit::Actor::User(user_id_str.clone());
+        
+        self.consent_service
+            .update_consent_level(&user_id_str, consent_manager::domain::consent::Domain::FinancialData, level, actor)
+            .await
+            .map_err(|e| FinanceError::InvalidData(format!("Consent service error: {:?}", e)))?;
+        
+        // Also update the legacy data sharing repo for backward compatibility during migration
+        let mut preference = match self.data_sharing_repo.find_by_user_id(user_id).await? {
+            Some(preference) => preference,
+            None => self.data_sharing_repo.create_default(user_id).await?,
+        };
         
         if enabled {
             preference.enable_sharing();

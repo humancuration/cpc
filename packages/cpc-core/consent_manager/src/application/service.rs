@@ -64,7 +64,7 @@ impl ConsentService {
                     user_id.to_string(),
                     domain.clone(),
                     ConsentAction::Modified,
-                    Some(previous_level),
+                    Some(previous_level.clone()),
                     level.clone(),
                     actor,
                 );
@@ -91,7 +91,23 @@ impl ConsentService {
         };
 
         // Save the updated profile
-        self.storage.save_consent_profile(&profile).await
+        self.storage.save_consent_profile(&profile).await?;
+        
+        // Publish consent change event (if bevy integration is enabled)
+        #[cfg(feature = "bevy-integration")]
+        {
+            if let Some(event_channel) = crate::infrastructure::events::bevy::ConsentEventChannel::get_global() {
+                let event = crate::infrastructure::events::bevy::ConsentChangeEvent {
+                    user_id: user_id.to_string(),
+                    domain: domain.clone(),
+                    new_level: level.clone(),
+                    timestamp: chrono::Utc::now(),
+                };
+                event_channel.publish(event);
+            }
+        }
+        
+        Ok(())
     }
 
     /// Revoke consent for a specific domain
@@ -106,13 +122,27 @@ impl ConsentService {
             // Create audit event
             let audit_event = AuditEvent::new(
                 user_id.to_string(),
-                domain,
+                domain.clone(),
                 ConsentAction::Revoked,
-                Some(previous_level),
+                Some(previous_level.clone()),
                 DataSharingLevel::None,
                 actor,
             );
             self.storage.save_audit_event(&audit_event).await?;
+            
+            // Publish consent change event (if bevy integration is enabled)
+            #[cfg(feature = "bevy-integration")]
+            {
+                if let Some(event_channel) = crate::infrastructure::events::bevy::ConsentEventChannel::get_global() {
+                    let event = crate::infrastructure::events::bevy::ConsentChangeEvent {
+                        user_id: user_id.to_string(),
+                        domain: domain.clone(),
+                        new_level: DataSharingLevel::None,
+                        timestamp: chrono::Utc::now(),
+                    };
+                    event_channel.publish(event);
+                }
+            }
         }
         
         Ok(())

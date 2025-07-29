@@ -1,236 +1,79 @@
 //! Consent management for cross-module data sharing
 //!
 //! This module implements the consent checking required by our privacy policies
-//! and handles data minimization for cross-module integrations.
+//! and handles data minimization for cross-module integrations using the
+//! centralized Consent Manager.
 
 use crate::domain::CalendarError;
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 use std::sync::Arc;
-use async_trait::async_trait;
-use tracing::{info, warn};
+use consent_manager::{
+    domain::{
+        consent::{DataSharingLevel, Domain},
+    },
+    application::service::ConsentService as NewConsentService,
+};
 
-/// Module identifiers for consent management
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Module {
-    Calendar,
-    Crm,
-    Invoicing,
-    Health,
-    TaskManager,
-    // Add other modules as needed
-}
-
-/// Purpose of data sharing for consent management
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum ConsentPurpose {
-    CrmIntegration,
-    InvoicingIntegration,
-    Analytics,
-    // Add other purposes as needed
-}
-
-/// Repository for consent records
-#[async_trait]
-pub trait ConsentRepository: Send + Sync {
-    /// Get the latest consent record for a user and purpose
-    async fn get_latest_consent(
-        &self,
-        user_id: Uuid,
-        source_module: Module,
-        target_module: Module,
-        purpose: ConsentPurpose,
-    ) -> Result<Option<ConsentRecord>, CalendarError>;
-    
-    /// Record a new consent decision
-    async fn record_consent(
-        &self,
-        consent: ConsentRecord,
-    ) -> Result<(), CalendarError>;
-    
-    /// Revoke consent for a specific purpose
-    async fn revoke_consent(
-        &self,
-        user_id: Uuid,
-        source_module: Module,
-        target_module: Module,
-        purpose: ConsentPurpose,
-    ) -> Result<(), CalendarError>;
-}
-
-/// A record of user consent
-#[derive(Debug, Clone)]
-pub struct ConsentRecord {
-    pub id: Uuid,
-    pub user_id: Uuid,
-    pub source_module: Module,
-    pub target_module: Module,
-    pub purpose: ConsentPurpose,
-    pub granted: bool,
-    pub data_types: Vec<DataType>,
-    pub valid_until: Option<DateTime<Utc>>,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-}
-
-/// Types of data that can be shared
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum DataType {
-    // CRM data types
-    SalesPipelineStages,
-    LeadScoringData,
-    EmailCampaignData,
-    
-    // Invoicing data types
-    PaymentDueDates,
-    PaymentStatus,
-    InvoiceAmounts,
-    
-    // General data types
-    EventTimestamps,
-    EventDescriptions,
-}
-
-/// Service for checking and managing user consent
+/// Service for checking and managing user consent using the new Consent Manager
 pub struct ConsentService {
-    repo: Arc<dyn ConsentRepository>,
+    consent_service: Arc<NewConsentService>,
 }
 
 impl ConsentService {
-    pub fn new(repo: Arc<dyn ConsentRepository>) -> Self {
-        Self { repo }
+    /// Create a new consent service
+    pub fn new(consent_service: Arc<NewConsentService>) -> Self {
+        Self { consent_service }
     }
     
-    /// Check if user has granted consent for a specific data sharing purpose
-    pub async fn has_consent(
-        &self,
-        user_id: Uuid,
-        source_module: Module,
-        target_module: Module,
-        purpose: ConsentPurpose,
-    ) -> Result<bool, CalendarError> {
-        let consent = self.repo.get_latest_consent(
-            user_id,
-            source_module,
-            target_module,
-            purpose,
-        ).await?;
+    /// Check if user has granted consent for CRM integration
+    pub async fn has_crm_consent(&self, user_id: Uuid) -> Result<bool, CalendarError> {
+        let user_id_str = user_id.to_string();
+        let level = self.consent_service
+            .get_consent_level(&user_id_str, Domain::CrmData)
+            .await
+            .map_err(|e| CalendarError::InvalidData(format!("Consent service error: {:?}", e)))?;
         
-        Ok(consent.map(|c| c.granted).unwrap_or(false))
+        // For CRM integration, we need at least Minimal level
+        Ok(level.priority() >= DataSharingLevel::Minimal.priority())
     }
     
-    /// Check if specific data type is covered by existing consent
-    pub async fn has_consent_for_data_type(
-        &self,
-        user_id: Uuid,
-        source_module: Module,
-        target_module: Module,
-        purpose: ConsentPurpose,
-        data_type: DataType,
-    ) -> Result<bool, CalendarError> {
-        let consent = self.repo.get_latest_consent(
-            user_id,
-            source_module,
-            target_module,
-            purpose,
-        ).await?;
+    /// Check if user has granted consent for Invoicing integration
+    pub async fn has_invoicing_consent(&self, user_id: Uuid) -> Result<bool, CalendarError> {
+        let user_id_str = user_id.to_string();
+        let level = self.consent_service
+            .get_consent_level(&user_id_str, Domain::FinancialData)
+            .await
+            .map_err(|e| CalendarError::InvalidData(format!("Consent service error: {:?}", e)))?;
         
-        Ok(consent.map(|c| 
-            c.granted && c.data_types.contains(&data_type)
-        ).unwrap_or(false))
+        // For Invoicing integration, we need at least Minimal level
+        Ok(level.priority() >= DataSharingLevel::Minimal.priority())
     }
     
-    /// Record user consent decision
-    pub async fn record_consent(
-        &self,
-        user_id: Uuid,
-        source_module: Module,
-        target_module: Module,
-        purpose: ConsentPurpose,
-        granted: bool,
-        data_types: Vec<DataType>,
-        valid_until: Option<DateTime<Utc>>,
-    ) -> Result<ConsentRecord, CalendarError> {
-        let now = Utc::now();
-        let consent = ConsentRecord {
-            id: Uuid::new_v4(),
-            user_id,
-            source_module,
-            target_module,
-            purpose,
-            granted,
-            data_types,
-            valid_until,
-            created_at: now,
-            updated_at: now,
-        };
+    /// Get the consent level for calendar data sharing
+    pub async fn get_calendar_consent_level(&self, user_id: Uuid) -> Result<DataSharingLevel, CalendarError> {
+        let user_id_str = user_id.to_string();
+        let level = self.consent_service
+            .get_consent_level(&user_id_str, Domain::CalendarData)
+            .await
+            .map_err(|e| CalendarError::InvalidData(format!("Consent service error: {:?}", e)))?;
         
-        self.repo.record_consent(consent.clone()).await?;
-        Ok(consent)
+        Ok(level)
     }
     
-    /// Revoke consent for a specific purpose
-    pub async fn revoke_consent(
+    /// Update the consent level for calendar data sharing
+    pub async fn update_calendar_consent_level(
         &self,
         user_id: Uuid,
-        source_module: Module,
-        target_module: Module,
-        purpose: ConsentPurpose,
+        level: DataSharingLevel,
     ) -> Result<(), CalendarError> {
-        self.repo.revoke_consent(
-            user_id,
-            source_module,
-            target_module,
-            purpose,
-        ).await
-    }
-}
-
-/// Mock implementation for testing
-#[derive(Default)]
-pub struct MockConsentRepository;
-
-#[async_trait]
-impl ConsentRepository for MockConsentRepository {
-    async fn get_latest_consent(
-        &self,
-        _user_id: Uuid,
-        _source_module: Module,
-        _target_module: Module,
-        _purpose: ConsentPurpose,
-    ) -> Result<Option<ConsentRecord>, CalendarError> {
-        // For testing, always grant consent
-        Ok(Some(ConsentRecord {
-            id: Uuid::new_v4(),
-            user_id: Uuid::new_v4(),
-            source_module: Module::Crm,
-            target_module: Module::Calendar,
-            purpose: ConsentPurpose::CrmIntegration,
-            granted: true,
-            data_types: vec![
-                DataType::SalesPipelineStages,
-                DataType::LeadScoringData,
-            ],
-            valid_until: None,
-            created_at: Utc::now(),
-            updated_at: Utc::now(),
-        }))
-    }
-    
-    async fn record_consent(
-        &self,
-        _consent: ConsentRecord,
-    ) -> Result<(), CalendarError> {
-        Ok(())
-    }
-    
-    async fn revoke_consent(
-        &self,
-        _user_id: Uuid,
-        _source_module: Module,
-        _target_module: Module,
-        _purpose: ConsentPurpose,
-    ) -> Result<(), CalendarError> {
+        let user_id_str = user_id.to_string();
+        let actor = consent_manager::domain::audit::Actor::User(user_id_str.clone());
+        
+        self.consent_service
+            .update_consent_level(&user_id_str, Domain::CalendarData, level, actor)
+            .await
+            .map_err(|e| CalendarError::InvalidData(format!("Consent service error: {:?}", e)))?;
+        
         Ok(())
     }
 }
@@ -238,41 +81,69 @@ impl ConsentRepository for MockConsentRepository {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use uuid::Uuid;
+    use consent_manager::domain::consent::DataSharingLevel as NewDataSharingLevel;
+    use consent_manager::domain::consent::Domain as NewDomain;
+    use consent_manager::domain::errors::ConsentError;
+    use consent_manager::application::service::{ConsentService as NewConsentService, ConsentStorage};
+    use async_trait::async_trait;
+    use std::collections::HashMap;
+    
+    struct MockConsentStorage {
+        profiles: HashMap<String, consent_manager::domain::consent::ConsentProfile>,
+    }
+    
+    impl MockConsentStorage {
+        fn new() -> Self {
+            Self {
+                profiles: HashMap::new(),
+            }
+        }
+    }
+    
+    #[async_trait]
+    impl ConsentStorage for MockConsentStorage {
+        async fn get_consent_profile(&self, user_id: &str, domain: &NewDomain) -> Result<Option<consent_manager::domain::consent::ConsentProfile>, ConsentError> {
+            let key = format!("{}:{:?}", user_id, domain);
+            Ok(self.profiles.get(&key).cloned())
+        }
+        
+        async fn save_consent_profile(&self, profile: &consent_manager::domain::consent::ConsentProfile) -> Result<(), ConsentError> {
+            // In a real implementation, we would save to a database
+            Ok(())
+        }
+        
+        async fn revoke_domain(&self, user_id: &str, domain: &NewDomain) -> Result<(), ConsentError> {
+            // In a real implementation, we would revoke consent in the database
+            Ok(())
+        }
+        
+        async fn get_audit_events(&self, user_id: &str) -> Result<Vec<consent_manager::domain::audit::AuditEvent>, ConsentError> {
+            // In a real implementation, we would fetch audit events from a database
+            Ok(vec![])
+        }
+        
+        async fn save_audit_event(&self, event: &consent_manager::domain::audit::AuditEvent) -> Result<(), ConsentError> {
+            // In a real implementation, we would save audit events to a database
+            Ok(())
+        }
+    }
     
     #[tokio::test]
     async fn test_consent_service() {
-        let repo = Arc::new(MockConsentRepository::default());
-        let service = ConsentService::new(repo);
+        let storage = Box::new(MockConsentStorage::new());
+        let new_consent_service = Arc::new(NewConsentService::new(storage));
+        let service = ConsentService::new(new_consent_service);
         
         let user_id = Uuid::new_v4();
         
-        // Test has_consent
-        let has_consent = service.has_consent(
-            user_id,
-            Module::Crm,
-            Module::Calendar,
-            ConsentPurpose::CrmIntegration,
-        ).await.unwrap();
-        assert!(has_consent);
+        // Test CRM consent
+        let has_crm_consent = service.has_crm_consent(user_id).await.unwrap();
+        // By default, consent level is None, so this should be false
+        assert!(!has_crm_consent);
         
-        // Test has_consent_for_data_type
-        let has_consent_for_data = service.has_consent_for_data_type(
-            user_id,
-            Module::Crm,
-            Module::Calendar,
-            ConsentPurpose::CrmIntegration,
-            DataType::SalesPipelineStages,
-        ).await.unwrap();
-        assert!(has_consent_for_data);
-        
-        let has_consent_for_data = service.has_consent_for_data_type(
-            user_id,
-            Module::Crm,
-            Module::Calendar,
-            ConsentPurpose::CrmIntegration,
-            DataType::PaymentDueDates,
-        ).await.unwrap();
-        assert!(!has_consent_for_data);
+        // Test Invoicing consent
+        let has_invoicing_consent = service.has_invoicing_consent(user_id).await.unwrap();
+        // By default, consent level is None, so this should be false
+        assert!(!has_invoicing_consent);
     }
 }

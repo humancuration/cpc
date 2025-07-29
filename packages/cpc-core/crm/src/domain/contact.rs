@@ -32,7 +32,7 @@ pub enum ContactType {
     External(ExternalContactData),
 }
 
-/// Data sharing level for consent settings
+/// Data sharing level for consent settings (legacy)
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum DataSharingLevel {
     /// No sharing allowed
@@ -82,6 +82,23 @@ impl ConsentSettings {
             share_profile: profile,
             share_interaction_history: interaction_history,
             share_preferences: preferences,
+            custom_fields: HashMap::new(),
+        }
+    }
+    
+    /// Create ConsentSettings from the new DataSharingLevel
+    pub fn from_new_level(level: &consent_manager::domain::consent::DataSharingLevel) -> Self {
+        let legacy_level = match level {
+            consent_manager::domain::consent::DataSharingLevel::None => DataSharingLevel::None,
+            consent_manager::domain::consent::DataSharingLevel::Minimal => DataSharingLevel::ViewOnly,
+            consent_manager::domain::consent::DataSharingLevel::Standard => DataSharingLevel::Editable,
+            consent_manager::domain::consent::DataSharingLevel::Full => DataSharingLevel::Editable,
+        };
+        
+        Self {
+            share_profile: legacy_level.clone(),
+            share_interaction_history: legacy_level.clone(),
+            share_preferences: legacy_level,
             custom_fields: HashMap::new(),
         }
     }

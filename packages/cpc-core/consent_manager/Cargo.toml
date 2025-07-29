@@ -28,8 +28,26 @@ tonic = "0.12"
 prost = "0.13"
 tower = "0.5"
 
+# Bevy ECS dependencies (optional)
+bevy_ecs = { version = "0.16", optional = true }
+bevy_app = { version = "0.16", optional = true }
+
 # Tracing
 tracing = "0.1"
+tracing-subscriber = "0.3"
+
+[build-dependencies]
+tonic-build = "0.12"
 
 [dev-dependencies]
 tokio-test = "0.4"
+criterion = { version = "0.5", features = ["async_tokio"] }
+rand = "0.8"
+
+[[bench]]
+name = "consent_manager_benchmark"
+harness = false
+
+[features]
+default = []
+bevy-integration = ["bevy_ecs", "bevy_app"]

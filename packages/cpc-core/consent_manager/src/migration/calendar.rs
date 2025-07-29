@@ -5,73 +5,97 @@ use crate::{
         consent::{ConsentProfile, Domain, DataSharingLevel},
         audit::{AuditEvent, Actor, ConsentAction},
     },
-    application::service::ConsentStorage,
+    application::service::ConsentService,
 };
+use std::sync::Arc;
 
 /// Structure representing existing calendar consent data
 #[derive(Debug, Clone)]
 pub struct CalendarConsentData {
     /// User ID
     pub user_id: String,
-    /// Whether calendar sharing is enabled
-    pub sharing_enabled: bool,
-    /// Level of detail shared (if sharing is enabled)
-    pub detail_level: CalendarDetailLevel,
+    /// Source module
+    pub source_module: Module,
+    /// Target module
+    pub target_module: Module,
+    /// Purpose of consent
+    pub purpose: ConsentPurpose,
+    /// Type of data being shared
+    pub data_type: DataType,
     /// Creation timestamp
     pub created_at: chrono::DateTime<chrono::Utc>,
     /// Last update timestamp
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
-/// Level of calendar detail shared
+/// Module in the system
 #[derive(Debug, Clone, PartialEq)]
-pub enum CalendarDetailLevel {
-    /// Only availability/free-busy information
-    AvailabilityOnly,
-    /// Basic event details (titles, times)
-    BasicDetails,
-    /// Full event details (including descriptions, locations)
-    FullDetails,
+pub enum Module {
+    /// CRM module
+    Crm,
+    /// Invoicing module
+    Invoicing,
+    /// Calendar module
+    Calendar,
+    /// SCM module
+    Scm,
+}
+
+/// Purpose of consent
+#[derive(Debug, Clone, PartialEq)]
+pub enum ConsentPurpose {
+    /// CRM integration
+    CrmIntegration,
+    /// Invoicing integration
+    InvoicingIntegration,
+    /// General purpose
+    General,
+}
+
+/// Type of data being shared
+#[derive(Debug, Clone, PartialEq)]
+pub enum DataType {
+    /// Event details
+    EventDetails,
+    /// Availability information
+    Availability,
+    /// Calendar metadata
+    Metadata,
 }
 
 /// Migrate calendar consent data to the new consent manager format
-pub async fn migrate_calendar_consent<T: ConsentStorage>(
-    storage: &T,
+pub async fn migrate_calendar_consent(
+    consent_service: Arc<ConsentService>,
     calendar_data: Vec<CalendarConsentData>,
     actor: Actor,
 ) -> Result<usize, crate::domain::errors::ConsentError> {
     let mut migrated_count = 0;
     
     for data in calendar_data {
-        // Convert calendar detail level to consent level
-        let level = match (&data.sharing_enabled, &data.detail_level) {
-            (false, _) => DataSharingLevel::None,
-            (true, CalendarDetailLevel::AvailabilityOnly) => DataSharingLevel::Minimal,
-            (true, CalendarDetailLevel::BasicDetails) => DataSharingLevel::Standard,
-            (true, CalendarDetailLevel::FullDetails) => DataSharingLevel::Full,
+        // Map module pairs to domains
+        let domain = match (&data.source_module, &data.target_module) {
+            (Module::Crm, Module::Calendar) => Domain::CrmData,
+            (Module::Invoicing, Module::Calendar) => Domain::FinancialData,
+            (Module::Scm, Module::Calendar) => Domain::ScmData,
+            _ => Domain::CalendarData,
         };
         
-        // Create consent profile
-        let profile = ConsentProfile::new(
-            data.user_id.clone(),
-            Domain::CalendarData,
-            level.clone(),
-        );
+        // Map purpose to data category
+        let category = match &data.purpose {
+            ConsentPurpose::CrmIntegration => "crm_integration",
+            ConsentPurpose::InvoicingIntegration => "invoicing",
+            ConsentPurpose::General => "general",
+        };
         
-        // Save the profile
-        storage.save_consent_profile(&profile).await?;
+        // Map data type to consent level
+        let level = match &data.data_type {
+            DataType::Availability => DataSharingLevel::Minimal,
+            DataType::EventDetails => DataSharingLevel::Standard,
+            DataType::Metadata => DataSharingLevel::Full,
+        };
         
-        // Create audit event for the migration
-        let audit_event = AuditEvent::new(
-            data.user_id.clone(),
-            Domain::CalendarData,
-            ConsentAction::Granted,
-            None,
-            level,
-            actor.clone(),
-        );
-        
-        storage.save_audit_event(&audit_event).await?;
+        // Update consent level
+        consent_service.update_consent_level(&data.user_id, domain.clone(), level.clone(), actor.clone()).await?;
         
         migrated_count += 1;
     }

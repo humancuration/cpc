@@ -140,6 +140,20 @@ Run tests with:
 cargo test
 ```
 
+## Examples
+
+Run the basic usage example:
+
+```bash
+cargo run --example basic_usage
+```
+
+Run the main example:
+
+```bash
+cargo run --bin consent_manager_example
+```
+
 ## License
 
 This project is licensed under the CPC License - see the LICENSE file for details.

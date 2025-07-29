@@ -1,9 +1,15 @@
 //! Consent framework for the SCM module
+//!
+//! This module provides integration with the centralized Consent Manager
+//! for managing data sharing permissions in the SCM module.
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use super::primitives::DataSharingLevel;
 use uuid::Uuid;
+use consent_manager::domain::consent::{DataSharingLevel as NewDataSharingLevel, Domain};
+use consent_manager::application::service::ConsentService;
+use std::sync::Arc;
 
 /// Consent settings for supply chain networks
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -16,32 +22,14 @@ pub struct NetworkConsentSettings {
 }
 
 impl NetworkConsentSettings {
-    pub fn new() -> Self {
+    /// Create NetworkConsentSettings from the new DataSharingLevel
+    pub fn from_new_level(level: &NewDataSharingLevel) -> Self {
+        let legacy_level = map_new_to_legacy_level(level);
         Self {
-            share_topology: DataSharingLevel::None,
-            share_lead_times: DataSharingLevel::None,
-            share_node_details: DataSharingLevel::None,
-            share_performance_data: DataSharingLevel::None,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_full_access() -> Self {
-        Self {
-            share_topology: DataSharingLevel::FullAccess,
-            share_lead_times: DataSharingLevel::FullAccess,
-            share_node_details: DataSharingLevel::FullAccess,
-            share_performance_data: DataSharingLevel::FullAccess,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_view_only() -> Self {
-        Self {
-            share_topology: DataSharingLevel::ViewOnly,
-            share_lead_times: DataSharingLevel::ViewOnly,
-            share_node_details: DataSharingLevel::ViewOnly,
-            share_performance_data: DataSharingLevel::ViewOnly,
+            share_topology: legacy_level.clone(),
+            share_lead_times: legacy_level.clone(),
+            share_node_details: legacy_level.clone(),
+            share_performance_data: legacy_level,
             custom_fields: HashMap::new(),
         }
     }
@@ -49,7 +37,13 @@ impl NetworkConsentSettings {
 
 impl Default for NetworkConsentSettings {
     fn default() -> Self {
-        Self::new()
+        Self {
+            share_topology: DataSharingLevel::None,
+            share_lead_times: DataSharingLevel::None,
+            share_node_details: DataSharingLevel::None,
+            share_performance_data: DataSharingLevel::None,
+            custom_fields: HashMap::new(),
+        }
     }
 }
 
@@ -64,32 +58,14 @@ pub struct InventoryConsentSettings {
 }
 
 impl InventoryConsentSettings {
-    pub fn new() -> Self {
+    /// Create InventoryConsentSettings from the new DataSharingLevel
+    pub fn from_new_level(level: &NewDataSharingLevel) -> Self {
+        let legacy_level = map_new_to_legacy_level(level);
         Self {
-            share_quantities: DataSharingLevel::None,
-            share_cost_data: DataSharingLevel::None,
-            share_movement_history: DataSharingLevel::None,
-            share_reorder_points: DataSharingLevel::None,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_full_access() -> Self {
-        Self {
-            share_quantities: DataSharingLevel::FullAccess,
-            share_cost_data: DataSharingLevel::FullAccess,
-            share_movement_history: DataSharingLevel::FullAccess,
-            share_reorder_points: DataSharingLevel::FullAccess,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_view_only() -> Self {
-        Self {
-            share_quantities: DataSharingLevel::ViewOnly,
-            share_cost_data: DataSharingLevel::ViewOnly,
-            share_movement_history: DataSharingLevel::ViewOnly,
-            share_reorder_points: DataSharingLevel::ViewOnly,
+            share_quantities: legacy_level.clone(),
+            share_cost_data: legacy_level.clone(),
+            share_movement_history: legacy_level.clone(),
+            share_reorder_points: legacy_level,
             custom_fields: HashMap::new(),
         }
     }
@@ -97,7 +73,13 @@ impl InventoryConsentSettings {
 
 impl Default for InventoryConsentSettings {
     fn default() -> Self {
-        Self::new()
+        Self {
+            share_quantities: DataSharingLevel::None,
+            share_cost_data: DataSharingLevel::None,
+            share_movement_history: DataSharingLevel::None,
+            share_reorder_points: DataSharingLevel::None,
+            custom_fields: HashMap::new(),
+        }
     }
 }
 
@@ -112,32 +94,14 @@ pub struct ProcurementConsentSettings {
 }
 
 impl ProcurementConsentSettings {
-    pub fn new() -> Self {
+    /// Create ProcurementConsentSettings from the new DataSharingLevel
+    pub fn from_new_level(level: &NewDataSharingLevel) -> Self {
+        let legacy_level = map_new_to_legacy_level(level);
         Self {
-            share_with_supplier: DataSharingLevel::None,
-            share_price_data: DataSharingLevel::None,
-            share_delivery_schedule: DataSharingLevel::None,
-            share_line_items: DataSharingLevel::None,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_full_access() -> Self {
-        Self {
-            share_with_supplier: DataSharingLevel::FullAccess,
-            share_price_data: DataSharingLevel::FullAccess,
-            share_delivery_schedule: DataSharingLevel::FullAccess,
-            share_line_items: DataSharingLevel::FullAccess,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_view_only() -> Self {
-        Self {
-            share_with_supplier: DataSharingLevel::ViewOnly,
-            share_price_data: DataSharingLevel::ViewOnly,
-            share_delivery_schedule: DataSharingLevel::ViewOnly,
-            share_line_items: DataSharingLevel::ViewOnly,
+            share_with_supplier: legacy_level.clone(),
+            share_price_data: legacy_level.clone(),
+            share_delivery_schedule: legacy_level.clone(),
+            share_line_items: legacy_level,
             custom_fields: HashMap::new(),
         }
     }
@@ -145,7 +109,13 @@ impl ProcurementConsentSettings {
 
 impl Default for ProcurementConsentSettings {
     fn default() -> Self {
-        Self::new()
+        Self {
+            share_with_supplier: DataSharingLevel::None,
+            share_price_data: DataSharingLevel::None,
+            share_delivery_schedule: DataSharingLevel::None,
+            share_line_items: DataSharingLevel::None,
+            custom_fields: HashMap::new(),
+        }
     }
 }
 
@@ -160,32 +130,14 @@ pub struct ShipmentConsentSettings {
 }
 
 impl ShipmentConsentSettings {
-    pub fn new() -> Self {
+    /// Create ShipmentConsentSettings from the new DataSharingLevel
+    pub fn from_new_level(level: &NewDataSharingLevel) -> Self {
+        let legacy_level = map_new_to_legacy_level(level);
         Self {
-            share_tracking_data: DataSharingLevel::None,
-            share_location_history: DataSharingLevel::None,
-            share_status_updates: DataSharingLevel::None,
-            share_carrier_info: DataSharingLevel::None,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_full_access() -> Self {
-        Self {
-            share_tracking_data: DataSharingLevel::FullAccess,
-            share_location_history: DataSharingLevel::FullAccess,
-            share_status_updates: DataSharingLevel::FullAccess,
-            share_carrier_info: DataSharingLevel::FullAccess,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_view_only() -> Self {
-        Self {
-            share_tracking_data: DataSharingLevel::ViewOnly,
-            share_location_history: DataSharingLevel::ViewOnly,
-            share_status_updates: DataSharingLevel::ViewOnly,
-            share_carrier_info: DataSharingLevel::ViewOnly,
+            share_tracking_data: legacy_level.clone(),
+            share_location_history: legacy_level.clone(),
+            share_status_updates: legacy_level.clone(),
+            share_carrier_info: legacy_level,
             custom_fields: HashMap::new(),
         }
     }
@@ -193,7 +145,13 @@ impl ShipmentConsentSettings {
 
 impl Default for ShipmentConsentSettings {
     fn default() -> Self {
-        Self::new()
+        Self {
+            share_tracking_data: DataSharingLevel::None,
+            share_location_history: DataSharingLevel::None,
+            share_status_updates: DataSharingLevel::None,
+            share_carrier_info: DataSharingLevel::None,
+            custom_fields: HashMap::new(),
+        }
     }
 }
 
@@ -208,32 +166,14 @@ pub struct WarehouseConsentSettings {
 }
 
 impl WarehouseConsentSettings {
-    pub fn new() -> Self {
+    /// Create WarehouseConsentSettings from the new DataSharingLevel
+    pub fn from_new_level(level: &NewDataSharingLevel) -> Self {
+        let legacy_level = map_new_to_legacy_level(level);
         Self {
-            share_capacity_data: DataSharingLevel::None,
-            share_utilization_data: DataSharingLevel::None,
-            share_location_data: DataSharingLevel::None,
-            share_operating_hours: DataSharingLevel::None,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_full_access() -> Self {
-        Self {
-            share_capacity_data: DataSharingLevel::FullAccess,
-            share_utilization_data: DataSharingLevel::FullAccess,
-            share_location_data: DataSharingLevel::FullAccess,
-            share_operating_hours: DataSharingLevel::FullAccess,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_view_only() -> Self {
-        Self {
-            share_capacity_data: DataSharingLevel::ViewOnly,
-            share_utilization_data: DataSharingLevel::ViewOnly,
-            share_location_data: DataSharingLevel::ViewOnly,
-            share_operating_hours: DataSharingLevel::ViewOnly,
+            share_capacity_data: legacy_level.clone(),
+            share_utilization_data: legacy_level.clone(),
+            share_location_data: legacy_level.clone(),
+            share_operating_hours: legacy_level,
             custom_fields: HashMap::new(),
         }
     }
@@ -241,7 +181,13 @@ impl WarehouseConsentSettings {
 
 impl Default for WarehouseConsentSettings {
     fn default() -> Self {
-        Self::new()
+        Self {
+            share_capacity_data: DataSharingLevel::None,
+            share_utilization_data: DataSharingLevel::None,
+            share_location_data: DataSharingLevel::None,
+            share_operating_hours: DataSharingLevel::None,
+            custom_fields: HashMap::new(),
+        }
     }
 }
 
@@ -256,7 +202,21 @@ pub struct SupplierConsentSettings {
 }
 
 impl SupplierConsentSettings {
-    pub fn new() -> Self {
+    /// Create SupplierConsentSettings from the new DataSharingLevel
+    pub fn from_new_level(level: &NewDataSharingLevel) -> Self {
+        let legacy_level = map_new_to_legacy_level(level);
+        Self {
+            share_contact_info: legacy_level.clone(),
+            share_performance_metrics: legacy_level.clone(),
+            share_contract_details: legacy_level.clone(),
+            share_certification_data: legacy_level,
+            custom_fields: HashMap::new(),
+        }
+    }
+}
+
+impl Default for SupplierConsentSettings {
+    fn default() -> Self {
         Self {
             share_contact_info: DataSharingLevel::None,
             share_performance_metrics: DataSharingLevel::None,
@@ -265,30 +225,14 @@ impl SupplierConsentSettings {
             custom_fields: HashMap::new(),
         }
     }
-
-    pub fn with_full_access() -> Self {
-        Self {
-            share_contact_info: DataSharingLevel::FullAccess,
-            share_performance_metrics: DataSharingLevel::FullAccess,
-            share_contract_details: DataSharingLevel::FullAccess,
-            share_certification_data: DataSharingLevel::FullAccess,
-            custom_fields: HashMap::new(),
-        }
-    }
-
-    pub fn with_view_only() -> Self {
-        Self {
-            share_contact_info: DataSharingLevel::ViewOnly,
-            share_performance_metrics: DataSharingLevel::ViewOnly,
-            share_contract_details: DataSharingLevel::ViewOnly,
-            share_certification_data: DataSharingLevel::ViewOnly,
-            custom_fields: HashMap::new(),
-        }
-    }
 }
 
-impl Default for SupplierConsentSettings {
-    fn default() -> Self {
-        Self::new()
+/// Map the new DataSharingLevel to the legacy SCM DataSharingLevel
+fn map_new_to_legacy_level(level: &NewDataSharingLevel) -> DataSharingLevel {
+    match level {
+        NewDataSharingLevel::None => DataSharingLevel::None,
+        NewDataSharingLevel::Minimal => DataSharingLevel::ViewOnly,
+        NewDataSharingLevel::Standard => DataSharingLevel::Editable,
+        NewDataSharingLevel::Full => DataSharingLevel::FullAccess,
     }
 }
