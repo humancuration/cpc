@@ -7,6 +7,8 @@ use cpc_core::bi_visualization::{
     DataSeries,
 };
 use crate::domain::{Sheet, ChartSpec};
+use visualization_context::{VisualizationContext, SharingScope, AccessibilityMode};
+use uuid::Uuid;
 
 /// Chart generator for creating interactive charts
 pub struct ChartGenerator;
@@ -21,6 +23,7 @@ impl ChartGenerator {
         &self,
         sheet: &Sheet,
         chart_spec: &ChartSpec,
+        context: &VisualizationContext,
     ) -> Result<impl bevy::prelude::Bundle, Box<dyn std::error::Error>> {
         let interactive_config = InteractiveConfig {
             chart_type: chart_spec.chart_type.clone(),
@@ -31,6 +34,13 @@ impl ChartGenerator {
                 cpc_core::bi_visualization::domain::chart::InteractiveElement::Zoom,
                 cpc_core::bi_visualization::domain::chart::InteractiveElement::Selection,
             ],
+            accessibility_mode: match context.accessibility_mode {
+                AccessibilityMode::Standard => cpc_core::bi_visualization::AccessibilityMode::Standard,
+                AccessibilityMode::HighContrast => cpc_core::bi_visualization::AccessibilityMode::HighContrast,
+                AccessibilityMode::ScreenReader => cpc_core::bi_visualization::AccessibilityMode::ScreenReader,
+                AccessibilityMode::KeyboardNavigation => cpc_core::bi_visualization::AccessibilityMode::KeyboardNavigation,
+            },
+            lod_level: context.lod_level,
         };
         
         // In a real implementation, we would transform the sheet data

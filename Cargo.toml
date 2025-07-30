@@ -5,6 +5,8 @@ members = [
     "packages/apps/messenger",
     "packages/infrastructure/messenger",
     "apps/messenger",
+    "apps/api_gateway",
+    "apps/dashboard",
 ]
 
 [workspace.dependencies]

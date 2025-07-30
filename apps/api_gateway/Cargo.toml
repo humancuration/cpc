@@ -1,0 +1,38 @@
+[package]
+name = "cpc-api-gateway"
+version = "0.1.0"
+edition = "2021"
+authors = ["CPC Cooperative <coop@cpc.dev>"]
+description = "Central API Gateway for CPC platform"
+
+[lib]
+crate-type = ["rlib", "cdylib"]
+
+[[bin]]
+name = "api-gateway"
+path = "src/main.rs"
+
+[dependencies]
+# Core dependencies
+axum = "0.8.4"
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# CPC modules
+cpc-api-integration = { path = "../api_integration" }
+visualization_context = { path = "../../packages/visualization_context" }
+
+# HTTP client for forwarding requests
+reqwest = { version = "0.11", features = ["json"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# UUID support
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# Testing
+tower = { version = "0.4", features = ["util"] }
+http-body-util = "0.1"

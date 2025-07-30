@@ -1,4 +1,6 @@
-//! Visualization routes for API Gateway
+//! Visualization routing for the API Gateway
+//!
+//! This module handles routing of visualization requests to the appropriate services.
 
 use axum::{
     extract::{Path, Query, State},
@@ -12,8 +14,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 use visualization_context::VisualizationContext;
 
-use crate::application::visualization::{
-    cache::VisualizationCache,
+use cpc_api_integration::application::visualization::{
     request::{VisualizationRequest, VisualizationParameters, RequestContext},
     response::{VisualizationResponse, VisualizationData, AccessibilityMetadata, ResponseMetadata},
 };
@@ -28,13 +29,26 @@ pub struct VisualizationQuery {
 
 /// State for visualization routes
 #[derive(Clone)]
-pub struct VisualizationRouteState {
-    pub cache: Arc<VisualizationCache>,
+pub struct VisualizationState {
     pub bi_service_url: String,
 }
 
-/// Register visualization routes
-pub fn register_routes(router: Router, state: VisualizationRouteState) -> Router {
+/// Query parameters for visualization requests
+#[derive(Debug, Deserialize)]
+pub struct VisualizationQuery {
+    pub width: Option<u32>,
+    pub height: Option<u32>,
+    pub lod_level: Option<u8>,
+}
+
+/// State for visualization routes
+#[derive(Clone)]
+pub struct VisualizationState {
+    pub bi_service_url: String,
+}
+
+/// Register visualization routes with the router
+pub fn register_routes(router: Router, state: VisualizationState) -> Router {
     router
         .route("/visualizations/:id", get(get_visualization))
         .route("/visualizations/:id/image", get(get_visualization_image))
@@ -43,12 +57,12 @@ pub fn register_routes(router: Router, state: VisualizationRouteState) -> Router
         .with_state(state)
 }
 
-/// Get 3D visualization
+/// Get visualization data
 async fn get_visualization(
     Path(id): Path<Uuid>,
     Query(params): Query<VisualizationQuery>,
     headers: HeaderMap,
-    State(state): State<VisualizationRouteState>,
+    State(state): State<VisualizationState>,
 ) -> Result<Json<VisualizationResponse>, StatusCode> {
     // Extract visualization context from headers
     let context = VisualizationContext::from_headers(&headers)
@@ -59,31 +73,9 @@ async fn get_visualization(
         return Err(StatusCode::FORBIDDEN);
     }
     
-    // Generate cache key
-    let viz_params = VisualizationParameters {
-        width: params.width.unwrap_or(800),
-        height: params.height.unwrap_or(600),
-        lod_level: params.lod_level.unwrap_or(context.lod_level),
-        visualization_type: "3d_scene".to_string(),
-        accessibility_mode: context.accessibility_mode.clone(),
-    };
-    
-    let cache_key = VisualizationCache::generate_cache_key(id, &viz_params, &context);
-    
-    // Try to get from cache
-    if let Ok(Some(cached_data)) = state.cache.get(&cache_key) {
-        if let Ok(cached_response) = bincode::deserialize::<VisualizationResponse>(&cached_data) {
-            return Ok(Json(cached_response));
-        }
-    }
-    
-    // Create mock response (in a real implementation, this would call the BI service)
-    let response = create_mock_visualization_response(id, &viz_params, &context);
-    
-    // Cache the response
-    if let Ok(serialized) = bincode::serialize(&response) {
-        let _ = state.cache.set(&cache_key, serialized, 300); // Cache for 5 minutes
-    }
+    // In a real implementation, this would forward the request to the BI service
+    // For now, we'll return a mock response
+    let response = create_mock_visualization_response(id, &params, &context);
     
     Ok(Json(response))
 }
@@ -93,7 +85,7 @@ async fn get_visualization_image(
     Path(id): Path<Uuid>,
     Query(params): Query<VisualizationQuery>,
     headers: HeaderMap,
-    State(state): State<VisualizationRouteState>,
+    State(state): State<VisualizationState>,
 ) -> Result<Response, StatusCode> {
     // Extract visualization context from headers
     let context = VisualizationContext::from_headers(&headers)
@@ -117,7 +109,7 @@ async fn get_visualization_image(
 async fn get_visualization_stream(
     Path(id): Path<Uuid>,
     headers: HeaderMap,
-    State(state): State<VisualizationRouteState>,
+    State(state): State<VisualizationState>,
 ) -> Result<Response, StatusCode> {
     // Extract visualization context from headers
     let context = VisualizationContext::from_headers(&headers)
@@ -149,11 +141,7 @@ async fn create_visualization(
     
     // In a real implementation, this would create a new visualization
     // For now, return a mock response
-    let response = create_mock_visualization_response(
-        request.visualization_id,
-        &request.parameters,
-        &context,
-    );
+    let response = create_mock_visualization_response_from_request(&request, &context);
     
     Ok(Json(response))
 }
@@ -161,20 +149,44 @@ async fn create_visualization(
 /// Create a mock visualization response for testing
 fn create_mock_visualization_response(
     id: Uuid,
-    params: &VisualizationParameters,
+    params: &VisualizationQuery,
     context: &VisualizationContext,
 ) -> VisualizationResponse {
     VisualizationResponse {
         visualization_data: VisualizationData::Scene3D {
             payload: serde_json::json!({
                 "visualization_id": id.to_string(),
-                "width": params.width,
-                "height": params.height,
-                "lod_level": params.lod_level,
+                "width": params.width.unwrap_or(800),
+                "height": params.height.unwrap_or(600),
+                "lod_level": params.lod_level.unwrap_or(context.lod_level as u8),
                 "type": "mock_3d_scene"
             }),
             accessibility: AccessibilityMetadata {
                 alt_text: format!("3D visualization of report {}", id),
+                navigation_map: Default::default(),
+                aria_properties: Default::default(),
+            },
+        },
+        metadata: ResponseMetadata::default(),
+    }
+}
+
+/// Create a mock visualization response from request
+fn create_mock_visualization_response_from_request(
+    request: &VisualizationRequest,
+    context: &VisualizationContext,
+) -> VisualizationResponse {
+    VisualizationResponse {
+        visualization_data: VisualizationData::Scene3D {
+            payload: serde_json::json!({
+                "visualization_id": request.visualization_id.to_string(),
+                "width": request.parameters.width,
+                "height": request.parameters.height,
+                "lod_level": request.parameters.lod_level,
+                "type": request.parameters.visualization_type,
+            }),
+            accessibility: AccessibilityMetadata {
+                alt_text: format!("3D visualization of report {}", request.visualization_id),
                 navigation_map: Default::default(),
                 aria_properties: Default::default(),
             },

@@ -18,6 +18,7 @@ tracing = "0.1"
 
 # CPC core dependencies
 cpc-core = { path = "../../packages/core" }
+visualization_context = { path = "../../packages/visualization_context" }
 
 # Database dependencies
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
@@ -26,6 +27,7 @@ sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid"
 axum = "0.7"
 async-graphql = "7.0"
 async-graphql-axum = "7.0"
+http = "0.2"
 
 # gRPC dependencies
 tonic = "0.14"
@@ -35,8 +37,13 @@ prost-types = "0.14"
 # OAuth2 for authentication
 oauth2 = "4.4"
 
+# Cache dependencies
+sled = "0.34"
+bincode = "1.3"
+
 # Test dependencies
 wasm-bindgen-test = { version = "0.3", optional = true }
+tempfile = "3.8"
 
 [build-dependencies]
 tonic-build = "0.14"

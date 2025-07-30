@@ -8,6 +8,7 @@ use cpc_core::bi_visualization::{
     TimeSeriesPoint,
 };
 use image::DynamicImage;
+use visualization_context::{VisualizationContext, AccessibilityMode};
 
 /// Service for generating charts from sheet data
 pub struct ChartService;
@@ -22,6 +23,7 @@ impl ChartService {
         &self,
         sheet: &Sheet,
         chart_spec: &ChartSpec,
+        context: &VisualizationContext,
     ) -> Result<DynamicImage, Box<dyn std::error::Error>> {
         // Transform sheet data to visualization format
         let data_series = self.transform_sheet_data(sheet, &chart_spec.data_range)?;
@@ -35,7 +37,14 @@ impl ChartService {
             chart_spec.series_config.iter()
                 .map(|sc| SeriesConfig::new(sc.name.clone(), sc.color.clone()))
                 .collect(),
-        );
+        )
+        .with_accessibility_mode(match context.accessibility_mode {
+            AccessibilityMode::Standard => cpc_core::bi_visualization::AccessibilityMode::Standard,
+            AccessibilityMode::HighContrast => cpc_core::bi_visualization::AccessibilityMode::HighContrast,
+            AccessibilityMode::ScreenReader => cpc_core::bi_visualization::AccessibilityMode::ScreenReader,
+            AccessibilityMode::KeyboardNavigation => cpc_core::bi_visualization::AccessibilityMode::KeyboardNavigation,
+        })
+        .with_lod_level(context.lod_level);
         
         // Generate chart using BI Visualization Toolkit
         let chart_image = VisualizationService::generate_chart(config, data_series)?;
