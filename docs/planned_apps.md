@@ -17,7 +17,7 @@ Leave blank if not started, mark [/] if partially implemented, [x] if implemente
 ## Communication & Social
 
 - [x] **Messenger**: Real-time encrypted messaging
-- [ ] **Convo**: Decentralized forums
+- [ ] **Convo**: Reddit clone forums
 - [ ] **Presence**: Status visibility across apps
 - [ ] **SocialGraph**: Relationship mapping
 

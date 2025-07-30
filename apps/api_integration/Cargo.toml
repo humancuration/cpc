@@ -1,0 +1,49 @@
+[package]
+name = "cpc-api-integration"
+version = "0.1.0"
+edition = "2021"
+authors = ["CPC Cooperative <coop@cpc.dev>"]
+description = "API & Integration Hub module for CPC platform"
+
+[dependencies]
+# Core dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "1.0"
+async-trait = "0.1"
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+
+# CPC core dependencies
+cpc-core = { path = "../../packages/core" }
+
+# Database dependencies
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
+
+# Web dependencies
+axum = "0.7"
+async-graphql = "7.0"
+async-graphql-axum = "7.0"
+
+# gRPC dependencies
+tonic = "0.14"
+prost = "0.14"
+prost-types = "0.14"
+
+# OAuth2 for authentication
+oauth2 = "4.4"
+
+# Test dependencies
+wasm-bindgen-test = { version = "0.3", optional = true }
+
+[build-dependencies]
+tonic-build = "0.14"
+
+[features]
+default = []
+test-yew = ["wasm-bindgen-test"]
+
+[lib]
+crate-type = ["rlib"]

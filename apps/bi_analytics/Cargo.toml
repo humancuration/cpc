@@ -1,0 +1,54 @@
+[package]
+name = "cpc-bi-analytics"
+version = "0.1.0"
+edition = "2021"
+authors = ["CPC Cooperative <coop@cpc.dev>"]
+description = "Business Intelligence & Analytics module for CPC platform"
+
+[dependencies]
+# Core dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "1.0"
+async-trait = "0.1"
+rust_decimal = "1.29"
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+
+# CPC core dependencies
+cpc-core = { path = "../../packages/core" }
+
+# Database dependencies
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "rust_decimal"] }
+
+# P2P dependencies
+p2panda = { git = "https://github.com/p2panda/p2panda", rev = "v0.8.1" }
+
+# Visualization dependencies
+bevy = { version = "0.16", optional = true }
+plotters = { version = "0.3", optional = true }
+
+# GraphQL dependencies
+async-graphql = { version = "7.0", optional = true }
+
+# gRPC dependencies
+tonic = { version = "0.14", optional = true }
+prost = { version = "0.14", optional = true }
+
+# Sled for edge caching
+sled = "0.34"
+
+# Test dependencies
+wasm-bindgen-test = { version = "0.3", optional = true }
+
+[features]
+default = []
+web = ["async-graphql"]
+bevy-ui = ["bevy"]
+visualization = ["plotters", "bevy-ui"]
+grpc = ["tonic", "prost"]
+
+[lib]
+crate-type = ["rlib"]

@@ -55,3 +55,36 @@ CREATE TABLE IF NOT EXISTS media (
 
 -- Index for faster media lookups
 CREATE INDEX IF NOT EXISTS idx_media_created_at ON media(created_at);
+
+-- Enhance media table with encryption fields
+ALTER TABLE media
+  ADD COLUMN encryption_key BYTEA,
+  ADD COLUMN iv BYTEA,
+  ADD COLUMN thumbnail_id UUID,
+  ADD COLUMN original_filename VARCHAR(255);
+
+-- Reactions table for message interactions
+CREATE TABLE IF NOT EXISTS reactions (
+    id UUID PRIMARY KEY,
+    message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL,
+    reaction_type VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_reactions_message_id ON reactions(message_id);
+CREATE INDEX IF NOT EXISTS idx_reactions_user_id ON reactions(user_id);
+
+-- Message threading table
+CREATE TABLE IF NOT EXISTS message_threads (
+    id UUID PRIMARY KEY,
+    parent_message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+    child_message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+    depth INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_message_threads_unique
+  ON message_threads (parent_message_id, child_message_id);
+CREATE INDEX IF NOT EXISTS idx_message_threads_parent ON message_threads(parent_message_id);
+CREATE INDEX IF NOT EXISTS idx_message_threads_child ON message_threads(child_message_id);
