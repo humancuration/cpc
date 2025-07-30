@@ -1,0 +1,35 @@
+[package]
+name = "cpc-android"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# JNI bindings
+jni = "0.21"
+
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+bincode = "1.3"
+
+# UUID handling
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# Database
+sled = "0.34"
+
+# CPC domain dependencies
+packages.domains.sheets = { path = "../../../packages/domains/sheets" }
+packages.domains.finance = { path = "../../../packages/domains/finance" }
+
+# CPC infra dependencies
+packages.infra = { path = "../../../packages/infra" }
+
+# For testing
+tempfile = "3.0"

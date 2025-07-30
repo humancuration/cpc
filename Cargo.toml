@@ -1,62 +1,78 @@
 [workspace]
 resolver = "2"
 members = [
-    "apps/backend",
-    "apps/pds",
-    "apps/cpc-node",
-    "apps/website-builder",
-    "packages/cpc-core",
-    "packages/cpc-core/finance",
-    "packages/cpc-core/invoicing",
-    "packages/cpc-core/crm",
-    "packages/cpc-core/consent_manager",
-    "packages/cpc-core/storage_abstraction",
-    "packages/cpc-core/event_bus",
-    "packages/cpc-core/audit_framework",
-    "packages/cpc-core/notification_core",
-    "packages/cpc-core/bi_visualization",
-    "packages/cpc-net",
-    "packages/cpc-protos",
-    "packages/cpc-core/document_editor"
+    "packages/domains/messenger",
+    "packages/apps/messenger",
+    "packages/infrastructure/messenger",
+    "apps/messenger",
 ]
 
 [workspace.dependencies]
 # Core Technologies
-bevy = "0.13"
+bevy = "0.16.1"
+p2panda-auth = "0.4.0"
+p2panda-blobs = "0.4.0"
 p2panda-core = "0.4.0"
+p2panda-discovery = "0.4.0"
+p2panda-encryption = "0.4.0"
 p2panda-net = "0.4.0"
 p2panda-store = "0.4.0"
-tauri = "1.5"
-yew = "0.21"
-wry = "0.35"
-plotters = "0.3"
-axum = "0.7"
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "sqlite", "chrono", "uuid", "json"] }
-tracing = "0.1"
-rodio = "0.17"
-pdf = "0.7"
+p2panda-stream = "0.4.0"
+p2panda-sync = "0.4.0"
+
+tauri = "2.7.0"
+yew = { version = "0.21.0", features = ["csr"] }
+yew-router = "0.18.0"
+stylist = { version = "0.13.0", features = ["yew_integration"] }
+wasm-bindgen = "0.2.100"
+wasm-bindgen-futures = "0.4.50"
+web-sys = "0.3.77"
+js-sys = "0.3.77"
+gloo-timers = { version = "0.3.0", features = ["futures"] }
+wry = "0.52.1"
+plotters = "0.3.7"
+axum = "0.8.4"
+sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "postgres", "sqlite", "chrono", "uuid", "json"] }
+tracing = "0.1.41"
+tracing-subscriber = "0.3.18"
+rodio = "0.21.1"
+pdf = "0.9.0"
 
 # GraphQL for Public API
-async-graphql = "7.0"
-async-graphql-axum = "7.0"
+async-graphql = "7.0.17"
+async-graphql-axum = "7.0.17"
 
 # gRPC for Internal API
-tonic = "0.11"
-prost = "0.12"
-prost-types = "0.12"
+tonic = "0.14.0"
+prost = "0.14.1"
+prost-types = "0.14.1"
 
 # Media Processing (royalty-free codecs only)
 # Note: ffmpeg.wasm not available as Rust crate, will need WASM integration
 
 # Common dependencies
-tokio = { version = "1.0", features = ["full"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1.0", features = ["v4", "serde"] }
-anyhow = "1.0"
-thiserror = "1.0"
-async-trait = "0.1"
-rust_decimal = "1.34"
-async-stream = "0.3"
-futures-util = "0.3"
+tokio = { version = "1.47.0", features = ["full"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.141"
+chrono = { version = "0.4.41", features = ["serde"] }
+uuid = { version = "1.17.0", features = ["v4", "serde"] }
+anyhow = "1.0.98"
+thiserror = "2.0.12"
+async-trait = "0.1.88"
+rust_decimal = "1.37.2"
+async-stream = "0.3.6"
+futures-util = "0.3.31"
+log = "0.4.27"
+wasm-logger = "0.2.0"
+
+# WebSocket support
+tokio-tungstenite = "0.20.1"
+
+# OAuth2 for authentication
+oauth2 = "4.4.2"
+
+# Sled for local caching
+sled = "0.34.7"
+
+# Encryption
+rust-crypto = "0.2.36"

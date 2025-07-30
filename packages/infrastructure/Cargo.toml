@@ -1,0 +1,47 @@
+[package]
+name = "packages.infra"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Async traits
+async-trait = "0.1"
+
+# UUID handling
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+bincode = "1.3"
+
+# Database
+sled = "0.34"
+
+# Networking
+tonic = "0.8"
+
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+
+# Error handling
+thiserror = "1.0"
+
+# Tracing
+tracing = "0.1"
+
+# Random number generation (for jitter in backoff)
+rand = "0.8"
+
+# CPC domain dependencies
+packages.domains.finance = { path = "../domains/finance" }
+
+[dev-dependencies]
+tempfile = "3.0"
+
+[[example]]
+name = "sync_example"
+path = "examples/sync_example.rs"
+
+[[example]]
+name = "full_integration_example"
+path = "examples/full_integration_example.rs"

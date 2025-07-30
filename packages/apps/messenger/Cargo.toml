@@ -1,0 +1,35 @@
+[package]
+name = "messenger_app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
+
+# Async support
+async-trait = { workspace = true }
+
+# Domain layer
+messenger_domain = { path = "../../domains/messenger" }
+
+# Core services
+consent_manager = { path = "../../core/consent_manager" }
+event_bus = { path = "../../core/event_bus" }
+storage_abstraction = { path = "../../core/storage_abstraction" }
+notification_core = { path = "../../core/notification_core" }
+
+# Database
+sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
+
+# OAuth2 for social integrations
+oauth2 = "4.4"
+
+# Sled for local caching
+sled = "0.34"

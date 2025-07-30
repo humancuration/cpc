@@ -16,7 +16,7 @@ We are concentrated on building out the useful features of our app suite that wi
 
 We aim to cover a wide assortment of apps in all niches to cover almost all general use cases people have with software, an entire app ecosystem.
 
-We will heavily encourage people to opt-in and share data of all types, in order to strengthen the services of the federation.
+We will heavily encourage people to opt-in and share data of all types, in order to strengthen the services of the federation. Apps will also share a lot of data between them for usability.
 
 The app suite is more about connectivity, utility, and social sharing/collaboration than privacy.
 
@@ -27,9 +27,16 @@ Screaming architecture
 Vertical slices
 Rust syntax
 
-Keep only true cross-cutting concerns in packages/core/
-Non-core domain modules (invoicing, crm, scm, etc) are in packages/domains/
-Runnable apps are in apps/
+Documentation and instructions may be slightly imprecise or wrong or outdated.
+
+## Hierarchy
+
+It's a lot like Adobe's Creative Suite. The clients manage all of the user's installed apps. There is one client per operating system. We are only working on the web and windows 64 bit versions for now. All of the apps run as independent apps. They can pick and choose which apps they want to download, install, or uninstall. The packages folder is where all of the shared, cross-cutting code goes.
+
+apps/
+clients/
+docs/
+packages/
 
 ## Tech Stack
 
