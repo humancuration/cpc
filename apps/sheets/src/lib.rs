@@ -9,6 +9,7 @@ pub mod domain;
 pub mod application;
 pub mod infrastructure;
 pub mod presentation;
+pub mod ui;
 
 // Re-export key types for convenience
 pub use domain::sheet::*;

@@ -14,19 +14,24 @@
 - Add chart creation from cell ranges with VisualizationContext
 - Implement embedded visualization rendering
 - Extend accessibility to cover grid navigation and cell content
-- Add alt text generation for cell ranges
+- Add alt text generation for cell ranges and visualizations
+- Integrate screen reader announcements for chart rendering
 
 ### Phase 3: Collaboration (Milestone: Release 3)
 - Integrate WebSocket client for real-time updates
 - Implement CRDT-based conflict resolution
 - Add presence tracking indicators
 - Develop permission management
+- Implement cache versioning for collaborative edits
+- Add WebSocket-triggered cache invalidation
 
 ### Phase 4: Advanced Features (Milestone: Release 4)
 - Implement .xlsx import/export with calamine (with compliance handling)
 - Add financial functions (PMT, FV, NPV, IRR)
 - Develop PDF export functionality
 - Optimize performance with differential updates
+- Implement visualization error taxonomy and propagation
+- Add fallback rendering for failed visualizations
 
 ## Task Dependencies
 
@@ -92,7 +97,8 @@ input VisualizationContextInput {
   "payload": {
     "sheet_id": "uuid",
     "position": "A1",
-    "value": "=SUM(B2:B10)"
+    "value": "=SUM(B2:B10)",
+    "cache_version": "a1b2c3"  # New version field
   }
 }
 ```
@@ -143,3 +149,10 @@ sequenceDiagram
     Collaboration Service->>User B: Push update via WS
     User B->>UI: Render updated cell
     UI->>Compliance Service: Verify PII flags
+```
+
+## Accessibility Features
+- Alt text preferences in VisualizationContext
+- Chart-specific alt text generation with detail levels
+- Screen reader announcements for chart rendering
+- Fallback rendering for failed visualizations

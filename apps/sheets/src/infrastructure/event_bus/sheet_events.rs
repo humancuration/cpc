@@ -9,7 +9,7 @@ use crate::application::collaboration_service::{SheetEvent, CrdtOperation};
 impl Event for SheetEvent {
     fn event_type(&self) -> String {
         match self {
-            SheetEvent::CellUpdated { .. } => "sheets.cell.updated".to_string(),
+            SheetEvent::CellUpdated { .. } => "CELL_UPDATE".to_string(),
             SheetEvent::CursorMoved { .. } => "sheets.cursor.moved".to_string(),
             SheetEvent::SheetShared { .. } => "sheets.sheet.shared".to_string(),
             SheetEvent::CommentAdded { .. } => "sheets.comment.added".to_string(),

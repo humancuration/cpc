@@ -5,6 +5,7 @@
 
 use crate::domain::{Sheet, CellAddress, CellRange, CellValue};
 use std::collections::HashMap;
+use visualization_context::AltTextPreferences;
 
 /// Accessibility service for the Sheets application
 pub struct AccessibilityService;
@@ -116,6 +117,84 @@ impl AccessibilityService {
             self.format_cell_address(address),
             self.describe_cell_content(value)
         )
+    }
+    
+    /// Generate alt text for a chart based on the data range and preferences
+    pub fn generate_chart_alt_text(sheet: &Sheet, range: &CellRange, preferences: &AltTextPreferences) -> String {
+        // For charts, we want to provide a more structured description
+        let range_description = format!(
+            "Chart data from {} to {}",
+            Self.format_cell_address(&range.start),
+            Self.format_cell_address(&range.end)
+        );
+        
+        // Extract headers for chart series names
+        let headers = Self.extract_headers(sheet, range);
+        
+        // Count data points
+        let data_point_count = if range.end.row > range.start.row {
+            range.end.row - range.start.row
+        } else {
+            0
+        };
+        
+        // Create description based on detail level
+        match preferences.detail_level {
+            0 => {
+                // Brief description
+                format!("Chart with {} data series and {} data points", headers.len().saturating_sub(1), data_point_count)
+            },
+            1 => {
+                // Detailed description
+                if headers.len() > 1 {
+                    format!("{} with {} series: {}", range_description, headers.len() - 1, headers[1..].join(", "))
+                } else {
+                    range_description
+                }
+            },
+            _ => {
+                // Verbose description
+                let mut description = format!("{} with {} data series", range_description, headers.len().saturating_sub(1));
+                
+                // Add series information
+                for (i, header) in headers.iter().enumerate().skip(1) {
+                    description.push_str(&format!(". Series {}: {}", i, header));
+                }
+                
+                // Add data point count
+                description.push_str(&format!(". Total data points: {}", data_point_count));
+                
+                description
+            }
+        }
+    }
+    
+    /// Extract headers from the first row of a range
+    fn extract_headers(sheet: &Sheet, range: &CellRange) -> Vec<String> {
+        let mut headers = Vec::new();
+        
+        for col in range.start.column..=range.end.column {
+            let address = CellAddress::new(range.start.row, col);
+            let header = if let Some(cell) = sheet.get_cell(&address) {
+                match &cell.value {
+                    CellValue::Text(s) => s.clone(),
+                    CellValue::Number(n) => n.to_string(),
+                    _ => format!("Column {}", col),
+                }
+            } else {
+                format!("Column {}", col)
+            };
+            headers.push(header);
+        }
+        
+        headers
+    }
+    
+    /// Announce a message to screen readers
+    pub fn announce_screen_reader(message: &str) {
+        // In a real implementation, this would interface with screen reader APIs
+        // For now, we'll just log the message
+        println!("Screen reader announcement: {}", message);
     }
 }
 

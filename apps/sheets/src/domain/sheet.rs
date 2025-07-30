@@ -13,6 +13,27 @@ pub enum PermissionLevel {
     None,
 }
 
+/// Compliance metadata for sheets
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ComplianceMetadata {
+    /// Data sovereignty information (country/region of origin)
+    pub data_sovereignty: String,
+    /// Whether PII has been redacted
+    pub pii_redacted: bool,
+    /// Sharing permissions metadata
+    pub sharing_permissions: Vec<String>,
+}
+
+impl Default for ComplianceMetadata {
+    fn default() -> Self {
+        Self {
+            data_sovereignty: "US".to_string(),
+            pii_redacted: false,
+            sharing_permissions: vec![],
+        }
+    }
+}
+
 /// Sheet entity representing a collaborative spreadsheet
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Sheet {
@@ -28,6 +49,8 @@ pub struct Sheet {
     pub formulas: HashMap<CellAddress, Formula>,
     pub charts: Vec<ChartSpec>,
     pub permissions: HashMap<Uuid, PermissionLevel>,
+    /// Compliance metadata for the sheet
+    pub compliance_metadata: ComplianceMetadata,
 }
 
 impl Sheet {
@@ -48,6 +71,7 @@ impl Sheet {
                 perms.insert(owner, PermissionLevel::Owner);
                 perms
             },
+            compliance_metadata: ComplianceMetadata::default(),
         }
     }
     
@@ -107,5 +131,10 @@ impl Sheet {
             Some(PermissionLevel::Owner) | Some(PermissionLevel::Editor) | Some(PermissionLevel::Viewer) => true,
             _ => false,
         }
+    }
+    
+    pub fn set_compliance_metadata(&mut self, metadata: ComplianceMetadata) {
+        self.compliance_metadata = metadata;
+        self.updated_at = Utc::now();
     }
 }

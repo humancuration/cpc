@@ -2,6 +2,7 @@
 
 use calamine::{open_workbook_auto, DataType, Range};
 use crate::domain::{Sheet, Cell, CellAddress, CellValue};
+use crate::infrastructure::compliance_handler::ComplianceHandler;
 use uuid::Uuid;
 
 /// XLSX parser for importing spreadsheet files
@@ -11,9 +12,8 @@ impl XlsxParser {
     pub fn new() -> Self {
         Self
     }
-    
     /// Import an XLSX file
-    pub fn import(file_path: &str, owner: Uuid) -> Result<Sheet, Box<dyn std::error::Error>> {
+    pub fn import(file_path: &str, owner: Uuid, source_region: Option<String>) -> Result<Sheet, Box<dyn std::error::Error>> {
         let mut workbook = open_workbook_auto(file_path)?;
         let sheet_names = workbook.sheet_names();
         
@@ -22,9 +22,17 @@ impl XlsxParser {
         }
         
         let range = workbook.worksheet_range(sheet_names[0].as_str())?;
-        let sheet = self.convert_range_to_sheet(range, owner);
+        let mut sheet = self.convert_range_to_sheet(range, owner);
+        
+        // Apply compliance rules
+        let compliance_handler = ComplianceHandler::new();
+        if let Some(region) = source_region {
+            compliance_handler.apply_data_sovereignty_rules(&mut sheet, region);
+        }
+        compliance_handler.scan_for_pii(&mut sheet);
         
         Ok(sheet)
+    }
     }
     
     /// Convert a calamine Range to a Sheet
@@ -63,10 +71,21 @@ impl XlsxParser {
     }
     
     /// Export a Sheet to XLSX format
-    pub fn export(sheet: &Sheet, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn export(sheet: &Sheet, file_path: &str, target_region: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
+        // Check data sovereignty
+        let compliance_handler = ComplianceHandler::new();
+        if let Some(region) = &target_region {
+            if !compliance_handler.check_data_sovereignty(sheet, region)? {
+                return Err("Data sovereignty violation: Cannot export to this region".into());
+            }
+        }
+        
+        // Redact PII if required
+        let export_sheet = compliance_handler.redact_pii_for_export(sheet);
+        
         // In a real implementation, this would export to XLSX format
         // For now, we'll just create a placeholder
-        println!("Exporting sheet {} to {}", sheet.name, file_path);
+        println!("Exporting sheet {} to {}", export_sheet.name, file_path);
         Ok(())
     }
 }

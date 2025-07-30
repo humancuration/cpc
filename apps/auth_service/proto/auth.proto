@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package auth;
+
+// Authentication service
+service AuthService {
+  // Validate an existing session
+  rpc ValidateSession(SessionRequest) returns (SessionResponse);
+  
+  // Create a new session
+  rpc CreateSession(CreateSessionRequest) returns (SessionResponse);
+  
+  // Invalidate a session
+  rpc InvalidateSession(InvalidateSessionRequest) returns (InvalidateSessionResponse);
+}
+
+// Request to validate a session
+message SessionRequest {
+  string session_id = 1;
+}
+
+// Request to create a session
+message CreateSessionRequest {
+  string user_id = 1;
+  string device_info = 2;
+}
+
+// Request to invalidate a session
+message InvalidateSessionRequest {
+  string session_id = 1;
+}
+
+// Response for session operations
+message SessionResponse {
+  bool valid = 1;
+  string user_id = 2;
+  string session_id = 3;
+  string error_message = 4;
+}
+
+// Response for invalidate session operation
+message InvalidateSessionResponse {
+  bool success = 1;
+  string error_message = 2;
+}

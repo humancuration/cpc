@@ -30,6 +30,7 @@ graph TD
         K --> C
         L[VisualizationContext] --> D
         L --> F
+        M[AccessibilityService] --> L  # New connection
     end
 ```
 
@@ -72,7 +73,8 @@ graph TD
 ### 6. Accessibility Framework
 - Grid navigation with keyboard support
 - Screen reader compatible cell content
-- Alt text generation for cell ranges
+- Alt text generation for cell ranges and visualizations
+- Screen reader support for chart rendering
 - CPC-wide accessibility standards integration
 
 ### 7. Compliance Architecture
@@ -175,5 +177,21 @@ input VisualizationContextInput {
 - Differential updates for large spreadsheets
 - Lazy rendering of off-screen cells
 - Multi-tier caching (edge + regional) with TTLs
-- Cache keys: SHA256(visualization_id + params)
+- Cache keys: SHA256(visualization_id + params + version)
 - Cache visualization renders with TTLs
+
+## Error Handling
+- `VizError` taxonomy covering:
+  - Accessibility failures
+  - Cache version conflicts
+  - Rendering fallbacks
+  - Data transformation errors
+- Fallback rendering for failed visualizations
+- Error propagation from visualization pipeline to UI
+- WebSocket-triggered cache invalidation
+- Version-aware cache retrieval
+
+## Accessibility Features
+- Alt text preferences in VisualizationContext
+- Chart-specific alt text generation
+- Screen reader announcements for chart rendering

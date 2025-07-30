@@ -1,6 +1,6 @@
 //! GraphQL schema for the sheets application
 
-use async_graphql::{Object, Schema, EmptyMutation, EmptySubscription, Context};
+use async_graphql::{Object, Schema, EmptyMutation, EmptySubscription, Context, InputObject};
 use uuid::Uuid;
 
 /// GraphQL query root
@@ -35,12 +35,36 @@ impl QueryRoot {
     }
 }
 
+/// GraphQL mutation root
+pub struct MutationRoot;
+
+#[Object]
+impl MutationRoot {
+    /// Create a chart from cell data
+    async fn create_chart(
+        &self,
+        ctx: &Context<'_>,
+        sheet_id: Uuid,
+        chart_type: ChartTypeDto,
+        data_range: String,
+        title: Option<String>,
+        context: VisualizationContextInput,
+    ) -> async_graphql::Result<ChartDto> {
+        // In a real implementation, this would call the chart service
+        Ok(ChartDto {
+            id: Uuid::new_v4(),
+            title: title.unwrap_or("New Chart".to_string()),
+            chart_type: format!("{:?}", chart_type),
+        })
+    }
+}
+
 /// GraphQL schema
-pub type SheetsSchema = Schema<QueryRoot, EmptyMutation, EmptySubscription>;
+pub type SheetsSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 
 /// Create the GraphQL schema
 pub fn create_schema() -> SheetsSchema {
-    Schema::build(QueryRoot, EmptyMutation, EmptySubscription).finish()
+    Schema::build(QueryRoot, MutationRoot, EmptySubscription).finish()
 }
 
 /// Data transfer object for Sheet
@@ -69,4 +93,38 @@ pub struct ChartDto {
     pub id: Uuid,
     pub title: String,
     pub chart_type: String,
+}
+
+/// GraphQL chart type enum
+#[derive(async_graphql::Enum, Clone, Copy, PartialEq, Eq)]
+pub enum ChartTypeDto {
+    Bar,
+    Line,
+    Pie,
+    Scatter,
+}
+
+/// GraphQL input for visualization context
+#[derive(InputObject)]
+pub struct VisualizationContextInput {
+    pub sharing_scope: SharingScopeDto,
+    pub accessibility_mode: AccessibilityModeDto,
+    pub lod_level: i32,
+}
+
+/// GraphQL sharing scope enum
+#[derive(async_graphql::Enum, Clone, Copy, PartialEq, Eq)]
+pub enum SharingScopeDto {
+    Public,
+    Team,
+    Private,
+}
+
+/// GraphQL accessibility mode enum
+#[derive(async_graphql::Enum, Clone, Copy, PartialEq, Eq)]
+pub enum AccessibilityModeDto {
+    Standard,
+    HighContrast,
+    ScreenReader,
+    KeyboardNavigation,
 }

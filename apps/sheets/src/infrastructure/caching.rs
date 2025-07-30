@@ -10,6 +10,7 @@ use sha2::{Sha256, Digest};
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
+use crate::application::collaboration_service::SheetEvent;
 
 /// Multi-tier cache implementation
 pub struct VisualizationCache {
@@ -30,8 +31,9 @@ impl VisualizationCache {
     }
     
     /// Generate a cache key using SHA-256
-    pub fn generate_key(&self, visualization_id: Uuid, params: &CacheKeyParams) -> String {
+    pub fn generate_key(&self, visualization_id: Uuid, params: &CacheKeyParams, version: &str) -> String {
         let mut hasher = Sha256::new();
+        hasher.update(version);
         hasher.update(visualization_id.to_string());
         hasher.update(params.width.unwrap_or(0).to_string());
         hasher.update(params.height.unwrap_or(0).to_string());
@@ -151,6 +153,17 @@ impl VisualizationCache {
         let mut conn = self.redis_client.get_connection()?;
         let _: RedisResult<()> = redis::cmd("FLUSHDB").query(&mut conn);
         Ok(())
+    /// Handle SheetEvent for cache invalidation
+    pub fn handle_sheet_event(&self, event: &SheetEvent) -> Result<(), Box<dyn std::error::Error>> {
+        if let SheetEvent::CellUpdated { sheet_id, cache_version, .. } = event {
+            // In a real implementation, we would need to generate cache keys for all
+            // visualizations affected by this cell update and remove them from cache
+            // This is a simplified example that just logs the invalidation
+            println!("Invalidating cache for sheet {} with version {}", sheet_id, cache_version);
+        }
+        Ok(())
+    }
+}
     }
 }
 
@@ -161,6 +174,7 @@ pub struct CacheKeyParams {
     pub height: Option<u32>,
     pub lod_level: Option<u8>,
     pub accessibility_mode: Option<String>,
+    pub cache_version: Option<String>,
 }
 
 /// Cached visualization entry
@@ -243,8 +257,9 @@ mod tests {
             height: Some(600),
             lod_level: Some(2),
             accessibility_mode: Some("screen-reader".to_string()),
+            cache_version: Some("v1.0".to_string()),
         };
-        let key = cache.generate_key(uuid, &params);
+        let key = cache.generate_key(uuid, &params, "v1.0");
         assert_eq!(key.len(), 64); // SHA-256 produces 64 hex characters
     }
     

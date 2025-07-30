@@ -35,6 +35,27 @@ pub enum AccessibilityMode {
     KeyboardNavigation,
 }
 
+/// Preferences for alt text generation
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AltTextPreferences {
+    /// Level of detail in alt text (0 = brief, 1 = detailed, 2 = verbose)
+    pub detail_level: u8,
+    /// Focus of description (data values, trends, patterns)
+    pub content_focus: String,
+    /// Format of alt text (textual, structural)
+    pub format: String,
+}
+
+impl Default for AltTextPreferences {
+    fn default() -> Self {
+        Self {
+            detail_level: 1,
+            content_focus: "data values".to_string(),
+            format: "textual".to_string(),
+        }
+    }
+}
+
 /// Visualization context for cross-app communication
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VisualizationContext {
@@ -48,6 +69,8 @@ pub struct VisualizationContext {
     pub accessibility_mode: AccessibilityMode,
     /// Level of detail (LOD) for progressive loading
     pub lod_level: u8,
+    /// Preferences for alt text generation
+    pub alt_text_preferences: AltTextPreferences,
     /// Additional context metadata
     pub metadata: HashMap<String, String>,
 }
@@ -67,6 +90,7 @@ impl VisualizationContext {
             sharing_scope,
             accessibility_mode,
             lod_level,
+            alt_text_preferences: AltTextPreferences::default(),
             metadata: HashMap::new(),
         }
     }
@@ -134,6 +158,30 @@ impl VisualizationContext {
                     .map_err(|e| ContextError::InvalidHeaderFormat(e.to_string()))
             })?;
             
+        let detail_level = headers
+            .get("X-Alt-Text-Detail-Level")
+            .and_then(|h| h.to_str().ok())
+            .and_then(|s| s.parse::<u8>().ok())
+            .unwrap_or(1); // Default to detailed
+            
+        let content_focus = headers
+            .get("X-Alt-Text-Content-Focus")
+            .and_then(|h| h.to_str().ok())
+            .map(|s| s.to_string())
+            .unwrap_or_else(|| "data values".to_string());
+            
+        let format = headers
+            .get("X-Alt-Text-Format")
+            .and_then(|h| h.to_str().ok())
+            .map(|s| s.to_string())
+            .unwrap_or_else(|| "textual".to_string());
+            
+        let alt_text_preferences = AltTextPreferences {
+            detail_level,
+            content_focus,
+            format,
+        };
+            
         let mut metadata = HashMap::new();
         for (key, value) in headers.iter() {
             if key.as_str().starts_with("X-Context-") {
@@ -150,6 +198,7 @@ impl VisualizationContext {
             sharing_scope,
             accessibility_mode,
             lod_level,
+            alt_text_preferences,
             metadata,
         })
     }
@@ -201,6 +250,21 @@ impl VisualizationContext {
             http::HeaderValue::from_str(&self.lod_level.to_string()).unwrap(),
         );
         
+        headers.insert(
+            "X-Alt-Text-Detail-Level",
+            http::HeaderValue::from_str(&self.alt_text_preferences.detail_level.to_string()).unwrap(),
+        );
+        
+        headers.insert(
+            "X-Alt-Text-Content-Focus",
+            http::HeaderValue::from_str(&self.alt_text_preferences.content_focus).unwrap(),
+        );
+        
+        headers.insert(
+            "X-Alt-Text-Format",
+            http::HeaderValue::from_str(&self.alt_text_preferences.format).unwrap(),
+        );
+        
         for (key, value) in &self.metadata {
             headers.insert(
                 format!("X-Context-{}", key),
@@ -248,6 +312,9 @@ mod tests {
         assert_eq!(deserialized.originating_app, context.originating_app);
         assert_eq!(deserialized.user_id, context.user_id);
         assert_eq!(deserialized.lod_level, context.lod_level);
+        assert_eq!(deserialized.alt_text_preferences.detail_level, context.alt_text_preferences.detail_level);
+        assert_eq!(deserialized.alt_text_preferences.content_focus, context.alt_text_preferences.content_focus);
+        assert_eq!(deserialized.alt_text_preferences.format, context.alt_text_preferences.format);
     }
     
     #[test]

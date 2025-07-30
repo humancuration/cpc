@@ -57,6 +57,8 @@ pub struct Cell {
     pub formatted_value: String,
     pub style: CellStyle,
     pub dependencies: Vec<CellAddress>, // For formula recalculation
+    /// Whether PII has been redacted in this cell
+    pub pii_redacted: bool,
 }
 
 impl Cell {
@@ -76,6 +78,7 @@ impl Cell {
             formatted_value,
             style: CellStyle::default(),
             dependencies: Vec::new(),
+            pii_redacted: false,
         }
     }
     
@@ -99,6 +102,12 @@ impl Cell {
         if !self.dependencies.contains(&dependency) {
             self.dependencies.push(dependency);
         }
+    }
+    
+    pub fn redact_pii(&mut self) {
+        self.pii_redacted = true;
+        // In a real implementation, this would actually redact the PII content
+        // For now, we'll just mark the cell as redacted
     }
 }
 

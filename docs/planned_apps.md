@@ -17,7 +17,45 @@ Leave blank if not started, mark [/] if partially implemented, [x] if implemente
 ## Communication & Social
 
 - [x] **Messenger**: Real-time encrypted messaging
-- [ ] **Convo**: Reddit clone forums
+- [/] **Allat**: Reddit-style forums
+    - User-generated communities/subreddits with customizable rules
+    - Threaded discussions with nesting (up to 10 levels)
+    - Voting system (upvote/downvote) with karma tracking
+    - Moderation tools: post removal, user bans, community settings
+    - Topic categorization via tags and flairs
+    - Rich text and media support (images, videos, links) in posts
+    - Search functionality within communities and across platform
+    
+    **Architectural Considerations**:
+      - Use `consent_manager` crate for privacy controls
+      - Hexagonal architecture: separate domain, application, and infrastructure layers
+      - API-first design: GraphQL API for all public operations
+      - Real-time updates via WebSockets for new posts and comments
+      - Integration with dabloons system for rewarding content creators
+
+- [/] **Yapper**: Twitter-style microblogging
+    - Character-limited posts (280 characters)
+    - Real-time feeds with algorithmic and chronological sorting options
+    - Hashtag support for topic discovery
+    - Engagement metrics (likes, shares, views) per post
+    - Media attachments (images, short videos) in posts
+    - Follow users and see their posts in your feed
+    - Direct messaging capability (via Messenger integration)
+    
+    **Architectural Considerations**:
+      - Use `consent_manager` for privacy controls on posts
+      - Screaming architecture: organize by features (posting, feed, profile)
+      - Horizontal scalability for feed generation
+      - Opt-in data sharing for federation and research
+      - Integration with dabloons for tipping and rewards
+
+- **Cross-platform Integration**:
+    - Unified feed: Option to view Allat and Yapper content in a single feed
+    - Post creation interface: Destination selector (Allat community or Yapper feed)
+    - Community selection when posting to Allat
+    - Cross-posting toggle (Allat posts to Yapper, with privacy controls)
+    - Shared identity and reputation system
+
 - [ ] **Presence**: Status visibility across apps
 - [ ] **SocialGraph**: Relationship mapping
 
@@ -232,6 +270,6 @@ Each application will:
 ### Core Design Philosophy
 
 * **True Modularity**: Each app module must function as a standalone, self-contained unit that can be developed, tested, and deployed independently
-* **User Empowerment**: Users should be able to enable/disable modules at runtime without restarting the application
+* **User Empowerment**: Users should be able to enable/disable modules at runtime without restarting the application (optional, if this is impossible)
 * **Cooperative Values**: Architecture must support transparency, user control, and community participation in feature development
 

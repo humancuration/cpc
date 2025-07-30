@@ -9,6 +9,9 @@ use cpc_core::bi_visualization::{
 };
 use image::DynamicImage;
 use visualization_context::{VisualizationContext, AccessibilityMode};
+use crate::application::accessibility::AccessibilityService;
+use crate::domain::errors::VizError;
+use crate::ui::fallback_renderer::FallbackRenderer;
 
 /// Service for generating charts from sheet data
 pub struct ChartService;
@@ -26,7 +29,11 @@ impl ChartService {
         context: &VisualizationContext,
     ) -> Result<DynamicImage, Box<dyn std::error::Error>> {
         // Transform sheet data to visualization format
-        let data_series = self.transform_sheet_data(sheet, &chart_spec.data_range)?;
+        let data_series = self.transform_sheet_data(sheet, &chart_spec.data_range)
+            .map_err(|_| VizError::DataTransformationError)?;
+        
+        // Generate alt text for the chart
+        let alt_text = AccessibilityService::generate_chart_alt_text(sheet, &chart_spec.data_range, &context.alt_text_preferences);
         
         // Create chart configuration
         let config = ChartConfig::new(
@@ -44,14 +51,41 @@ impl ChartService {
             AccessibilityMode::ScreenReader => cpc_core::bi_visualization::AccessibilityMode::ScreenReader,
             AccessibilityMode::KeyboardNavigation => cpc_core::bi_visualization::AccessibilityMode::KeyboardNavigation,
         })
-        .with_lod_level(context.lod_level);
+        .with_lod_level(context.lod_level)
+        .with_alt_text(alt_text);
         
         // Generate chart using BI Visualization Toolkit
         let chart_image = VisualizationService::generate_chart(config, data_series)?;
         
+        
+        // Add screen reader announcement
+        AccessibilityService::announce_screen_reader(
+            &format!("Chart {} rendered", chart_spec.title)
+        );
+        
         Ok(chart_image)
     }
     
+    /// Generate a chart with fallback rendering
+    pub fn generate_chart_with_fallback(
+        &self,
+        sheet: &Sheet,
+        chart_spec: &ChartSpec,
+        context: &VisualizationContext,
+    ) -> DynamicImage {
+        match self.generate_chart(sheet, chart_spec, context) {
+            Ok(chart_image) => chart_image,
+            Err(_) => {
+                // Use fallback renderer
+                let fallback_renderer = FallbackRenderer::new();
+                fallback_renderer.render_fallback(
+                    &VizError::RenderFallbackTriggered,
+                    chart_spec.options.width,
+                    chart_spec.options.height,
+                )
+            }
+        }
+    }
     /// Transform sheet data to visualization format
     fn transform_sheet_data(
         &self,

@@ -8,8 +8,9 @@ use chrono::Utc;
 pub enum SheetEvent {
     CellUpdated {
         sheet_id: Uuid,
-        cell: CellAddress,
+        position: String, // A1 notation
         operation: CrdtOperation,
+        cache_version: String,
         timestamp: chrono::DateTime<Utc>,
     },
     CursorMoved {
@@ -65,10 +66,10 @@ impl CollaborationService {
         let callback = Box::new(|event: SheetEvent| {
             // Handle incoming collaboration events
             match event {
-                SheetEvent::CellUpdated { sheet_id, cell, operation, .. } => {
+                SheetEvent::CellUpdated { sheet_id, position, operation, .. } => {
                     // Apply CRDT merge operation
                     // In a real implementation, this would update the local sheet state
-                    println!("Received cell update for sheet {:?}, cell {:?}", sheet_id, cell);
+                    println!("Received cell update for sheet {:?}, position {:?}", sheet_id, position);
                 }
                 SheetEvent::CursorMoved { user, position, .. } => {
                     // Update collaborator cursor position
@@ -94,11 +95,15 @@ impl CollaborationService {
         cell: CellAddress,
         operation: CrdtOperation,
     ) {
+        // Convert cell address to A1 notation
+        let position = self.cell_address_to_a1(cell);
         let event = SheetEvent::CellUpdated {
             sheet_id,
-            cell,
+            position,
             operation,
+            cache_version: self.generate_cache_version(),
             timestamp: Utc::now(),
+        };
         };
         
         self.event_publisher.publish(&event);
@@ -151,5 +156,33 @@ impl CollaborationService {
         };
         
         self.event_publisher.publish(&event);
+    }
+    
+    /// Convert cell address to A1 notation
+    fn cell_address_to_a1(&self, address: CellAddress) -> String {
+        // Convert column number to letter (A, B, ..., Z, AA, AB, ...)
+        let column_letter = self.column_number_to_letter(address.column + 1);
+        format!("{}{}", column_letter, address.row + 1)
+    }
+    
+    /// Convert column number to letter notation (1 -> A, 2 -> B, ..., 27 -> AA)
+    fn column_number_to_letter(&self, column: u32) -> String {
+        let mut result = String::new();
+        let mut col = column;
+        
+        while col > 0 {
+            let remainder = (col - 1) % 26;
+            result.insert(0, (b'A' + remainder as u8) as char);
+            col = (col - 1) / 26;
+        }
+        
+        result
+    }
+    
+    /// Generate a cache version string based on current timestamp
+    fn generate_cache_version(&self) -> String {
+        // In a real implementation, this might be based on a more sophisticated
+        // versioning scheme, but for now we'll use a timestamp-based approach
+        format!("{:x}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs())
     }
 }

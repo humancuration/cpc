@@ -274,4 +274,36 @@ This architecture will evolve to support our p2panda network implementation whil
 - Enhanced conflict resolution for collaborative editing
 - Advanced sync queue prioritization
 - More sophisticated network status awareness
+## Unified Authentication System
+
+### Overview
+The CPC ecosystem implements a unified authentication system that provides centralized identity management across all applications. This system consists of:
+- gRPC-based Auth Service for session management
+- Redis-based session storage
+- Role-Based Access Control (RBAC) system
+- Consent management for data sharing
+- Karma system for user reputation
+
+### Components
+
+#### Auth Service
+A gRPC service that handles session creation, validation, and invalidation. See [Auth Service API Documentation](auth_service_api.md) for detailed API specifications.
+
+#### RBAC System
+The Role-Based Access Control system provides flexible permission management:
+- Roles are defined with specific permissions
+- Permissions are checked at the middleware level
+- Roles can be assigned to users through the auth service
+
+#### Consent Management
+Users can control their data sharing preferences across different application domains:
+- Consent levels: None, Minimal, Standard, Full
+- Domain-specific consent profiles
+- Middleware enforcement of consent requirements
+
+#### Karma System
+A unified reputation system that tracks user contributions across all applications:
+- Karma scores are stored with user profiles
+- Karma transactions are logged for audit purposes
+- Karma can be transferred between users
 - Improved performance metrics for offline operations
