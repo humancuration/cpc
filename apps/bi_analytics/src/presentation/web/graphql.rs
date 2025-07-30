@@ -18,6 +18,7 @@ use crate::{
         report_generation::ReportGenerationService,
         dashboard_management::DashboardManagementService,
         compliance_management::ComplianceManagementService,
+        visualization_service::{BevyVisualizationService, VisualizationPayload, Base64Image},
     },
     infrastructure::{
         postgres_repository::PostgresBiRepository,
@@ -35,6 +36,7 @@ pub fn create_schema(
     report_generation_service: ReportGenerationService<PostgresBiRepository, PostgresBiRepository>,
     dashboard_management_service: DashboardManagementService<PostgresBiRepository, PostgresBiRepository>,
     compliance_management_service: ComplianceManagementService<PostgresBiRepository, PostgresBiRepository>,
+    visualization_service: BevyVisualizationService,
 ) -> BiAnalyticsGraphQLSchema {
     Schema::build(
         QueryRoot {
@@ -42,16 +44,76 @@ pub fn create_schema(
             report_generation_service,
             dashboard_management_service,
             compliance_management_service,
+            visualization_service,
         },
         MutationRoot {
             data_ingestion_service,
             report_generation_service,
             dashboard_management_service,
             compliance_management_service,
+            visualization_service,
         },
         EmptySubscription,
     )
     .finish()
+}
+
+/// GraphQL representation of navigation hint
+#[derive(SimpleObject)]
+pub struct NavigationHintObject {
+    label: String,
+    key: String,
+    position: Vec<f32>,
+}
+
+/// GraphQL representation of visualization payload
+#[derive(SimpleObject)]
+pub struct VisualizationPayloadObject {
+    scene_data: JsonValue,
+    alt_text: String,
+    navigation_map: Vec<(String, NavigationHintObject)>,
+}
+
+impl From<crate::application::visualization_service::VisualizationPayload> for VisualizationPayloadObject {
+    fn from(payload: crate::application::visualization_service::VisualizationPayload) -> Self {
+        let navigation_map: Vec<(String, NavigationHintObject)> = payload.navigation_map
+            .into_iter()
+            .map(|(key, hint)| {
+                let hint_obj = NavigationHintObject {
+                    label: hint.label,
+                    key: hint.key,
+                    position: vec![hint.position[0], hint.position[1], hint.position[2]],
+                };
+                (key, hint_obj)
+            })
+            .collect();
+        
+        Self {
+            scene_data: payload.scene_data,
+            alt_text: payload.alt_text,
+            navigation_map,
+        }
+    }
+}
+
+/// GraphQL representation of base64 image
+#[derive(SimpleObject)]
+pub struct Base64ImageObject {
+    image_data: String,
+    alt_text: String,
+    width: i32,
+    height: i32,
+}
+
+impl From<crate::application::visualization_service::Base64Image> for Base64ImageObject {
+    fn from(image: crate::application::visualization_service::Base64Image) -> Self {
+        Self {
+            image_data: image.image_data,
+            alt_text: image.alt_text,
+            width: image.width,
+            height: image.height,
+        }
+    }
 }
 
 /// Root query object
@@ -60,6 +122,7 @@ pub struct QueryRoot {
     report_generation_service: ReportGenerationService<PostgresBiRepository, PostgresBiRepository>,
     dashboard_management_service: DashboardManagementService<PostgresBiRepository, PostgresBiRepository>,
     compliance_management_service: ComplianceManagementService<PostgresBiRepository, PostgresBiRepository>,
+    visualization_service: BevyVisualizationService,
 }
 
 /// Root mutation object
@@ -68,6 +131,7 @@ pub struct MutationRoot {
     report_generation_service: ReportGenerationService<PostgresBiRepository, PostgresBiRepository>,
     dashboard_management_service: DashboardManagementService<PostgresBiRepository, PostgresBiRepository>,
     compliance_management_service: ComplianceManagementService<PostgresBiRepository, PostgresBiRepository>,
+    visualization_service: BevyVisualizationService,
 }
 
 /// GraphQL representation of a dataset
@@ -380,6 +444,49 @@ impl QueryRoot {
             })?;
         
         Ok(dashboards.into_iter().map(|d| d.into()).collect())
+    }
+    
+    /// Get 3D visualization for a report
+    async fn visualization3d(&self, ctx: &Context<'_>, report_id: Uuid) -> Result<VisualizationPayloadObject> {
+        info!("Generating 3D visualization for report: {}", report_id);
+        
+        // In a real implementation, we would get the user ID from the context
+        let user_id = Uuid::new_v4(); // Placeholder
+        
+        let payload = self.visualization_service.generate_3d_visualization(report_id, user_id)
+            .await
+            .map_err(|e| {
+                error!("Failed to generate 3D visualization for report {}: {}", report_id, e);
+                async_graphql::Error::new(format!("Failed to generate visualization: {}", e))
+            })?;
+        
+        Ok(payload.into())
+    }
+    
+    /// Get static image representation of visualization
+    async fn visualization_image(
+        &self,
+        ctx: &Context<'_>,
+        report_id: Uuid,
+        width: Option<i32>,
+        height: Option<i32>,
+    ) -> Result<Base64ImageObject> {
+        info!("Generating visualization image for report: {}", report_id);
+        
+        // In a real implementation, we would get the user ID from the context
+        let user_id = Uuid::new_v4(); // Placeholder
+        
+        let width = width.unwrap_or(800) as u32;
+        let height = height.unwrap_or(600) as u32;
+        
+        let image = self.visualization_service.generate_visualization_image(report_id, user_id, width, height)
+            .await
+            .map_err(|e| {
+                error!("Failed to generate visualization image for report {}: {}", report_id, e);
+                async_graphql::Error::new(format!("Failed to generate visualization image: {}", e))
+            })?;
+        
+        Ok(image.into())
     }
 }
 

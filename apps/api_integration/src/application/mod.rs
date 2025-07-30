@@ -4,6 +4,7 @@ pub mod api_management;
 pub mod request_routing;
 pub mod monitoring;
 pub mod adapter_registry;
+pub mod visualization;
 
 // Re-export key types
 pub use api_management::ApiManagementService;

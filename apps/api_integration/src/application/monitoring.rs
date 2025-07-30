@@ -328,6 +328,80 @@ pub trait MonitoringRepository: Send + Sync {
     ) -> Result<Vec<ApiCallLog>, MonitoringError>;
 }
 
+/// Visualization-specific metrics
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VisualizationMetrics {
+    pub requests_by_app: std::collections::HashMap<String, u64>,
+    pub visualization_types: std::collections::HashMap<String, u64>,
+    pub lod_levels: std::collections::HashMap<u8, u64>,
+    pub cache_hit_ratio: f64,
+    pub average_render_time_ms: f64,
+    pub accessibility_usage: std::collections::HashMap<String, u64>,
+}
+
+/// Metrics collector for visualization requests
+pub struct MetricsCollector {
+    visualization_requests: std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, u64>>>,
+    cache_hits: std::sync::Arc<std::sync::AtomicU64>,
+    cache_misses: std::sync::Arc<std::sync::AtomicU64>,
+}
+
+impl MetricsCollector {
+    pub fn new() -> Self {
+        Self {
+            visualization_requests: std::sync::Arc::new(std::sync::Mutex::new(std::collections::HashMap::new())),
+            cache_hits: std::sync::Arc::new(std::sync::AtomicU64::new(0)),
+            cache_misses: std::sync::Arc::new(std::sync::AtomicU64::new(0)),
+        }
+    }
+    
+    pub fn record_request(&self, app_id: &str, success: bool, duration: std::time::Duration) {
+        let mut requests = self.visualization_requests.lock().unwrap();
+        *requests.entry(app_id.to_string()).or_insert(0) += 1;
+        
+        // Record metrics using the metrics crate
+        metrics::increment_counter!(
+            "visualization_requests_total",
+            "app" => app_id.to_string(),
+            "result" => if success { "success" } else { "error" }
+        );
+        
+        metrics::histogram!(
+            "visualization_request_duration",
+            duration.as_secs_f64(),
+            "app" => app_id.to_string()
+        );
+    }
+    
+    pub fn record_cache_hit(&self, app_id: &str) {
+        self.cache_hits.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        metrics::increment_counter!(
+            "visualization_cache_hits_total",
+            "app" => app_id.to_string()
+        );
+    }
+    
+    pub fn record_cache_miss(&self, app_id: &str) {
+        self.cache_misses.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        metrics::increment_counter!(
+            "visualization_cache_misses_total",
+            "app" => app_id.to_string()
+        );
+    }
+    
+    pub fn get_cache_hit_ratio(&self) -> f64 {
+        let hits = self.cache_hits.load(std::sync::atomic::Ordering::Relaxed) as f64;
+        let misses = self.cache_misses.load(std::sync::atomic::Ordering::Relaxed) as f64;
+        let total = hits + misses;
+        
+        if total > 0.0 {
+            hits / total
+        } else {
+            0.0
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

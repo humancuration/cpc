@@ -1,0 +1,12 @@
+[package]
+name = "visualization_context"
+version = "0.1.0"
+edition = "2021"
+description = "Shared visualization context for cross-app communication"
+authors = ["CPC Development Team"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+http = "0.2"
+thiserror = "1.0"

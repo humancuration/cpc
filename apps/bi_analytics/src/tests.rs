@@ -157,3 +157,87 @@ mod tests {
         assert_eq!(position.height, 4);
     }
 }
+
+#[cfg(test)]
+mod visualization_tests {
+    use super::*;
+    use crate::presentation::web::routes::{SubscriptionManager, WebSocketMessage};
+    use uuid::Uuid;
+    use std::sync::Arc;
+
+    #[tokio::test]
+    async fn test_subscription_manager() {
+        let manager = Arc::new(SubscriptionManager::default());
+        let report_id = Uuid::new_v4();
+        
+        // Create a channel to receive messages
+        let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
+        
+        // Subscribe to report updates
+        manager.subscribe(report_id, tx.clone()).await;
+        
+        // Broadcast a message
+        let message = WebSocketMessage::Update {
+            report_id,
+            delta: serde_json::json!({"modified": ["node1"]}),
+            accessibility_announcement: "Data updated".to_string(),
+        };
+        
+        manager.broadcast(report_id, message.clone()).await;
+        
+        // Verify the message was received
+        let received = rx.recv().await.unwrap();
+        match received {
+            WebSocketMessage::Update { report_id: id, .. } => {
+                assert_eq!(id, report_id);
+            }
+            _ => panic!("Unexpected message type"),
+        }
+        
+        // Unsubscribe
+        manager.unsubscribe(report_id, &tx).await;
+        
+        // Broadcast another message - should not be received
+        manager.broadcast(report_id, message).await;
+        
+        // Verify no message was received
+        assert!(rx.try_recv().is_err());
+    }
+    
+    #[tokio::test]
+    async fn test_websocket_message_serialization() {
+        let report_id = Uuid::new_v4();
+        
+        let messages = vec![
+            WebSocketMessage::Connected {
+                report_id,
+                message: "Connected".to_string(),
+            },
+            WebSocketMessage::Update {
+                report_id,
+                delta: serde_json::json!({"test": "data"}),
+                accessibility_announcement: "Test update".to_string(),
+            },
+            WebSocketMessage::Error {
+                report_id,
+                message: "Test error".to_string(),
+            },
+            WebSocketMessage::Ping,
+            WebSocketMessage::Pong,
+        ];
+        
+        for message in messages {
+            let json = serde_json::to_string(&message).unwrap();
+            let deserialized: WebSocketMessage = serde_json::from_str(&json).unwrap();
+            
+            match (message, deserialized) {
+                (WebSocketMessage::Connected { .. }, WebSocketMessage::Connected { .. }) => {},
+                (WebSocketMessage::Update { .. }, WebSocketMessage::Update { .. }) => {},
+                (WebSocketMessage::Error { .. }, WebSocketMessage::Error { .. }) => {},
+                (WebSocketMessage::Ping, WebSocketMessage::Ping) => {},
+                (WebSocketMessage::Pong, WebSocketMessage::Pong) => {},
+                _ => panic!("Message serialization failed"),
+            }
+        }
+    }
+}
