@@ -24,6 +24,9 @@ sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "migrate", "u
 async-std = "1.12"
 async-graphql = "7.0.17"
 async-graphql-axum = "7.0.17"
+axum = "0.8.4"
+tower = "0.5.1"
+tower-http = { version = "0.6.1", features = ["cors"] }
 
 [dev-dependencies]
 tempfile = "3.0"

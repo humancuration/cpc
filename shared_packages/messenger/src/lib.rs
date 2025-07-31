@@ -1,14 +1,16 @@
-//! # Messenger Application Layer
+//! # Messenger Domain Layer
 //!
-//! This module contains the application services and use cases for the Messenger application.
-//! It implements the domain service interfaces and orchestrates the business logic.
+//! This module contains the core domain entities and logic for the Messenger application.
+//! It follows hexagonal architecture principles with a strict separation between domain logic
+//! and infrastructure concerns.
 
-/// Application services
+/// Core domain entities
+pub mod models;
+/// Domain errors
+pub mod errors;
+/// Domain services
 pub mod services;
-/// Repositories for data access
-pub mod repositories;
-/// Integration with external services
-pub mod integration;
 
 // Re-export commonly used types
-pub use services::{ConversationServiceImpl, MessageServiceImpl, MediaServiceImpl, PresenceServiceImpl};
+pub use models::{Conversation, Message, Participant, MessageContent, MediaReference, DeliveryStatus};
+pub use errors::MessengerError;
