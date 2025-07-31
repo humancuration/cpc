@@ -9,7 +9,6 @@ pub mod savings_service;
 pub mod investment_service;
 pub mod debt_service;
 pub mod rewards_service;
-pub mod wallet_service;
 pub mod finance_aggregator;
 pub mod events;
 pub mod expense_tracker;

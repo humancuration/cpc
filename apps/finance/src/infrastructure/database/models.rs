@@ -7,6 +7,10 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 use crate::domain::primitives::{Money, Currency};
+use cpc_wallet::domain::{
+    wallet::{Wallet, WalletTransaction, TransactionType},
+    primitives::{Money as WalletMoney, Currency as WalletCurrency},
+};
 
 /// Database model for budgets table
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
@@ -22,57 +26,57 @@ pub struct BudgetDbModel {
     pub period_start: DateTime<Utc>,
     pub period_end: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
-    impl BudgetDbModel {
-        /// Convert domain Budget to database model
-        pub fn from_domain(budget: &crate::domain::budget::Budget) -> Self {
-            Self {
-                id: budget.id,
-                user_id: budget.user_id,
-                category: budget.category.clone(),
-                allocated_amount: budget.allocation.primary.amount,
-                spent_amount: budget.spent.primary.amount,
-                dabloons_allocated: budget.allocation.dabloons.amount,
-                dabloons_spent: budget.spent.dabloons.amount,
-                currency_type: match budget.currency_type {
-                    crate::domain::budget::BudgetCurrencyType::TraditionalOnly => "TraditionalOnly".to_string(),
-                    crate::domain::budget::BudgetCurrencyType::DabloonsOnly => "DabloonsOnly".to_string(),
-                    crate::domain::budget::BudgetCurrencyType::Mixed => "Mixed".to_string(),
-                },
-                period_start: budget.start_date,
-                period_end: budget.end_date,
-                created_at: budget.start_date, // Using start_date as created_at for now
-                updated_at: Utc::now(),
-            }
-        }
-    
-        /// Convert database model to domain Budget
-        pub fn to_domain(&self, currency: Currency) -> crate::domain::budget::Budget {
-            let currency_type = match self.currency_type.as_str() {
-                "TraditionalOnly" => crate::domain::budget::BudgetCurrencyType::TraditionalOnly,
-                "DabloonsOnly" => crate::domain::budget::BudgetCurrencyType::DabloonsOnly,
-                "Mixed" => crate::domain::budget::BudgetCurrencyType::Mixed,
-                _ => crate::domain::budget::BudgetCurrencyType::TraditionalOnly, // Default
-            };
-            
-            crate::domain::budget::Budget {
-                id: self.id,
-                user_id: self.user_id,
-                category: self.category.clone(),
-                allocation: crate::domain::budget::BudgetAllocation {
-                    primary: Money::new(self.allocated_amount, currency.clone()),
-                    dabloons: Money::new(self.dabloons_allocated, Currency::Dabloons),
-                },
-                spent: crate::domain::budget::BudgetAllocation {
-                    primary: Money::new(self.spent_amount, currency.clone()),
-                    dabloons: Money::new(self.dabloons_spent, Currency::Dabloons),
-                },
-                currency_type,
-                period: crate::domain::budget::BudgetPeriod::Custom, // Simplified for now
-                start_date: self.period_start,
-                end_date: self.period_end,
-            }
+    pub updated_at: DateTime<Utc>,
+}
+
+impl BudgetDbModel {
+    /// Convert domain Budget to database model
+    pub fn from_domain(budget: &crate::domain::budget::Budget) -> Self {
+        Self {
+            id: budget.id,
+            user_id: budget.user_id,
+            category: budget.category.clone(),
+            allocated_amount: budget.allocation.primary.amount,
+            spent_amount: budget.spent.primary.amount,
+            dabloons_allocated: budget.allocation.dabloons.amount,
+            dabloons_spent: budget.spent.dabloons.amount,
+            currency_type: match budget.currency_type {
+                crate::domain::budget::BudgetCurrencyType::TraditionalOnly => "TraditionalOnly".to_string(),
+                crate::domain::budget::BudgetCurrencyType::DabloonsOnly => "DabloonsOnly".to_string(),
+                crate::domain::budget::BudgetCurrencyType::Mixed => "Mixed".to_string(),
+            },
+            period_start: budget.start_date,
+            period_end: budget.end_date,
+            created_at: budget.start_date, // Using start_date as created_at for now
+            updated_at: Utc::now(),
         }
     }
+
+    /// Convert database model to domain Budget
+    pub fn to_domain(&self, currency: Currency) -> crate::domain::budget::Budget {
+        let currency_type = match self.currency_type.as_str() {
+            "TraditionalOnly" => crate::domain::budget::BudgetCurrencyType::TraditionalOnly,
+            "DabloonsOnly" => crate::domain::budget::BudgetCurrencyType::DabloonsOnly,
+            "Mixed" => crate::domain::budget::BudgetCurrencyType::Mixed,
+            _ => crate::domain::budget::BudgetCurrencyType::TraditionalOnly, // Default
+        };
+        
+        crate::domain::budget::Budget {
+            id: self.id,
+            user_id: self.user_id,
+            category: self.category.clone(),
+            allocation: crate::domain::budget::BudgetAllocation {
+                primary: Money::new(self.allocated_amount, currency.clone()),
+                dabloons: Money::new(self.dabloons_allocated, Currency::Dabloons),
+            },
+            spent: crate::domain::budget::BudgetAllocation {
+                primary: Money::new(self.spent_amount, currency.clone()),
+                dabloons: Money::new(self.dabloons_spent, Currency::Dabloons),
+            },
+            currency_type,
+            period: crate::domain::budget::BudgetPeriod::Custom, // Simplified for now
+            start_date: self.period_start,
+            end_date: self.period_end,
         }
     }
 }
@@ -159,6 +163,7 @@ pub struct DataSharingPreferenceDbModel {
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
+
 impl DataSharingPreferenceDbModel {
     /// Convert domain model to database model
     pub fn from_domain(preference: &crate::application::savings_service::DataSharingPreference) -> Self {
@@ -172,6 +177,7 @@ impl DataSharingPreferenceDbModel {
             updated_at: preference.updated_at,
         }
     }
+
     /// Convert database model to domain model
     pub fn to_domain(&self) -> crate::application::savings_service::DataSharingPreference {
         crate::application::savings_service::DataSharingPreference {
@@ -182,8 +188,6 @@ impl DataSharingPreferenceDbModel {
             preferred_currency: self.preferred_currency.clone(),
             created_at: self.created_at,
             updated_at: self.updated_at,
-        }
-    }
         }
     }
 }
@@ -200,7 +204,7 @@ pub struct WalletDbModel {
 
 impl WalletDbModel {
     /// Convert domain Wallet to database model
-    pub fn from_domain(wallet: &crate::domain::wallet::Wallet) -> Self {
+    pub fn from_domain(wallet: &Wallet) -> Self {
         Self {
             id: wallet.id,
             user_id: wallet.user_id,
@@ -211,11 +215,11 @@ impl WalletDbModel {
     }
 
     /// Convert database model to domain Wallet
-    pub fn to_domain(&self) -> crate::domain::wallet::Wallet {
-        crate::domain::wallet::Wallet {
+    pub fn to_domain(&self) -> Wallet {
+        Wallet {
             id: self.id,
             user_id: self.user_id,
-            balance: Money::new(self.balance, Currency::Dabloons),
+            balance: WalletMoney::new(self.balance, WalletCurrency::Dabloons),
             created_at: self.created_at,
             updated_at: self.updated_at,
         }
@@ -235,13 +239,13 @@ pub struct WalletTransactionDbModel {
 
 impl WalletTransactionDbModel {
     /// Convert domain WalletTransaction to database model
-    pub fn from_domain(transaction: &crate::domain::wallet::WalletTransaction) -> Self {
+    pub fn from_domain(transaction: &WalletTransaction) -> Self {
         Self {
             id: transaction.id,
             wallet_id: transaction.wallet_id,
             transaction_type: match transaction.transaction_type {
-                crate::domain::wallet::TransactionType::Credit => "credit".to_string(),
-                crate::domain::wallet::TransactionType::Debit => "debit".to_string(),
+                TransactionType::Credit => "credit".to_string(),
+                TransactionType::Debit => "debit".to_string(),
             },
             amount: transaction.amount.amount,
             description: transaction.description.clone(),
@@ -250,16 +254,16 @@ impl WalletTransactionDbModel {
     }
 
     /// Convert database model to domain WalletTransaction
-    pub fn to_domain(&self) -> crate::domain::wallet::WalletTransaction {
-        crate::domain::wallet::WalletTransaction {
+    pub fn to_domain(&self) -> WalletTransaction {
+        WalletTransaction {
             id: self.id,
             wallet_id: self.wallet_id,
             transaction_type: match self.transaction_type.as_str() {
-                "credit" => crate::domain::wallet::TransactionType::Credit,
-                "debit" => crate::domain::wallet::TransactionType::Debit,
-                _ => crate::domain::wallet::TransactionType::Credit, // Default to credit if unknown
+                "credit" => TransactionType::Credit,
+                "debit" => TransactionType::Debit,
+                _ => TransactionType::Credit, // Default to credit if unknown
             },
-            amount: Money::new(self.amount, Currency::Dabloons),
+            amount: WalletMoney::new(self.amount, WalletCurrency::Dabloons),
             description: self.description.clone(),
             timestamp: self.timestamp,
         }

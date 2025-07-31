@@ -13,7 +13,7 @@ cpc_auth = { path = "../../packages/cpc_auth" }
 cpc_rbac = { path = "../../packages/cpc_rbac" }
 cpc_karma = { path = "../../packages/cpc_karma" }
 cpc_consent = { path = "../../packages/cpc_consent" }
-dabloons = { path = "../../apps/finance/src/domain/primitives.rs" }
+cpc_wallet = { path = "../../packages/core/wallet" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sled = "0.34"
@@ -22,7 +22,7 @@ uuid = { version = "1.0", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 rust_decimal = "1.26"
 thiserror = "1.0"
-social_integration = { path = "../social_integration" }
+social_integration = { path = "../../packages/social_integration" }
 jsonwebtoken = "0.16.0"
 tonic = "0.9"
 prost = "0.12"

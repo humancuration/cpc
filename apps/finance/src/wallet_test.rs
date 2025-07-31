@@ -2,15 +2,16 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::{
+    use cpc_wallet::{
         domain::{
             wallet::{Wallet, WalletTransaction, TransactionType},
             primitives::{Money, Currency},
         },
         application::{
-            wallet_service::{WalletService, WalletServiceImpl},
+            wallet_service::{WalletService, WalletServiceImpl, WalletRepository},
         },
     };
+    use crate::domain::FinanceError;
     use uuid::Uuid;
     use std::sync::Arc;
     use rust_decimal_macros::dec;
@@ -29,26 +30,26 @@ mod tests {
             }
         }
     }
+#[async_trait::async_trait]
+impl WalletRepository for MockWalletRepository {
+    async fn save_wallet(&self, _wallet: &Wallet) -> Result<(), FinanceError> {
+        // In a real implementation, this would save to a database
+        Ok(())
+    }
 
-    #[async_trait::async_trait]
-    impl crate::application::wallet_service::WalletRepository for MockWalletRepository {
-        async fn save_wallet(&self, _wallet: &crate::domain::wallet::Wallet) -> Result<(), crate::domain::FinanceError> {
-            // In a real implementation, this would save to a database
-            Ok(())
-        }
+    async fn find_wallet_by_user_id(&self, _user_id: Uuid) -> Result<Option<Wallet>, FinanceError> {
+        Ok(self.wallet.clone())
+    }
 
-        async fn find_wallet_by_user_id(&self, _user_id: Uuid) -> Result<Option<crate::domain::wallet::Wallet>, crate::domain::FinanceError> {
-            Ok(self.wallet.clone())
-        }
+    async fn save_transaction(&self, _transaction: &WalletTransaction) -> Result<(), FinanceError> {
+        // In a real implementation, this would save to a database
+        Ok(())
+    }
 
-        async fn save_transaction(&self, _transaction: &crate::domain::wallet::WalletTransaction) -> Result<(), crate::domain::FinanceError> {
-            // In a real implementation, this would save to a database
-            Ok(())
-        }
-
-        async fn find_transactions_by_wallet_id(&self, _wallet_id: Uuid) -> Result<Vec<crate::domain::wallet::WalletTransaction>, crate::domain::FinanceError> {
-            Ok(self.transactions.clone())
-        }
+    async fn find_transactions_by_wallet_id(&self, _wallet_id: Uuid) -> Result<Vec<WalletTransaction>, FinanceError> {
+        Ok(self.transactions.clone())
+    }
+}
     }
 
     #[tokio::test]

@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant App
+    participant WalletService
+    participant p2pNetwork
+    participant Recipient
+    
+    App->>WalletService: sendTip(recipientId, amount)
+    WalletService->>WalletService: Deduct from sender
+    WalletService->>WalletService: Add to recipient
+    WalletService->>p2pNetwork: Broadcast TipSentEvent
+    p2pNetwork->>Recipient: Deliver TipSentEvent
+    Recipient->>Recipient: Show notification

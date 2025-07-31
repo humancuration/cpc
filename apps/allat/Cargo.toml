@@ -9,14 +9,14 @@ consent_manager = { path = "../../packages/core/consent_manager" }
 cpc_consent = { path = "../../packages/cpc_consent" }
 cpc_rbac = { path = "../../packages/cpc_rbac" }
 cpc_karma = { path = "../../packages/cpc_karma" }
-dabloons = { path = "../../apps/finance/src/domain/primitives.rs" }
+cpc_wallet = { path = "../../packages/core/wallet" }
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.0", features = ["full"] }
 uuid = { version = "1.0", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 rust_decimal = "1.26"
 thiserror = "1.0"
-social_integration = { path = "../social_integration" }
+social_integration = { path = "../../packages/social_integration" }
 cpc_auth = { path = "../../packages/cpc_auth" }
 sled = "0.34"
 bincode = "1.3"

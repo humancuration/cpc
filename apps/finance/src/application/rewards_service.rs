@@ -9,8 +9,8 @@ use chrono::{NaiveDate, Utc};
 use crate::domain::{
     rewards::{UniversalIncomeConfig, UIDistribution, UIService},
     primitives::{Money, Currency, FinancialError},
-    wallet::Wallet,
 };
+use cpc_wallet::domain::wallet::Wallet;
 use std::sync::Arc;
 
 /// Repository trait for Universal Income configuration persistence

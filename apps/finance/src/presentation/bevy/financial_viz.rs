@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use crate::domain::{
     budget::Budget,
     savings_goal::SavingsGoal,
-    wallet::Wallet,
 };
+use cpc_wallet::domain::wallet::Wallet;
 
 /// Build a budget vs actual comparison chart
 #[cfg(feature = "visualization")]

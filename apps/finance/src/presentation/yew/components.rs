@@ -4,7 +4,9 @@ use yew::prelude::*;
 use crate::domain::{
     budget::Budget,
     savings_goal::SavingsGoal,
-    wallet::{Wallet, WalletTransaction},
+};
+use cpc_wallet::domain::{
+    wallet::{Wallet, WalletTransaction, TransactionType},
 };
 
 /// Props for the BudgetChart component
@@ -114,8 +116,8 @@ pub struct WalletTransactionItemProps {
 #[function_component(WalletTransactionItem)]
 pub fn wallet_transaction_item(props: &WalletTransactionItemProps) -> Html {
     let transaction_type_class = match props.transaction.transaction_type {
-        crate::domain::wallet::TransactionType::Credit => "credit",
-        crate::domain::wallet::TransactionType::Debit => "debit",
+        TransactionType::Credit => "credit",
+        TransactionType::Debit => "debit",
     };
     
     html! {

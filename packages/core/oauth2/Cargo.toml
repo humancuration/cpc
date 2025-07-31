@@ -1,0 +1,79 @@
+[package]
+name = "cpc_oauth2"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Async traits
+async-trait = "0.1.68"
+
+# OAuth2 implementation
+oauth2 = { version = "4.4.0", features = ["basic", "reqwest"] }
+
+# Async runtime
+tokio = { version = "1.32.0", features = ["full"] }
+
+# HTTP client for OAuth2 requests
+reqwest = { version = "0.11", features = ["json"] }
+
+# Serialization
+serde = { version = "1.0.190", features = ["derive"] }
+serde_json = "1.0.107"
+
+# Error handling
+thiserror = "1.0.50"
+
+# Encryption - using RustCrypto
+aes-gcm = { version = "0.10.3", features = ["aes"] }
+rand = "0.8"
+base64 = "0.21"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# UUID for identifiers
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# URL handling
+url = "2.0"
+
+# Consent manager integration
+cpc_consent = { path = "../consent_manager" }
+
+# Audit framework integration
+cpc_audit = { path = "../audit_framework" }
+
+# gRPC
+prost = "0.12.1"
+tonic = "0.10.2"
+
+# Axum for REST API
+axum = "0.6"
+
+# Optional storage features
+sled = { version = "0.34", optional = true }
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"], optional = true }
+
+[build-dependencies]
+tonic-build = "0.10.2"
+
+[features]
+default = ["sled_storage"]
+sled_storage = ["sled"]
+postgres_storage = ["sqlx"]
+facebook = []
+google = []
+tiktok = []
+twitter = []
+
+[dev-dependencies]
+tokio-test = "0.4"
+criterion = { version = "0.5", features = ["async_tokio"] }
+
+[[bench]]
+name = "oauth2_benchmark"
+harness = false

@@ -9,8 +9,10 @@ use crate::domain::{
     FinanceError,
 };
 use crate::application::{
-    wallet_service::WalletService,
     budget_service::BudgetService,
+};
+use cpc_wallet::application::{
+    wallet_service::WalletService,
 };
 
 /// Repository trait for expense persistence

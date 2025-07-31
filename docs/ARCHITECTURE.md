@@ -307,3 +307,18 @@ A unified reputation system that tracks user contributions across all applicatio
 - Karma transactions are logged for audit purposes
 - Karma can be transferred between users
 - Improved performance metrics for offline operations
+
+## Monetization System
+
+The CPC platform supports monetization features including tipping. The tipping functionality has been moved to the Wallet module.
+
+### Key Components:
+- **Tip Transactions**: Secure transfer of funds between users
+- **Real-time Notifications**: GraphQL subscription for instant tip alerts
+- **Wallet Integration**: Direct integration with user wallets
+
+### Tipping Flow:
+1. User initiates tip from any app
+2. Wallet service processes the transaction
+3. Recipient receives real-time notification
+4. Transaction recorded in wallet history

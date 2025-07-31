@@ -2,14 +2,21 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::{
+    use cpc_wallet::{
         domain::{
             wallet::{Wallet, WalletTransaction, TransactionType},
-            budget::{Budget, BudgetPeriod},
             primitives::{Money, Currency},
         },
         application::{
-            wallet_service::{WalletService, WalletServiceImpl},
+            wallet_service::{WalletService, WalletServiceImpl, WalletRepository},
+        },
+    };
+    use crate::{
+        domain::{
+            budget::{Budget, BudgetPeriod},
+            primitives::{Money as DomainMoney, Currency as DomainCurrency},
+        },
+        application::{
             budget_service::{BudgetService, BudgetServiceImpl},
         },
     };
@@ -46,20 +53,20 @@ mod tests {
     }
 
     #[async_trait::async_trait]
-    impl crate::application::wallet_service::WalletRepository for MockWalletRepository {
-        async fn save_wallet(&self, _wallet: &crate::domain::wallet::Wallet) -> Result<(), crate::domain::FinanceError> {
+    impl WalletRepository for MockWalletRepository {
+        async fn save_wallet(&self, _wallet: &Wallet) -> Result<(), crate::domain::FinanceError> {
             Ok(())
         }
 
-        async fn find_wallet_by_user_id(&self, _user_id: Uuid) -> Result<Option<crate::domain::wallet::Wallet>, crate::domain::FinanceError> {
+        async fn find_wallet_by_user_id(&self, _user_id: Uuid) -> Result<Option<Wallet>, crate::domain::FinanceError> {
             Ok(self.wallet.clone())
         }
 
-        async fn save_transaction(&self, _transaction: &crate::domain::wallet::WalletTransaction) -> Result<(), crate::domain::FinanceError> {
+        async fn save_transaction(&self, _transaction: &WalletTransaction) -> Result<(), crate::domain::FinanceError> {
             Ok(())
         }
 
-        async fn find_transactions_by_wallet_id(&self, _wallet_id: Uuid) -> Result<Vec<crate::domain::wallet::WalletTransaction>, crate::domain::FinanceError> {
+        async fn find_transactions_by_wallet_id(&self, _wallet_id: Uuid) -> Result<Vec<WalletTransaction>, crate::domain::FinanceError> {
             Ok(self.transactions.clone())
         }
     }

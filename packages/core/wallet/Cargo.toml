@@ -1,0 +1,38 @@
+[package]
+name = "cpc_wallet"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Async traits
+async-trait = "0.1.68"
+
+# GraphQL
+async-graphql = "5.0"
+async-stream = "0.3.5"
+tokio-stream = "0.1.14"
+futures-util = "0.3.28"
+
+# Serialization
+serde = { version = "1.0.190", features = ["derive"] }
+serde_json = "1.0.107"
+
+# Error handling
+thiserror = "1.0.50"
+
+# UUID for identifiers
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Decimal numbers for financial calculations
+rust_decimal = "1.28"
+rust_decimal_macros = "1.28"
+
+# Logging
+tracing = "0.1"
+
+[dev-dependencies]
+tokio = { version = "1.32.0", features = ["full"] }
+tokio-test = "0.4"

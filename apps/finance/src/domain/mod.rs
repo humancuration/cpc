@@ -6,7 +6,6 @@ pub mod rewards;
 pub mod budget;
 pub mod savings_goal;
 pub mod primitives;
-pub mod wallet;
 pub mod expense_tracker;
 pub mod currency;
 

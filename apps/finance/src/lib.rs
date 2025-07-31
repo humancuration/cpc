@@ -39,7 +39,6 @@ pub use domain::{
     budget::Budget,
     savings_goal::SavingsGoal,
     primitives::{Money, Currency, Amount},
-    wallet::{Wallet, WalletTransaction, TransactionType},
     currency::{Currency as FullCurrency, CurrencyCode, CurrencyRegistry, ExchangeRate, ExchangeRateService},
 };
 

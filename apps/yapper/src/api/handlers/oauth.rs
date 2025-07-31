@@ -33,7 +33,7 @@ pub async fn oauth_initiate(
     // In a real implementation, this would redirect to the OAuth provider
     // For demo purposes, we'll just return an error
     match payload.provider.as_str() {
-        "google" | "facebook" | "tiktok" => {
+        "google" | "facebook" | "tiktok" | "twitter" => {
             // Simulate OAuth redirect
             let redirect_url = format!("https://{}.com/oauth/authorize?client_id=example&redirect_uri=http://localhost:3000/oauth/callback&response_type=code&scope=email", payload.provider);
             Ok(Redirect::to(&redirect_url))
@@ -51,7 +51,7 @@ pub async fn oauth_callback(
     // For demo purposes, we'll simulate a successful OAuth flow
     
     match payload.provider.as_str() {
-        "google" | "facebook" | "tiktok" => {
+        "google" | "facebook" | "tiktok" | "twitter" => {
             // Simulate successful OAuth flow
             // Create a dummy user for demonstration
             let user_id = Uuid::new_v4();
