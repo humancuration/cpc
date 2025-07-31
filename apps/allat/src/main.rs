@@ -3,13 +3,16 @@ use crate::domain::auth::{Credentials, User};
 use crate::domain::auth_service::{AuthService, AllatAuthService};
 use crate::infrastructure::repositories::user_repository::SledUserRepository;
 use std::sync::Arc;
+use sqlx::PgPool;
 
 mod domain {
     pub mod auth;
     pub mod auth_service;
     pub mod community;
     pub mod post;
+    pub mod comment;
     pub mod vote;
+    pub mod media_asset;
     pub mod karma_update_service;
 }
 
@@ -19,17 +22,53 @@ mod infrastructure {
     pub mod event_bus;
     pub mod repositories {
         pub mod user_repository;
+        pub mod community_repo;
+        pub mod post_repo;
+        pub mod comment_repo;
     }
     pub mod middleware;
 }
-
 mod application {
     pub mod vote_service;
+}
+
+mod api {
+    pub mod schema;
+    pub mod queries;
+    pub mod mutations;
+    pub mod subscriptions;
+}
+}
+
+async fn setup_database() -> Result<PgPool, Box<dyn std::error::Error>> {
+    // Get database URL from environment variable
+    let database_url = std::env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "postgresql://localhost/allat_dev".to_string());
+    
+    // Create connection pool
+    let pool = PgPool::connect(&database_url).await?;
+    
+    // Run migrations
+    sqlx::migrate!("./migrations").run(&pool).await?;
+    
+    Ok(pool)
 }
 
 #[tokio::main]
 async fn main() {
     println!("Allat - Reddit-style forums");
+    
+    // Setup database
+    let pool = match setup_database().await {
+        Ok(pool) => {
+            println!("Database connected and migrations applied successfully");
+            pool
+        },
+        Err(e) => {
+            eprintln!("Failed to setup database: {:?}", e);
+            return;
+        }
+    };
     
     // Initialize base auth service
     let base_auth_service = Arc::new(BaseAuthService::new());

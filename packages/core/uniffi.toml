@@ -1,9 +1,0 @@
-[ffi]
-namespace = "cpc_core"
-
-[export]
-types = ["VerificationResult"]
-functions = [
-    "verify_impact_report_signature",
-    "free_verification_result"
-]

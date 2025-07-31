@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use crate::domain::vote::Vote;
+use crate::domain::media_asset::MediaAsset;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Post {
@@ -14,10 +15,11 @@ pub struct Post {
     pub updated_at: DateTime<Utc>,
     pub votes: Vec<Vote>,
     pub parent_id: Option<Uuid>, // For threaded comments
+    pub media_assets: Vec<MediaAsset>,
 }
 
 impl Post {
-    pub fn new(community_id: Uuid, user_id: Uuid, title: String, content: String, parent_id: Option<Uuid>) -> Self {
+    pub fn new(community_id: Uuid, user_id: Uuid, title: String, content: String, parent_id: Option<Uuid>, media_assets: Vec<MediaAsset>) -> Self {
         let now = Utc::now();
         Self {
             id: Uuid::new_v4(),
@@ -29,6 +31,7 @@ impl Post {
             updated_at: now,
             votes: Vec::new(),
             parent_id,
+            media_assets,
         }
     }
 }

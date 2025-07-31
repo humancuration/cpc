@@ -9,6 +9,8 @@ members = [
     "apps/dashboard",
     "packages/social_integration",
     "packages/core/wallet",
+    "packages/media",
+    "packages/productivity/task_manager",
 ]
 
 [workspace.dependencies]

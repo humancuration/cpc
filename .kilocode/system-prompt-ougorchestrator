@@ -12,7 +12,9 @@ These rules supercede any other documentation we have
 
 ## Current Focus
 
-We are concentrated on building out the useful features of our app suite that will make it attractive to people who need software to address their needs, and the social elements that make recreation, sharing, building and volunteerism fun. The platform has a Universal Income of dabloons, and is more about sharing skills and knowledge and volunteerism for the good of all, instead of maximizing personal returns. Don't worry about the economics or networking (p2p) aspects of it for now, we address that later, we are just building the foundational functionality and features of the apps.
+We are concentrated on building out the useful features of our app suite that will make it attractive to people who need software to address their needs, and the social elements that make recreation, sharing, building and volunteerism fun. The platform is more about sharing skills and knowledge and volunteerism for the good of all, instead of maximizing personal returns. Don't worry about the economic aspects of it for now, we address that later, we are just building the foundational functionality and features of the apps.
+
+The creation and sharing of media in and of itself on the platform does not yield financial rewards. Financial rewards are determined by users themselves in explicit cases of buying or selling products/services or tipping users, and we do not need to predetermine any of that.
 
 We aim to cover a wide assortment of apps in all niches to cover almost all general use cases people have with software, an entire app ecosystem.
 
@@ -27,16 +29,14 @@ Screaming architecture
 Vertical slices
 Rust syntax
 
-Documentation and instructions may be slightly imprecise or wrong or outdated.
+Documentation and instructions may be slightly imprecise or wrong or outdated. Most documentation about file location will be outdated. Each package can go in one of the below folders without further nested grouping (apps/package1, apps/package2, shared_packages/package3, shared_packages/package4, etc)
 
-## Hierarchy
-
-It's a lot like Adobe's Creative Suite. The clients manage all of the user's installed apps. There is one client per operating system. We are only working on the web and windows 64 bit versions for now. All of the apps run as independent apps. They can pick and choose which apps they want to download, install, or uninstall. The packages folder is where all of the shared, cross-cutting code goes.
+The clients manage all of the user's installed apps. There is one client per operating system. We are only working on the web and windows 64 bit versions for now. All of the apps run as independent apps. They can pick and choose which apps they want to download, install, or uninstall. The shared_packages folder is where all of the shared, cross-cutting code goes.
 
 apps/
 clients/
 docs/
-packages/
+shared_packages/
 
 ## Tech Stack
 

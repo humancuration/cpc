@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use cpc_auth::models::User as BaseUser;
 use std::collections::HashMap;
+use uuid::Uuid;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct User {
