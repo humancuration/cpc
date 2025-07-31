@@ -1,3 +1,5 @@
+-- DEPRECATED: This file has been moved to the wallet package
+-- The tip functionality has been moved to the wallet package
 CREATE TABLE tip_transactions (
     id UUID PRIMARY KEY,
     sender_id UUID NOT NULL,

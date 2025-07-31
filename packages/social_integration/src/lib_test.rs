@@ -9,7 +9,6 @@ mod tests {
     };
     use crate::application::{
         social_integration_service::SocialIntegrationService,
-        tip_service::TipService,
         feed_service::FeedService,
     };
     use crate::infrastructure::{
@@ -71,26 +70,6 @@ mod tests {
     }
     
     #[test]
-    fn test_tip_transaction_creation() {
-        let sender_id = Uuid::new_v4();
-        let recipient_id = Uuid::new_v4();
-        let amount = Money::new(rust_decimal::Decimal::new(10, 0), Currency::Dabloons);
-        let description = "Thanks for the great post!".to_string();
-        
-        let transaction = crate::domain::tip_transaction::TipTransaction::new(
-            sender_id,
-            recipient_id,
-            amount.clone(),
-            description.clone(),
-        );
-        
-        assert_eq!(transaction.sender_id, sender_id);
-        assert_eq!(transaction.recipient_id, recipient_id);
-        assert_eq!(transaction.amount, amount);
-        assert_eq!(transaction.description, description);
-        assert_eq!(transaction.transaction_type, "tip");
-    }
-    
     #[tokio::test]
     async fn test_in_memory_repository() {
         let repo = InMemoryUnifiedPostRepository::new();

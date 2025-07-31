@@ -1,12 +1,11 @@
 # Social Integration Crate
 
-This crate provides functionality for integrating social features across CPC apps, including unified feeds, cross-posting, and social tipping.
+This crate provides functionality for integrating social features across CPC apps, including unified feeds and cross-posting.
 
 ## Features
 
 - Unified post model for cross-app social content
 - Social event tracking
-- Tipping system for social interactions
 - Unified feed generation
 - Integration with Allat (Reddit-style forums) and Yapper (Twitter-style microblogging)
 
@@ -24,7 +23,7 @@ The domain layer contains the core models and concepts:
 The application layer contains the business logic:
 
 - `social_integration_service`: Main service for integrating social features
-- `tip_service`: Service for handling social tipping
+- `tip_service`: Service for handling social tipping (DEPRECATED - moved to wallet package)
 - `feed_service`: Service for generating unified feeds
 
 ### Infrastructure
@@ -77,30 +76,33 @@ let post = UnifiedPost::new(
 ```
 
 ### Sending Tips Between Users
+### Sending Tips Between Users
+
+**NOTE**: The tipping functionality has been moved to the wallet package. Please refer to the wallet package documentation for the current implementation.
 
 ```rust
-use social_integration::domain::tip_transaction::TipTransaction;
-use social_integration::application::tip_service::TipService;
-use cpc_wallet::domain::primitives::{Money, Currency};
-use uuid::Uuid;
-use chrono::Utc;
-use rust_decimal_macros::dec;
-
-// Create a tip service with a wallet service
-let tip_service = TipService::new(
-    Box::new(wallet_service),
-    Box::new(tip_transaction_repository),
-);
-
-// Send a tip from one user to another
-let sender_id = Uuid::new_v4();
-let recipient_id = Uuid::new_v4();
-let amount = Money::new(dec!(10), Currency::Dabloons);
-let note = Some("Thanks for the great post!".to_string());
-
-tip_service.send_tip(sender_id, recipient_id, amount, note).await?;
+// Previous implementation (DEPRECATED)
+// use social_integration::domain::tip_transaction::TipTransaction;
+// use social_integration::application::tip_service::TipService;
+// use cpc_wallet::domain::primitives::{Money, Currency};
+// use uuid::Uuid;
+// use chrono::Utc;
+// use rust_decimal_macros::dec;
+//
+// // Create a tip service with a wallet service
+// let tip_service = TipService::new(
+//     Box::new(wallet_service),
+//     Box::new(tip_transaction_repository),
+// );
+//
+// // Send a tip from one user to another
+// let sender_id = Uuid::new_v4();
+// let recipient_id = Uuid::new_v4();
+// let amount = Money::new(dec!(10), Currency::Dabloons);
+// let note = Some("Thanks for the great post!".to_string());
+//
+// tip_service.send_tip(sender_id, recipient_id, amount, note).await?;
 ```
-
 ## Testing
 
 Run tests with:

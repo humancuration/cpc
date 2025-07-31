@@ -32,7 +32,7 @@ Implemented full database integration tests for all PostgreSQL repositories usin
 - `test_following_order_is_preserved` - Tests that following order is preserved
 - `test_circular_following` - Tests circular following relationships
 
-### PostgresTipTransactionRepository Tests (`postgres_tip_transaction_repository_test.rs`)
+### PostgresTipTransactionRepository Tests (`postgres_tip_transaction_repository_test.rs`) (DEPRECATED - moved to wallet package)
 
 - `test_record_transaction` - Tests recording a tip transaction
 - `test_record_transaction_non_dabloon_currency` - Tests currency validation (all currencies allowed)

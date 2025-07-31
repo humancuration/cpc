@@ -16,4 +16,4 @@ pub mod graphql;
 
 // Re-export key types
 pub use domain::{Wallet, WalletTransaction, TransactionType, Money, Currency};
-pub use application::{WalletService, WalletRepository};
+pub use application::{WalletService, WalletRepository, TipService};

@@ -18,11 +18,11 @@ This document summarizes the implementation of comprehensive database integratio
 **Migration File Created:**
 - `packages/social_integration/migrations/0004_enhance_unified_posts.sql`
 
-### 2. Flexible Currency Support
+### 2. Flexible Currency Support (DEPRECATED - moved to wallet package)
 
 **Files Modified:**
-- `packages/social_integration/src/infrastructure/repositories/postgres_tip_transaction_repository.rs`
-- `packages/social_integration/src/infrastructure/repositories/postgres_tip_transaction_repository_test.rs`
+- `packages/social_integration/src/infrastructure/repositories/postgres_tip_transaction_repository.rs` (DEPRECATED)
+- `packages/social_integration/src/infrastructure/repositories/postgres_tip_transaction_repository_test.rs` (DEPRECATED)
 
 **Changes:**
 - Removed Dabloons currency restriction

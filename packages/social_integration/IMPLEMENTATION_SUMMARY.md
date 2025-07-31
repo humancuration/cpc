@@ -7,7 +7,6 @@ This document summarizes the implementation of the social integration features f
 The social integration crate provides functionality for integrating social features across CPC apps, including:
 - Unified feeds
 - Cross-posting
-- Social tipping (dabloons distribution)
 
 ## Key Components Implemented
 
@@ -21,7 +20,7 @@ A new crate `cpc-social-integration` was created with the following structure:
 
 #### Application Layer
 - `social_integration_service`: Main service for integrating social features
-- `tip_service`: Service for handling social tipping between users
+- `tip_service`: Service for handling social tipping between users (DEPRECATED - moved to wallet package)
 - `feed_service`: Service for generating unified feeds (chronological and algorithmic)
 
 #### GraphQL Layer
@@ -59,14 +58,6 @@ Twitter OAuth support was added to the existing OAuth2 crate:
 - Updated Cargo.toml to use cpc_wallet instead of direct finance dependency
 - Added social_integration dependency
 
-## Tipping System
-
-The tipping system allows users to voluntarily send dabloons to other users for their content:
-- Users can send tips of any amount to other users
-- Tips are transferred directly between user wallets
-- All tip transactions are recorded for audit purposes
-- Supports multiple currencies (Dabloons and traditional currencies)
-
 ## Testing
 
 - Unit tests for all domain models
@@ -80,17 +71,7 @@ The social integration crate can be used to:
 2. Process social events for analytics and tracking
 3. Generate unified feeds for users
 4. Integrate with existing social apps (Allat and Yapper)
-5. Send tips between users
-6. Query tip transactions via GraphQL API
-
-## GraphQL API
-
-A GraphQL API has been implemented for the tipping functionality:
-- `sendTip` mutation for sending tips between users
-- `tipTransactionsByUser` query for fetching tip transaction history
-- Input validation for tip amounts and note length
-- Authorization middleware to ensure users can only access their own data
-- Error handling according to the GraphQL specification
+5. Query tip transactions via GraphQL API
 
 ## Next Steps
 

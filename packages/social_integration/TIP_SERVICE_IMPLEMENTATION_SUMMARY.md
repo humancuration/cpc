@@ -1,4 +1,7 @@
-# Tip Service Implementation Summary
+# Tip Service Implementation Summary (DEPRECATED)
+
+**NOTE**: This document describes the deprecated tip service implementation. The tip functionality has been moved to the wallet package.
+Please refer to the wallet package documentation for the current implementation.
 
 This document summarizes the implementation of the new tip service for the social integration system, replacing the old automatic reward system.
 

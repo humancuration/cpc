@@ -7,7 +7,7 @@ This document provides a comprehensive summary of the PostgreSQL implementation 
 This implementation replaces the in-memory repositories with production-ready PostgreSQL implementations for:
 1. Unified posts storage
 2. User following relationships
-3. Tip transaction recording
+3. Tip transaction recording (DEPRECATED - moved to wallet package)
 
 ## Key Components Implemented
 
@@ -17,7 +17,7 @@ Created three SQL migration scripts in `packages/social_integration/migrations/`
 
 - `0001_create_unified_posts_table.sql`
 - `0002_create_user_following_table.sql` 
-- `0003_create_tip_transactions_table.sql`
+- `0003_create_tip_transactions_table.sql` (DEPRECATED - moved to wallet package)
 
 These scripts create the necessary tables and indexes for the social integration system.
 
@@ -34,7 +34,7 @@ These scripts create the necessary tables and indexes for the social integration
 - Manages user following relationships in the database
 - Supports creating, removing, and querying following relationships
 
-#### PostgresTipTransactionRepository
+#### PostgresTipTransactionRepository (DEPRECATED - moved to wallet package)
 - Implements the `TipTransactionRepository` trait
 - Records tip transactions for audit and tracking purposes
 - Supports all currency types
@@ -47,7 +47,7 @@ These scripts create the necessary tables and indexes for the social integration
 - Following operations now persist to the database
 - Feed generation now queries the database for following relationships
 
-#### TipService
+#### TipService (DEPRECATED - moved to wallet package)
 - Updated to use `TipTransactionRepository` for transaction recording
 - Constructor now requires a repository dependency
 - Tip processing now records transactions before updating wallets
@@ -78,7 +78,7 @@ Updated the main library exports to include:
 Created placeholder test files for all repositories:
 - `postgres_unified_post_repository_test.rs`
 - `postgres_user_following_repository_test.rs`
-- `postgres_tip_transaction_repository_test.rs`
+- `postgres_tip_transaction_repository_test.rs` (DEPRECATED - moved to wallet package)
 
 These files contain the structure for database integration tests, though actual database connections would be needed to run them.
 
@@ -113,7 +113,7 @@ use cpc_social_integration::{
 // Assuming you have a PgPool instance
 let post_repo = PostgresUnifiedPostRepository::new(pool.clone());
 let following_repo = PostgresUserFollowingRepository::new(pool.clone());
-let tip_repo = PostgresTipTransactionRepository::new(pool.clone());
+// let tip_repo = PostgresTipTransactionRepository::new(pool.clone()); (DEPRECATED - moved to wallet package)
 ```
 
 ### Updating Services
@@ -144,7 +144,7 @@ The database integration tests use the `sqlx::test` attribute which automaticall
 The tests are organized in modules next to their corresponding repositories:
 - `postgres_unified_post_repository_test.rs` - Tests for unified post repository
 - `postgres_user_following_repository_test.rs` - Tests for user following repository
-- `postgres_tip_transaction_repository_test.rs` - Tests for tip transaction repository
+- `postgres_tip_transaction_repository_test.rs` - Tests for tip transaction repository (DEPRECATED - moved to wallet package)
 
 ### What the Tests Cover
 
@@ -165,7 +165,7 @@ The tests are organized in modules next to their corresponding repositories:
 - Order preservation
 - Circular relationships
 
-#### PostgresTipTransactionRepository Tests
+#### PostgresTipTransactionRepository Tests (DEPRECATED - moved to wallet package)
 - Record tip transactions
 - Currency validation (supports all currencies)
 - Multiple transactions
@@ -178,18 +178,18 @@ The tests are organized in modules next to their corresponding repositories:
 1. Migration scripts:
    - `migrations/0001_create_unified_posts_table.sql`
    - `migrations/0002_create_user_following_table.sql`
-   - `migrations/0003_create_reward_transactions_table.sql`
+   - `migrations/0003_create_reward_transactions_table.sql` (DEPRECATED - moved to wallet package)
    - `migrations/0004_enhance_unified_posts.sql`
 
 2. Repository implementations:
    - `src/infrastructure/repositories/postgres_unified_post_repository.rs`
    - `src/infrastructure/repositories/postgres_user_following_repository.rs`
-   - `src/infrastructure/repositories/postgres_tip_transaction_repository.rs`
+   - `src/infrastructure/repositories/postgres_tip_transaction_repository.rs` (DEPRECATED - moved to wallet package)
 
 3. Test files:
    - `src/infrastructure/repositories/postgres_unified_post_repository_test.rs`
    - `src/infrastructure/repositories/postgres_user_following_repository_test.rs`
-   - `src/infrastructure/repositories/postgres_tip_transaction_repository_test.rs`
+   - `src/infrastructure/repositories/postgres_tip_transaction_repository_test.rs` (DEPRECATED - moved to wallet package)
 
 4. Integration test:
    - `src/integration_test.rs`
@@ -206,6 +206,6 @@ The tests are organized in modules next to their corresponding repositories:
 2. `src/lib.rs` - Added exports for new repositories and traits
 3. `src/infrastructure/repositories/mod.rs` - Updated module structure
 4. `src/application/feed_service.rs` - Updated to use UserFollowingRepository
-5. `src/application/tip_service.rs` - Updated to use TipTransactionRepository
+5. `src/application/tip_service.rs` - Updated to use TipTransactionRepository (DEPRECATED - moved to wallet package)
 
 This implementation provides a solid foundation for production use of the social integration system with persistent storage.

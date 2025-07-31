@@ -8,7 +8,7 @@ Three migration scripts were created in `packages/social_integration/migrations/
 
 1. `0001_create_unified_posts_table.sql` - Creates the unified_posts table for storing social posts
 2. `0002_create_user_following_table.sql` - Creates the user_following table for storing following relationships
-3. `0003_create_tip_transactions_table.sql` - Creates the tip_transactions table for storing tip transactions
+3. `0003_create_tip_transactions_table.sql` - Creates the tip_transactions table for storing tip transactions (DEPRECATED - moved to wallet package)
 
 ## Repository Implementations
 
@@ -33,9 +33,9 @@ Three migration scripts were created in `packages/social_integration/migrations/
   - `unfollow` - Removes a following relationship
   - `get_following` - Retrieves all users that a user is following
 
-### PostgresTipTransactionRepository
+### PostgresTipTransactionRepository (DEPRECATED - moved to wallet package)
 
-- Located at: `packages/social_integration/src/infrastructure/repositories/postgres_tip_transaction_repository.rs`
+- Located at: `packages/social_integration/src/infrastructure/repositories/postgres_tip_transaction_repository.rs` (DEPRECATED)
 - Implements the `TipTransactionRepository` trait
 - Provides PostgreSQL-based storage for tip transactions
 - Methods implemented:
@@ -50,7 +50,7 @@ Three migration scripts were created in `packages/social_integration/migrations/
 - `follow_user` and `unfollow_user` methods now use the repository
 - `get_user_feed` method now retrieves following relationships from the database
 
-### TipService
+### TipService (DEPRECATED - moved to wallet package)
 
 - Updated to use `TipTransactionRepository` to record transactions
 - Constructor now requires a `TipTransactionRepository` parameter
@@ -71,7 +71,7 @@ Created comprehensive database integration tests for all repositories:
 
 - `postgres_unified_post_repository_test.rs`
 - `postgres_user_following_repository_test.rs`
-- `postgres_tip_transaction_repository_test.rs`
+- `postgres_tip_transaction_repository_test.rs` (DEPRECATED - moved to wallet package)
 
 These files contain full integration tests using the `sqlx::test` attribute which automatically
 manages test databases. Tests cover all CRUD operations, error handling, JSON serialization,

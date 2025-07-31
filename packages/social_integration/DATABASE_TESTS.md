@@ -32,7 +32,7 @@ The `sqlx::test` attribute will automatically:
 The tests are organized in modules next to their corresponding repositories:
 - `postgres_unified_post_repository_test.rs` - Tests for unified post repository
 - `postgres_user_following_repository_test.rs` - Tests for user following repository
-- `postgres_tip_transaction_repository_test.rs` - Tests for tip transaction repository
+- `postgres_tip_transaction_repository_test.rs` - Tests for tip transaction repository (DEPRECATED - moved to wallet package)
 
 ## What the Tests Cover
 
@@ -54,7 +54,7 @@ The tests are organized in modules next to their corresponding repositories:
 - Order preservation
 - Circular relationships
 
-### PostgresTipTransactionRepository Tests
+### PostgresTipTransactionRepository Tests (DEPRECATED - moved to wallet package)
 - Record tip transactions
 - Currency validation (supports all currencies)
 - Multiple transactions
@@ -88,7 +88,7 @@ The tests are organized in modules next to their corresponding repositories:
 8. `test_following_order_is_preserved`: Verifies the order of following is preserved
 9. `test_circular_following`: Tests circular following relationships
 
-### Tip Transaction Repository Tests
+### Tip Transaction Repository Tests (DEPRECATED - moved to wallet package)
 
 1. `test_record_transaction`: Basic transaction recording
 2. `test_record_transaction_with_different_currencies`: Tests recording transactions with different currencies
@@ -117,8 +117,8 @@ cargo test postgres_unified_post_repository_test
 # Run only user following repository tests
 cargo test postgres_user_following_repository_test
 
-# Run only tip transaction repository tests
-cargo test postgres_tip_transaction_repository_test
+# Run only tip transaction repository tests (DEPRECATED - moved to wallet package)
+# cargo test postgres_tip_transaction_repository_test
 ```
 
 ### Running Specific Tests

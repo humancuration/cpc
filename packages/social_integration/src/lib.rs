@@ -21,7 +21,6 @@ pub use graphql::{
     create_schema,
     SocialIntegrationSchema,
 };
-};
 
 pub use infrastructure::repositories::{
     PostgresUnifiedPostRepository,

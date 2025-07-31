@@ -1,8 +1,8 @@
 //! Basic usage example for the social integration crate
 
 use social_integration::domain::post::{UnifiedPost, AppSource, PostMetadata, EngagementMetrics, PrivacySettings};
-use social_integration::domain::tip_transaction::TipTransaction;
-use social_integration::application::tip_service::TipService;
+// use social_integration::domain::tip_transaction::TipTransaction; // DEPRECATED - moved to wallet package
+// use social_integration::application::tip_service::TipService; // DEPRECATED - moved to wallet package
 use social_integration::infrastructure::repositories::InMemoryUnifiedPostRepository;
 use cpc_wallet::domain::primitives::{Money, Currency};
 use uuid::Uuid;
@@ -54,55 +54,56 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     
     // Create a tip service (with a mock wallet service)
-    let tip_service = TipService::new(
-        Box::new(MockWalletService::new()),
-        Box::new(MockTipTransactionRepository::new()),
-    );
+    // NOTE: The tip functionality has been moved to the wallet package
+    // let tip_service = TipService::new(
+    //     Box::new(MockWalletService::new()),
+    //     Box::new(MockTipTransactionRepository::new()),
+    // );
     
     // Send a tip from one user to another
-    let sender_id = Uuid::new_v4();
-    let recipient_id = author_id; // Tip the post author
-    let amount = Money::new(dec!(5), Currency::Dabloons);
-    let note = Some("Great post!".to_string());
+    // let sender_id = Uuid::new_v4();
+    // let recipient_id = author_id; // Tip the post author
+    // let amount = Money::new(dec!(5), Currency::Dabloons);
+    // let note = Some("Great post!".to_string());
     
-    tip_service.send_tip(sender_id, recipient_id, amount, note).await?;
-    println!("Sent tip from user {} to user {}", sender_id, recipient_id);
+    // tip_service.send_tip(sender_id, recipient_id, amount, note).await?;
+    // println!("Sent tip from user {} to user {}", sender_id, recipient_id);
     
     Ok(())
 }
-
-#[async_trait::async_trait]
-impl social_integration::infrastructure::repositories::TipTransactionRepository for MockTipTransactionRepository {
-    async fn record_transaction(
-        &self,
-        sender_id: uuid::Uuid,
-        recipient_id: uuid::Uuid,
-        amount: cpc_wallet::domain::primitives::Money,
-        transaction_type: String,
-        description: String
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        println!("Recording tip transaction: {} dabloons from user {} to user {} (type: {}, description: {})",
-                 amount.amount, sender_id, recipient_id, transaction_type, description);
-        Ok(())
-    }
-}
-
-/// Mock wallet service for demonstration
-struct MockWalletService;
-
-/// Mock tip transaction repository for demonstration
-struct MockTipTransactionRepository;
-
-impl MockWalletService {
-    fn new() -> Self {
-        Self
-    }
-}
-
-impl MockTipTransactionRepository {
-    fn new() -> Self {
-        Self
-    }
+// #[async_trait::async_trait]
+// impl social_integration::infrastructure::repositories::TipTransactionRepository for MockTipTransactionRepository {
+//     async fn record_transaction(
+//         &self,
+//         sender_id: uuid::Uuid,
+//         recipient_id: uuid::Uuid,
+//         amount: cpc_wallet::domain::primitives::Money,
+//         transaction_type: String,
+//         description: String
+//     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+//         println!("Recording tip transaction: {} dabloons from user {} to user {} (type: {}, description: {})",
+//                  amount.amount, sender_id, recipient_id, transaction_type, description);
+//         Ok(())
+//     }
+// }
+//
+// /// Mock wallet service for demonstration
+// struct MockWalletService;
+//
+// /// Mock tip transaction repository for demonstration
+// struct MockTipTransactionRepository;
+//
+// impl MockWalletService {
+//     fn new() -> Self {
+//         Self
+//     }
+// }
+//
+// impl MockTipTransactionRepository {
+//     fn new() -> Self {
+//         Self
+//     }
+// }
 }
 
 #[async_trait::async_trait]
