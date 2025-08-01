@@ -40,17 +40,17 @@ This document summarizes the critical security fixes implemented for the invoici
 ## Files Modified/Created
 
 ### New Files
-1. `packages/cpc-core/invoicing/src/infrastructure/p2p/session_manager.rs` - Session management for Double Ratchet
-2. `packages/cpc-net/src/secure_storage.rs` - Secure storage for sensitive data
-3. `packages/cpc-net/src/circuit_breaker.rs` - Circuit breaker implementation
-4. `packages/cpc-core/invoicing/SECURITY_FIXES_SUMMARY.md` - This document
+1. `apps/invoicing/src/infrastructure/p2p/session_manager.rs` - Session management for Double Ratchet
+2. `shared_packages/network/src/secure_storage.rs` - Secure storage for sensitive data
+3. `shared_packages/network/src/circuit_breaker.rs` - Circuit breaker implementation
+4. `apps/invoicing/SECURITY_FIXES_SUMMARY.md` - This document
 
 ### Modified Files
-1. `packages/cpc-core/invoicing/src/infrastructure/p2p/mod.rs` - Added session_manager module
-2. `packages/cpc-core/invoicing/src/infrastructure/p2p/data_sharing.rs` - Updated to use new security components
-3. `packages/cpc-net/src/crypto.rs` - Added encrypt/decrypt methods to NoiseSession
-4. `packages/cpc-net/src/lib.rs` - Exported new modules and types
-5. `packages/cpc-net/Cargo.toml` - Added required dependencies
+1. `apps/invoicing/src/infrastructure/p2p/mod.rs` - Added session_manager module
+2. `apps/invoicing/src/infrastructure/p2p/data_sharing.rs` - Updated to use new security components
+3. `shared_packages/network/src/crypto.rs` - Added encrypt/decrypt methods to NoiseSession
+4. `shared_packages/network/src/lib.rs` - Exported new modules and types
+5. `shared_packages/network/Cargo.toml` - Added required dependencies
 
 ## Dependencies Added
 - `zeroize = "1.5"` - For secure memory wiping

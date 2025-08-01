@@ -76,7 +76,7 @@ cpc-core = { path = "../", features = ["recruitment"] }
 Enable the web feature to use Yew UI components:
 
 ```toml
-cpc-recruitment = { path = "./packages/cpc-core/recruitment", features = ["web"] }
+cpc-recruitment = { path = "./apps/recruitment", features = ["web"] }
 ```
 
 ### gRPC Services
@@ -84,7 +84,7 @@ cpc-recruitment = { path = "./packages/cpc-core/recruitment", features = ["web"]
 Enable the grpc feature for internal service communication:
 
 ```toml
-cpc-recruitment = { path = "./packages/cpc-core/recruitment", features = ["grpc"] }
+cpc-recruitment = { path = "./apps/recruitment", features = ["grpc"] }
 ```
 
 ## Testing

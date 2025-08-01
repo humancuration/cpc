@@ -5,7 +5,7 @@ This document outlines the architecture for the advanced CRM module that extends
 ## 1. Module Structure (Updated)
 
 ```
-packages/cpc-core/advanced_crm/
+apps/advanced_crm/
 ├── ARCHITECTURE.md
 ├── Cargo.toml
 └── src/

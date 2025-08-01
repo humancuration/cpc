@@ -18,7 +18,7 @@ The calendar module follows a hexagonal architecture with vertical slices, imple
 ### Module Structure
 
 ```
-packages/cpc-core/calendar/
+apps/calendar/
 ├── Cargo.toml
 ├── README.md
 └── src/

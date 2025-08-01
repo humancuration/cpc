@@ -23,7 +23,7 @@ This module provides a complete invoicing and quoting system with:
 The module follows a strict vertical slice architecture with clear boundaries between layers:
 
 ```
-packages/cpc-core/invoicing/
+apps/invoicing/
 ├── Cargo.toml
 ├── README.md
 ├── ARCHITECTURE.md
@@ -61,7 +61,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-cpc-invoicing = { path = "packages/cpc-core/invoicing" }
+cpc-invoicing = { path = "apps/invoicing" }
 ```
 
 Enable features as needed:

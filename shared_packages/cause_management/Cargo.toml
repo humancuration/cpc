@@ -1,0 +1,30 @@
+[package]
+name = "cause_management"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "cause_management"
+path = "src/main.rs"
+
+[dependencies]
+# Workspace dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true }
+sqlx = { workspace = true }
+rust_decimal = { workspace = true }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Local dependencies
+# Add any local dependencies here when needed
+
+[build-dependencies]
+tonic-build = "0.14.0"

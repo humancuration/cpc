@@ -1,0 +1,24 @@
+[package]
+name = "cpay"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Workspace dependencies
+tauri = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+axum = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true }
+
+# Local dependencies
+cpay_core = { path = "../../shared_packages/cpay_core" }
+notification_core = { path = "../../shared_packages/notification_core" }
+social_integration = { path = "../../shared_packages/social_integration" }
+wallet = { path = "../../shared_packages/wallet" }
+
+[build-dependencies]
+tauri-build = "2.0.0"

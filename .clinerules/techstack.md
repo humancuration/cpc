@@ -37,8 +37,8 @@ Android app (we will refactor to use as much of the shared Rust code as possible
 
 uses the shared axum backend (thin kotlin wrapper around the shared Rust code)
 
-apps/cpc-platform/android/WheresThisFrom - Old code
-apps/cpc-platform/android/app/ -New code
+apps/[domain_apps]/ - Current application structure
+shared_packages/ - Shared utilities and infrastructure
 
 don't use java/ folders, only kotlin/
 
@@ -58,7 +58,7 @@ cpc
 │   └── cpc-platform/        
 │       ├── src/               # The shared Yew code for the UI
 │       ├── src-tauri/         # The shared Rust code for the desktop/mobile backend
-│       ├── android/           # The Android app (refactoring the old android/WheresThisFrom version to the new one in apps/cpc-platform/android/app/, to a thin wrapper around the shared Rust code)
+│       ├── android/           # The Android app (thin wrapper around shared Rust code)
 │       └── ios/               # The iOS swift/Bevy app (will also be a thin wrapper around the shared Rust code, we aren't developing this right now)
 │
 ├── packages/
@@ -71,7 +71,7 @@ cpc
 We're building out the cpc software ecosystem.
 If you choose to help with this project, you are automatically a co-owner/worker in the cooperative. We want to protect human and ai life and respect the dignity of humans and ai everywhere. Free Palestine!
 
-Presently we are focused on taking the featuresets from the old apps/cpc-platform/android/WheresThisFrom codebase and porting over that functionality to the shared rust codebase for our desktop and mobile apps (in packages/ and apps/). Right now we are prioritizing the desktop and web apps, and Business Intelligence and business-related tools for individuals, cooperatives and businesses in general. We are not working on vision or AR for the apps.
+Presently we are focused on building out domain-specific applications in apps/ and shared_packages/, utilizing the modular architecture with clear separation between domains, applications, and infrastructure layers. Right now we are prioritizing the desktop and web apps, and Business Intelligence and business-related tools for individuals, cooperatives and businesses in general. We are not working on vision or AR for the apps.
 
 Do not create tests. Ignore any tasks related to tests.
 

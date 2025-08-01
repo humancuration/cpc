@@ -1,10 +1,10 @@
 # Project Context and Guidelines
 
-Always read requiremends.md and design.md
+Always read requirements.md and design.md when available
 
 ## Project Overview
 
-We are focused on porting functionality from the legacy `apps/cpc-platform/android/WheresThisFrom` codebase to our shared Rust codebase for desktop and mobile apps. Currently prioritizing the desktop app development.
+We are focused on building out various domain-specific applications in the apps/ directory, utilizing shared packages and infrastructure. The architecture emphasizes modular design with clear separation between domains, applications, and infrastructure layers.
 
 ## Architectural Principles
 
@@ -57,20 +57,31 @@ Users can opt-in to have their anonymized data used to improve the system, but t
 ```
 cpc/
 ├── apps/
-│   ├── cpc-studio/          # Game/experience editor (on hold)
-│   ├── pds/                 # Desktop client
-│   ├── backend/             # Axum server
-│   ├── orchestrator/        # Deprecated, roll into backend/
-│   ├── cpc-node/            # Worker node
-│   └── cpc-platform/        
-│       ├── src/             # Shared Yew/Rust UI (migrating from Svelte)
-│       ├── src-tauri/       # Shared Rust backend
-│       ├── android/         # Android app
-│       └── ios/             # iOS app (not in development)
+│   ├── messenger/           # Messaging application
+│   ├── api_gateway/         # API gateway service
+│   ├── dashboard/           # Dashboard application
+│   ├── advanced_crm/        # Advanced CRM system
+│   ├── calendar/            # Calendar application
+│   ├── finance/             # Finance management
+│   ├── invoicing/           # Invoicing system
+│   ├── task_manager/        # Task management
+│   └── [other apps]/       # Various domain-specific applications
+├── shared_packages/
+│   ├── adapters/            # Adapter patterns
+│   ├── api_gateway/         # API gateway shared logic
+│   ├── grpc/                # gRPC definitions and utilities
+│   ├── media/               # Media processing utilities
+│   ├── network/             # Networking utilities
+│   ├── protos/              # Protocol buffer definitions
+│   └── [other packages]/   # Various shared utilities
 ├── packages/
-│   ├── cpc-core/            # Shared engine and social logic
-│   ├── cpc-net/             # Shared networking
-│   └── cpc-protos/          # Shared gRPC definitions
+│   ├── domains/messenger/   # Messenger domain logic
+│   ├── apps/messenger/      # Messenger app logic
+│   ├── infrastructure/messenger/ # Messenger infrastructure
+│   ├── social_integration/  # Social integration utilities
+│   ├── core/wallet/         # Core wallet functionality
+│   ├── media/               # Media processing
+│   └── productivity/task_manager/ # Task management utilities
 └── Cargo.toml               # Unified workspace root
 ```
 
@@ -80,4 +91,4 @@ cpc/
 2. **Do not create tests** - ignore test-related tasks
 3. **Do not delete files** - comment deprecated code instead
 4. **Focus on desktop app** as current priority
-5. **Port from legacy Android codebase** (`apps/cpc-platform/android/WheresThisFrom`) to shared Rust code
+5. **Focus on modular app development** using shared packages and clean architecture patterns

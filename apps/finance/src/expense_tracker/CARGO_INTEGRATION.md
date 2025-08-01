@@ -8,7 +8,7 @@ The Expense Tracker module is designed to integrate seamlessly with the existing
 
 ## Current Cargo.toml Structure
 
-The Expense Tracker module works with the existing `packages/cpc-core/Cargo.toml` configuration:
+The Expense Tracker module works with the existing `apps/finance/Cargo.toml` configuration:
 
 ```toml
 [package]

@@ -5,7 +5,7 @@ This document provides a comprehensive overview of the complete module structure
 ## Module Hierarchy
 
 ```
-packages/cpc-core/finance/src/expense_tracker/
+apps/finance/src/expense_tracker/
 ├── mod.rs                           # Main module declaration
 ├── domain/
 │   └── mod.rs                       # Domain models and entities
@@ -45,25 +45,25 @@ packages/cpc-core/finance/src/expense_tracker/
 
 ### Database Migration
 ```
-packages/cpc-core/migrations/
+migrations/
 └── 20250728000015_add_expense_tracker_tables.sql  # Database schema migration
 ```
 
 ### Integration Files
 ```
-packages/cpc-core/finance/src/
+apps/finance/src/
 ├── domain/mod.rs                                  # Added expense_tracker module reference
 ├── application/mod.rs                             # Added expense_tracker module reference
 ├── lib.rs                                         # Added expense_tracker module and test module
 └── infrastructure/database/mod.rs                 # Added expense_tracker_repositories module reference
 
-packages/cpc-core/finance/src/infrastructure/database/
+apps/finance/src/infrastructure/database/
 └── expense_tracker_repositories.rs                # Centralized repository implementations
 ```
 
 ### Test Files
 ```
-packages/cpc-core/finance/src/
+apps/finance/src/
 ├── expense_tracker_test.rs                        # Unit tests
 └── expense_tracker_integration_test.rs            # Integration test outlines
 ```

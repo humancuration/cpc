@@ -1,0 +1,35 @@
+[package]
+name = "cpay_core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Workspace dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+axum = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true }
+sqlx = { workspace = true }
+rust_decimal = { workspace = true }
+rust_decimal_macros = { workspace = true }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
+rust-crypto = { workspace = true }
+
+# Local dependencies
+notification_core = { path = "../notification_core" }
+social_integration = { path = "../social_integration" }
+wallet = { path = "../wallet" }
+
+[build-dependencies]
+tonic-build = "0.14.0"
+
+[dev-dependencies]
+notification_core = { path = "../notification_core" }
+social_integration = { path = "../social_integration" }
+wallet = { path = "../wallet" }

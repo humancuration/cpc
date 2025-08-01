@@ -15,8 +15,8 @@ We use ONLY permissive libraries and technologies (MIT, Apache 2.0)
 
 Android app (we will refactor to use as much of the shared Rust code as possible)
 
-apps/cpc-platform/android/WheresThisFrom - Old code
-apps/cpc-platform/android/app/ -New code
+apps/[domain_apps]/ - Current application structure
+shared_packages/ - Shared utilities and infrastructure
 
 uses the shared axum backend, svelte, tauri, bevy, graphql_client, tokio-tungstenite, rusqlite, js, tokio, serde, JSON, chrono, Date
 
@@ -38,7 +38,7 @@ cpc
 │   └── cpc-platform/        
 │       ├── src/               # The shared Svelte/JS source code for the UI
 │       ├── src-tauri/         # The shared Rust code for the desktop/mobile backend
-│       ├── android/           # The Android app (refactoring the old android/WheresThisFrom version to the new one in apps/cpc-platform/android/app/, to a thin wrapper around the shared Rust code)
+│       ├── android/           # The Android app (thin wrapper around shared Rust code)
 │       └── ios/               # The iOS swift/Bevy app (will also be a thin wrapper around the shared Rust code, we aren't developing this right now)
 │       └── tauri.conf.json    # Configuration for the app
 │

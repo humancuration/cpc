@@ -47,7 +47,7 @@ Implemented key services with proper business logic:
 ### 6. Database Schema
 
 - Implemented the exact schema from ARCHITECTURE.md
-- Created migration file in apps/backend/migrations/
+- Created migration file in migrations/
 - Proper foreign key constraints
 - JSONB fields for flexible content storage
 - Indexes for performance-critical queries

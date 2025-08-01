@@ -1,0 +1,30 @@
+[package]
+name = "collaboration_engine"
+version = "0.2.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+tokio = { workspace = true, features = ["sync"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+async_trait = { workspace = true }
+
+# UUID support
+uuid = { workspace = true, features = ["v4", "serde"] }
+
+# Time handling
+chrono = { workspace = true, features = ["serde"] }
+
+# Storage backend
+sled = "0.34"
+semver = "1.0"
+
+# Integration with other CPC packages
+event_bus = { path = "../event_bus" }
+storage_abstraction = { path = "../storage_abstraction" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }

@@ -101,7 +101,7 @@ pub struct P2PInvoiceSharing {
 #### Double Ratchet Implementation
 - **Task**: Replace placeholder encryption with actual `cpc-net::crypto::NoiseSession`
 - **Files to Modify**:
-  - `packages/cpc-core/invoicing/src/infrastructure/p2p/data_sharing.rs`
+  - `apps/invoicing/src/infrastructure/p2p/data_sharing.rs`
 - **Implementation Steps**:
   1. Create `NoiseSession` per exchange (not static key)
   2. Implement proper session initialization with DH ratchet

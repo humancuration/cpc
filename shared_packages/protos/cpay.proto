@@ -1,0 +1,184 @@
+syntax = "proto3";
+
+package cpay;
+
+// Payment request structure
+message PaymentRequest {
+  string user_id = 1;
+  string recipient_id = 2;
+  string amount = 3;
+  Currency currency = 4;
+  optional string description = 5;
+  bool is_public = 6;
+  bool share_to_social = 7;
+  optional string cause_id = 8;
+  optional string volunteer_hours = 9;
+}
+
+// Payment response structure
+message PaymentResponse {
+  string transaction_id = 1;
+  TransactionStatus status = 2;
+  int64 timestamp = 3;
+}
+
+// Transaction history request
+message TransactionHistoryRequest {
+  string user_id = 1;
+}
+
+// Transaction history response
+message TransactionHistoryResponse {
+  repeated Transaction transactions = 1;
+}
+
+// Transaction structure
+message Transaction {
+  string id = 1;
+  string sender_id = 2;
+  string recipient_id = 3;
+  string amount = 4;
+  Currency currency = 5;
+  TransactionStatus status = 6;
+  optional string description = 7;
+  optional string social_post_id = 8;
+  optional string volunteer_hours = 9;
+  int64 created_at = 10;
+  optional int64 completed_at = 11;
+}
+
+// Currency enumeration
+enum Currency {
+  DABLOONS = 0;
+  USD = 1;
+  EUR = 2;
+  GBP = 3;
+  JPY = 4;
+}
+
+// Transaction status enumeration
+enum TransactionStatus {
+  PENDING = 0;
+  COMPLETED = 1;
+  FAILED = 2;
+  CANCELLED = 3;
+}
+
+// Featured causes request
+message FeaturedCausesRequest {}
+
+// Featured causes response
+message FeaturedCausesResponse {
+  repeated Cause causes = 1;
+}
+
+// Cause structure
+message Cause {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string image_url = 4;
+  string total_donations = 5;
+}
+
+// Create cause request
+message CreateCauseRequest {
+  string name = 1;
+  string description = 2;
+  optional string image_url = 3;
+}
+
+// Create cause response
+message CreateCauseResponse {
+  Cause cause = 1;
+}
+
+// Get cause request
+message GetCauseRequest {
+  string cause_id = 1;
+}
+
+// Get cause response
+message GetCauseResponse {
+  Cause cause = 1;
+}
+
+// Update cause request
+message UpdateCauseRequest {
+  string cause_id = 1;
+  optional string name = 2;
+  optional string description = 3;
+  optional string image_url = 4;
+}
+
+// Update cause response
+message UpdateCauseResponse {
+  Cause cause = 1;
+}
+
+// Delete cause request
+message DeleteCauseRequest {
+  string cause_id = 1;
+}
+
+// Delete cause response
+message DeleteCauseResponse {
+  bool success = 1;
+}
+
+// List causes request
+message ListCausesRequest {
+  optional int32 limit = 1;
+  optional int32 offset = 2;
+}
+
+// List causes response
+message ListCausesResponse {
+  repeated Cause causes = 1;
+  int32 total_count = 2;
+}
+
+// Skill exchange rates request
+message SkillExchangeRatesRequest {}
+
+// Skill exchange rates response
+message SkillExchangeRatesResponse {
+  repeated SkillRate rates = 1;
+}
+
+// Skill rate structure
+message SkillRate {
+  string skill_name = 1;
+  string rate_per_hour = 2;
+  string currency = 3;
+}
+
+// CPay service definition
+service CpayService {
+  // Process a payment
+  rpc ProcessPayment(PaymentRequest) returns (PaymentResponse);
+  
+  // Get transaction history for a user
+  rpc GetTransactionHistory(TransactionHistoryRequest) returns (TransactionHistoryResponse);
+  
+  // Get featured causes for donations
+  rpc GetFeaturedCauses(FeaturedCausesRequest) returns (FeaturedCausesResponse);
+  
+  // Create a new cause
+  rpc CreateCause(CreateCauseRequest) returns (CreateCauseResponse);
+  
+  // Get a specific cause
+  rpc GetCause(GetCauseRequest) returns (GetCauseResponse);
+  
+  // Update a cause
+  rpc UpdateCause(UpdateCauseRequest) returns (UpdateCauseResponse);
+  
+  // Delete a cause
+  rpc DeleteCause(DeleteCauseRequest) returns (DeleteCauseResponse);
+  
+  // List causes
+  rpc ListCauses(ListCausesRequest) returns (ListCausesResponse);
+  
+  // Get skill exchange rates for volunteer hour conversion
+  rpc GetSkillExchangeRates(SkillExchangeRatesRequest) returns (SkillExchangeRatesResponse);
+}

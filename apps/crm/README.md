@@ -90,7 +90,7 @@ convert_pipeline_to_viz(&pipeline, &deals, &contacts);
 ## Module Structure
 
 ```
-packages/cpc-core/crm/
+apps/crm/
 ├── Cargo.toml
 ├── MIGRATION_GUIDE.md
 ├── README.md

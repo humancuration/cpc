@@ -82,7 +82,7 @@ These tools can help users manage their work, studies, and personal projects.
   - [ ] Mobile Optimization (Priority 3)
   - [ ] Dashboard Integration (Priority 4)
   - [ ] Comprehensive Test Suite (Priority 2)
-- [ ] **Wallet**: Multi-currency digital wallet
+- [/] **Wallet**: Multi-currency digital wallet
 - [ ] **Invoicing**: Automated invoice generation
 - [ ] **Budget**: Personal and household budgeting
 

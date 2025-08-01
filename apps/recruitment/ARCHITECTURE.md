@@ -20,7 +20,7 @@ This module adheres to our cooperative principles by:
 ## 2. Directory Structure Following Vertical Slice Pattern
 
 ```
-packages/cpc-core/recruitment/
+apps/recruitment/
 ├── Cargo.toml
 ├── migrations/
 │   ├── 20250801000000_create_recruitment_tables.sql
@@ -232,7 +232,7 @@ The module will provide the following integration points for other modules:
 
 ✅ Hexagonal Architecture with clear domain/application/infrastructure separation  
 ✅ Screaming Architecture reflecting recruitment and job market capabilities  
-✅ Vertical slice implementation within `packages/cpc-core/`  
+✅ Vertical slice implementation within `apps/recruitment/`  
 ✅ Permissively licensed dependencies (MIT/Apache 2.0)  
 ✅ Integration with existing calendar and notification infrastructure  
 ✅ Support for opt-in data sharing across federation  

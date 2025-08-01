@@ -28,9 +28,10 @@ async-trait = "0.1"
 async-graphql = "7.0"
 
 # CPC dependencies
-cpc-core = { path = "../../packages/cpc-core" }
-cpc-net = { path = "../../packages/cpc-net" }
-cpc-protos = { path = "../../packages/cpc-protos" }
+# Note: Update these paths based on current shared_packages structure
+# cpc-core = { path = "../../shared_packages/core" }
+# cpc-net = { path = "../../shared_packages/network" }
+# cpc-protos = { path = "../../shared_packages/protos" }
 
 # Media processing
 ffmpeg-wasm = "0.1"

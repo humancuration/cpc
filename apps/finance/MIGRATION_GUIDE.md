@@ -4,7 +4,7 @@ This document describes how to migrate from the old personal-finance app to the 
 
 ## Overview
 
-The personal finance functionality has been moved from `apps/personal-finance/` to `packages/cpc-core/finance/` to follow the screaming architecture principles. All finance domain logic now exists as vertical slices within the core package.
+The personal finance functionality has been organized within `apps/finance/` to follow the screaming architecture principles. All finance domain logic now exists as vertical slices within the finance app.
 
 ## Migration Steps
 
@@ -14,7 +14,7 @@ The personal finance functionality has been moved from `apps/personal-finance/` 
    # personal-finance = { path = "../apps/personal-finance" }
    
    # Add this line:
-   cpc-core = { path = "../packages/cpc-core", features = ["finance"] }
+   cpc-finance = { path = "../apps/finance", features = ["finance"] }
    ```
 
 2. Update your imports:
@@ -27,7 +27,7 @@ The personal finance functionality has been moved from `apps/personal-finance/` 
    ```
 
 3. Update database migrations:
-   - Move migration files from `apps/backend/migrations/20250728_*` to `packages/cpc-core/migrations/`
+   - Move migration files from `apps/backend/migrations/20250728_*` to `migrations/`
    - Update migration filenames to follow CPC Core format: `YYYYMMDDHHMMSS_description.sql`
 
 4. Update service initialization:

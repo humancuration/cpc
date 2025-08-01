@@ -10,7 +10,7 @@ This document summarizes the implementation of the Expense Tracker module for th
 
 ## Key Components Implemented
 
-### 1. Domain Layer (`packages/cpc-core/finance/src/expense_tracker/domain/`)
+### 1. Domain Layer (`apps/finance/src/expense_tracker/domain/`)
 
 - `Expense` struct with dual-currency support
 - `Receipt` struct for storing receipt data
@@ -19,7 +19,7 @@ This document summarizes the implementation of the Expense Tracker module for th
 - `ExpenseSharingPreferences` for privacy controls
 - Proper validation and business logic methods
 
-### 2. Application Layer (`packages/cpc-core/finance/src/expense_tracker/application/`)
+### 2. Application Layer (`apps/finance/src/expense_tracker/application/`)
 
 - `ExpenseService` trait defining the interface
 - `ExpenseServiceImpl` implementation with dependency injection
@@ -27,9 +27,9 @@ This document summarizes the implementation of the Expense Tracker module for th
 - Integration with WalletService for Dabloon deductions
 - Integration with BudgetService for spent amount tracking
 
-### 3. Infrastructure Layer (`packages/cpc-core/finance/src/expense_tracker/infrastructure/`)
+### 3. Infrastructure Layer (`apps/finance/src/expense_tracker/infrastructure/`)
 
-#### Database (`packages/cpc-core/finance/src/expense_tracker/infrastructure/database/`)
+#### Database (`apps/finance/src/expense_tracker/infrastructure/database/`)
 
 - `PostgresExpenseRepository` - PostgreSQL implementation for expenses
 - `PostgresReceiptRepository` - PostgreSQL implementation for receipts

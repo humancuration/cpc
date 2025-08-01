@@ -17,7 +17,7 @@ The CPC Finance Module provides comprehensive personal finance management functi
 This module follows hexagonal (clean) architecture with vertical slices:
 
 ```
-packages/cpc-core/finance/
+apps/finance/
 ├── src/
 │   ├── domain/          # Core business logic and models
 │   ├── application/     # Application services orchestrating domain logic
@@ -48,7 +48,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-cpc-core = { path = "../packages/cpc-core", features = ["finance"] }
+cpc-finance = { path = "../apps/finance", features = ["finance"] }
 ```
 
 ## Usage

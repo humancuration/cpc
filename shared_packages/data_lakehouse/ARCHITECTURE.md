@@ -2,10 +2,10 @@
 
 ## Module Structure (Hexagonal Architecture with Vertical Slices)
 
-The data lakehouse module is implemented in `packages/cpc-core/data_lakehouse/` following screaming architecture principles. All data management logic exists as vertical slices within the core package.
+The data lakehouse module is implemented in `shared_packages/data_lakehouse/` following screaming architecture principles. All data management logic exists as vertical slices within the shared package.
 
 ```
-packages/cpc-core/data_lakehouse/
+shared_packages/data_lakehouse/
 ├── Cargo.toml
 ├── ARCHITECTURE.md
 ├── MIGRATION_GUIDE.md

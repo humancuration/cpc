@@ -23,18 +23,18 @@ This document marks the completion of the implementation for the Expense Tracker
 
 ## Files Modified
 
-- `packages/cpc-core/finance/src/application/wallet_service.rs`
-- `packages/cpc-core/finance/src/domain/wallet.rs`
-- `packages/cpc-core/finance/src/expense_tracker/application/expense_service.rs`
-- `packages/cpc-core/finance/src/expense_tracker/infrastructure/ocr/receipt_processor.rs`
-- `packages/cpc-core/finance/src/expense_tracker/domain/mod.rs`
-- `packages/cpc-core/migrations/20250728000015_add_expense_tracker_tables.sql`
-- `packages/cpc-core/finance/src/expense_tracker/README.md`
-- `packages/cpc-core/Cargo.toml`
+- `apps/finance/src/application/wallet_service.rs`
+- `apps/finance/src/domain/wallet.rs`
+- `apps/finance/src/expense_tracker/application/expense_service.rs`
+- `apps/finance/src/expense_tracker/infrastructure/ocr/receipt_processor.rs`
+- `apps/finance/src/expense_tracker/domain/mod.rs`
+- `migrations/20250728000015_add_expense_tracker_tables.sql`
+- `apps/finance/src/expense_tracker/README.md`
+- `apps/finance/Cargo.toml`
 
 ## New Files Created
 
-- `packages/cpc-core/finance/src/expense_tracker/IMPLEMENTATION_SUMMARY.md` - Detailed summary of changes made
+- `apps/finance/src/expense_tracker/IMPLEMENTATION_SUMMARY.md` - Detailed summary of changes made
 
 ## Verification
 

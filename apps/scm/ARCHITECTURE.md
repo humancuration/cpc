@@ -21,7 +21,7 @@ graph TD
 
 ### File Structure
 ```
-packages/cpc-core/scm/
+apps/scm/
 ├── Cargo.toml
 ├── MIGRATION_GUIDE.md
 ├── ARCHITECTURE.md
@@ -712,15 +712,15 @@ For organizations migrating from traditional ERP systems:
 
 ```bash
 # 1. Create module structure (already completed)
-mkdir -p packages/cpc-core/scm/{src/{domain,application,infrastructure/{database,p2p},presentation/{bevy,yew}},migrations}
+mkdir -p apps/scm/{src/{domain,application,infrastructure/{database,p2p},presentation/{bevy,yew}},migrations}
 
 # 2. Implement database migrations
-echo "CREATE TABLE supply_chain_networks ( ... );" > packages/cpc-core/scm/migrations/20250728000000_create_networks_table.sql
-echo "CREATE TABLE inventory_items ( ... );" > packages/cpc-core/scm/migrations/20250728000001_create_inventory_table.sql
+echo "CREATE TABLE supply_chain_networks ( ... );" > apps/scm/migrations/20250728000000_create_networks_table.sql
+echo "CREATE TABLE inventory_items ( ... );" > apps/scm/migrations/20250728000001_create_inventory_table.sql
 # ... additional migrations
 
 # 3. Update workspace dependencies
-# Add to packages/cpc-core/Cargo.toml
+# Add to apps/scm/Cargo.toml
 [features]
 scm = ["scm"]
 

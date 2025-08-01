@@ -4,7 +4,7 @@ This guide provides instructions for migrating to the new Invoicing & Quoting mo
 
 ## Overview
 
-The Invoicing & Quoting module has been implemented as a vertical slice within `packages/cpc-core/invoicing/` following the hexagonal architecture pattern.
+The Invoicing & Quoting module has been implemented as a vertical slice within `apps/invoicing/` following the hexagonal architecture pattern.
 
 ## Migration Steps
 
@@ -14,7 +14,7 @@ Add the new invoicing module as a dependency:
 
 ```toml
 [dependencies]
-cpc-invoicing = { path = "packages/cpc-core/invoicing" }
+cpc-invoicing = { path = "apps/invoicing" }
 ```
 
 ### 2. Update Feature Flags

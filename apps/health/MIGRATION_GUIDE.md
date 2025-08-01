@@ -1,6 +1,6 @@
 # Health Module Migration Guide
 
-This guide provides instructions for migrating from older health implementations to the new health module structure within `packages/cpc-core/health/`.
+This guide provides instructions for migrating from older health implementations to the new health module structure within `apps/health/`.
 
 ## Migration from Standalone Health Applications
 

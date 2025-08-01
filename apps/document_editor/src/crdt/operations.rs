@@ -1,9 +1,12 @@
+// DEPRECATED - Refactored to use collaboration_engine
+// This file has been deprecated as part of the refactor to use the collaboration_engine package.
+// The new implementation can be found in the application/collaboration_service.rs file.
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use crate::crdt::id::CRDTId;
 use ciborium;
-
+use collaboration_engine::core::Position;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum FormattingStyle {
     Bold,
@@ -11,6 +14,16 @@ pub enum FormattingStyle {
     Underline,
     Heading(usize),
     // Add other formatting types as needed
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum FormatType {
+    Bold,
+    Italic,
+    Underline,
+    ListItem,
+    // ... other formats
+}
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -34,6 +47,15 @@ pub enum DocumentOperation {
         id: CRDTId,
         style: FormattingStyle,
         timestamp: i64,
+    },
+    Format {
+        range: (Position, Position),
+        format: FormatType,
+    },
+    InsertImage {
+        position: Position,
+        image_id: Uuid,
+        caption: String,
     },
 }
 

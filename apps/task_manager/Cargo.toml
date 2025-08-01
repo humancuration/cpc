@@ -20,7 +20,8 @@ async-graphql = "7.0"
 async-graphql-actix-web = "7.0"
 
 # P2P sync
-cpc-net = { path = "../../packages/cpc-net" }
+# Note: Update path based on current shared_packages structure
+# cpc-net = { path = "../../shared_packages/network" }
 
 # Web framework
 actix-web = "4.0"

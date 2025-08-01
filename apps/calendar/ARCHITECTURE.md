@@ -5,7 +5,7 @@
 The calendar module follows screaming architecture principles by implementing all functionality as a vertical slice within `packages/cpc-core/calendar/`. This structure ensures clear separation of concerns while maintaining domain integrity.
 
 ```
-packages/cpc-core/calendar/
+apps/calendar/
 ├── Cargo.toml
 ├── MIGRATION_GUIDE.md
 ├── README.md

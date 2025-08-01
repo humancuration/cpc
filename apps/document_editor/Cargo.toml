@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 # Core dependencies
 cpc-core = { path = "../", features = ["document_editor"] }
+collaboration_engine = { path = "../../shared_packages/collaboration_engine" }
 cpc-net = { path = "../../cpc-net" }
 async-graphql = { workspace = true }
 async-graphql-axum = { workspace = true }

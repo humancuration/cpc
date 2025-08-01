@@ -17,7 +17,7 @@ The Health module is a comprehensive health management system built with Rust, f
 The module follows hexagonal (ports and adapters) architecture with vertical slices:
 
 ```
-packages/cpc-core/health/
+apps/health/
 ├── Cargo.toml
 ├── MIGRATION_GUIDE.md  # Migration instructions from old health implementations
 ├── README.md           # Module documentation

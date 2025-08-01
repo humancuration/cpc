@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CPay - Payment Processing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .transaction-history {
+            margin-top: 30px;
+        }
+        .transaction-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        .status-completed {
+            color: green;
+        }
+        .status-pending {
+            color: orange;
+        }
+        .status-failed {
+            color: red;
+        }
+        
+        /* Toggle switch */
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 60px;
+          height: 34px;
+        }
+
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          transition: .4s;
+        }
+
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 26px;
+          width: 26px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          transition: .4s;
+        }
+
+        input:checked + .slider {
+          background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+          transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+          border-radius: 34px;
+        }
+
+        .slider.round:before {
+          border-radius: 50%;
+        }
+
+        /* Tooltip */
+        .tooltip {
+          position: relative;
+          display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+          visibility: hidden;
+          width: 200px;
+          background-color: #555;
+          color: #fff;
+          text-align: center;
+          border-radius: 6px;
+          padding: 5px;
+          position: absolute;
+          z-index: 1;
+          bottom: 125%;
+          left: 50%;
+          margin-left: -100px;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        .social-indicators span {
+          margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CPay Payment Processing</h1>
+        
+        <div class="payment-form">
+            <h2>Send Payment</h2>
+            <div class="form-group">
+                <label for="recipient">Recipient ID:</label>
+                <input type="text" id="recipient" placeholder="Enter recipient user ID">
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" placeholder="Enter amount" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="currency">Currency:</label>
+                <select id="currency">
+                    <option value="DABLOONS">Dabloons</option>
+                    <option value="USD">US Dollar</option>
+                    <option value="EUR">Euro</option>
+                    <option value="GBP">British Pound</option>
+                    <option value="JPY">Japanese Yen</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Description (optional):</label>
+                <input type="text" id="description" placeholder="Enter description">
+            </div>
+            
+            <!-- Social Options -->
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="is-public">
+                Make transaction public
+              </label>
+              <span class="tooltip">ℹ️
+                <span class="tooltiptext">Public transactions are visible to everyone</span>
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="share-social" disabled>
+                Share to social feed
+              </label>
+              <span class="tooltip">ℹ️
+                <span class="tooltiptext">Share this transaction to your feed</span>
+              </span>
+            </div>
+            
+            <!-- Cause Selection -->
+            <div class="form-group">
+              <label for="cause-select">Cause:</label>
+              <select id="cause-select">
+                <option value="">Select a cause</option>
+                <!-- Populated via gRPC -->
+              </select>
+              <input type="text" id="cause-search" placeholder="Search causes...">
+              <button id="new-cause-btn">+ New Cause</button>
+            </div>
+            
+            <!-- Volunteer/Curency Toggle -->
+            <div class="form-group">
+              <label>Input Type:</label>
+              <label class="switch">
+                <input type="checkbox" id="input-type-toggle">
+                <span class="slider"></span>
+              </label>
+              <span id="input-type-label">Currency</span>
+            </div>
+
+            <!-- Currency Input -->
+            <div id="currency-input-group" class="form-group">
+              <label for="amount">Amount:</label>
+              <input type="number" id="amount" placeholder="Enter amount" step="0.01">
+              <select id="currency">
+                <option value="DABLOONS">Dabloons</option>
+                <option value="USD">US Dollar</option>
+                <option value="EUR">Euro</option>
+                <option value="GBP">British Pound</option>
+                <option value="JPY">Japanese Yen</option>
+              </select>
+            </div>
+
+            <!-- Volunteer Input -->
+            <div id="hours-input-group" class="form-group" style="display:none;">
+              <label for="volunteer-hours">Volunteer Hours:</label>
+              <input type="number" id="volunteer-hours" placeholder="Enter hours" step="0.5">
+              <div id="equivalent-display">Equivalent: </div>
+            </div>
+            
+            <button id="send-payment">Send Payment</button>
+        </div>
+        
+        <div class="transaction-history">
+            <h2>Transaction History</h2>
+            <div id="transactions">
+                <div class="transaction-item">
+                    <div>No transactions yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // This would connect to the Tauri backend in a real implementation
+        document.getElementById('send-payment').addEventListener('click', function() {
+            const recipient = document.getElementById('recipient').value;
+            const amount = document.getElementById('amount').value;
+            const currency = document.getElementById('currency').value;
+            const description = document.getElementById('description').value;
+            
+            if (!recipient || !amount) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // In a real implementation, this would call the Tauri backend
+            alert(`Payment sent!\nRecipient: ${recipient}\nAmount: ${amount} ${currency}\nDescription: ${description || 'None'}`);
+            
+            // Add to transaction history (mock)
+            const transactionsDiv = document.getElementById('transactions');
+            transactionsDiv.innerHTML = `
+                <div class="transaction-item">
+                    <div><strong>To:</strong> ${recipient}</div>
+                    <div><strong>Amount:</strong> ${amount} ${currency}</div>
+                    <div><strong>Status:</strong> <span class="status-completed">Completed</span></div>
+                    <div><strong>Description:</strong> ${description || 'None'}</div>
+                    <div class="social-indicators">
+                      <span id="public-indicator" title="Public Transaction" style="display:none;">🌐</span>
+                      <span id="social-share-indicator" title="Shared to Social" style="display:none;">📣</span>
+                      <span id="volunteer-indicator" style="display:none;">Volunteer: <span id="volunteer-hours-display">0</span> hours</span>
+                    </div>
+                </div>
+                ${transactionsDiv.innerHTML}
+            `;
+            
+            // Clear form
+            document.getElementById('recipient').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('description').value = '';
+        });
+        
+        // Toggle social share enabled state
+        document.getElementById('is-public').addEventListener('change', function() {
+          document.getElementById('share-social').disabled = !this.checked;
+        });
+
+        // Toggle between currency/hours input
+        document.getElementById('input-type-toggle').addEventListener('change', function() {
+          const isHours = this.checked;
+          document.getElementById('currency-input-group').style.display = isHours ? 'none' : 'block';
+          document.getElementById('hours-input-group').style.display = isHours ? 'block' : 'none';
+          document.getElementById('input-type-label').textContent = isHours ? 'Hours' : 'Currency';
+        });
+
+        // Volunteer hours conversion
+        document.getElementById('volunteer-hours').addEventListener('input', async function() {
+          const hours = parseFloat(this.value) || 0;
+          const rate = await getSkillExchangeRate(); // Implement gRPC call
+          document.getElementById('equivalent-display').textContent =
+            `Equivalent: ${(hours * rate).toFixed(2)} Dabloons`;
+        });
+
+        // Cause search
+        document.getElementById('cause-search').addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
+          const options = document.getElementById('cause-select').options;
+          
+          for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            option.style.display = option.text.toLowerCase().includes(searchTerm) ? '' : 'none';
+          }
+        });
+
+        // Update transaction indicators
+        function updateTransactionIndicators(transaction) {
+          if (transaction.isPublic) {
+            document.getElementById('public-indicator').style.display = 'inline';
+          }
+          if (transaction.shareToSocial) {
+            document.getElementById('social-share-indicator').style.display = 'inline';
+          }
+          if (transaction.volunteerHours > 0) {
+            document.getElementById('volunteer-indicator').style.display = 'inline';
+            document.getElementById('volunteer-hours-display').textContent = transaction.volunteerHours;
+          }
+        }
+        
+        // Mock function for skill exchange rate
+        async function getSkillExchangeRate() {
+          // In a real implementation, this would call a gRPC endpoint
+          return 15.0; // Mock rate of 15 Dabloons per hour
+        }
+    </script>
+</body>
+</html>

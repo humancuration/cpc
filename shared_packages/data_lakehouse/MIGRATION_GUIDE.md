@@ -21,7 +21,7 @@ Add the data lakehouse module to your project dependencies:
 
 ```toml
 [dependencies]
-cpc-core-data-lakehouse = { path = "../packages/cpc-core/data_lakehouse" }
+cpc-core-data-lakehouse = { path = "../shared_packages/data_lakehouse" }
 ```
 
 ### 2. Database Schema Migration
@@ -164,4 +164,4 @@ If issues are encountered, you can rollback by:
 
 ## Support
 
-For assistance with migration, contact the data lakehouse module maintainers or refer to the documentation in `packages/cpc-core/data_lakehouse/ARCHITECTURE.md`.
+For assistance with migration, contact the data lakehouse module maintainers or refer to the documentation in `shared_packages/data_lakehouse/ARCHITECTURE.md`.
