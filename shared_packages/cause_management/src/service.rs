@@ -21,7 +21,7 @@ pub mod proto {
 }
 
 use proto::{
-    cpay_service_server::CpayService,
+    cause_service_server::CauseService,
     CreateCauseRequest as ProtoCreateCauseRequest,
     CreateCauseResponse as ProtoCreateCauseResponse,
     GetCauseRequest as ProtoGetCauseRequest,
@@ -81,7 +81,7 @@ impl CauseServiceImpl {
 }
 
 #[async_trait::async_trait]
-impl CpayService for CauseServiceImpl {
+impl CauseService for CauseServiceImpl {
     /// Create a new cause
     async fn create_cause(
         &self,
@@ -255,22 +255,6 @@ impl CpayService for CauseServiceImpl {
         Ok(Response::new(response))
     }
     
-    /// Process a payment (delegated to cpay_core)
-    async fn process_payment(
-        &self,
-        _request: Request<proto::PaymentRequest>,
-    ) -> Result<Response<proto::PaymentResponse>, Status> {
-        Err(Status::unimplemented("This service does not handle payments. Use cpay_core service."))
-    }
-    
-    /// Get transaction history (delegated to cpay_core)
-    async fn get_transaction_history(
-        &self,
-        _request: Request<proto::TransactionHistoryRequest>,
-    ) -> Result<Response<proto::TransactionHistoryResponse>, Status> {
-        Err(Status::unimplemented("This service does not handle transaction history. Use cpay_core service."))
-    }
-    
     /// Get featured causes
     async fn get_featured_causes(
         &self,
@@ -299,13 +283,5 @@ impl CpayService for CauseServiceImpl {
         };
         
         Ok(Response::new(response))
-    }
-    
-    /// Get skill exchange rates (delegated to cpay_core)
-    async fn get_skill_exchange_rates(
-        &self,
-        _request: Request<proto::SkillExchangeRatesRequest>,
-    ) -> Result<Response<proto::SkillExchangeRatesResponse>, Status> {
-        Err(Status::unimplemented("This service does not handle skill exchange rates. Use cpay_core service."))
     }
 }

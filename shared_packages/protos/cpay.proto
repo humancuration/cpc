@@ -153,8 +153,9 @@ message SkillRate {
   string currency = 3;
 }
 
-// CPay service definition
+// Deprecated: Use PaymentService and CauseService instead
 service CpayService {
+  option deprecated = true;
   // Process a payment
   rpc ProcessPayment(PaymentRequest) returns (PaymentResponse);
   
@@ -181,4 +182,19 @@ service CpayService {
   
   // Get skill exchange rates for volunteer hour conversion
   rpc GetSkillExchangeRates(SkillExchangeRatesRequest) returns (SkillExchangeRatesResponse);
+}
+
+service PaymentService {
+  rpc ProcessPayment(PaymentRequest) returns (PaymentResponse);
+  rpc GetTransactionHistory(TransactionHistoryRequest) returns (TransactionHistoryResponse);
+  rpc GetSkillExchangeRates(SkillExchangeRatesRequest) returns (SkillExchangeRatesResponse);
+}
+
+service CauseService {
+  rpc CreateCause(CreateCauseRequest) returns (CreateCauseResponse);
+  rpc GetCause(GetCauseRequest) returns (GetCauseResponse);
+  rpc UpdateCause(UpdateCauseRequest) returns (UpdateCauseResponse);
+  rpc DeleteCause(DeleteCauseRequest) returns (DeleteCauseResponse);
+  rpc ListCauses(ListCausesRequest) returns (ListCausesResponse);
+  rpc GetFeaturedCauses(FeaturedCausesRequest) returns (FeaturedCausesResponse);
 }

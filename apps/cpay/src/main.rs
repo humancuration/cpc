@@ -9,6 +9,7 @@ use notification_core::application::service::{NotificationService, NotificationS
 use notification_core::infrastructure::{email::EmailNotificationAdapter, push::PushNotificationAdapter};
 use social_integration::application::social_integration_service::{SocialIntegrationService, SocialIntegrationServiceImpl};
 use wallet::application::{WalletService, WalletServiceImpl};
+use cause_management::{CauseManagementServiceImpl, service::CauseServiceImpl, repository::MockCauseRepository};
 use std::sync::Arc;
 use tracing::{info, Level};
 use tracing_subscriber;
@@ -16,6 +17,44 @@ use tracing_subscriber;
 // Mock repository implementations for demonstration
 struct MockWalletRepository;
 struct MockSocialRepository;
+#[derive(Clone)]
+struct MockCauseRepository;
+
+#[async_trait::async_trait]
+impl cause_management::repository::CauseRepository for MockCauseRepository {
+    async fn create_cause(&self, _cause: &cause_management::models::Cause) -> Result<(), cause_management::models::CauseError> {
+        Ok(())
+    }
+    
+    async fn find_cause_by_id(&self, _id: uuid::Uuid) -> Result<Option<cause_management::models::Cause>, cause_management::models::CauseError> {
+        Ok(None)
+    }
+    
+    async fn update_cause(&self, _cause: &cause_management::models::Cause) -> Result<(), cause_management::models::CauseError> {
+        Ok(())
+    }
+    
+    async fn delete_cause(&self, _id: uuid::Uuid) -> Result<(), cause_management::models::CauseError> {
+        Ok(())
+    }
+    
+    async fn list_causes(&self, _request: cause_management::models::ListCausesRequest) -> Result<cause_management::models::ListCausesResponse, cause_management::models::CauseError> {
+        Ok(cause_management::models::ListCausesResponse {
+            causes: vec![],
+            total_count: 0,
+        })
+    }
+    
+    async fn add_donation_to_cause(&self, _cause_id: uuid::Uuid, _amount: rust_decimal::Decimal) -> Result<(), cause_management::models::CauseError> {
+        Ok(())
+    }
+    
+    impl MockCauseRepository {
+        fn new() -> Self {
+            Self
+        }
+    }
+}
 
 #[async_trait::async_trait]
 impl wallet::application::WalletRepository for MockWalletRepository {
@@ -53,7 +92,6 @@ impl social_integration::infrastructure::repositories::UnifiedPostRepository for
     async fn find_feed_for_user(&self, _user_id: &str, _limit: i64) -> Result<Vec<social_integration::domain::post::UnifiedPost>, social_integration::domain::social_event::SocialEventError> {
         Ok(vec![])
     }
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -85,14 +123,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         transaction_engine,
     );
     
-    // Start gRPC server
+    // Initialize Cause Management service
+    let cause_repo = Arc::new(MockCauseRepository::new());
+    let cause_service = Arc::new(CauseServiceImpl::new(cause_repo));
+    let cause_management_service = CauseManagementServiceImpl::new(cause_service);
+    
+    // Start gRPC server with both services
     let addr = "127.0.0.1:50051".parse()?;
-    cpay_service.start_grpc_server(addr).await?;
+    info!("Starting gRPC server on {}", addr);
+    
+    let cpay_svc = cpay_core::proto::payment_service_server::PaymentServiceServer::new(cpay_service);
+    let cause_svc = cause_management::proto::cause_service_server::CauseServiceServer::new(cause_management_service);
+    
+    tonic::transport::Server::builder()
+        .add_service(cpay_svc)
+        .add_service(cause_svc)
+        .serve(addr)
+        .await?;
     
     // Start Tauri desktop app
     tauri::Builder::default()
         .run(tauri::generate_context!())
         .expect("error while running CPay desktop application");
     
+    Ok(())
+}
     Ok(())
 }

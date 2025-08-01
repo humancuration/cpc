@@ -37,12 +37,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cause_management_service = CauseManagementServiceImpl::new(cause_service);
     
     // Start server
-    let addr: SocketAddr = "0.0.0.0:50051".parse()?;
+    let addr: SocketAddr = "0.0.0.0:50052".parse()?; // Different port for CauseService
     info!("Starting gRPC server on {}", addr);
     
-    cause_management_service.start_grpc_server(addr).await?;
+    // Create the gRPC service
+    let svc = proto::cause_service_server::CauseServiceServer::new(cause_service);
+    
+    // Start the server
+    tonic::transport::Server::builder()
+        .add_service(svc)
+        .serve(addr)
+        .await?;
     */
     
     info!("Cause Management service initialized");
     Ok(())
+}
 }

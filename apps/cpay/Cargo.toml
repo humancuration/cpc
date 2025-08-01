@@ -19,6 +19,7 @@ cpay_core = { path = "../../shared_packages/cpay_core" }
 notification_core = { path = "../../shared_packages/notification_core" }
 social_integration = { path = "../../shared_packages/social_integration" }
 wallet = { path = "../../shared_packages/wallet" }
+cause_management = { path = "../../shared_packages/cause_management" }
 
 [build-dependencies]
 tauri-build = "2.0.0"
