@@ -3,9 +3,12 @@ use uuid::Uuid;
 use chrono::Utc;
 use crate::database::repository::DatabaseRepository;
 use crate::database::models::AcademicCredential as DatabaseCredential;
+use crate::error::AppError;
+use crate::utils::parse_uuid;
 
 // Import the generated protobuf types
 tonic::include_proto!("cpc.learning_platform");
+tonic::include_proto!("cpc.learning_platform_server");
 
 pub struct CredentialService {
     repository: DatabaseRepository,
@@ -25,26 +28,23 @@ impl credential_service_server::CredentialService for CredentialService {
     ) -> Result<Response<IssueCredentialResponse>, Status> {
         let req = request.into_inner();
         
-        let user_id = Uuid::parse_str(&req.user_id)
-            .map_err(|_| Status::invalid_argument("Invalid user ID"))?;
-            
-        let course_id = Uuid::parse_str(&req.course_id)
-            .map_err(|_| Status::invalid_argument("Invalid course ID"))?;
+        let user_id = parse_uuid(&req.user_id)?;
+        let course_id = parse_uuid(&req.course_id)?;
         
         // Check if course exists
         if self.repository.get_course_by_id(course_id).await
-            .map_err(|e| Status::internal(format!("Failed to check course: {}", e)))?
+            .map_err(AppError::from)?
             .is_none() {
-            return Err(Status::not_found("Course not found"));
+            return Err(AppError::NotFound("Course not found".to_string()).into());
         }
         
         // Check if user is enrolled and has completed the course
         let enrollment = self.repository.get_enrollment_by_user_and_course(user_id, course_id).await
-            .map_err(|e| Status::internal(format!("Failed to check enrollment: {}", e)))?
-            .ok_or_else(|| Status::not_found("User not enrolled in this course"))?;
+            .map_err(AppError::from)?
+            .ok_or_else(|| AppError::NotFound("User not enrolled in this course".to_string()))?;
         
         if enrollment.status != "COMPLETED" {
-            return Err(Status::failed_precondition("User has not completed the course"));
+            return Err(AppError::Validation("User has not completed the course".to_string()).into());
         }
         
         // Create credential
@@ -57,7 +57,7 @@ impl credential_service_server::CredentialService for CredentialService {
             1 => "BADGE",
             2 => "MICRO_DEGREE",
             3 => "DEGREE",
-            _ => return Err(Status::invalid_argument("Invalid credential type")),
+            _ => return Err(AppError::Validation("Invalid credential type".to_string()).into()),
         };
         
         let db_credential = DatabaseCredential {
@@ -72,7 +72,7 @@ impl credential_service_server::CredentialService for CredentialService {
         
         // Save to database
         let saved_credential = self.repository.create_credential(&db_credential).await
-            .map_err(|e| Status::internal(format!("Failed to create credential: {}", e)))?;
+            .map_err(AppError::from)?;
         
         // Convert to protobuf credential
         let proto_credential = Credential {

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: learning_platform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  learning_platform_server:
+    build: .
+    ports:
+      - "50051:50051"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/learning_platform
+      - SERVER_ADDR=0.0.0.0:50051
+      - JWT_SECRET=your_jwt_secret_here
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

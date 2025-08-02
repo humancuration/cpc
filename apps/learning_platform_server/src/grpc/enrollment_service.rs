@@ -3,9 +3,12 @@ use uuid::Uuid;
 use chrono::Utc;
 use crate::database::repository::DatabaseRepository;
 use crate::database::models::Enrollment as DatabaseEnrollment;
+use crate::error::AppError;
+use crate::utils::parse_uuid;
 
 // Import the generated protobuf types
 tonic::include_proto!("cpc.learning_platform");
+tonic::include_proto!("cpc.learning_platform_server");
 
 pub struct EnrollmentService {
     repository: DatabaseRepository,
@@ -25,24 +28,21 @@ impl enrollment_service_server::EnrollmentService for EnrollmentService {
     ) -> Result<Response<EnrollResponse>, Status> {
         let req = request.into_inner();
         
-        let user_id = Uuid::parse_str(&req.user_id)
-            .map_err(|_| Status::invalid_argument("Invalid user ID"))?;
-            
-        let course_id = Uuid::parse_str(&req.course_id)
-            .map_err(|_| Status::invalid_argument("Invalid course ID"))?;
+        let user_id = parse_uuid(&req.user_id)?;
+        let course_id = parse_uuid(&req.course_id)?;
         
         // Check if course exists
         if self.repository.get_course_by_id(course_id).await
-            .map_err(|e| Status::internal(format!("Failed to check course: {}", e)))?
+            .map_err(AppError::from)?
             .is_none() {
-            return Err(Status::not_found("Course not found"));
+            return Err(AppError::NotFound("Course not found".to_string()).into());
         }
         
         // Check if user is already enrolled
         if self.repository.get_enrollment_by_user_and_course(user_id, course_id).await
-            .map_err(|e| Status::internal(format!("Failed to check enrollment: {}", e)))?
+            .map_err(AppError::from)?
             .is_some() {
-            return Err(Status::already_exists("User already enrolled in this course"));
+            return Err(AppError::AlreadyExists("User already enrolled in this course".to_string()).into());
         }
         
         // Create enrollment
@@ -59,7 +59,7 @@ impl enrollment_service_server::EnrollmentService for EnrollmentService {
         
         // Save to database
         let saved_enrollment = self.repository.create_enrollment(&db_enrollment).await
-            .map_err(|e| Status::internal(format!("Failed to create enrollment: {}", e)))?;
+            .map_err(AppError::from)?;
         
         // Convert to protobuf enrollment
         let proto_enrollment = Enrollment {
@@ -83,13 +83,17 @@ impl enrollment_service_server::EnrollmentService for EnrollmentService {
     ) -> Result<Response<UpdateProgressResponse>, Status> {
         let req = request.into_inner();
         
-        let enrollment_id = Uuid::parse_str(&req.enrollment_id)
-            .map_err(|_| Status::invalid_argument("Invalid enrollment ID"))?;
+        let enrollment_id = parse_uuid(&req.enrollment_id)?;
+        
+        // Validate progress
+        if req.progress < 0.0 || req.progress > 100.0 {
+            return Err(AppError::Validation("Progress must be between 0 and 100".to_string()).into());
+        }
         
         // Fetch existing enrollment
         let mut enrollment = self.repository.get_enrollment_by_id(enrollment_id).await
-            .map_err(|e| Status::internal(format!("Failed to fetch enrollment: {}", e)))?
-            .ok_or_else(|| Status::not_found("Enrollment not found"))?;
+            .map_err(AppError::from)?
+            .ok_or_else(|| AppError::NotFound("Enrollment not found".to_string()))?;
         
         // Update progress
         enrollment.progress = req.progress;
@@ -111,7 +115,7 @@ impl enrollment_service_server::EnrollmentService for EnrollmentService {
             enrollment.progress,
             &enrollment.status
         ).await
-            .map_err(|e| Status::internal(format!("Failed to update enrollment: {}", e)))?;
+            .map_err(AppError::from)?;
         
         // Convert to protobuf enrollment
         let status_enum = match updated_enrollment.status.as_str() {

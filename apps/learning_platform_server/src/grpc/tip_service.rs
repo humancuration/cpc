@@ -3,9 +3,12 @@ use uuid::Uuid;
 use chrono::Utc;
 use crate::database::repository::DatabaseRepository;
 use crate::database::models::Tip as DatabaseTip;
+use crate::error::AppError;
+use crate::utils::{parse_uuid, validate_positive};
 
 // Import the generated protobuf types
 tonic::include_proto!("cpc.learning_platform");
+tonic::include_proto!("cpc.learning_platform_server");
 
 pub struct TipService {
     repository: DatabaseRepository,
@@ -25,21 +28,15 @@ impl tip_service_server::TipService for TipService {
     ) -> Result<Response<SendTipResponse>, Status> {
         let req = request.into_inner();
         
-        let sender_id = Uuid::parse_str(&req.sender_id)
-            .map_err(|_| Status::invalid_argument("Invalid sender ID"))?;
-            
-        let recipient_id = Uuid::parse_str(&req.recipient_id)
-            .map_err(|_| Status::invalid_argument("Invalid recipient ID"))?;
+        let sender_id = parse_uuid(&req.sender_id)?;
+        let recipient_id = parse_uuid(&req.recipient_id)?;
         
         // Validate amount
-        if req.amount <= 0.0 {
-            return Err(Status::invalid_argument("Tip amount must be positive"));
-        }
+        validate_positive(req.amount, "Tip amount")?;
         
         // Validate course ID if provided
         let course_id = if let Some(ref course_id_str) = req.course_id {
-            Some(Uuid::parse_str(course_id_str)
-                .map_err(|_| Status::invalid_argument("Invalid course ID"))?)
+            Some(parse_uuid(course_id_str)?)
         } else {
             None
         };
@@ -47,9 +44,9 @@ impl tip_service_server::TipService for TipService {
         // Check if course exists if course_id is provided
         if let Some(course_id) = course_id {
             if self.repository.get_course_by_id(course_id).await
-                .map_err(|e| Status::internal(format!("Failed to check course: {}", e)))?
+                .map_err(AppError::from)?
                 .is_none() {
-                return Err(Status::not_found("Course not found"));
+                return Err(AppError::NotFound("Course not found".to_string()).into());
             }
         }
         
@@ -67,7 +64,7 @@ impl tip_service_server::TipService for TipService {
         
         // Save to database
         let saved_tip = self.repository.create_tip(&db_tip).await
-            .map_err(|e| Status::internal(format!("Failed to create tip: {}", e)))?;
+            .map_err(AppError::from)?;
         
         // Convert to protobuf tip
         let proto_tip = Tip {

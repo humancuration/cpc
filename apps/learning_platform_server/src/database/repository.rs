@@ -45,6 +45,58 @@ impl DatabaseRepository {
         Ok(result)
     }
 
+    // Module operations
+    pub async fn create_module(&self, module: &Module) -> Result<Module, sqlx::Error> {
+        let result = sqlx::query_as!(
+            Module,
+            "INSERT INTO modules (id, course_id, title, order_index, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+            module.id,
+            module.course_id,
+            module.title,
+            module.order_index,
+            module.created_at
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(result)
+    }
+
+    pub async fn get_modules_by_course_id(&self, course_id: Uuid) -> Result<Vec<Module>, sqlx::Error> {
+        let result = sqlx::query_as!(Module, "SELECT * FROM modules WHERE course_id = $1 ORDER BY order_index", course_id)
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(result)
+    }
+
+    // Lesson operations
+    pub async fn create_lesson(&self, lesson: &Lesson) -> Result<Lesson, sqlx::Error> {
+        let result = sqlx::query_as!(
+            Lesson,
+            "INSERT INTO lessons (id, module_id, title, content, media_url, order_index, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+            lesson.id,
+            lesson.module_id,
+            lesson.title,
+            lesson.content,
+            lesson.media_url,
+            lesson.order_index,
+            lesson.created_at
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(result)
+    }
+
+    pub async fn get_lessons_by_module_id(&self, module_id: Uuid) -> Result<Vec<Lesson>, sqlx::Error> {
+        let result = sqlx::query_as!(Lesson, "SELECT * FROM lessons WHERE module_id = $1 ORDER BY order_index", module_id)
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(result)
+    }
+
     // Enrollment operations
     pub async fn create_enrollment(&self, enrollment: &Enrollment) -> Result<Enrollment, sqlx::Error> {
         let result = sqlx::query_as!(

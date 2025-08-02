@@ -20,9 +20,33 @@ config = "0.14"
 dotenv = "0.15"
 jsonwebtoken = "9.0"
 bcrypt = "0.15"
+thiserror = "1.0"
 
 # Shared core library
 learning_core = { path = "../../shared_packages/learning_core" }
 
 [build-dependencies]
 tonic-build = "0.12"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["async_tokio"] }
+
+[[example]]
+name = "client"
+path = "examples/client.rs"
+
+[lib]
+name = "learning_platform_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "learning_platform_server"
+path = "src/main.rs"
+
+[[bin]]
+name = "migrate"
+path = "src/bin/migrate.rs"
+
+[[bench]]
+name = "service_benchmark"
+harness = false

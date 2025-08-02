@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package cpc.learning_platform_server;
+
+import "google/protobuf/timestamp.proto";
+import "shared_packages/grpc/learning_platform.proto";
+
+// Additional service for user management
+service UserService {
+    // Register a new user
+    rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse);
+}
+
+// Request/Response messages for UserService
+message RegisterUserRequest {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message RegisterUserResponse {
+    string user_id = 1;
+}

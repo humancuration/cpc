@@ -6,9 +6,12 @@ use chrono::{Utc, Duration};
 use crate::database::repository::DatabaseRepository;
 use crate::database::models::User;
 use crate::middleware::auth::Claims;
+use crate::error::AppError;
+use crate::utils::{validate_not_empty, validate_password_strength};
 
 // Import the generated protobuf types
 tonic::include_proto!("cpc.learning_platform");
+tonic::include_proto!("cpc.learning_platform_server");
 
 pub struct AuthService {
     repository: DatabaseRepository,
@@ -28,17 +31,22 @@ impl auth_service_server::AuthService for AuthService {
     ) -> Result<Response<AuthResponse>, Status> {
         let req = request.into_inner();
         
+        // Validate inputs
+        validate_not_empty(&req.username, "Username")?;
+        validate_not_empty(&req.password, "Password")?;
+        validate_password_strength(&req.password)?;
+        
         // Look up user by username
         let user = self.repository.get_user_by_username(&req.username).await
-            .map_err(|e| Status::internal(format!("Failed to lookup user: {}", e)))?
-            .ok_or_else(|| Status::unauthenticated("Invalid username or password"))?;
+            .map_err(AppError::from)?
+            .ok_or_else(|| AppError::Auth("Invalid username or password".to_string()))?;
         
         // Verify password
         let valid = verify(&req.password, &user.password_hash)
-            .map_err(|_| Status::internal("Failed to verify password"))?;
+            .map_err(|_| AppError::Internal("Failed to verify password".to_string()))?;
         
         if !valid {
-            return Err(Status::unauthenticated("Invalid username or password"));
+            return Err(AppError::Auth("Invalid username or password".to_string()).into());
         }
         
         // Create claims for JWT
@@ -57,7 +65,7 @@ impl auth_service_server::AuthService for AuthService {
         
         // Create JWT token
         let token = encode(&Header::default(), &claims, &EncodingKey::from_secret(jwt_secret.as_bytes()))
-            .map_err(|_| Status::internal("Failed to create token"))?;
+            .map_err(|_| AppError::Internal("Failed to create token".to_string()))?;
         
         let response = AuthResponse {
             access_token: token,
