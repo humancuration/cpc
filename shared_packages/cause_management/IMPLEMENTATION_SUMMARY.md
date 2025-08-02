@@ -1,147 +1,109 @@
-# Cause Management Service Implementation Summary
+# Cause Management Service Implementation Summary (v2.0)
 
 ## Overview
+This service provides comprehensive cause management with collaborative features for the CPC platform. Organized using vertical slices and hexagonal architecture.
 
-This document summarizes the implementation of the Cause Management Service for the CPC platform. The service provides functionality for managing charitable causes that users can donate to within the platform.
+## Vertical Slices
 
-## Components Implemented
+### 1. Cause Management
+- **Models**:
+  - `Cause` with validation logic
+  - Request/response structures
+- **Repository**:
+  - CRUD operations
+  - Pagination and filtering
+- **Service**:
+  - gRPC handlers for cause operations
+  - Input validation
+  - Error mapping
 
-### 1. Core Modules
+### 2. Discussion System
+- **Models**:
+  - `DiscussionThread` with comments
+  - User mentions and reactions
+- **Repository**:
+  - Thread creation/updating
+  - Nested comment storage
+- **Service**:
+  - Real-time updates via gRPC streams
+  - Notification triggers
 
-#### `models.rs`
-- Cause structure with name, description, image URL, and donation tracking
-- CreateCauseRequest and UpdateCauseRequest structures
-- ListCausesRequest and ListCausesResponse for pagination
-- CauseError enumeration for error handling
-- Unit tests for cause creation, updating, and donation tracking
+### 3. Updates & Announcements
+- **Models**:
+  - `CauseUpdate` with multimedia support
+  - Update metadata
+- **Repository**:
+  - Versioned updates
+  - Scheduled publishing
+- **Service**:
+  - Update broadcasting
+  - Subscriber notifications
 
-#### `repository.rs`
-- CauseRepository trait defining database operations
-- PostgresCauseRepository implementation for PostgreSQL
-- CRUD operations for causes
-- Donation tracking functionality
-- Pagination support for listing causes
-- Comprehensive error handling
-
-#### `service.rs`
-- CauseServiceImpl implementing the gRPC service interface
-- Conversion methods between proto and internal models
-- Implementation of all cause management RPC methods:
-  - CreateCause
-  - GetCause
-  - UpdateCause
-  - DeleteCause
-  - ListCauses
-  - GetFeaturedCauses
-- Integration with existing cpay.proto service definition
-
-#### `lib.rs`
-- Main service trait defining CauseManagementService functionality
-- Service implementation with dependency injection
-- gRPC server startup functionality
-
-### 2. Protocol Buffer Definitions
-
-#### `proto/cpay.proto` (extended)
-- Cause message definition
-- CreateCauseRequest/CreateCauseResponse messages
-- GetCauseRequest/GetCauseResponse messages
-- UpdateCauseRequest/UpdateCauseResponse messages
-- DeleteCauseRequest/DeleteCauseResponse messages
-- ListCausesRequest/ListCausesResponse messages
-- Extended CpayService with cause management RPC methods
-
-### 3. Database Migrations
-
-#### `migrations/20250801000003_create_causes_table.sql`
-- Table for storing cause information
-- Indexes for common query patterns
-- Support for donation tracking
-
-### 4. Build System
-
-#### `build.rs`
-- Build script for generating gRPC code from proto files
-- Dependency tracking for proto file changes
+## Hexagonal Architecture
+```mermaid
+graph LR
+    A[gRPC Controller] --> B[Service Layer]
+    B --> C[Domain Model]
+    C --> D[Repository Interface]
+    D --> E[Postgres Repository]
+    D --> F[Mock Repository]
+```
 
 ## Key Features
+- **Collaboration Tools**:
+  - Discussion threads on causes
+  - Real-time updates
+  - User mentions
+- **Social Features**:
+  - Cause sharing
+  - Update subscriptions
+  - Activity feeds
+- **Enhanced Architecture**:
+  - Feature-based vertical slices
+  - Clear domain boundaries
+  - Testable interfaces
 
-### Cause Management
-- Full CRUD operations for causes
-- Support for cause images
-- Donation tracking with precise decimal arithmetic
-- Pagination for listing causes
+## Protocol Buffers
+```protobuf
+// Discussion system
+message DiscussionThread {
+  string id = 1;
+  string cause_id = 2;
+  repeated Comment comments = 3;
+}
 
-### Data Management
-- PostgreSQL database storage
-- Repository pattern for data access
-- Comprehensive error handling
-- Indexes for common query patterns
+message CreateThreadRequest {
+  string cause_id = 1;
+  string initial_comment = 2;
+}
 
-### Integration Points
-- gRPC for internal service communication
-- Shared proto definitions with cpay_core
-- Compatible with existing CPC platform services
+// Cause updates
+message CauseUpdate {
+  string id = 1;
+  string cause_id = 2;
+  string content = 3;
+  repeated string media_urls = 4;
+}
+```
 
-## Architecture Patterns
+## Database Schema
+```sql
+CREATE TABLE discussion_threads (
+  id UUID PRIMARY KEY,
+  cause_id UUID REFERENCES causes(id),
+  created_at TIMESTAMPTZ NOT NULL
+);
 
-### Hexagonal Architecture
-- Clear separation of business logic from infrastructure
-- Dependency inversion through repository traits
-- Testability through mock implementations
-
-### Service Layer
-- Well-defined service interfaces
-- Dependency injection for loose coupling
-- Async/await for non-blocking operations
-
-### Error Handling
-- Comprehensive error types with context
-- Proper error propagation through Result types
-- Integration with existing error types from dependencies
-
-## Testing
-
-### Unit Tests
-- Models: Cause creation, updating, and donation tracking
-- Repository: Database operations (integration tests)
-- Service: gRPC method implementations
-
-### Integration Points
-- gRPC service implementation
-- Database schema compatibility
-- Proto definition compatibility
-
-## Dependencies
-
-### External Crates
-- `tokio` for async runtime
-- `tonic`/`prost` for gRPC services
-- `sqlx` for database access
-- `rust_decimal` for precise financial calculations
-- `uuid` for unique identifiers
-- `chrono` for time handling
-- `serde` for serialization
-
-### Internal Crates
-- None currently, but designed for integration with:
-  - `cpay_core` for payment processing
-  - Other CPC platform services
+CREATE TABLE cause_updates (
+  id UUID PRIMARY KEY,
+  cause_id UUID REFERENCES causes(id),
+  content TEXT NOT NULL,
+  media_urls JSONB,
+  published_at TIMESTAMPTZ
+);
+```
 
 ## Future Enhancements
-
-### Advanced Features
-- Featured causes algorithm
-- Cause categories and tagging
-- Cause statistics and analytics
-- Cause search functionality
-
-### Performance Improvements
-- Caching strategies for frequently accessed causes
-- Database query optimization
-- Asynchronous processing for donation updates
-
-### Integration Enhancements
-- Social sharing for causes
-- Volunteer opportunity linking
-- Impact tracking and reporting
+- Volunteer opportunity management
+- Skill-based volunteering integration
+- Advanced impact analytics

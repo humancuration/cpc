@@ -1,0 +1,222 @@
+syntax = "proto3";
+package skill_volunteering;
+
+import "google/protobuf/timestamp.proto";
+
+service SkillVolunteeringService {
+  rpc CreateOpportunity(CreateOpportunityRequest) returns (CreateOpportunityResponse);
+  rpc ApplyForOpportunity(ApplyRequest) returns (ApplyResponse);
+  rpc ListOpportunities(ListOpportunitiesRequest) returns (ListOpportunitiesResponse);
+  rpc RecordImpact(ImpactRecordRequest) returns (ImpactRecordResponse);
+  rpc GetOpportunity(GetOpportunityRequest) returns (GetOpportunityResponse);
+  rpc UpdateOpportunity(UpdateOpportunityRequest) returns (UpdateOpportunityResponse);
+  rpc DeleteOpportunity(DeleteOpportunityRequest) returns (DeleteOpportunityResponse);
+  rpc ListUserApplications(ListUserApplicationsRequest) returns (ListUserApplicationsResponse);
+  rpc UpdateApplicationStatus(UpdateApplicationStatusRequest) returns (UpdateApplicationStatusResponse);
+
+  rpc ListSkills(ListSkillsRequest) returns (ListSkillsResponse);
+
+ // User Skill Management
+ rpc AddUserSkill(AddUserSkillRequest) returns (AddUserSkillResponse);
+ rpc ListUserSkills(ListUserSkillsRequest) returns (ListUserSkillsResponse);
+ rpc RemoveUserSkill(RemoveUserSkillRequest) returns (RemoveUserSkillResponse);
+}
+
+message Skill {
+  string id = 1;
+  string name = 2;
+  string category = 3;
+  string description = 4;
+}
+
+message VolunteerOpportunity {
+  string id = 1;
+  string cause_id = 2;
+  repeated string required_skills = 3;
+  string title = 4;
+  string description = 5;
+  int32 estimated_hours = 6;
+  google.protobuf.Timestamp deadline = 7;
+  google.protobuf.Timestamp created_at = 8;
+  string created_by = 9;
+}
+
+message OpportunityApplication {
+  string id = 1;
+  string opportunity_id = 2;
+  string user_id = 3;
+  google.protobuf.Timestamp applied_at = 4;
+  string status = 5; // pending, accepted, rejected, completed
+  optional string volunteer_hours = 6;
+}
+
+message VolunteerImpact {
+  string id = 1;
+  string opportunity_id = 2;
+  string user_id = 3;
+  string skill_id = 4;
+  int32 hours_contributed = 5;
+  string impact_description = 6;
+  google.protobuf.Timestamp recorded_at = 7;
+}
+
+// Request/Response messages
+
+message CreateOpportunityRequest {
+  string cause_id = 1;
+  repeated string required_skills = 2;
+  string title = 3;
+  string description = 4;
+  int32 estimated_hours = 5;
+  google.protobuf.Timestamp deadline = 6;
+  string created_by = 7;
+}
+
+message CreateOpportunityResponse {
+  VolunteerOpportunity opportunity = 1;
+}
+
+message GetOpportunityRequest {
+  string opportunity_id = 1;
+}
+
+message GetOpportunityResponse {
+  VolunteerOpportunity opportunity = 1;
+}
+
+message UpdateOpportunityRequest {
+  string opportunity_id = 1;
+  optional string cause_id = 2;
+  optional repeated string required_skills = 3;
+  optional string title = 4;
+  optional string description = 5;
+  optional int32 estimated_hours = 6;
+  optional google.protobuf.Timestamp deadline = 7;
+}
+
+message UpdateOpportunityResponse {
+  VolunteerOpportunity opportunity = 1;
+}
+
+message DeleteOpportunityRequest {
+  string opportunity_id = 1;
+}
+
+message DeleteOpportunityResponse {
+  bool success = 1;
+}
+
+message ApplyRequest {
+  string opportunity_id = 1;
+  string user_id = 2;
+}
+
+message ApplyResponse {
+  OpportunityApplication application = 1;
+}
+
+message ListOpportunitiesRequest {
+  optional string cause_id = 1;
+  optional string skill_id = 2;
+  optional int32 limit = 3;
+  optional int32 offset = 4;
+  optional bool only_open = 5; // Only show opportunities that haven't passed their deadline
+}
+
+message ListOpportunitiesResponse {
+  repeated VolunteerOpportunity opportunities = 1;
+  int32 total_count = 2;
+}
+
+message ListUserApplicationsRequest {
+  string user_id = 1;
+  optional int32 limit = 2;
+  optional int32 offset = 3;
+  optional string status = 4;
+}
+
+message ListUserApplicationsResponse {
+  repeated OpportunityApplication applications = 1;
+  int32 total_count = 2;
+}
+
+message UpdateApplicationStatusRequest {
+  string application_id = 1;
+  string status = 2; // accepted, rejected, completed
+  optional string volunteer_hours = 3; // Only used when status is 'Completed'. Will be ignored for other statuses.
+}
+
+message UpdateApplicationStatusResponse {
+  OpportunityApplication application = 1;
+}
+
+message ImpactRecordRequest {
+  string opportunity_id = 1;
+  string user_id = 2;
+  string skill_id = 3;
+  int32 hours_contributed = 4;
+  string impact_description = 5;
+}
+
+message ImpactRecordResponse {
+  VolunteerImpact impact = 1;
+}
+
+message ListSkillsRequest {
+  optional string category = 1;
+  optional int32 limit = 2;
+  optional int32 offset = 3;
+}
+
+message ListSkillsResponse {
+  repeated Skill skills = 1;
+  int32 total_count = 2;
+}
+
+// Represents a skill associated with a user.
+message UserSkill {
+ string user_id = 1;
+ string skill_id = 2;
+ string skill_level = 3; // "beginner", "intermediate", "advanced"
+ google.protobuf.Timestamp created_at = 4;
+ google.protobuf.Timestamp updated_at = 5;
+}
+
+// Represents detailed information about a user's skill, including the skill name and category.
+// Used in list operations.
+message UserSkillDetails {
+   string user_id = 1;
+   Skill skill = 2; // from existing definitions
+   string skill_level = 3;
+   google.protobuf.Timestamp created_at = 4;
+}
+
+// AddUserSkill
+message AddUserSkillRequest {
+ string user_id = 1;
+ string skill_id = 2;
+ string skill_level = 3;
+}
+
+message AddUserSkillResponse {
+ UserSkill user_skill = 1;
+}
+
+// ListUserSkills
+message ListUserSkillsRequest {
+ string user_id = 1;
+}
+
+message ListUserSkillsResponse {
+ repeated UserSkillDetails user_skills = 1;
+}
+
+// RemoveUserSkill
+message RemoveUserSkillRequest {
+ string user_id = 1;
+ string skill_id = 2;
+}
+
+message RemoveUserSkillResponse {
+ bool success = 1;
+}

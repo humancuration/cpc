@@ -74,48 +74,71 @@ let cause: Cause = response.into_inner().cause;
 
 ## Database Schema Integration
 
-### CPay Core Tables
-- `traditional_currency_transactions` - Stores payment transaction data
-- References to `cause_id` for donations
-
 ### Cause Management Tables
-- `causes` - Stores cause information and donation tracking
-- Can be joined with transaction data for reporting
+- `causes` - Cause information and donation tracking
+- `discussion_threads` - Threads for cause discussions
+- `comments` - Individual comments in threads
+- `cause_updates` - Updates and announcements
 
-## Error Handling
+```sql
+CREATE TABLE discussion_threads (
+  id UUID PRIMARY KEY,
+  cause_id UUID REFERENCES causes(id),
+  title TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
-Both services follow consistent error handling patterns:
-- Use of `thiserror` for structured error types
-- Proper gRPC status codes for service-to-service communication
-- Detailed error messages for debugging
+CREATE TABLE comments (
+  id UUID PRIMARY KEY,
+  thread_id UUID REFERENCES discussion_threads(id),
+  user_id UUID NOT NULL,
+  content TEXT NOT NULL,
+  media_urls JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
-## Deployment Considerations
+CREATE TABLE cause_updates (
+  id UUID PRIMARY KEY,
+  cause_id UUID REFERENCES causes(id),
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  media_urls JSONB,
+  published_at TIMESTAMPTZ
+);
+```
 
-### Separate Deployments
-Each service should be deployed independently:
-- CPay Core: Handles high-volume payment processing
-- Cause Management: Handles cause-related operations
-- Allows for independent scaling and maintenance
+## Collaborative Features Integration
 
-### Shared Dependencies
-- Both services use the same proto definitions
-- Both services connect to the same database cluster
-- Both services follow the same logging and monitoring patterns
+### Discussion System
+- Real-time updates using gRPC streams:
+  ```protobuf
+  service DiscussionService {
+    rpc StreamThreadUpdates(StreamThreadRequest) returns (stream ThreadUpdate);
+  }
+  ```
+- Push notifications for new comments
+- Moderation hooks for content filtering
 
-## Testing Integration
+### Cause Updates
+- Scheduled publishing via background workers
+- Subscription system for update notifications
+- Multimedia content handling
 
-### Unit Tests
-Each service has independent unit tests that don't require the other service to be running.
+## Skill Volunteering Integration
+The new Skill Volunteering module will integrate with:
+- CauseService to link opportunities with causes
+- DiscussionService for volunteer coordination
+- User profiles for skill matching
 
-### Integration Tests
-For end-to-end testing, both services need to be running:
-1. Start CPay Core service
-2. Start Cause Management service
-3. Run integration tests that verify cross-service communication
+```mermaid
+graph TD
+    A[CauseService] -->|opportunities| B[SkillVolunteering]
+    B -->|notifications| C[UserService]
+    C -->|skill matching| B
+    D[DiscussionService] -->|coordination| B
+```
 
-## Monitoring and Observability
-
-Both services use the same tracing infrastructure:
-- Consistent logging formats
-- Distributed tracing support
-- Metrics collection
+## Future Integration
+- Social graph for volunteer connections
+- Skill validation system
+- Impact scoring for volunteer work
