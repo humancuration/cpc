@@ -12,6 +12,7 @@ use crate::application::template_service::TemplateService;
 use crate::application::analytics_service::AnalyticsService;
 use crate::domain::errors::WebsiteBuilderError;
 use crate::web::types::*;
+use crate::domain::models::{CampaignType, FundraisingCampaignData};
 
 // GraphQL Query Root
 #[derive(Default)]
@@ -100,6 +101,17 @@ impl WebsiteBuilderMutation {
         let site_output = convert_site_to_output(site);
         Ok(site_output)
     }
+#[derive(InputObject)]
+pub struct CreateFundraisingCampaignInput {
+    pub site_name: String,
+    pub title: String,
+    pub description: String,
+    pub campaign_type: CampaignTypeInput,
+    pub goal_amount: i64,
+    pub currency: String,
+    pub start_date: String,
+    pub end_date: Option<String>,
+}
 
     async fn update_site_settings(
         &self,
@@ -148,6 +160,28 @@ impl WebsiteBuilderMutation {
         
         analytics_service.track_link_click(link_id).await?;
         Ok(true)
+    }
+    
+    async fn create_fundraising_campaign(&self, ctx: &Context<'_>, input: CreateFundraisingCampaignInput) -> Result<SiteOutput> {
+        let site_service = ctx.data_unchecked::<SiteService>();
+        let user_id = ctx.data_unchecked::<Uuid>();
+
+        let campaign_data = FundraisingCampaignData {
+            campaign_id: Uuid::nil(), // To be set by service
+            campaign_title: input.title,
+            campaign_description: input.description,
+            campaign_type: convert_campaign_type_input_to_domain(input.campaign_type),
+            goal_amount: input.goal_amount,
+            current_amount: 0,
+            start_date: input.start_date,
+            end_date: input.end_date,
+        };
+
+        let site = site_service
+            .create_fundraising_campaign(*user_id, campaign_data, input.site_name)
+            .await?;
+        
+        Ok(convert_site_to_output(site))
     }
 }
 
@@ -213,6 +247,20 @@ fn convert_site_type_to_output(site_type: crate::domain::models::SiteType) -> Si
                 description: data.description,
                 links: data.links.into_iter().map(convert_link_item_to_output).collect(),
                 click_count: data.click_count,
+            }),
+        },
+        crate::domain::models::SiteType::FundraisingCampaign(data) => SiteTypeOutput {
+            full_website: None,
+            link_in_bio: None,
+            fundraising_campaign: Some(FundraisingCampaignDataOutput {
+                campaign_id: data.campaign_id,
+                campaign_title: data.campaign_title,
+                campaign_description: data.campaign_description,
+                campaign_type: convert_campaign_type_to_output(data.campaign_type),
+                goal_amount: data.goal_amount,
+                current_amount: data.current_amount,
+                start_date: data.start_date,
+                end_date: data.end_date,
             }),
         },
     }
@@ -458,5 +506,25 @@ fn convert_site_type_input_to_domain(site_type: SiteTypeInput) -> crate::domain:
             links: vec![],
             click_count: 0,
         })
+    }
+}
+
+fn convert_campaign_type_input_to_domain(campaign_type: CampaignTypeInput) -> crate::domain::models::CampaignType {
+    match campaign_type {
+        CampaignTypeInput::CooperativeMembership => crate::domain::models::CampaignType::CooperativeMembership,
+        CampaignTypeInput::PureDonation => crate::domain::models::CampaignType::PureDonation,
+        CampaignTypeInput::RegCF => crate::domain::models::CampaignType::RegCF,
+        CampaignTypeInput::RegA => crate::domain::models::CampaignType::RegA,
+        CampaignTypeInput::RegD => crate::domain::models::CampaignType::RegD,
+    }
+}
+
+fn convert_campaign_type_to_output(campaign_type: crate::domain::models::CampaignType) -> CampaignTypeOutput {
+    match campaign_type {
+        crate::domain::models::CampaignType::CooperativeMembership => CampaignTypeOutput::CooperativeMembership,
+        crate::domain::models::CampaignType::PureDonation => CampaignTypeOutput::PureDonation,
+        crate::domain::models::CampaignType::RegCF => CampaignTypeOutput::RegCF,
+        crate::domain::models::CampaignType::RegA => CampaignTypeOutput::RegA,
+        crate::domain::models::CampaignType::RegD => CampaignTypeOutput::RegD,
     }
 }

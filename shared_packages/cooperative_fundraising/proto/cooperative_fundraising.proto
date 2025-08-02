@@ -5,6 +5,17 @@ import "google/protobuf/timestamp.proto";
 
 service CooperativeFundraisingService {
   // Campaign management
+  // Creates a new fundraising campaign with strict validation.
+  //
+  // Errors:
+  // - INVALID_ARGUMENT (400):
+  //     * title must be 5-100 characters
+  //     * description must be 20-1000 characters
+  // - FAILED_PRECONDITION (412):
+  //     * status must be DRAFT
+  //     * For MEMBERSHIP campaigns: max_participants must be > 0
+  //     * For DONATION campaigns: funding_goal must be positive and external_use_case required
+  // - INTERNAL (500): Database operation failed
   rpc CreateCampaign(CreateCampaignRequest) returns (CreateCampaignResponse);
   rpc GetCampaign(GetCampaignRequest) returns (GetCampaignResponse);
   rpc ListCampaigns(ListCampaignsRequest) returns (ListCampaignsResponse);

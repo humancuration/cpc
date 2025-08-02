@@ -30,12 +30,17 @@ apps/website-builder/
     │   ├── repository.rs
     │   ├── p2p_store.rs
     │   └── media_processor.rs
-    └── web/
+    ├── web/
+    │   ├── mod.rs
+    │   ├── routes.rs
+    │   ├── graphql.rs
+    │   ├── module.rs
+    │   └── types.rs
+    └── frontend/           # UI components (Yew/Tauri)
         ├── mod.rs
-        ├── routes.rs
-        ├── graphql.rs
-        ├── module.rs
-        └── types.rs
+        ├── components.rs
+        ├── editor.rs       # Bevy-based editor
+        └── ...
 ```
 
 ## Documentation

@@ -20,6 +20,14 @@ service SkillVolunteeringService {
  rpc AddUserSkill(AddUserSkillRequest) returns (AddUserSkillResponse);
  rpc ListUserSkills(ListUserSkillsRequest) returns (ListUserSkillsResponse);
  rpc RemoveUserSkill(RemoveUserSkillRequest) returns (RemoveUserSkillResponse);
+
+ // Skill Endorsement System
+ rpc RecordEndorsement(RecordEndorsementRequest) returns (RecordEndorsementResponse);
+ rpc GetEndorsementsForUser(GetEndorsementsRequest) returns (GetEndorsementsResponse);
+ 
+ // Location-based filtering
+ rpc OpportunitiesNearMe(OpportunitiesNearMeRequest) returns (OpportunitiesNearMeResponse);
+ rpc GetVolunteeringActivity(VolunteeringActivityRequest) returns (VolunteeringActivityResponse);
 }
 
 message Skill {
@@ -218,5 +226,65 @@ message RemoveUserSkillRequest {
 }
 
 message RemoveUserSkillResponse {
- bool success = 1;
+  bool success = 1;
+}
+
+// Skill Endorsement System
+
+message RecordEndorsementRequest {
+  string opportunity_id = 1;
+  string skill_id = 2;
+  string recipient_id = 3;
+  string comment = 4;
+  uint32 rating = 5;
+}
+
+message RecordEndorsementResponse {
+  Endorsement endorsement = 1;
+}
+
+message GetEndorsementsRequest {
+  string user_id = 1;
+  optional string skill_id = 2;
+}
+
+message GetEndorsementsResponse {
+  repeated Endorsement endorsements = 1;
+}
+
+message Endorsement {
+  string id = 1;
+  string opportunity_id = 2;
+  string skill_id = 3;
+  string endorser_id = 4;
+  string recipient_id = 5;
+  string comment = 6;
+  uint32 rating = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+// Location-based filtering
+
+message OpportunitiesNearMeRequest {
+  double latitude = 1;
+  double longitude = 2;
+  double radius_km = 3;
+  optional int32 limit = 4;
+  optional int32 offset = 5;
+}
+
+message OpportunitiesNearMeResponse {
+  repeated VolunteerOpportunity opportunities = 1;
+  int32 total_count = 2;
+}
+
+message VolunteeringActivityRequest {
+  string user_id = 1;
+  optional int32 limit = 2;
+  optional int32 offset = 3;
+}
+
+message VolunteeringActivityResponse {
+  repeated VolunteerOpportunity opportunities = 1;
+  int32 total_count = 2;
 }

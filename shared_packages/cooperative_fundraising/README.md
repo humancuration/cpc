@@ -55,7 +55,7 @@ The system follows a hexagonal architecture with clear separation of concerns:
 - gRPC service implementation
 - Integrations with cpay, wallet, and skill_volunteering systems
 
-## Database Schema
+## Database Schema and Migrations
 
 The system uses several tables to track campaigns and contributions:
 
@@ -64,6 +64,43 @@ The system uses several tables to track campaigns and contributions:
 - `donation_campaigns` - Details for donation campaigns
 - `contributions` - Individual contributions (monetary or volunteer)
 - `user_shares` - Membership shares with proper constraint enforcement (see ADR-001)
+
+### Migration Structure Guidelines
+
+All database migrations must adhere to the following vertical slice pattern:
+
+1. **Location**: Migrations must reside in `migrations/` directory within the package:
+   ```
+   shared_packages/cooperative_fundraising/migrations/
+   ```
+
+2. **Naming Convention**: Use sequential timestamp format:
+   ```
+   YYYYMMDDHHMMSS_create_table_name.sql
+   ```
+   - Example: `20250802000000_create_campaigns_table.sql`
+   - Timestamps must reflect dependency order (earlier dependencies first)
+
+3. **Dependency Rules**:
+   - Tables with foreign keys must have higher timestamps than their dependencies
+   - `campaigns` must be created before any tables referencing it
+   - Complex dependencies should be documented in the migration file
+
+4. **Verification Checklist**:
+   - [ ] All tables exist in test database
+   - [ ] Foreign key constraints verified
+   - [ ] Enum values match repository implementations
+   - [ ] JSON fields use `JSONB` for PostgreSQL
+   - [ ] All required indexes created
+
+### Testing Validation
+
+After applying migrations, verify with:
+```rust
+assert!(pool.execute("SELECT 1 FROM campaigns").await.is_ok());
+assert!(pool.execute("SELECT 1 FROM user_shares").await.is_ok());
+// Verify all other tables...
+```
 
 ## Critical Architectural Decisions
 

@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package learning_platform;
+
+import "google/protobuf/timestamp.proto";
+
+// Course Management
+message Course {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string creator_id = 4;
+  repeated Module modules = 5;
+}
+
+message Module {
+  string id = 1;
+  string title = 2;
+  repeated Lesson lessons = 3;
+}
+
+message Lesson {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string media_url = 4;
+}
+
+// Enrollment Tracking
+message Enrollment {
+  string id = 1;
+  string user_id = 2;
+  string course_id = 3;
+  float progress = 4;
+  enum Status {
+    ENROLLED = 0;
+    IN_PROGRESS = 1;
+    COMPLETED = 2;
+    DROPPED = 3;
+  }
+  Status status = 5;
+}
+
+// Credential Issuance
+message AcademicCredential {
+  string id = 1;
+  string user_id = 2;
+  string course_id = 3;
+  enum CredentialType {
+    CERTIFICATE = 0;
+    MICRO_DEGREE = 1;
+    DEGREE = 2;
+    BADGE = 3;
+  }
+  CredentialType credential_type = 4;
+  google.protobuf.Timestamp issued_at = 5;
+  string verification_code = 6;
+}
+
+// Tipping
+message Tip {
+  string id = 1;
+  string from_user_id = 2;
+  string to_user_id = 3;
+  optional string course_id = 4;
+  double amount = 5;
+  string currency = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+// Service Requests/Responses
+message CourseRequest {
+  string title = 1;
+  string description = 2;
+  string creator_id = 3;
+}
+
+message CourseResponse {
+  Course course = 1;
+}
+
+message EnrollmentRequest {
+  string user_id = 1;
+  string course_id = 2;
+}
+
+message EnrollmentResponse {
+  Enrollment enrollment = 1;
+}
+
+message ProgressUpdateRequest {
+  string enrollment_id = 1;
+  float progress_delta = 2;
+}
+
+message ProgressResponse {
+  Enrollment enrollment = 1;
+}
+
+message CredentialRequest {
+  string user_id = 1;
+  string course_id = 2;
+  AcademicCredential.CredentialType credential_type = 3;
+}
+
+message CredentialResponse {
+  AcademicCredential credential = 1;
+}
+
+message TipRequest {
+  string from_user_id = 1;
+  string to_user_id = 2;
+  optional string course_id = 3;
+  double amount = 4;
+  string currency = 5;
+}
+
+message TipResponse {
+  Tip tip = 1;
+}
+
+// Service Definition
+service LearningPlatformService {
+  // Course Management
+  rpc CreateCourse(CourseRequest) returns (CourseResponse);
+  
+  // Enrollment
+  rpc EnrollUser(EnrollmentRequest) returns (EnrollmentResponse);
+  rpc UpdateProgress(ProgressUpdateRequest) returns (ProgressResponse);
+  
+  // Credentials
+  rpc IssueCredential(CredentialRequest) returns (CredentialResponse);
+  
+  // Tipping
+  rpc TipEducator(TipRequest) returns (TipResponse);
+}

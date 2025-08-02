@@ -1,7 +1,8 @@
+-- DEPRECATED: Moved to cooperative_fundraising/migrations/
 -- Create user_shares table for tracking cooperative membership
 CREATE TABLE user_shares (
     user_id UUID NOT NULL,
-    campaign_id UUID NOT NULL REFERENCES campaigns(id),
+    campaign_id UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
     granted_at TIMESTAMPTZ DEFAULT NOW(),
     PRIMARY KEY (user_id, campaign_id)
 );

@@ -15,8 +15,8 @@ The website builder module follows a hexagonal architecture (also known as ports
 
 The domain layer contains the core business entities and value objects:
 
-- `Site` - The main entity representing either a full website or link-in-bio site
-- `SiteType` - An enum that distinguishes between full websites and link-in-bio sites
+- `Site` - The main entity representing either a full website, link-in-bio site, or fundraising campaign site
+- `SiteType` - An enum that distinguishes between full websites, link-in-bio sites, and fundraising campaign sites
 - `Template` - Site templates that define the structure and appearance
 - `AnalyticsReport` - Data structure for analytics information
 - Value objects like `ColorHex`, `ValidUrl`, and `TemplateId` for type-safe domain values
@@ -41,6 +41,7 @@ The infrastructure layer contains the technical implementations:
 - `SiteRepository` - Database implementation for storing and retrieving sites
 - `P2pandaClient` - Client for interacting with the p2panda network
 - `MediaProcessor` - Handles media processing tasks
+- `FundraisingClient` - gRPC client for interacting with the cooperative fundraising service
 
 These components implement the interfaces (traits) defined in the domain layer.
 

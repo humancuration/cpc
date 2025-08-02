@@ -26,6 +26,7 @@ pub struct Site {
 pub enum SiteType {
     FullWebsite(FullWebsiteData),
     LinkInBio(LinkInBioData),
+    FundraisingCampaign(FundraisingCampaignData),
 }
 
 /// Data specific to full websites

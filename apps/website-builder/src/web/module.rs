@@ -10,6 +10,7 @@ use crate::application::analytics_service::AnalyticsService;
 use crate::infrastructure::repository::SiteRepository;
 use crate::infrastructure::p2p_store::P2pandaClient;
 use crate::infrastructure::media_processor::MediaProcessor;
+use crate::infrastructure::grpc::FundraisingClient;
 use crate::web::graphql::{WebsiteBuilderQuery, WebsiteBuilderMutation, WebsiteBuilderSubscription};
 use crate::web::routes::create_website_builder_router;
 
@@ -31,9 +32,11 @@ pub fn initialize(db_pool: PgPool) -> WebsiteBuilderModule {
 
     // Initialize application services
     let template_service = Arc::new(TemplateService::new(site_repository.clone()));
+    let fundraising_client = Arc::new(FundraisingClient::new("http://localhost:50051").expect("Failed to create fundraising client"));
     let site_service = Arc::new(SiteService::new(
         site_repository.clone(),
         template_service.clone(),
+        fundraising_client,
     ));
     let analytics_service = Arc::new(AnalyticsService::new(site_repository.clone()));
 

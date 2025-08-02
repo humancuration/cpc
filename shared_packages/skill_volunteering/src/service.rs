@@ -4,6 +4,7 @@ use crate::{
     opportunity_management::{models::{VolunteerOpportunity as DomainVolunteerOpportunity, ApplicationStatus}, service::{OpportunityService, OpportunityServiceError, UpdateOpportunityData}},
     skill_management::{models::Skill as DomainSkill, service::SkillService},
     user_skill_management::service::{UserSkillService, UserSkillServiceError},
+    endorsement_management::{service::{EndorsementService, EndorsementServiceError}, models::SkillEndorsement},
 };
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
@@ -19,11 +20,14 @@ pub mod proto {
 use proto::{
     skill_volunteering_service_server::{SkillVolunteeringService, SkillVolunteeringServiceServer},
     ApplyRequest, ApplyResponse, CreateOpportunityRequest, CreateOpportunityResponse,
-    DeleteOpportunityRequest, DeleteOpportunityResponse, GetOpportunityRequest,
+    DeleteOpportunityRequest, DeleteOpportunityResponse, Endorsement as ProtoEndorsement,
+    GetEndorsementsRequest, GetEndorsementsResponse, GetOpportunityRequest,
     GetOpportunityResponse, ImpactRecordRequest, ImpactRecordResponse, ListOpportunitiesRequest,
     ListOpportunitiesResponse, ListUserApplicationsRequest, ListUserApplicationsResponse,
-    UpdateApplicationStatusRequest, UpdateApplicationStatusResponse, UpdateOpportunityRequest,
-    UpdateOpportunityResponse, VolunteerOpportunity as ProtoVolunteerOpportunity,
+    OpportunitiesNearMeRequest, OpportunitiesNearMeResponse, RecordEndorsementRequest,
+    RecordEndorsementResponse, UpdateApplicationStatusRequest, UpdateApplicationStatusResponse,
+    UpdateOpportunityRequest, UpdateOpportunityResponse, VolunteeringActivityRequest,
+    VolunteeringActivityResponse, VolunteerOpportunity as ProtoVolunteerOpportunity,
     OpportunityApplication as ProtoOpportunityApplication,
     AddUserSkillRequest, AddUserSkillResponse, ListUserSkillsRequest, ListUserSkillsResponse,
     RemoveUserSkillRequest, RemoveUserSkillResponse, UserSkill as ProtoUserSkill,
@@ -36,6 +40,7 @@ use proto::{
         opp_service: tokio::sync::Mutex<OpportunityService>,
         skill_service: Arc<SkillService>,
         user_skill_service: Arc<UserSkillService>,
+        endorsement_service: Arc<EndorsementService>,
     }
     
     impl SkillVolunteeringServiceImpl {
@@ -43,11 +48,13 @@ use proto::{
             opp_service: OpportunityService,
             skill_service: Arc<SkillService>,
             user_skill_service: Arc<UserSkillService>,
+            endorsement_service: Arc<EndorsementService>,
         ) -> Self {
             Self {
                 opp_service: tokio::sync::Mutex::new(opp_service),
                 skill_service,
                 user_skill_service,
+                endorsement_service,
             }
         }
     }
@@ -365,6 +372,31 @@ use proto::{
                     Status::internal(format!("Internal server error: {}", msg))
                 }
             }
+            
+            fn map_endorsement_error(err: EndorsementServiceError) -> Status {
+                match err {
+                    EndorsementServiceError::InvalidInput(msg) => Status::invalid_argument(msg),
+                    EndorsementServiceError::NotFound => Status::not_found("Endorsement not found"),
+                    EndorsementServiceError::Unauthorized => Status::permission_denied("Unauthorized"),
+                    EndorsementServiceError::Internal(msg) => Status::internal(msg),
+                }
+            }
+            
+            fn domain_endorsement_to_proto(endorsement: SkillEndorsement) -> ProtoEndorsement {
+                ProtoEndorsement {
+                    id: endorsement.id.to_string(),
+                    opportunity_id: endorsement.opportunity_id.to_string(),
+                    skill_id: endorsement.skill_id.to_string(),
+                    endorser_id: endorsement.endorser_id.to_string(),
+                    recipient_id: endorsement.recipient_id.to_string(),
+                    comment: endorsement.comment.unwrap_or_default(),
+                    rating: endorsement.rating,
+                    created_at: Some(prost_types::Timestamp {
+                        seconds: endorsement.created_at.timestamp(),
+                        nanos: endorsement.created_at.timestamp_nanos_opt().unwrap_or_default() as i32,
+                    }),
+                }
+            }
         }
         
         fn domain_skill_to_proto(domain_skill: DomainSkill) -> ProtoSkill {
@@ -479,6 +511,149 @@ use proto::{
                         total_count: paginated_result.total_count as i32,
                     };
             
+                    Ok(Response::new(response))
+                }
+                
+                async fn record_endorsement(
+                    &self,
+                    request: Request<RecordEndorsementRequest>,
+                ) -> Result<Response<RecordEndorsementResponse>, Status> {
+                    let req = request.into_inner();
+                    
+                    let opportunity_id = Uuid::from_str(&req.opportunity_id)
+                        .map_err(|_| Status::invalid_argument("Invalid opportunity_id format"))?;
+                    
+                    let skill_id = Uuid::from_str(&req.skill_id)
+                        .map_err(|_| Status::invalid_argument("Invalid skill_id format"))?;
+                    
+                    let recipient_id = Uuid::from_str(&req.recipient_id)
+                        .map_err(|_| Status::invalid_argument("Invalid recipient_id format"))?;
+                    
+                    let rating = req.rating;
+                    
+                    // Get endorser ID from request metadata (authentication context)
+                    let endorser_id = Uuid::from_str(
+                        request.metadata()
+                            .get("user_id")
+                            .ok_or_else(|| Status::unauthenticated("No user ID provided"))?
+                            .to_str()
+                            .map_err(|_| Status::invalid_argument("Invalid user ID format"))?
+                    ).map_err(|_| Status::invalid_argument("Invalid user ID format"))?;
+                    
+                    let endorsement = self.endorsement_service
+                        .record_endorsement(
+                            opportunity_id,
+                            skill_id,
+                            endorser_id,
+                            recipient_id,
+                            if req.comment.is_empty() { None } else { Some(req.comment) },
+                            rating,
+                        )
+                        .await
+                        .map_err(map_endorsement_error)?;
+                    
+                    let response = RecordEndorsementResponse {
+                        endorsement: Some(domain_endorsement_to_proto(endorsement)),
+                    };
+                    
+                    Ok(Response::new(response))
+                }
+                
+                async fn get_endorsements_for_user(
+                    &self,
+                    request: Request<GetEndorsementsRequest>,
+                ) -> Result<Response<GetEndorsementsResponse>, Status> {
+                    let req = request.into_inner();
+                    
+                    let user_id = Uuid::from_str(&req.user_id)
+                        .map_err(|_| Status::invalid_argument("Invalid user_id format"))?;
+                    
+                    let endorsements = self.endorsement_service
+                        .get_endorsements_for_user(user_id)
+                        .await
+                        .map_err(map_endorsement_error)?;
+                    
+                    let proto_endorsements = endorsements
+                        .into_iter()
+                        .map(domain_endorsement_to_proto)
+                        .collect();
+                    
+                    let response = GetEndorsementsResponse {
+                        endorsements: proto_endorsements,
+                    };
+                    
+                    Ok(Response::new(response))
+                }
+                
+                async fn opportunities_near_me(
+                    &self,
+                    request: Request<OpportunitiesNearMeRequest>,
+                ) -> Result<Response<OpportunitiesNearMeResponse>, Status> {
+                    let req = request.into_inner();
+                    
+                    // TODO: Implement actual location-based filtering
+                    // For now, return all opportunities as a placeholder
+                    let limit = req.limit.unwrap_or(10) as i64;
+                    let offset = req.offset.unwrap_or(0) as i64;
+                    
+                    let mut opp_service = self.opp_service.lock().await;
+                    
+                    let (opportunities, total_count) = opp_service
+                        .list_opportunities(None, None, true, limit, offset)
+                        .await
+                        .map_err(map_error)?;
+                    
+                    let proto_opportunities = opportunities
+                        .into_iter()
+                        .map(domain_opp_to_proto)
+                        .collect();
+                    
+                    let response = OpportunitiesNearMeResponse {
+                        opportunities: proto_opportunities,
+                        total_count: total_count as i32,
+                    };
+                    
+                    Ok(Response::new(response))
+                }
+                
+                async fn get_volunteering_activity(
+                    &self,
+                    request: Request<VolunteeringActivityRequest>,
+                ) -> Result<Response<VolunteeringActivityResponse>, Status> {
+                    let req = request.into_inner();
+                    
+                    let user_id = Uuid::from_str(&req.user_id)
+                        .map_err(|_| Status::invalid_argument("Invalid user_id format"))?;
+                    
+                    let limit = req.limit.unwrap_or(10) as i64;
+                    let offset = req.offset.unwrap_or(0) as i64;
+                    
+                    let mut opp_service = self.opp_service.lock().await;
+                    
+                    // Get opportunities where user has applications
+                    let (applications, _) = opp_service
+                        .list_user_applications(user_id, None, limit, offset)
+                        .await
+                        .map_err(map_error)?;
+                    
+                    // Get the opportunities for these applications
+                    let mut opportunities = Vec::new();
+                    for app in applications {
+                        if let Ok(Some(opp)) = opp_service.get_opportunity(app.opportunity_id).await {
+                            opportunities.push(opp);
+                        }
+                    }
+                    
+                    let proto_opportunities = opportunities
+                        .into_iter()
+                        .map(domain_opp_to_proto)
+                        .collect();
+                    
+                    let response = VolunteeringActivityResponse {
+                        opportunities: proto_opportunities,
+                        total_count: proto_opportunities.len() as i32,
+                    };
+                    
                     Ok(Response::new(response))
                 }
             }

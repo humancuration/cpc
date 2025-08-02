@@ -12,6 +12,7 @@ To add a new site type:
 4. Update the repository to handle the new site type
 5. Update the GraphQL types to include the new site type
 6. Update the services to handle the new site type
+7. Add integration with external services if needed (e.g., gRPC clients)
 
 ## Adding New Template Types
 
@@ -130,3 +131,16 @@ When adding new features, make sure to:
 3. Update the architecture documentation if needed
 4. Update the GraphQL documentation
 5. Update the database documentation if needed
+
+## Adding Fundraising Campaign Integration
+
+To add fundraising campaign integration:
+
+1. Add new variants to the `SiteType` enum for fundraising campaigns
+2. Add new structs for campaign data and campaign types
+3. Create a gRPC client to communicate with the fundraising service
+4. Update the database schema to store campaign information
+5. Update the repository to handle campaign data
+6. Update the services to create and manage campaigns
+7. Add new GraphQL types and mutations for campaigns
+8. Create frontend components for campaign creation and management

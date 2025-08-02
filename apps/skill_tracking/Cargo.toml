@@ -1,0 +1,65 @@
+[package]
+name = "skill_tracking"
+version = "0.1.0"
+edition = "2021"
+authors = ["CPC Cooperative <cooperative@cpc.dev>"]
+
+[dependencies]
+# Tauri
+tauri = { version = "2.0.0-rc", features = ["shell-open"] }
+tauri-plugin-shell = "2.0.0-rc"
+
+# Yew
+yew = { version = "0.21", features = ["csr"] }
+stylist = "0.13"
+
+# CPC Dependencies
+skill_development = { path = "../../shared_packages/skill_development" }
+skill_volunteering = { path = "../../shared_packages/skill_volunteering" }
+social_integration = { path = "../../shared_packages/social_integration" }
+
+# Async
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = "0.3"
+gloo = "0.8"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# gRPC
+tonic = { version = "0.12", default-features = false, features = ["prost", "codegen"] }
+prost = "0.13"
+
+# UUID
+uuid = { version = "1.8", features = ["v4", "serde", "js"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Plotting
+plotters = { version = "0.3", default-features = false, features = ["wasm-backend"] }
+
+# HTTP Client
+reqwest = { version = "0.12", features = ["json", "wasm-bindgen"] }
+
+# Logging
+wasm-logger = "0.2"
+log = "0.4"
+
+[build-dependencies]
+tonic-build = "0.12"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[lib]
+name = "skill_tracking_lib"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "skill_tracking"
+path = "src/main.rs"

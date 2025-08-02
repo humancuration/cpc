@@ -147,6 +147,8 @@ pub struct LinkInBioDataInput {
     pub description: String,
 }
 
+// Fundraising campaign input is now handled by CreateFundraisingCampaignInput in graphql.rs
+
 #[derive(Enum, Copy, Clone, Eq, PartialEq)]
 pub enum SectionTypeInput {
     Text,
@@ -174,6 +176,15 @@ pub enum TemplateTypeInput {
     LinkInBio,
 }
 
+#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+pub enum CampaignTypeInput {
+    CooperativeMembership,
+    PureDonation,
+    RegCF,
+    RegA,
+    RegD,
+}
+
 // Output types
 
 #[derive(SimpleObject, Serialize, Deserialize)]
@@ -195,6 +206,7 @@ pub struct SiteOutput {
 pub struct SiteTypeOutput {
     pub full_website: Option<FullWebsiteDataOutput>,
     pub link_in_bio: Option<LinkInBioDataOutput>,
+    pub fundraising_campaign: Option<FundraisingCampaignDataOutput>,
 }
 
 #[derive(SimpleObject, Serialize, Deserialize)]
@@ -210,6 +222,18 @@ pub struct LinkInBioDataOutput {
     pub description: String,
     pub links: Vec<LinkItemOutput>,
     pub click_count: u64,
+}
+
+#[derive(SimpleObject, Serialize, Deserialize)]
+pub struct FundraisingCampaignDataOutput {
+    pub campaign_id: Uuid,
+    pub campaign_title: String,
+    pub campaign_description: String,
+    pub campaign_type: CampaignTypeOutput,
+    pub goal_amount: Option<u64>,
+    pub current_amount: u64,
+    pub start_date: DateTime<Utc>,
+    pub end_date: Option<DateTime<Utc>>,
 }
 
 #[derive(SimpleObject, Serialize, Deserialize)]
@@ -308,6 +332,15 @@ pub struct TemplateOutput {
 pub enum TemplateTypeOutput {
     FullWebsite,
     LinkInBio,
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub enum CampaignTypeOutput {
+    CooperativeMembership,
+    PureDonation,
+    RegCF,
+    RegA,
+    RegD,
 }
 
 #[derive(SimpleObject, Serialize, Deserialize)]

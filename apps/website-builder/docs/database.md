@@ -22,7 +22,7 @@ Stores the main site entities, which can be either full websites or link-in-bio 
 CREATE TABLE sites (
     id UUID PRIMARY KEY,
     owner_id UUID NOT NULL REFERENCES cooperative_members(id),
-    site_type VARCHAR(20) NOT NULL, -- 'full_website' or 'link_in_bio'
+    site_type VARCHAR(20) NOT NULL, -- 'full_website', 'link_in_bio', or 'fundraising_campaign'
     name VARCHAR(100) NOT NULL,
     custom_domain VARCHAR(255),
     primary_color VARCHAR(7) NOT NULL DEFAULT '#000000',
@@ -31,7 +31,15 @@ CREATE TABLE sites (
     is_published BOOLEAN NOT NULL DEFAULT false,
     click_count BIGINT NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    campaign_id UUID,
+    campaign_title VARCHAR(255),
+    campaign_description TEXT,
+    campaign_type VARCHAR(50),
+    goal_amount BIGINT,
+    current_amount BIGINT DEFAULT 0,
+    campaign_start_date TIMESTAMPTZ,
+    campaign_end_date TIMESTAMPTZ
 );
 ```
 
@@ -48,6 +56,14 @@ Columns:
 - `click_count` - Total click count for link-in-bio sites
 - `created_at` - Timestamp when the site was created
 - `updated_at` - Timestamp when the site was last updated
+- `campaign_id` - Reference to the fundraising campaign (for fundraising campaign sites)
+- `campaign_title` - Title of the fundraising campaign (for fundraising campaign sites)
+- `campaign_description` - Description of the fundraising campaign (for fundraising campaign sites)
+- `campaign_type` - Type of the fundraising campaign (for fundraising campaign sites)
+- `goal_amount` - Goal amount for the fundraising campaign (for fundraising campaign sites)
+- `current_amount` - Current amount raised for the fundraising campaign (for fundraising campaign sites)
+- `campaign_start_date` - Start date of the fundraising campaign (for fundraising campaign sites)
+- `campaign_end_date` - End date of the fundraising campaign (for fundraising campaign sites)
 
 ### pages
 
@@ -181,3 +197,5 @@ The `pages.content` and `templates.structure` columns use the JSONB data type to
 ## Migration
 
 The database schema is created by running the migration file `apps/backend/migrations/20250726000000_create_website_builder_tables.sql`.
+
+Additional campaign fields are added by running the migration file `apps/website-builder/migrations/20250803000000_add_campaign_fields.sql`.

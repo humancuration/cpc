@@ -2,8 +2,7 @@ name = "website-builder"
 description = "Dynamic website builder with templates and analytics"
 version = "0.1.0"
 dependencies = [
-  # Example dependencies:
-  # "core-module>=1.0.0",
-  # "analytics-module>=1.2.0,<2.0.0",
-  # "optional-module?"
+  "yew",
+  "tauri",
+  "bevy"
 ]

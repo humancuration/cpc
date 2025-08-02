@@ -8,20 +8,25 @@ use crate::domain::models::{Site, SiteType};
 use crate::domain::errors::WebsiteBuilderError;
 use crate::infrastructure::repository::SiteRepository;
 use crate::application::template_service::TemplateService;
+use crate::infrastructure::grpc::{FundraisingClient, CreateCampaignRequest};
+use crate::domain::models::{SiteType, FundraisingCampaignData};
 
 pub struct SiteService {
     site_repository: Arc<SiteRepository>,
     template_service: Arc<TemplateService>,
+    fundraising_client: Arc<FundraisingClient>,
 }
 
 impl SiteService {
     pub fn new(
         site_repository: Arc<SiteRepository>,
         template_service: Arc<TemplateService>,
+        fundraising_client: Arc<FundraisingClient>,
     ) -> Self {
         Self {
             site_repository,
             template_service,
+            fundraising_client,
         }
     }
 
@@ -38,6 +43,11 @@ impl SiteService {
             return Err(WebsiteBuilderError::SiteNameRequired);
         }
 
+        // Handle fundraising campaigns specially
+        if let SiteType::FundraisingCampaign(campaign_data) = site_type {
+            return self.create_fundraising_campaign(owner_id, campaign_data, name).await;
+        }
+
         // For link-in-bio sites, check if user already has one
         if matches!(site_type, SiteType::LinkInBio(_)) {
             if self.site_repository.has_link_in_bio_site(owner_id).await? {
@@ -50,6 +60,66 @@ impl SiteService {
             id: Uuid::new_v4(),
             owner_id,
             site_type,
+            name,
+            custom_domain: None,
+            primary_color: "#000000".to_string(),
+            secondary_color: "#FFFFFF".to_string(),
+            font_family: "Arial, sans-serif".to_string(),
+            is_published: false,
+            created_at: chrono::Utc::now(),
+            updated_at: chrono::Utc::now(),
+        };
+
+        // Save the site
+        let saved_site = self.site_repository.create_site(site).await?;
+
+        Ok(saved_site)
+    }
+    
+    /// Creates a new fundraising campaign site
+    #[instrument(skip(self))]
+    pub async fn create_fundraising_campaign(
+        &self,
+        owner_id: Uuid,
+        campaign_data: FundraisingCampaignData,
+        name: String,
+    ) -> Result<Site, WebsiteBuilderError> {
+        // Validate that the name is provided
+        if name.is_empty() {
+            return Err(WebsiteBuilderError::SiteNameRequired);
+        }
+        
+        // Create the fundraising campaign in the cooperative fundraising service
+        let request = CreateCampaignRequest {
+            title: campaign_data.campaign_title.clone(),
+            description: campaign_data.campaign_description.clone(),
+            campaign_type: campaign_data.campaign_type.clone(),
+            owner_user_id: owner_id,
+            goal_amount: campaign_data.goal_amount,
+            currency: Some("USD".to_string()), // Default currency for now
+            start_date: campaign_data.start_date,
+            end_date: campaign_data.end_date,
+        };
+        
+        let response = self.fundraising_client.create_campaign(request).await?;
+        
+        // Update the campaign data with the response
+        let updated_campaign_data = FundraisingCampaignData {
+            campaign_id: response.campaign_id,
+            campaign_title: response.title,
+            campaign_description: response.description,
+            campaign_type: response.campaign_type.into(),
+            goal_amount: response.goal_amount,
+            current_amount: response.current_amount,
+            start_date: response.start_date,
+            end_date: response.end_date,
+        };
+        
+        // Create the site entity with the fundraising campaign data
+        let site = Site {
+            id: Uuid::new_v4(),
+            owner_id,
+            site_type: SiteType::FundraisingCampaign(updated_campaign_data),
             name,
             custom_domain: None,
             primary_color: "#000000".to_string(),

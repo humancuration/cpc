@@ -34,6 +34,9 @@ impl cooperative_fundraising_service_server::CooperativeFundraisingService for C
         &self,
         request: Request<CreateCampaignRequest>,
     ) -> Result<Response<CreateCampaignResponse>, Status> {
+        let span = tracing::info_span!("grpc.create_campaign");
+        let _enter = span.enter();
+
         let req = request.into_inner();
         
         // Convert campaign type
@@ -56,7 +59,7 @@ impl cooperative_fundraising_service_server::CooperativeFundraisingService for C
                 .ok_or_else(|| Status::invalid_argument("Membership requirements required for membership campaign"))?;
             
             let membership_requirements = crate::domain::MembershipRequirements {
-                max_participants: requirements.max_participants.map(|i| i as u32),
+                max_participants: requirements.max_participants.map(|i| i as i32).map(|i| i as u32),
                 required_actions: requirements.required_actions.clone(),
             };
             
@@ -90,7 +93,18 @@ impl cooperative_fundraising_service_server::CooperativeFundraisingService for C
         let campaign = self.campaign_service
             .create_campaign(campaign)
             .await
-            .map_err(|e| Status::internal(format!("Failed to create campaign: {:?}", e)))?;
+            .map_err(|e| {
+                // Map creation errors to appropriate gRPC statuses
+                let msg = format!("{e}");
+                // Use substrings to pick status; CreationError variants format with user-friendly messages
+                if msg.starts_with("Invalid title") || msg.starts_with("Invalid description") {
+                    Status::invalid_argument(msg)
+                } else if msg.starts_with("Invalid membership requirements") || msg.starts_with("Invalid donation details") || msg.contains("Only DRAFT status") {
+                    Status::failed_precondition(msg)
+                } else {
+                    Status::internal(format!("Database or unexpected error: {msg}"))
+                }
+            })?;
         
         // Convert back to proto
         let proto_campaign = self.convert_campaign_to_proto(campaign);

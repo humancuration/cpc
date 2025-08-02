@@ -34,3 +34,13 @@ ffmpeg-wasm = "0.1"
 
 # Web framework
 axum = "0.7"
+
+# gRPC
+tonic = "0.12"
+prost = "0.13"
+
+# CPC dependencies
+cpc-cooperative-fundraising = { path = "../../shared_packages/cooperative_fundraising" }
+
+[build-dependencies]
+tonic-build = "0.12"

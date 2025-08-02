@@ -6,6 +6,8 @@
 pub mod skill_management;
 pub mod opportunity_management;
 pub mod user_skill_management;
+pub mod endorsement_management;
+pub mod social_integration;
 pub mod service;
 pub mod postgres;
 pub mod proto {
@@ -16,4 +18,6 @@ pub mod proto {
 pub use skill_management::models::Skill;
 pub use opportunity_management::models::{VolunteerOpportunity, OpportunityApplication};
 pub use user_skill_management::models::{UserSkill, UserSkillDetails};
+pub use endorsement_management::models::SkillEndorsement;
+pub use social_integration::{SkillVolunteeringSocialIntegration, SocialIntegrationClient};
 pub use service::SkillVolunteeringServiceImpl;

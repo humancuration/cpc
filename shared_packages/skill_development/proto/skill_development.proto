@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package skill_development;
+
+service SkillDevelopment {
+    rpc TrackSkillProgress(TrackSkillProgressRequest) returns (TrackSkillProgressResponse);
+    rpc CreateLearningPath(CreateLearningPathRequest) returns (CreateLearningPathResponse);
+    rpc IssueCertification(IssueCertificationRequest) returns (IssueCertificationResponse);
+    rpc GetUserSkillProgress(GetUserSkillProgressRequest) returns (GetUserSkillProgressResponse);
+    rpc GetUserCertifications(GetUserCertificationsRequest) returns (GetUserCertificationsResponse);
+}
+
+message TrackSkillProgressRequest {
+    string user_id = 1;
+    string skill_id = 2;
+    int32 current_level = 3;
+    int32 target_level = 4;
+}
+
+message TrackSkillProgressResponse {
+    string id = 1;
+    string skill_name = 2;
+    int32 current_level = 3;
+    int32 target_level = 4;
+    float progress_percentage = 5;
+    int32 total_hours_invested = 6;
+    string last_practice_date = 7;
+}
+
+message CreateLearningPathRequest {
+    string title = 1;
+    string description = 2;
+    string creator_id = 3;
+    int32 difficulty_level = 4;
+}
+
+message CreateLearningPathResponse {
+    string id = 1;
+    string title = 2;
+    string description = 3;
+    int32 estimated_duration_hours = 4;
+    int32 difficulty_level = 5;
+    float progress_percentage = 6;
+}
+
+message IssueCertificationRequest {
+    string user_id = 1;
+    string skill_id = 2;
+    int32 certification_type = 3;
+    int32 level_achieved = 4;
+    string issued_by = 5;
+}
+
+message IssueCertificationResponse {
+    string id = 1;
+    string skill_name = 2;
+    int32 level_achieved = 3;
+    int32 certification_type = 4;
+    string issued_at = 5;
+    string verification_code = 6;
+}
+
+message GetUserSkillProgressRequest {
+    string user_id = 1;
+}
+
+message GetUserSkillProgressResponse {
+    repeated TrackSkillProgressResponse skills = 1;
+}
+
+message GetUserCertificationsRequest {
+    string user_id = 1;
+}
+
+message GetUserCertificationsResponse {
+    repeated IssueCertificationResponse certifications = 1;
+}

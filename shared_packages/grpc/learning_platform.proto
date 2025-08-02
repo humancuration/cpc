@@ -1,0 +1,187 @@
+syntax = "proto3";
+
+package cpc.learning_platform;
+
+import "google/protobuf/timestamp.proto";
+
+// Service definitions
+service CourseService {
+    // List all available courses
+    rpc ListCourses(ListCoursesRequest) returns (ListCoursesResponse);
+    
+    // Create a new course
+    rpc CreateCourse(CreateCourseRequest) returns (CreateCourseResponse);
+    
+    // Update an existing course
+    rpc UpdateCourse(UpdateCourseRequest) returns (UpdateCourseResponse);
+}
+
+service EnrollmentService {
+    // Enroll a user in a course
+    rpc Enroll(EnrollRequest) returns (EnrollResponse);
+    
+    // Update user's progress in a course
+    rpc UpdateProgress(UpdateProgressRequest) returns (UpdateProgressResponse);
+}
+
+service CredentialService {
+    // Issue a credential for course completion
+    rpc IssueCredential(IssueCredentialRequest) returns (IssueCredentialResponse);
+}
+
+service TipService {
+    // Send tip to content creator
+    rpc SendTip(SendTipRequest) returns (SendTipResponse);
+}
+
+service AuthService {
+    // Authenticate user and get access token
+    rpc Authenticate(AuthRequest) returns (AuthResponse);
+}
+
+// Common enums
+enum CredentialType {
+    CERTIFICATE = 0;
+    BADGE = 1;
+    MICRO_DEGREE = 2;
+    DEGREE = 3;
+}
+
+enum EnrollmentStatus {
+    ENROLLED = 0;
+    IN_PROGRESS = 1;
+    COMPLETED = 2;
+    DROPPED = 3;
+}
+
+// Course-related messages
+message Course {
+    string id = 1;
+    string title = 2;
+    string description = 3;
+    repeated Module modules = 4;
+}
+
+message Module {
+    string id = 1;
+    string title = 2;
+    repeated Lesson lessons = 3;
+}
+
+message Lesson {
+    string id = 1;
+    string title = 2;
+    string content = 3;  // Could be text content or video URL
+}
+
+// Enrollment messages
+message Enrollment {
+    string id = 1;
+    string user_id = 2;
+    string course_id = 3;
+    EnrollmentStatus status = 4;
+    float progress = 5;  // Percentage completion (0.0 to 1.0)
+    google.protobuf.Timestamp enrolled_at = 6;
+}
+
+// Credential messages
+message Credential {
+    string id = 1;
+    string user_id = 2;
+    string course_id = 3;
+    CredentialType credential_type = 4;
+    google.protobuf.Timestamp issued_date = 5;
+    string verification_code = 6;
+}
+
+// Tipping messages
+message Tip {
+    string id = 1;
+    string sender_id = 2;
+    string recipient_id = 3;
+    double amount = 4;
+    string currency = 5;  // ISO currency code (USD, EUR, etc)
+    string course_id = 6; // Optional course association
+    google.protobuf.Timestamp sent_at = 7;
+}
+
+// Request/Response messages for CourseService
+message ListCoursesRequest {
+    // Can add pagination later
+}
+
+message ListCoursesResponse {
+    repeated Course courses = 1;
+}
+
+message CreateCourseRequest {
+    Course course = 1;
+}
+
+message CreateCourseResponse {
+    string course_id = 1;
+}
+
+message UpdateCourseRequest {
+    Course course = 1;
+}
+
+message UpdateCourseResponse {
+    Course course = 1;
+}
+
+// Request/Response messages for EnrollmentService
+message EnrollRequest {
+    string user_id = 1;
+    string course_id = 2;
+}
+
+message EnrollResponse {
+    Enrollment enrollment = 1;
+}
+
+message UpdateProgressRequest {
+    string enrollment_id = 1;
+    float progress = 2;  // New progress value (0.0 to 1.0)
+}
+
+message UpdateProgressResponse {
+    Enrollment enrollment = 1;
+}
+
+// Request/Response messages for CredentialService
+message IssueCredentialRequest {
+    string user_id = 1;
+    string course_id = 2;
+    CredentialType credential_type = 3;
+}
+
+message IssueCredentialResponse {
+    Credential credential = 1;
+}
+
+// Request/Response messages for TipService
+message SendTipRequest {
+    string sender_id = 1;
+    string recipient_id = 2;
+    double amount = 3;
+    string currency = 4;
+    optional string course_id = 5;
+}
+
+message SendTipResponse {
+    Tip tip = 1;
+}
+
+// Request/Response messages for AuthService
+message AuthRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message AuthResponse {
+    string access_token = 1;
+    string refresh_token = 2;
+    google.protobuf.Timestamp expires_at = 3;
+    string user_id = 4;
+}

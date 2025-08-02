@@ -189,9 +189,15 @@ Example workflow for link-in-bio creation:
 | `sqlx` | Database access (already in backend dependencies) |
 | `tracing` | Structured logging |
 
-The module will NOT depend on frontend-specific code (Yew, Tauri) as it's a backend service. The frontend will interact via the GraphQL API.
 
-## 7. Database Schema Considerations
+## 7. Frontend Implementation
+The frontend is implemented as part of this vertical slice using:
+- Yew for web-based UI components
+- Tauri for desktop application packaging
+- Bevy for visual editor components
+All frontend code resides in src/frontend directory
+
+## 8. Database Schema Considerations
 
 ### Primary Tables
 

@@ -20,6 +20,7 @@ The module provides the following GraphQL operations:
 - `updateSiteContent(input: UpdateSiteContentInput!)` - Update site content
 - `publishSite(siteId: ID!)` - Publish a site
 - `trackLinkClick(linkId: ID!)` - Track a link click
+- `createFundraisingCampaign(input: CreateSiteInput!)` - Create a fundraising campaign site
 
 ### Subscriptions
 
@@ -52,6 +53,7 @@ type Site {
 type SiteType {
   fullWebsite: FullWebsiteData
   linkInBio: LinkInBioData
+  fundraisingCampaign: FundraisingCampaignData
 }
 ```
 
@@ -73,6 +75,21 @@ type LinkInBioData {
   description: String!
   links: [LinkItem!]!
   clickCount: Int!
+}
+```
+
+### FundraisingCampaignData
+
+```graphql
+type FundraisingCampaignData {
+  campaignId: ID!
+  campaignTitle: String!
+  campaignDescription: String!
+  campaignType: CampaignType!
+  goalAmount: Int
+  currentAmount: Int!
+  startDate: DateTime!
+  endDate: DateTime
 }
 ```
 
@@ -117,6 +134,29 @@ input CreateSiteInput {
 }
 ```
 
+### SiteTypeInput
+
+```graphql
+input SiteTypeInput {
+  fullWebsite: FullWebsiteDataInput
+  linkInBio: LinkInBioDataInput
+  fundraisingCampaign: FundraisingCampaignDataInput
+}
+```
+
+### FundraisingCampaignDataInput
+
+```graphql
+input FundraisingCampaignDataInput {
+  campaignTitle: String!
+  campaignDescription: String!
+  campaignType: CampaignType!
+  goalAmount: Int
+  startDate: DateTime!
+  endDate: DateTime
+}
+```
+
 ### UpdateSiteSettingsInput
 
 ```graphql
@@ -127,6 +167,18 @@ input UpdateSiteSettingsInput {
   primaryColor: String
   secondaryColor: String
   fontFamily: String
+}
+```
+
+### CampaignType
+
+```graphql
+enum CampaignType {
+  CooperativeMembership
+  PureDonation
+  RegCF
+  RegA
+  RegD
 }
 ```
 

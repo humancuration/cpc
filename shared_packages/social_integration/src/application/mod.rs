@@ -2,7 +2,8 @@
 
 pub mod social_integration_service;
 pub mod feed_service;
-
+pub mod feed_algorithms;
 
 pub use social_integration_service::SocialIntegrationService;
 pub use feed_service::FeedService;
+pub use feed_algorithms::{FeedAlgorithm, ChronologicalFeedAlgorithm, EngagementFeedAlgorithm};

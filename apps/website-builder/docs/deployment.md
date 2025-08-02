@@ -8,6 +8,26 @@ This document explains how to run and deploy the website builder module.
 - PostgreSQL database
 - Access to a p2panda network
 - ffmpeg.wasm for media processing
+- Access to the cooperative fundraising service
+
+## Frontend/Backend Relationship
+
+The Website Builder consists of two main components:
+
+- **Backend**: The `website-builder` module (this project) provides the GraphQL API, database interactions, and business logic.
+- **Frontend**: The `website-builder-frontend` project provides the web-based user interface.
+
+The frontend communicates with the backend via GraphQL. They are separate applications that can be developed and deployed independently.
+
+### Architecture Diagram
+
+```mermaid
+graph TD;
+    Frontend[Website Builder Frontend] -->|GraphQL| Backend[Website Builder Backend];
+    Backend --> FundraisingService;
+    Backend --> Database;
+    Backend --> p2panda;
+```
 
 ## Development Setup
 
@@ -24,6 +44,32 @@ The module requires the following environment variables:
 - `DATABASE_URL` - Connection string for the PostgreSQL database
 - `P2PANDA_NODE_URL` - URL of the p2panda node
 - `JWT_SECRET` - Secret key for JWT token generation
+- `FUNDRAISING_SERVICE_URL` - URL of the cooperative fundraising service
+
+## Fundraising Service Integration
+
+The website builder integrates with the cooperative fundraising service to allow users to create fundraising campaigns.
+
+### Required Environment Variables
+
+- `FUNDRAISING_SERVICE_URL`: The base URL of the fundraising service
+- `DEFAULT_CURRENCY`: The default currency for fundraising campaigns (e.g., USD, EUR)
+
+### Configuration Steps
+
+1. Set the `FUNDRAISING_SERVICE_URL` to point to your fundraising service instance
+2. Configure `DEFAULT_CURRENCY` to specify the base currency for all campaigns
+3. Ensure the fundraising service is running and accessible before starting the website builder
+4. Currency handling is automatically configured through the service - no additional setup required
+
+### Service Dependencies
+
+```mermaid
+graph TD;
+    WebsiteBuilder --> FundraisingService;
+    WebsiteBuilder --> Database;
+    WebsiteBuilder --> p2panda;
+```
 
 ## Running Tests
 
@@ -67,8 +113,29 @@ The module requires the following database tables:
 - `link_items`
 - `templates`
 - `site_analytics`
+- `fundraising_campaigns` (added by fundraising migration)
 
-Run the migration file `apps/backend/migrations/20250726000000_create_website_builder_tables.sql` to create these tables.
+Run these migration files in order:
+
+1. `apps/backend/migrations/20250726000000_create_website_builder_tables.sql` - Creates core tables
+2. `apps/website-builder/migrations/20250803000000_add_campaign_fields.sql` - Adds fundraising campaign fields
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Check the application logs for error messages
+2. Verify that all environment variables are set correctly
+3. Ensure the database is accessible and the migrations have been run
+4. Check the p2panda node is running and accessible
+5. For fundraising service issues:
+   - Verify `FUNDRAISING_SERVICE_URL` is correct
+   - Check network connectivity to the fundraising service
+   - Validate currency configuration matches service expectations
+   - Ensure service has proper CORS headers configured
+
+### Currency Conversion Note
+The fundraising service handles all currency conversion automatically. Campaigns can accept donations in any currency, but will display amounts in the `DEFAULT_CURRENCY` after conversion. Exchange rates are updated daily from the cooperative financial service.
 
 ## Deployment
 

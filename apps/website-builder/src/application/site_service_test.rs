@@ -5,7 +5,7 @@
 use uuid::Uuid;
 use chrono::Utc;
 
-use crate::domain::models::{Site, SiteType, LinkInBioData, FullWebsiteData};
+use crate::domain::models::{Site, SiteType, LinkInBioData, FullWebsiteData, FundraisingCampaignData, CampaignType};
 
 #[tokio::test]
 async fn test_site_type_enum_variants() {
@@ -24,6 +24,18 @@ async fn test_site_type_enum_variants() {
         pages: vec![],
     });
     
+    // Test that we can create FundraisingCampaign site type
+    let fundraising_campaign = SiteType::FundraisingCampaign(FundraisingCampaignData {
+        campaign_id: Uuid::new_v4(),
+        campaign_title: "Test Campaign".to_string(),
+        campaign_description: "Test Description".to_string(),
+        campaign_type: CampaignType::PureDonation,
+        goal_amount: Some(1000),
+        current_amount: 0,
+        start_date: Utc::now(),
+        end_date: None,
+    });
+    
     // Verify variants are correctly created
     match link_in_bio {
         SiteType::LinkInBio(data) => {
@@ -38,6 +50,15 @@ async fn test_site_type_enum_variants() {
             assert_eq!(data.pages.len(), 0);
         }
         _ => panic!("Expected FullWebsite variant"),
+    }
+    
+    match fundraising_campaign {
+        SiteType::FundraisingCampaign(data) => {
+            assert_eq!(data.campaign_title, "Test Campaign");
+            assert_eq!(data.campaign_description, "Test Description");
+            assert_eq!(data.goal_amount, Some(1000));
+        }
+        _ => panic!("Expected FundraisingCampaign variant"),
     }
 }
 
@@ -97,4 +118,20 @@ async fn test_site_type_matches_macro() {
     assert!(matches!(full_website_site, SiteType::FullWebsite(_)));
     assert!(!matches!(link_in_bio_site, SiteType::FullWebsite(_)));
     assert!(!matches!(full_website_site, SiteType::LinkInBio(_)));
+    
+    let fundraising_campaign_site = SiteType::FundraisingCampaign(FundraisingCampaignData {
+        campaign_id: Uuid::new_v4(),
+        campaign_title: "Test".to_string(),
+        campaign_description: "Test".to_string(),
+        campaign_type: CampaignType::PureDonation,
+        goal_amount: None,
+        current_amount: 0,
+        start_date: Utc::now(),
+        end_date: None,
+    });
+    
+    // Test matches! macro usage for fundraising campaign
+    assert!(matches!(fundraising_campaign_site, SiteType::FundraisingCampaign(_)));
+    assert!(!matches!(fundraising_campaign_site, SiteType::LinkInBio(_)));
+    assert!(!matches!(fundraising_campaign_site, SiteType::FullWebsite(_)));
 }

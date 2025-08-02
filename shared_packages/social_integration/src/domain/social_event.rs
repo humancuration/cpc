@@ -43,6 +43,21 @@ pub enum SocialEvent {
         followed_id: Uuid,
         timestamp: DateTime<Utc>,
     },
+    
+    /// An opportunity was shared
+    OpportunityShared {
+        user_id: Uuid,
+        opportunity_id: Uuid,
+        timestamp: DateTime<Utc>,
+    },
+    
+    /// A user volunteered for an opportunity
+    Volunteered {
+        user_id: Uuid,
+        opportunity_id: Uuid,
+        hours_contributed: f32,
+        timestamp: DateTime<Utc>,
+    },
 }
 
 /// Type of vote
@@ -61,6 +76,8 @@ impl SocialEvent {
             SocialEvent::PostVoted { user_id, .. } => user_id,
             SocialEvent::PostShared { user_id, .. } => user_id,
             SocialEvent::UserFollowed { follower_id, .. } => follower_id,
+            SocialEvent::OpportunityShared { user_id, .. } => user_id,
+            SocialEvent::Volunteered { user_id, .. } => user_id,
         }
     }
     
@@ -72,6 +89,8 @@ impl SocialEvent {
             SocialEvent::PostVoted { timestamp, .. } => timestamp,
             SocialEvent::PostShared { timestamp, .. } => timestamp,
             SocialEvent::UserFollowed { timestamp, .. } => timestamp,
+            SocialEvent::OpportunityShared { timestamp, .. } => timestamp,
+            SocialEvent::Volunteered { timestamp, .. } => timestamp,
         }
     }
 }

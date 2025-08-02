@@ -28,15 +28,40 @@ impl SiteRepository {
             SiteType::LinkInBio(_) => "link_in_bio",
         };
 
+        // Handle fundraising campaign data
+        let (campaign_id, campaign_title, campaign_description, campaign_type, goal_amount, current_amount, campaign_start_date, campaign_end_date) =
+            if let SiteType::FundraisingCampaign(data) = &site.site_type {
+                (
+                    Some(data.campaign_id),
+                    Some(data.campaign_title.clone()),
+                    Some(data.campaign_description.clone()),
+                    Some(match data.campaign_type {
+                        crate::domain::models::CampaignType::CooperativeMembership => "cooperative_membership".to_string(),
+                        crate::domain::models::CampaignType::PureDonation => "pure_donation".to_string(),
+                        crate::domain::models::CampaignType::RegCF => "reg_cf".to_string(),
+                        crate::domain::models::CampaignType::RegA => "reg_a".to_string(),
+                        crate::domain::models::CampaignType::RegD => "reg_d".to_string(),
+                    }),
+                    data.goal_amount,
+                    Some(data.current_amount as i64),
+                    Some(data.start_date),
+                    data.end_date,
+                )
+            } else {
+                (None, None, None, None, None, None, None, None)
+            };
+
         let created_site = sqlx::query_as!(
             Site,
             r#"
             INSERT INTO sites (
                 id, owner_id, site_type, name, custom_domain,
                 primary_color, secondary_color, font_family, is_published,
-                created_at, updated_at
+                created_at, updated_at,
+                campaign_id, campaign_title, campaign_description, campaign_type,
+                goal_amount, current_amount, campaign_start_date, campaign_end_date
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
             RETURNING *
             "#,
             site.id,
@@ -49,7 +74,15 @@ impl SiteRepository {
             site.font_family,
             site.is_published,
             site.created_at,
-            site.updated_at
+            site.updated_at,
+            campaign_id,
+            campaign_title,
+            campaign_description,
+            campaign_type,
+            goal_amount.map(|v| v as i64),
+            current_amount,
+            campaign_start_date,
+            campaign_end_date
         )
         .fetch_one(&*self.db_pool)
         .await?;
@@ -64,7 +97,9 @@ impl SiteRepository {
             r#"
             SELECT id, owner_id, site_type, name, custom_domain,
                    primary_color, secondary_color, font_family, is_published,
-                   created_at, updated_at
+                   created_at, updated_at,
+                   campaign_id, campaign_title, campaign_description, campaign_type,
+                   goal_amount, current_amount, campaign_start_date, campaign_end_date
             FROM sites
             WHERE id = $1
             "#,
@@ -88,6 +123,28 @@ impl SiteRepository {
                 links: vec![], // Will be populated later
                 click_count: 0,
             }),
+            "fundraising_campaign" => {
+                // Handle fundraising campaign
+                let campaign_type = match site_row.campaign_type.as_deref() {
+                    Some("cooperative_membership") => crate::domain::models::CampaignType::CooperativeMembership,
+                    Some("pure_donation") => crate::domain::models::CampaignType::PureDonation,
+                    Some("reg_cf") => crate::domain::models::CampaignType::RegCF,
+                    Some("reg_a") => crate::domain::models::CampaignType::RegA,
+                    Some("reg_d") => crate::domain::models::CampaignType::RegD,
+                    _ => crate::domain::models::CampaignType::PureDonation, // Default
+                };
+                
+                SiteType::FundraisingCampaign(FundraisingCampaignData {
+                    campaign_id: site_row.campaign_id.unwrap_or_else(Uuid::nil),
+                    campaign_title: site_row.campaign_title.unwrap_or_default(),
+                    campaign_description: site_row.campaign_description.unwrap_or_default(),
+                    campaign_type,
+                    goal_amount: site_row.goal_amount.map(|v| v as u64),
+                    current_amount: site_row.current_amount.unwrap_or(0) as u64,
+                    start_date: site_row.campaign_start_date.unwrap_or_else(chrono::Utc::now),
+                    end_date: site_row.campaign_end_date,
+                })
+            },
             _ => return Err(WebsiteBuilderError::InvalidSiteType(site_row.site_type)),
         };
 
@@ -114,7 +171,31 @@ impl SiteRepository {
         let site_type_str = match &site.site_type {
             SiteType::FullWebsite(_) => "full_website",
             SiteType::LinkInBio(_) => "link_in_bio",
+            SiteType::FundraisingCampaign(_) => "fundraising_campaign",
         };
+
+        // Handle fundraising campaign data
+        let (campaign_id, campaign_title, campaign_description, campaign_type, goal_amount, current_amount, campaign_start_date, campaign_end_date) =
+            if let SiteType::FundraisingCampaign(data) = &site.site_type {
+                (
+                    Some(data.campaign_id),
+                    Some(data.campaign_title.clone()),
+                    Some(data.campaign_description.clone()),
+                    Some(match data.campaign_type {
+                        crate::domain::models::CampaignType::CooperativeMembership => "cooperative_membership".to_string(),
+                        crate::domain::models::CampaignType::PureDonation => "pure_donation".to_string(),
+                        crate::domain::models::CampaignType::RegCF => "reg_cf".to_string(),
+                        crate::domain::models::CampaignType::RegA => "reg_a".to_string(),
+                        crate::domain::models::CampaignType::RegD => "reg_d".to_string(),
+                    }),
+                    data.goal_amount,
+                    Some(data.current_amount as i64),
+                    Some(data.start_date),
+                    data.end_date,
+                )
+            } else {
+                (None, None, None, None, None, None, None, None)
+            };
 
         let updated_site = sqlx::query_as!(
             Site,
@@ -122,7 +203,9 @@ impl SiteRepository {
             UPDATE sites
             SET owner_id = $2, site_type = $3, name = $4, custom_domain = $5,
                 primary_color = $6, secondary_color = $7, font_family = $8,
-                is_published = $9, updated_at = $10
+                is_published = $9, updated_at = $10,
+                campaign_id = $11, campaign_title = $12, campaign_description = $13, campaign_type = $14,
+                goal_amount = $15, current_amount = $16, campaign_start_date = $17, campaign_end_date = $18
             WHERE id = $1
             RETURNING *
             "#,
@@ -135,7 +218,15 @@ impl SiteRepository {
             site.secondary_color,
             site.font_family,
             site.is_published,
-            site.updated_at
+            site.updated_at,
+            campaign_id,
+            campaign_title,
+            campaign_description,
+            campaign_type,
+            goal_amount.map(|v| v as i64),
+            current_amount,
+            campaign_start_date,
+            campaign_end_date
         )
         .fetch_one(&*self.db_pool)
         .await?;
@@ -167,7 +258,9 @@ impl SiteRepository {
             r#"
             SELECT id, owner_id, site_type, name, custom_domain,
                    primary_color, secondary_color, font_family, is_published,
-                   created_at, updated_at
+                   created_at, updated_at,
+                   campaign_id, campaign_title, campaign_description, campaign_type,
+                   goal_amount, current_amount, campaign_start_date, campaign_end_date
             FROM sites
             WHERE owner_id = $1
             ORDER BY created_at DESC
@@ -192,6 +285,28 @@ impl SiteRepository {
                     links: vec![], // Will be populated later
                     click_count: 0,
                 }),
+                "fundraising_campaign" => {
+                    // Handle fundraising campaign
+                    let campaign_type = match site_row.campaign_type.as_deref() {
+                        Some("cooperative_membership") => crate::domain::models::CampaignType::CooperativeMembership,
+                        Some("pure_donation") => crate::domain::models::CampaignType::PureDonation,
+                        Some("reg_cf") => crate::domain::models::CampaignType::RegCF,
+                        Some("reg_a") => crate::domain::models::CampaignType::RegA,
+                        Some("reg_d") => crate::domain::models::CampaignType::RegD,
+                        _ => crate::domain::models::CampaignType::PureDonation, // Default
+                    };
+                    
+                    SiteType::FundraisingCampaign(FundraisingCampaignData {
+                        campaign_id: site_row.campaign_id.unwrap_or_else(Uuid::nil),
+                        campaign_title: site_row.campaign_title.unwrap_or_default(),
+                        campaign_description: site_row.campaign_description.unwrap_or_default(),
+                        campaign_type,
+                        goal_amount: site_row.goal_amount.map(|v| v as u64),
+                        current_amount: site_row.current_amount.unwrap_or(0) as u64,
+                        start_date: site_row.campaign_start_date.unwrap_or_else(chrono::Utc::now),
+                        end_date: site_row.campaign_end_date,
+                    })
+                },
                 _ => return Err(WebsiteBuilderError::InvalidSiteType(site_row.site_type)),
             };
 

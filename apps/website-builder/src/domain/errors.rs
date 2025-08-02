@@ -55,10 +55,19 @@ pub enum WebsiteBuilderError {
     
     #[error("Invalid template structure: {0}")]
     InvalidTemplateStructure(String),
+    
+    #[error("gRPC error: {0}")]
+    GrpcError(String),
 }
 
 impl From<sqlx::Error> for WebsiteBuilderError {
     fn from(error: sqlx::Error) -> Self {
         WebsiteBuilderError::DatabaseError(error.to_string())
+    }
+}
+
+impl From<tonic::Status> for WebsiteBuilderError {
+    fn from(status: tonic::Status) -> Self {
+        WebsiteBuilderError::GrpcError(status.to_string())
     }
 }

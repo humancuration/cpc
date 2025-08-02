@@ -327,6 +327,88 @@ async fn test_analytics_date_range_validation() {
     let result = schema.execute(query).await;
     
     // Should handle invalid date ranges gracefully
-    assert!(result.errors.is_empty() || 
+    assert!(result.errors.is_empty() ||
+            result.errors.iter().any(|e| e.message.contains("Context") || e.message.contains("Service")));
+}
+
+#[tokio::test]
+async fn test_create_site_mutation_with_fundraising_campaign() {
+    let schema = create_test_schema();
+    
+    let mutation = r#"
+        mutation {
+            createSite(input: {
+                name: "Test Fundraising Campaign"
+                siteType: {
+                    fundraisingCampaign: {
+                        campaignTitle: "Help Our Cause"
+                        campaignDescription: "Support our community project"
+                        campaignType: PURE_DONATION
+                        goalAmount: 10000
+                        startDate: "2025-08-01T00:00:00Z"
+                        endDate: "2025-12-31T23:59:59Z"
+                    }
+                }
+            }) {
+                id
+                name
+                siteType {
+                    fundraisingCampaign {
+                        campaignTitle
+                        campaignDescription
+                        campaignType
+                        goalAmount
+                    }
+                }
+            }
+        }
+    "#;
+    
+    let result = schema.execute(mutation).await;
+    
+    // Note: In a real test, we would need to provide mock services in the context
+    // For now, we're just testing that the schema is valid and the mutation can be parsed
+    assert!(result.errors.is_empty() ||
+            result.errors.iter().any(|e| e.message.contains("Context") || e.message.contains("Service")));
+}
+
+#[tokio::test]
+async fn test_create_fundraising_campaign_mutation() {
+    let schema = create_test_schema();
+    
+    let mutation = r#"
+        mutation {
+            createFundraisingCampaign(input: {
+                name: "Test Fundraising Campaign"
+                siteType: {
+                    fundraisingCampaign: {
+                        campaignTitle: "Help Our Cause"
+                        campaignDescription: "Support our community project"
+                        campaignType: PURE_DONATION
+                        goalAmount: 10000
+                        startDate: "2025-08-01T00:00:00Z"
+                        endDate: "2025-12-31T23:59:59Z"
+                    }
+                }
+            }) {
+                id
+                name
+                siteType {
+                    fundraisingCampaign {
+                        campaignTitle
+                        campaignDescription
+                        campaignType
+                        goalAmount
+                    }
+                }
+            }
+        }
+    "#;
+    
+    let result = schema.execute(mutation).await;
+    
+    // Note: In a real test, we would need to provide mock services in the context
+    // For now, we're just testing that the schema is valid and the mutation can be parsed
+    assert!(result.errors.is_empty() ||
             result.errors.iter().any(|e| e.message.contains("Context") || e.message.contains("Service")));
 }

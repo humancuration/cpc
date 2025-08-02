@@ -1,0 +1,28 @@
+[package]
+name = "learning_platform_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tonic = "0.12"
+prost = "0.13"
+sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-native-tls", "migrate"] }
+uuid = { version = "1.0", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+async-trait = "0.1"
+tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+prost-types = "0.13"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+config = "0.14"
+dotenv = "0.15"
+jsonwebtoken = "9.0"
+bcrypt = "0.15"
+
+# Shared core library
+learning_core = { path = "../../shared_packages/learning_core" }
+
+[build-dependencies]
+tonic-build = "0.12"

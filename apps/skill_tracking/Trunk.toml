@@ -1,0 +1,9 @@
+[build]
+target = "wasm32-unknown-unknown"
+
+[watch]
+ignore = ["src-tauri"]
+
+[serve]
+address = "127.0.0.1"
+port = 1420

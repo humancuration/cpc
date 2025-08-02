@@ -10,7 +10,7 @@ use chrono::Utc;
 
 use crate::infrastructure::repository::SiteRepository;
 use crate::domain::models::{
-    Site, SiteType, FullWebsiteData, LinkInBioData, Template, TemplateType, TemplateStructure, TemplateLayout, TemplateSection
+    Site, SiteType, FullWebsiteData, LinkInBioData, FundraisingCampaignData, CampaignType, Template, TemplateType, TemplateStructure, TemplateLayout, TemplateSection
 };
 use crate::domain::value_objects::ColorHex;
 
@@ -620,6 +620,70 @@ async fn test_get_analytics_report() {
     assert_eq!(report.total_views, 100);
     assert_eq!(report.link_clicks.get(&link_id), Some(&25));
     assert_eq!(report.page_views.get(&page_id), Some(&50));
+    
+    cleanup_test_data(&pool).await;
+}
+
+#[tokio::test]
+async fn test_create_and_get_fundraising_campaign_site() {
+    let pool = setup_test_db().await;
+    let repository = SiteRepository::new(Arc::new(pool.clone()));
+    
+    // Create a test fundraising campaign site
+    let owner_id = Uuid::new_v4();
+    let campaign_id = Uuid::new_v4();
+    let start_date = Utc::now();
+    let end_date = start_date + chrono::Duration::days(30);
+    
+    let site = Site {
+        id: Uuid::new_v4(),
+        owner_id,
+        site_type: SiteType::FundraisingCampaign(FundraisingCampaignData {
+            campaign_id,
+            campaign_title: "Test Fundraising Campaign".to_string(),
+            campaign_description: "Test Description".to_string(),
+            campaign_type: CampaignType::PureDonation,
+            goal_amount: Some(10000),
+            current_amount: 2500,
+            start_date,
+            end_date: Some(end_date),
+        }),
+        name: "test_fundraising_campaign".to_string(),
+        custom_domain: Some("campaign.example.com".to_string()),
+        primary_color: "#FF0000".to_string(),
+        secondary_color: "#00FF00".to_string(),
+        font_family: "Arial".to_string(),
+        is_published: false,
+        created_at: Utc::now(),
+        updated_at: Utc::now(),
+    };
+    
+    // Test create
+    let created_site = repository.create_site(site.clone()).await.unwrap();
+    assert_eq!(created_site.id, site.id);
+    assert_eq!(created_site.owner_id, site.owner_id);
+    assert_eq!(created_site.name, site.name);
+    
+    // Test get by ID
+    let retrieved_site = repository.get_site_by_id(site.id).await.unwrap();
+    assert_eq!(retrieved_site.id, site.id);
+    assert_eq!(retrieved_site.owner_id, site.owner_id);
+    assert_eq!(retrieved_site.name, site.name);
+    
+    // Verify the site type is correctly retrieved
+    match retrieved_site.site_type {
+        SiteType::FundraisingCampaign(data) => {
+            assert_eq!(data.campaign_id, campaign_id);
+            assert_eq!(data.campaign_title, "Test Fundraising Campaign");
+            assert_eq!(data.campaign_description, "Test Description");
+            assert_eq!(data.campaign_type, CampaignType::PureDonation);
+            assert_eq!(data.goal_amount, Some(10000));
+            assert_eq!(data.current_amount, 2500);
+            assert_eq!(data.start_date, start_date);
+            assert_eq!(data.end_date, Some(end_date));
+        }
+        _ => panic!("Expected FundraisingCampaign site type"),
+    }
     
     cleanup_test_data(&pool).await;
 }

@@ -1,19 +1,24 @@
 # Website Builder Module
 
-This module provides functionality for creating both full websites and link-in-bio sites within the CPC platform. It follows a hexagonal architecture pattern with clear separation of concerns.
+This is the backend component of the Website Builder. This module provides functionality for creating both full websites and link-in-bio sites within the CPC platform. It follows a hexagonal architecture pattern with clear separation of concerns.
+
+The frontend UI components are implemented within this module using Yew for web and Tauri for desktop, following vertical slice architecture principles.
 
 ## Features
 
 - Create and manage full websites with multiple pages
 - Create and manage link-in-bio sites with customizable links
-- Template system for both site types
+- Create and manage fundraising campaign sites with integration to the cooperative fundraising service
+- Template system for all site types
 - Analytics tracking for site visits and link clicks
 - P2P storage integration for published sites
 - Mobile-first responsive design
 
 ## Architecture
 
-The module follows a hexagonal architecture with the following layers:
+The module follows a vertical slice architecture with both backend and frontend components:
+
+### Backend Layers
 
 ### Domain Layer
 - Core business models and value objects
@@ -28,6 +33,13 @@ The module follows a hexagonal architecture with the following layers:
 - Database repository implementation
 - P2P storage integration
 - Media processing utilities
+- gRPC client for fundraising service integration
+
+### Frontend Layer
+- UI components implemented in src/frontend directory
+- Yew for web-based UI
+- Tauri for desktop application packaging
+- Bevy for visual editor components
 
 ### Web Layer
 - GraphQL API implementation
@@ -43,6 +55,8 @@ The module uses the following tables:
 - `link_items` - Links for link-in-bio sites
 - `templates` - Site templates
 - `site_analytics` - Analytics data
+
+The `sites` table has been extended with additional columns for fundraising campaign data.
 
 ## GraphQL API
 
@@ -60,6 +74,7 @@ The module exposes the following GraphQL operations:
 - `updateSiteContent(input: UpdateSiteContentInput!)` - Update site content
 - `publishSite(siteId: ID!)` - Publish a site
 - `trackLinkClick(linkId: ID!)` - Track a link click
+- `createFundraisingCampaign(input: CreateSiteInput!)` - Create a fundraising campaign site
 
 ### Subscriptions
 - `sitePublished(siteId: ID!)` - Site publishing updates
@@ -72,6 +87,7 @@ The module integrates with:
 - `cpc-core` - For cooperative member models and authentication
 - `cpc-net` - For p2panda integration
 - `cpc-protos` - For gRPC definitions
+- `cpc-cooperative-fundraising` - For fundraising campaign integration
 
 ## Dependencies
 
@@ -88,3 +104,5 @@ All dependencies use permissive licenses (MIT, Apache 2.0):
 - axum - Web framework
 - tracing - Logging
 - ffmpeg-wasm - Media processing
+- tonic - gRPC client implementation
+- prost - Protocol buffer serialization

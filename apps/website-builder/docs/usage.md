@@ -46,6 +46,42 @@ fn create_site() -> Result<(), WebsiteBuilderError> {
 }
 ```
 
+### Creating a Fundraising Campaign Site
+
+```rust
+use cpc_website_builder::domain::models::{Site, SiteType, FundraisingCampaignData, CampaignType};
+use cpc_website_builder::domain::errors::WebsiteBuilderError;
+use uuid::Uuid;
+
+fn create_fundraising_campaign_site() -> Result<(), WebsiteBuilderError> {
+    let site = Site {
+        id: Uuid::new_v4(),
+        owner_id: Uuid::new_v4(),
+        site_type: SiteType::FundraisingCampaign(FundraisingCampaignData {
+            campaign_id: Uuid::new_v4(),
+            campaign_title: "Community Garden Project".to_string(),
+            campaign_description: "Help us build a community garden for local families".to_string(),
+            campaign_type: CampaignType::PureDonation,
+            goal_amount: Some(50000), // $500 goal
+            current_amount: 0,
+            start_date: chrono::Utc::now(),
+            end_date: Some(chrono::Utc::now() + chrono::Duration::days(60)), // 60-day campaign
+        }),
+        name: "Community Garden Fundraiser".to_string(),
+        custom_domain: None,
+        primary_color: "#228B22".to_string(), // Forest green
+        secondary_color: "#32CD32".to_string(), // Lime green
+        font_family: "Georgia, serif".to_string(),
+        is_published: false,
+        created_at: chrono::Utc::now(),
+        updated_at: chrono::Utc::now(),
+    };
+
+    // Use the site...
+    Ok(())
+}
+```
+
 ### Using Services
 
 To use the application services, you'll need to set up the infrastructure components first:
@@ -87,6 +123,8 @@ The module requires the following database tables to be created:
 - `site_analytics`
 
 Run the migration file `apps/backend/migrations/20250726000000_create_website_builder_tables.sql` to create these tables.
+
+Run the migration file `apps/website-builder/migrations/20250803000000_add_campaign_fields.sql` to add the fundraising campaign fields.
 
 ## Testing
 
