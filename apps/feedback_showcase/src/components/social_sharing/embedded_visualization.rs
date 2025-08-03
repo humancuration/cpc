@@ -6,9 +6,11 @@ use crate::components::visualization::types::{VisualizationComponent, Annotation
 use crate::components::social_sharing::annotation_manager::AnnotationManager;
 use crate::components::social_sharing::utils::normalize_coordinates;
 use crate::services::federation::{get_shared_visualization, SharedVisualization};
+use crate::services::collaboration::CollaborationService;
 use reviews::Review;
 use crate::data_generator::generators::products::Product;
 use crate::components::visualization::{Summary, RatingsChart, WordCloud, Sentiment};
+use std::rc::Rc;
 
 #[derive(Properties, PartialEq)]
 pub struct EmbeddedVisualizationProps {
@@ -29,6 +31,10 @@ pub struct EmbeddedVisualizationProps {
     pub data: Option<Vec<Review<Product>>>,
     #[prop_or(true)]
     pub loading: bool,
+    #[prop_or_default]
+    pub current_user_id: String,
+    #[prop_or_default]
+    pub collaboration_service: Option<Rc<CollaborationService>>,
 }
 
 #[function_component(EmbeddedVisualization)]
@@ -147,6 +153,8 @@ pub fn embedded_visualization(props: &EmbeddedVisualizationProps) -> Html {
                 on_form_toggle={Callback::from(move |_| {
                     show_annotation_form.set(!*show_annotation_form);
                 })}
+                current_user_id={props.current_user_id.clone()}
+                collaboration_service={props.collaboration_service.clone()}
             />
         </div>
     }

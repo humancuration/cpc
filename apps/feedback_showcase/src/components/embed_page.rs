@@ -4,9 +4,11 @@ use yew::prelude::*;
 use crate::components::visualization::types::{VisualizationComponent, Annotation};
 use crate::components::social_sharing::embedded_visualization::EmbeddedVisualization;
 use crate::services::federation::{get_shared_visualization, SharedVisualization};
+use crate::services::collaboration::CollaborationService;
 use reviews::Review;
 use crate::data_generator::generators::products::Product;
 use uuid::Uuid;
+use std::rc::Rc;
 
 #[derive(Properties, PartialEq)]
 pub struct EmbedPageProps {
@@ -22,6 +24,10 @@ pub struct EmbedPageProps {
     pub show_title: Option<bool>,
     #[prop_or_default]
     pub interactive: Option<bool>,
+    #[prop_or_default]
+    pub current_user_id: Option<String>,
+    #[prop_or_default]
+    pub collaboration_service: Option<Rc<CollaborationService>>,
 }
 
 #[function_component(EmbedPage)]
@@ -70,6 +76,8 @@ pub fn embed_page(props: &EmbedPageProps) -> Html {
         let annotations = annotations.clone();
         Callback::from(move |annotation: Annotation| {
             let mut new_annotations = (*annotations).clone();
+            let mut annotation = annotation;
+            annotation.ensure_compatibility("anonymous");
             new_annotations.push(annotation);
             annotations.set(new_annotations);
         })
@@ -110,6 +118,8 @@ pub fn embed_page(props: &EmbedPageProps) -> Html {
                     annotations={(*annotations).clone()}
                     data={data}
                     loading={*loading}
+                    current_user_id={props.current_user_id.clone().unwrap_or("anonymous".to_string())}
+                    collaboration_service={props.collaboration_service.clone()}
                 />
             }
         </div>

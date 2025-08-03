@@ -42,4 +42,69 @@ pub struct Annotation {
     pub timestamp: DateTime<Utc>,
     pub content: String,
     pub position: Option<(f32, f32)>, // Normalized coordinates
+    #[serde(default)]
+    pub permissions: Vec<Permission>,
+    #[serde(default)]
+    pub mentions: Vec<String>,
+    #[serde(default)]
+    pub version: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Permission {
+    pub user_id: String,
+    pub level: PermissionLevel,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum PermissionLevel {
+    View,
+    Comment,
+    Edit,
+}
+
+impl Default for PermissionLevel {
+    fn default() -> Self {
+        PermissionLevel::Edit
+    }
+}
+
+impl Annotation {
+    /// Create a new annotation with backward compatibility
+    pub fn new(
+        id: Uuid,
+        share_id: String,
+        user_id: String,
+        content: String,
+        position: Option<(f32, f32)>,
+    ) -> Self {
+        Self {
+            id,
+            share_id,
+            user_id: user_id.clone(),
+            timestamp: Utc::now(),
+            content,
+            position,
+            permissions: vec![Permission {
+                user_id,
+                level: PermissionLevel::Edit,
+            }],
+            mentions: Vec::new(),
+            version: 1,
+        }
+    }
+    
+    /// Ensure backward compatibility for existing annotations
+    pub fn ensure_compatibility(&mut self, default_user_id: &str) {
+        if self.permissions.is_empty() {
+            self.permissions.push(Permission {
+                user_id: self.user_id.clone(),
+                level: PermissionLevel::Edit,
+            });
+        }
+        
+        if self.version == 0 {
+            self.version = 1;
+        }
+    }
 }

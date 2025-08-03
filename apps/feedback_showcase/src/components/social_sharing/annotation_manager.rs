@@ -2,9 +2,11 @@
 
 use yew::prelude::*;
 use web_sys::HtmlTextAreaElement;
-use crate::components::visualization::types::Annotation;
+use crate::components::visualization::types::{Annotation, Permission, PermissionLevel};
+use crate::services::collaboration::CollaborationService;
 use uuid::Uuid;
 use chrono::Utc;
+use std::rc::Rc;
 
 #[derive(Properties, PartialEq)]
 pub struct AnnotationManagerProps {
@@ -19,6 +21,10 @@ pub struct AnnotationManagerProps {
     pub show_form: bool,
     #[prop_or_default]
     pub on_form_toggle: Callback<()>,
+    #[prop_or_default]
+    pub current_user_id: String,
+    #[prop_or_default]
+    pub collaboration_service: Option<Rc<CollaborationService>>,
 }
 
 #[function_component(AnnotationManager)]
@@ -76,16 +82,34 @@ pub fn annotation_manager(props: &AnnotationManagerProps) -> Html {
         let position = position.clone();
         let on_add_annotation = props.on_add_annotation.clone();
         let share_id = props.share_id.clone();
+        let current_user_id = props.current_user_id.clone();
+        let collaboration_service = props.collaboration_service.clone();
         Callback::from(move |_| {
             if !content.is_empty() {
-                let annotation = Annotation {
-                    id: Uuid::new_v4(),
-                    share_id: share_id.clone(),
-                    user_id: "current_user".to_string(), // In a real app, this would be the actual user ID
-                    timestamp: Utc::now(),
-                    content: content.to_string(),
-                    position: *position,
+                // Parse mentions from content
+                let mentions = if let Some(ref service) = collaboration_service {
+                    service.parse_mentions(&content)
+                } else {
+                    Vec::new()
                 };
+                
+                let annotation = Annotation::new(
+                    Uuid::new_v4(),
+                    share_id.clone(),
+                    current_user_id.clone(),
+                    content.to_string(),
+                    *position,
+                );
+                
+                // Update mentions and version
+                let mut annotation = annotation;
+                annotation.mentions = mentions;
+                annotation.version = 1;
+                
+                // Broadcast update via collaboration service if available
+                if let Some(ref service) = collaboration_service {
+                    service.broadcast_update(&share_id, &annotation);
+                }
                 
                 on_add_annotation.emit(annotation);
                 content.set("".to_string());
@@ -160,17 +184,61 @@ pub fn annotation_manager(props: &AnnotationManagerProps) -> Html {
                     <p class="no-annotations">{"No annotations yet. Be the first to add one!"}</p>
                 } else {
                     {for props.annotations.iter().map(|annotation| {
+                        // Ensure backward compatibility for existing annotations
+                        let mut annotation = annotation.clone();
+                        annotation.ensure_compatibility(&props.current_user_id);
+                        
+                        let can_edit = if let Some(ref service) = props.collaboration_service {
+                            service.check_permission(&annotation, &props.current_user_id, PermissionLevel::Edit)
+                        } else {
+                            annotation.user_id == props.current_user_id
+                        };
+                        
+                        let content = if !annotation.mentions.is_empty() {
+                            // Highlight mentions in the content
+                            let mut highlighted_content = annotation.content.clone();
+                            for mention in &annotation.mentions {
+                                highlighted_content = highlighted_content.replace(
+                                    &format!("@{}", mention),
+                                    &format!("<mark>@{}</mark>", mention)
+                                );
+                            }
+                            highlighted_content
+                        } else {
+                            annotation.content.clone()
+                        };
+                        
                         html! {
                             <div class="annotation-item">
                                 <div class="annotation-content">
-                                    {&annotation.content}
+                                    {Html::from_html_unchecked(content.into())}
                                 </div>
                                 <div class="annotation-meta">
-                                    <span class="annotation-user">{"You"}</span>
+                                    <span class="annotation-user">
+                                        if annotation.user_id == props.current_user_id {
+                                            {"You"}
+                                        } else {
+                                            {format!("User: {}", annotation.user_id)}
+                                        }
+                                    </span>
                                     <span class="annotation-timestamp">
                                         {annotation.timestamp.format("%Y-%m-%d %H:%M").to_string()}
                                     </span>
+                                    if !annotation.mentions.is_empty() {
+                                        <span class="annotation-mentions">
+                                            {"Mentions: "}
+                                            {for annotation.mentions.iter().map(|mention| {
+                                                html! { <span class="mention-tag">@{mention}</span> }
+                                            })}
+                                        </span>
+                                    }
                                 </div>
+                                if can_edit {
+                                    <div class="annotation-actions">
+                                        <button class="edit-annotation-btn">{"Edit"}</button>
+                                        <button class="delete-annotation-btn">{"Delete"}</button>
+                                    </div>
+                                }
                             </div>
                         }
                     })}

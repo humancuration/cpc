@@ -1,0 +1,49 @@
+[package]
+name = "cpc-twitch-clone"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "twitch-clone"
+path = "src/main.rs"
+
+[dependencies]
+# Core dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "1.0"
+tracing = "0.1"
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
+
+# Async
+tokio = { version = "1.0", features = ["full"] }
+async-trait = "0.1"
+
+# GraphQL
+async-graphql = "7.0"
+
+# Web framework
+axum = "0.7"
+
+# WebRTC
+wry = "0.52.1"
+
+# Media processing
+ffmpeg-wasm = "0.1"
+plotters = "0.3"
+
+# CPC dependencies
+cpc-messenger = { path = "../messenger" }
+cpc-social-integration = { path = "../../shared_packages/social_integration" }
+cpc-notification-core = { path = "../../shared_packages/notification_core" }
+
+# P2P networking
+p2panda = "0.1"
+iroh = "0.1"
+
+# Audio processing
+rodio = "0.17"

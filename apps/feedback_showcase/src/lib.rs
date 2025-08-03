@@ -18,3 +18,4 @@ pub use components::social_sharing::{
     AnnotationManager,
     EmbeddedVisualization
 };
+pub use services::collaboration::CollaborationService;

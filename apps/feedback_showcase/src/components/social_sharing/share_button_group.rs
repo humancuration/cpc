@@ -1,6 +1,6 @@
 //! Share button group component for visualization data
 
-use yew::prelude::*;
+use yew::{prelude::*, classes};
 use web_sys::HtmlCanvasElement;
 use wasm_bindgen::JsCast;
 use crate::components::visualization::types::{VisualizationComponent, ShareAction};
@@ -12,6 +12,7 @@ use crate::services::federation::share_visualization;
 use crate::components::social_sharing::social_sharing_dialog::SocialSharingDialog;
 use crate::components::social_sharing::embed_code_dialog::EmbedCodeDialog;
 use crate::utils::accessibility::ensure_social_button_accessibility;
+use crate::styles::social_sharing::*;
 
 #[derive(Properties, PartialEq)]
 pub struct ShareButtonGroupProps {
@@ -104,12 +105,18 @@ pub fn share_button_group(props: &ShareButtonGroupProps) -> Html {
 
     // Get accessibility attributes
     let accessibility_attrs = ensure_social_button_accessibility();
+    let share_button_group_style = share_button_group();
+    let share_btn_style = share_btn();
+    let share_btn_federation_style = share_btn_federation();
+    let share_btn_embed_style = share_btn_embed();
+    let share_btn_image_style = share_btn_image();
+    let share_btn_social_style = share_btn_social();
     
     html! {
         <>
-            <div class="share-button-group">
+            <div class={share_button_group_style}>
                 <button
-                    class="share-btn federation"
+                    class={classes!(share_btn_style.clone(), share_btn_federation_style)}
                     onclick={on_federation_share}
                     title="Share to Federation"
                     role={accessibility_attrs[0].1}
@@ -119,7 +126,7 @@ pub fn share_button_group(props: &ShareButtonGroupProps) -> Html {
                     {"🌐"}
                 </button>
                 <button
-                    class="share-btn embed"
+                    class={classes!(share_btn_style.clone(), share_btn_embed_style)}
                     onclick={on_embed_code}
                     title="Generate Embed Code"
                     role={accessibility_attrs[0].1}
@@ -129,7 +136,7 @@ pub fn share_button_group(props: &ShareButtonGroupProps) -> Html {
                     {"</>"}
                 </button>
                 <button
-                    class="share-btn image"
+                    class={classes!(share_btn_style.clone(), share_btn_image_style)}
                     onclick={on_image_export}
                     title="Export as Image"
                     role={accessibility_attrs[0].1}
@@ -139,7 +146,7 @@ pub fn share_button_group(props: &ShareButtonGroupProps) -> Html {
                     {"📷"}
                 </button>
                 <button
-                    class="share-btn social"
+                    class={classes!(share_btn_style.clone(), share_btn_social_style)}
                     onclick={on_social_share}
                     title="Share to Social Platforms"
                     role={accessibility_attrs[0].1}
@@ -148,6 +155,7 @@ pub fn share_button_group(props: &ShareButtonGroupProps) -> Html {
                 >
                     {"🔗"}
                 </button>
+            </div>
             </div>
             
             if *show_social_dialog {

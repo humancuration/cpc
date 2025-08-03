@@ -26,6 +26,7 @@ web-sys = { version = "0.3", features = ["Blob", "Url", "HtmlAnchorElement", "Ht
 js-sys = "0.3"
 uuid = { version = "1.0", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde", "js-sys"] }
+stylist = "0.13"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

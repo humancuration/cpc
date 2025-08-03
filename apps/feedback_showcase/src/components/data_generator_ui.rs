@@ -3,6 +3,7 @@
 use yew::prelude::*;
 use crate::components::{ConfigPanel, ActionBar, MetricsPanel, DemoControlPanel, Playground, PresetSelector};
 use crate::components::visualization::{Summary, RatingsChart, WordCloud, Sentiment};
+use crate::styles::data_generator::*;
 use crate::components::demo_control_panel::{AppState, ComponentType, LayoutConfig, ComponentSize};
 use crate::data_generator::config::DataGeneratorConfig;
 use crate::data_generator::generators::products::Product;
@@ -153,39 +154,45 @@ let on_component_toggle = {
         app_state.set(new_app_state);
     })
 };
+let data_generator_ui_style = data_generator_ui();
+let data_generator_ui_h1_style = data_generator_ui_h1();
+let control_section_style = config_section();
+let action_buttons_style = action_buttons();
+let preview_button_style = preview_button();
 
-    html! {
-        <div class="data-generator-ui">
-            <h1>{"Feedback Data Generator"}</h1>
-            
-            <div class="control-section">
-                <PresetSelector on_preset_selected={on_preset_selected} />
-                <DemoControlPanel
-                    config={(*config).clone()}
-                    on_config_update={on_config_update}
-                    on_generate={on_generate}
-                />
-            </div>
-            
-            <div class="action-buttons">
-                <ActionBar
-                    on_generate={on_generate}
-                    on_reset={on_reset}
-                    on_export={on_export}
-                    generating={*generating}
-                    has_data={generated_data.is_some()}
-                />
-                <button onclick={on_show_sample_data} class="preview-button">
-                    {"Preview Visualizations"}
-                </button>
-            </div>
-            <MetricsPanel metrics={(*metrics).clone()} />
-            
-            <Playground
-                app_state={(*app_state).clone()}
-                on_component_toggle={on_component_toggle}
+html! {
+    <div class={data_generator_ui_style}>
+        <h1 class={data_generator_ui_h1_style}>{"Feedback Data Generator"}</h1>
+        
+        <div class={control_section_style}>
+            <PresetSelector on_preset_selected={on_preset_selected} />
+            <DemoControlPanel
+                config={(*config).clone()}
+                on_config_update={on_config_update}
+                on_generate={on_generate}
             />
         </div>
+        
+        <div class={action_buttons_style}>
+            <ActionBar
+                on_generate={on_generate}
+                on_reset={on_reset}
+                on_export={on_export}
+                generating={*generating}
+                has_data={generated_data.is_some()}
+            />
+            <button onclick={on_show_sample_data} class={preview_button_style}>
+                {"Preview Visualizations"}
+            </button>
+        </div>
+        <MetricsPanel metrics={(*metrics).clone()} />
+        
+        <Playground
+            app_state={(*app_state).clone()}
+            on_component_toggle={on_component_toggle}
+        />
+    </div>
+}
     }
 }
 

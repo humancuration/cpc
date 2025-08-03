@@ -1,5 +1,6 @@
 //! Summary visualization component showing key metrics
 
+use yew::{prelude::*, classes};
 use yew::prelude::*;
 use reviews::Review;
 use crate::data_generator::generators::products::Product;
@@ -12,6 +13,7 @@ use web_sys::ResizeObserver;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 use crate::components::social_sharing::ShareButtonGroup;
+use crate::styles::visualization::*;
 
 #[function_component(Summary)]
 pub fn summary(props: &VisualizationProps) -> Html {
@@ -70,11 +72,22 @@ pub fn summary(props: &VisualizationProps) -> Html {
             }
         });
     }
+    let visualization_summary_style = visualization_summary();
+    let visualization_header_style = crate::styles::social_sharing::visualization_header();
+    let visualization_summary_h2_style = visualization_summary_h2();
+    let summary_metrics_style = summary_metrics();
+    let metric_card_style = metric_card();
+    let metric_card_h3_style = metric_card_h3();
+    let rating_display_style = rating_display();
+    let rating_value_style = rating_value();
+    let rating_max_style = rating_max();
+    let star_rating_style = stars();
+    let review_count_style = review_count();
     
     html! {
-        <div ref={container_ref} class="visualization-summary">
-            <div class="visualization-header">
-                <h2>{"Feedback Summary"}</h2>
+        <div ref={container_ref} class={visualization_summary_style}>
+            <div class={visualization_header_style}>
+                <h2 class={visualization_summary_h2_style}>{"Feedback Summary"}</h2>
                 if props.enable_sharing {
                     <ShareButtonGroup
                         visualization_type={VisualizationComponent::Summary}
@@ -85,27 +98,27 @@ pub fn summary(props: &VisualizationProps) -> Html {
                 }
             </div>
             
-            <div class="summary-metrics">
-                <div class="metric-card">
-                    <h3>{"Average Rating"}</h3>
-                    <div class="rating-display">
-                        <span class="rating-value">{format!("{:.2}", avg_rating * 5.0)}</span>
-                        <span class="rating-max">{" / 5.0"}</span>
+            <div class={summary_metrics_style}>
+                <div class={metric_card_style}>
+                    <h3 class={metric_card_h3_style}>{"Average Rating"}</h3>
+                    <div class={rating_display_style}>
+                        <span class={rating_value_style}>{format!("{:.2}", avg_rating * 5.0)}</span>
+                        <span class={rating_max_style}>{" / 5.0"}</span>
                     </div>
-                    <div class="star-rating">
+                    <div class={star_rating_style}>
                         {render_stars(avg_rating)}
                     </div>
                 </div>
                 
-                <div class="metric-card">
-                    <h3>{"Total Reviews"}</h3>
-                    <div class="review-count">
+                <div class={metric_card_style}>
+                    <h3 class={metric_card_h3_style}>{"Total Reviews"}</h3>
+                    <div class={review_count_style}>
                         {total_reviews}
                     </div>
                 </div>
                 
-                <div class="metric-card">
-                    <h3>{"Sentiment Distribution"}</h3>
+                <div class={metric_card_style}>
+                    <h3 class={metric_card_h3_style}>{"Sentiment Distribution"}</h3>
                     <canvas
                         ref={canvas_ref}
                         width="200"
@@ -123,21 +136,25 @@ pub fn summary(props: &VisualizationProps) -> Html {
 fn render_stars(rating: f32) -> Html {
     let full_stars = (rating * 5.0).floor() as u32;
     let has_half_star = (rating * 5.0 * 2.0).fract() >= 0.5;
+    let star_style = star();
+    let star_full_style = star_full();
+    let star_half_style = star_half();
     
     let mut stars = Vec::new();
     
     for i in 0..5 {
         if i < full_stars {
-            stars.push(html! { <span class="star full">{"★"}</span> });
+            stars.push(html! { <span class={classes!(star_style.clone(), star_full_style.clone())}>{"★"}</span> });
         } else if i == full_stars && has_half_star {
-            stars.push(html! { <span class="star half">{"★"}</span> });
+            stars.push(html! { <span class={classes!(star_style.clone(), star_half_style.clone())}>{"★"}</span> });
         } else {
-            stars.push(html! { <span class="star empty">{"★"}</span> });
+            stars.push(html! { <span class={star_style.clone()}>{"★"}</span> });
         }
     }
     
+    let stars_style = stars();
     html! {
-        <div class="stars">
+        <div class={stars_style}>
             {stars}
         </div>
     }
