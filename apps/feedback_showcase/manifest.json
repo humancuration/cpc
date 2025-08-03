@@ -1,0 +1,16 @@
+{
+  "name": "Feedback Data Generator",
+  "short_name": "FeedbackGen",
+  "description": "A web-based tool for generating sample feedback data",
+  "start_url": "/static/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
+  "icons": [
+    {
+      "src": "/static/icon.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ]
+}

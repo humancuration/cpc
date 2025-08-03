@@ -50,3 +50,7 @@ path = "src/bin/migrate.rs"
 [[bench]]
 name = "service_benchmark"
 harness = false
+
+[[bench]]
+name = "utils_benchmark"
+harness = false

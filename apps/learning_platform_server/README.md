@@ -117,6 +117,11 @@ apps/learning_platform_server/
 ├── examples/              # Example clients
 ├── tests/                 # Integration tests
 ├── benches/               # Benchmark tests
+├── docs/                  # Documentation
+│   ├── architecture.md    # System architecture
+│   ├── database_schema.md # Database schema
+│   ├── development.md     # Development guide
+│   └── testing.md         # Testing strategy
 ├── Cargo.toml             # Rust package manifest
 ├── Cargo.lock             # Rust dependency lock file
 ├── build.rs               # Build script for gRPC code generation
@@ -128,6 +133,14 @@ apps/learning_platform_server/
 ├── API.md                 # API documentation
 └── README.md              # This file
 ```
+
+## Documentation
+
+- [API Documentation](API.md): Detailed API specifications
+- [Architecture](docs/architecture.md): System architecture and design decisions
+- [Database Schema](docs/database_schema.md): Database structure and relationships
+- [Development Guide](docs/development.md): Development workflow and best practices
+- [Testing Strategy](docs/testing.md): Testing approach and guidelines
 
 ## Contributing
 

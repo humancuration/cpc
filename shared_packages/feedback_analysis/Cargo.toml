@@ -1,0 +1,13 @@
+[package]
+name = "feedback_analysis"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+feedback_core = { path = "../feedback_core" }
+reviews = { path = "../reviews" }
+survey = { path = "../survey" }
+plotters = "0.3"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+serde = { version = "1.0", features = ["derive"] }

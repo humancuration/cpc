@@ -1,0 +1,27 @@
+[package]
+name = "reviews"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+serde = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+sqlx = { workspace = true }
+sled = { workspace = true }
+plotters = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+# Survey integration
+survey = { path = "../survey" }
+
+# Feedback system integration
+feedback_analysis = { path = "../feedback_analysis" }
+feedback_core = { path = "../feedback_core" }
+
+# Optional dependencies for features
+async-trait = { workspace = true }

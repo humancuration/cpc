@@ -1,0 +1,32 @@
+[package]
+name = "survey"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+serde = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+rand = "0.8"
+plotters = "0.3"
+serde_json = "1.0"
+
+# Feedback system integration
+feedback_analysis = { path = "../feedback_analysis" }
+feedback_core = { path = "../feedback_core" }
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
+
+[[example]]
+name = "review_integration"
+path = "examples/review_integration.rs"
+
+[[example]]
+name = "advanced_analysis"
+path = "examples/advanced_analysis.rs"
