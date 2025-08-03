@@ -87,6 +87,35 @@ pub enum UserPresence {
     /// User is offline
     Offline,
     
+    
     /// User is busy
     Busy,
+}
+
+/// Service for stream chat operations
+#[async_trait]
+pub trait StreamChatService: Send + Sync {
+    /// Create a stream chat room
+    async fn create_stream_chat(&self, stream_id: Uuid, channel_owner_id: Uuid) -> Result<Conversation, MessengerError>;
+    
+    /// Send a stream chat message
+    async fn send_stream_message(
+        &self,
+        conversation_id: Uuid,
+        sender_id: Uuid,
+        content: String,
+        emotes: Vec<crate::models::Emote>,
+        badges: Vec<crate::models::Badge>,
+        is_moderator: bool,
+        is_subscriber: bool,
+    ) -> Result<crate::models::StreamMessage, MessengerError>;
+    
+    /// Get recent stream messages
+    async fn get_recent_stream_messages(&self, conversation_id: Uuid, limit: usize) -> Result<Vec<crate::models::StreamMessage>, MessengerError>;
+    
+    /// Add an emote to the system
+    async fn add_emote(&self, emote: crate::models::Emote) -> Result<(), MessengerError>;
+    
+    /// Get emote by name
+    async fn get_emote_by_name(&self, name: &str) -> Result<Option<crate::models::Emote>, MessengerError>;
 }

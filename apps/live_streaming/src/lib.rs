@@ -10,6 +10,8 @@ pub mod social;
 pub mod media_processing;
 pub mod web;
 pub mod module_registry;
+pub mod ui;
+
 
 // Re-export key components for easier access
 pub use channel::channel::Channel;
@@ -22,3 +24,7 @@ pub use social::subscription::SubscriptionService;
 pub use web::module::LiveStreamingModule;
 pub use web::modular_module::ModularLiveStreaming;
 pub use module_registry::create_module;
+
+// Re-export external services
+pub use cpc_social_integration::StreamEventService;
+pub use cpc_notification_core::StreamNotificationService;

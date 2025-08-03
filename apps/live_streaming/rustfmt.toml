@@ -1,0 +1,148 @@
+# Rust formatting configuration
+
+# Maximum width of each line
+max_width = 100
+
+# Number of spaces per tab
+tab_spaces = 4
+
+# Use spaces for indentation
+hard_tabs = false
+
+# Width of the first column in a struct literal
+struct_lit_width = 18
+
+# Width of the first column in a struct variant
+struct_variant_width = 35
+
+# Maximum width of an array literal before falling back to vertical formatting
+array_width = 60
+
+# Maximum width of a chain to fit on one line
+chain_width = 60
+
+# Maximum width of a single match arm before falling back to vertical formatting
+single_match_arm_width = 80
+
+# Maximum width of a single line if-else block before falling back to vertical formatting
+single_line_if_else_max_width = 50
+
+# Wrap comments
+wrap_comments = true
+
+# Format doc comments
+format_code_in_doc_comments = true
+
+# Reorder imports
+reorder_imports = true
+
+# Reorder modules
+reorder_modules = true
+
+# Remove nested parens
+remove_nested_parens = true
+
+# Import sorting style
+imports_granularity = "Crate"
+
+# Group imports
+group_imports = "StdExternalCrate"
+
+# Format strings
+format_strings = false
+
+# Format macro matchers
+format_macro_matchers = false
+
+# Format macro bodies
+format_macro_bodies = true
+
+# Empty item single line
+empty_item_single_line = true
+
+# Function arguments layout
+fn_args_layout = "Tall"
+
+# Match arm leading pipe
+match_arm_leading_pipes = "Never"
+
+# Force multiline blocks
+force_multiline_blocks = false
+
+# Controls whether to include a space after '<' and before '>' in generic arguments
+spaces_around_ranges = false
+
+# Controls whether to format parentheses and brackets in expressions
+space_before_colon = false
+
+# Controls whether to format parentheses and brackets in expressions
+space_after_colon = true
+
+# Controls whether to format parentheses and brackets in expressions
+spaces_around = "[\n\r\t ]"
+
+# Controls whether to format parentheses and brackets in expressions
+brace_style = "SameLineWhere"
+
+# Controls whether to format parentheses and brackets in expressions
+control_brace_style = "AlwaysSameLine"
+
+# Controls whether to format parentheses and brackets in expressions
+indent_style = "Block"
+
+# Controls whether to format parentheses and brackets in expressions
+combine_control_expr = true
+
+# Controls whether to format parentheses and brackets in expressions
+overflow_delimited_expr = false
+
+# Controls whether to format parentheses and brackets in expressions
+struct_field_align_threshold = 0
+
+# Controls whether to format parentheses and brackets in expressions
+enum_discrim_align_threshold = 0
+
+# Controls whether to format parentheses and brackets in expressions
+match_arm_blocks = true
+
+# Controls whether to format parentheses and brackets in expressions
+force_explicit_abi = true
+
+# Controls whether to format parentheses and brackets in expressions
+condense_wildcard_suffixes = false
+
+# Controls whether to format parentheses and brackets in expressions
+color = "Auto"
+
+# Controls whether to format parentheses and brackets in expressions
+unstable_features = false
+
+# Controls whether to format parentheses and brackets in expressions
+disable_all_formatting = false
+
+# Controls whether to format parentheses and brackets in expressions
+skip_children = false
+
+# Controls whether to format parentheses and brackets in expressions
+hide_parse_errors = false
+
+# Controls whether to format parentheses and brackets in expressions
+error_on_line_overflow = false
+
+# Controls whether to format parentheses and brackets in expressions
+error_on_unformatted = false
+
+# Controls whether to format parentheses and brackets in expressions
+report_todo = "Never"
+
+# Controls whether to format parentheses and brackets in expressions
+report_fixme = "Never"
+
+# Controls whether to format parentheses and brackets in expressions
+ignore = []
+
+# Controls whether to format parentheses and brackets in expressions
+emit_mode = "Files"
+
+# Controls whether to format parentheses and brackets in expressions
+make_backup = false

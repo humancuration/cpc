@@ -1,20 +1,26 @@
 //! Chat service implementation that integrates with the shared messenger
 
-use cpc_messenger::models::{Conversation, Message, Participant, MessageContent};
-use cpc_messenger::services::{ConversationService, MessageService};
+use cpc_messenger::models::{Conversation, Message, Participant, MessageContent, StreamMessage, Emote as MessengerEmote, Badge as MessengerBadge};
+use cpc_messenger::services::{ConversationService, MessageService, StreamChatService};
+use cpc_messenger::errors::MessengerError;
 use async_trait::async_trait;
 use uuid::Uuid;
 use std::collections::HashMap;
 use sqlx::PgPool;
 use std::error::Error;
+use std::sync::Arc;
+use serde_json::json;
+use cpc_notification_core::application::service::NotificationService;
+use cpc_notification_core::domain::types::{Notification, NotificationCategory, NotificationPriority, ChannelType};
 
 /// Chat service for Twitch-like chat functionality
 pub struct ChatService {
     db_pool: PgPool,
     /// In-memory cache of active conversations for performance
     active_conversations: HashMap<Uuid, Conversation>,
+    /// Notification service for sending notifications
+    notification_service: Arc<NotificationService>,
 }
-
 /// Twitch-specific chat message with emotes and badges
 #[derive(Debug, Clone)]
 pub struct TwitchChatMessage {
@@ -60,12 +66,33 @@ pub struct Badge {
     pub version: Option<String>,
 }
 
+impl From<Emote> for MessengerEmote {
+    fn from(emote: Emote) -> Self {
+        MessengerEmote {
+            id: emote.id,
+            name: emote.name,
+            positions: emote.positions,
+        }
+    }
+}
+
+impl From<Badge> for MessengerBadge {
+    fn from(badge: Badge) -> Self {
+        MessengerBadge {
+            id: badge.id,
+            name: badge.name,
+            version: badge.version,
+        }
+    }
+}
+
 impl ChatService {
     /// Create a new chat service
-    pub fn new(db_pool: PgPool) -> Self {
+    pub fn new(db_pool: PgPool, notification_service: Arc<NotificationService>) -> Self {
         Self {
             db_pool,
             active_conversations: HashMap::new(),
+            notification_service,
         }
     }
     
@@ -83,11 +110,24 @@ impl ChatService {
         Ok(conversation)
     }
     
+    /// Convert a TwitchChatMessage to a StreamMessage
+    fn to_stream_message(&self, twitch_message: TwitchChatMessage) -> StreamMessage {
+        StreamMessage {
+            base_message: twitch_message.base_message,
+            emotes: twitch_message.emotes.into_iter().map(|e| e.into()).collect(),
+            badges: twitch_message.badges.into_iter().map(|b| b.into()).collect(),
+            is_moderator: twitch_message.is_moderator,
+            is_subscriber: twitch_message.is_subscriber,
+        }
+    }
+    
+    
     /// Send a chat message to a stream
     pub async fn send_chat_message(
         &self,
         conversation_id: Uuid,
         sender_id: Uuid,
+        sender_name: String,
         content: String,
         emotes: Vec<Emote>,
         badges: Vec<Badge>,
@@ -95,7 +135,7 @@ impl ChatService {
         is_subscriber: bool,
     ) -> Result<TwitchChatMessage, Box<dyn Error + Send + Sync>> {
         // Create the base message through the messenger service
-        let base_message = Message::new_text(conversation_id, sender_id, content);
+        let base_message = Message::new_text(conversation_id, sender_id, content.clone());
         
         let twitch_message = TwitchChatMessage {
             base_message,
@@ -105,6 +145,23 @@ impl ChatService {
             is_subscriber,
         };
         
+        // Send notification for the new chat message
+        let notif = Notification::new_immediate(
+            conversation_id.to_string(),
+            NotificationCategory::Streaming,
+            NotificationPriority::Normal,
+            "New Chat Message".into(),
+            format!("{}: {}", sender_name, Self::content_preview(&content, 25)),
+            json!({"type": "chat", "conversation_id": conversation_id}),
+            vec![ChannelType::InApp, ChannelType::Push],
+        );
+        let service_clone = self.notification_service.clone();
+        tokio::spawn(async move {
+            if let Err(e) = service_clone.send(notif).await {
+                tracing::error!("Chat notification failed: {}", e);
+            }
+        });
+        
         // In a real implementation, we would:
         // 1. Validate emotes and badges
         // 2. Check if user has permission to use them
@@ -112,8 +169,16 @@ impl ChatService {
         // 4. Broadcast to all connected viewers
         
         Ok(twitch_message)
+        
+        /// Create a preview of content by truncating it to a maximum length
+        fn content_preview(content: &str, max_length: usize) -> String {
+            if content.len() <= max_length {
+                content.to_string()
+            } else {
+                format!("{}...", &content[..max_length])
+            }
+        }
     }
-    
     /// Get recent chat messages for a stream
     pub async fn get_recent_messages(&self, conversation_id: Uuid, limit: usize) -> Result<Vec<TwitchChatMessage>, Box<dyn Error + Send + Sync>> {
         // In a real implementation, we would fetch messages from the database
@@ -133,6 +198,57 @@ impl ChatService {
     pub async fn get_emote_by_name(&self, name: &str) -> Result<Option<Emote>, Box<dyn Error + Send + Sync>> {
         // In a real implementation, we would fetch the emote from the database
         
+        Ok(None)
+    }
+}
+
+// Implement the StreamChatService trait from the messenger
+#[async_trait]
+impl StreamChatService for ChatService {
+    async fn create_stream_chat(&self, stream_id: Uuid, channel_owner_id: Uuid) -> Result<Conversation, MessengerError> {
+        // In a real implementation, we would create the chat room
+        // For now, we'll return a mock conversation
+        let participants = vec![Participant::new(channel_owner_id)];
+        let conversation = Conversation::new_group(participants, format!("Stream Chat - {}", stream_id));
+        Ok(conversation)
+    }
+    
+    async fn send_stream_message(
+        &self,
+        conversation_id: Uuid,
+        sender_id: Uuid,
+        content: String,
+        emotes: Vec<MessengerEmote>,
+        badges: Vec<MessengerBadge>,
+        is_moderator: bool,
+        is_subscriber: bool,
+    ) -> Result<StreamMessage, MessengerError> {
+        // Create the base message
+        let base_message = Message::new_text(conversation_id, sender_id, content);
+        
+        let stream_message = StreamMessage {
+            base_message,
+            emotes,
+            badges,
+            is_moderator,
+            is_subscriber,
+        };
+        
+        Ok(stream_message)
+    }
+    
+    async fn get_recent_stream_messages(&self, conversation_id: Uuid, limit: usize) -> Result<Vec<StreamMessage>, MessengerError> {
+        // In a real implementation, we would fetch messages from the database
+        Ok(Vec::new())
+    }
+    
+    async fn add_emote(&self, emote: MessengerEmote) -> Result<(), MessengerError> {
+        // In a real implementation, we would store the emote in the database
+        Ok(())
+    }
+    
+    async fn get_emote_by_name(&self, name: &str) -> Result<Option<MessengerEmote>, MessengerError> {
+        // In a real implementation, we would fetch the emote from the database
         Ok(None)
     }
 }

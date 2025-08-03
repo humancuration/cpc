@@ -16,3 +16,4 @@ pub mod infrastructure;
 // Re-export commonly used types
 pub use domain::{types::Notification, preferences::UserPreferences, NotificationError};
 pub use application::service::NotificationService;
+pub use application::stream_notification_service::StreamNotificationService;

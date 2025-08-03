@@ -1,0 +1,22 @@
+[module]
+name = "live-streaming"
+version = "0.1.0"
+description = "A live streaming platform with real-time chat, channel subscriptions, and social features"
+category = "media"
+license = "CPC"
+
+[dependencies]
+cpc-messenger = { path = "../messenger" }
+cpc-social-integration = { path = "../../shared_packages/social_integration" }
+cpc-notification-core = { path = "../../shared_packages/notification_core" }
+cpc-media = { path = "../../shared_packages/media" }
+
+[features]
+websockets = ["tauri/websocket"]
+webrtc = []
+transcoding = []
+ui = ["yew", "stylist"]
+
+[web]
+tauri = true
+yew = true

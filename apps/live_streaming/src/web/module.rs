@@ -11,9 +11,15 @@ use crate::social::subscription::SubscriptionService;
 use crate::streaming::broadcaster::Broadcaster;
 use crate::web::routes::create_live_streaming_router;
 
+// External service dependencies
+use cpc_social_integration::StreamEventService;
+use cpc_notification_core::StreamNotificationService;
+
 /// This struct holds all the pieces the backend needs from this module
 pub struct LiveStreamingModule {
     pub router: Router,
+    pub stream_event_service: Arc<StreamEventService>,
+    pub stream_notification_service: Arc<StreamNotificationService>,
     // In a real implementation, we would also have GraphQL schema components
 }
 
@@ -26,10 +32,16 @@ pub fn initialize(db_pool: PgPool) -> LiveStreamingModule {
     let subscription_service = Arc::new(SubscriptionService::new());
     let broadcaster = Arc::new(Broadcaster::new());
     
+    // Initialize external services
+    let stream_event_service = Arc::new(StreamEventService::new());
+    let stream_notification_service = Arc::new(StreamNotificationService::new());
+    
     // Initialize web components
     let router = create_live_streaming_router();
     
     LiveStreamingModule {
         router,
+        stream_event_service,
+        stream_notification_service,
     }
 }

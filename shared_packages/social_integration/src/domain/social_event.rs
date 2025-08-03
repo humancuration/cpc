@@ -58,6 +58,52 @@ pub enum SocialEvent {
         hours_contributed: f32,
         timestamp: DateTime<Utc>,
     },
+    
+    /// A stream was started
+    StreamStarted {
+        user_id: Uuid,
+        stream_id: Uuid,
+        timestamp: DateTime<Utc>,
+    },
+    
+    /// A stream was ended
+    StreamEnded {
+        user_id: Uuid,
+        stream_id: Uuid,
+        timestamp: DateTime<Utc>,
+    },
+    
+    /// A viewer joined a stream
+    ViewerJoined {
+        user_id: Uuid,
+        broadcaster_id: Uuid, // New field
+        stream_id: Uuid,
+        timestamp: DateTime<Utc>,
+    },
+    
+    /// A chat message was sent in a stream
+    ChatMessageSent {
+        user_id: Uuid,
+        stream_id: Uuid,
+        message_id: Uuid,
+        timestamp: DateTime<Utc>,
+    },
+    
+    /// A user subscribed to a channel
+    SubscriptionCreated {
+        user_id: Uuid,
+        channel_id: Uuid,
+        tier: SubscriptionTier,
+        timestamp: DateTime<Utc>,
+    },
+}
+
+/// Subscription tier
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum SubscriptionTier {
+    Tier1,
+    Tier2,
+    Tier3,
 }
 
 /// Type of vote
@@ -78,6 +124,11 @@ impl SocialEvent {
             SocialEvent::UserFollowed { follower_id, .. } => follower_id,
             SocialEvent::OpportunityShared { user_id, .. } => user_id,
             SocialEvent::Volunteered { user_id, .. } => user_id,
+            SocialEvent::StreamStarted { user_id, .. } => user_id,
+            SocialEvent::StreamEnded { user_id, .. } => user_id,
+            SocialEvent::ViewerJoined { user_id, .. } => user_id,
+            SocialEvent::ChatMessageSent { user_id, .. } => user_id,
+            SocialEvent::SubscriptionCreated { user_id, .. } => user_id,
         }
     }
     
@@ -91,6 +142,11 @@ impl SocialEvent {
             SocialEvent::UserFollowed { timestamp, .. } => timestamp,
             SocialEvent::OpportunityShared { timestamp, .. } => timestamp,
             SocialEvent::Volunteered { timestamp, .. } => timestamp,
+            SocialEvent::StreamStarted { timestamp, .. } => timestamp,
+            SocialEvent::StreamEnded { timestamp, .. } => timestamp,
+            SocialEvent::ViewerJoined { timestamp, .. } => timestamp,
+            SocialEvent::ChatMessageSent { timestamp, .. } => timestamp,
+            SocialEvent::SubscriptionCreated { timestamp, .. } => timestamp,
         }
     }
 }

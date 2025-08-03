@@ -15,6 +15,7 @@ pub use domain::{
 };
 pub use application::{
     social_integration_service::SocialIntegrationService,
+    stream_event_service::StreamEventService,
 };
 
 pub use graphql::{

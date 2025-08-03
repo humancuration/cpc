@@ -24,6 +24,9 @@ pub enum NotificationCategory {
     Security,
     /// Marketing notifications
     Marketing,
+    
+    /// Live streaming notifications
+    Streaming,
 }
 
 impl fmt::Display for NotificationCategory {
@@ -36,7 +39,15 @@ impl fmt::Display for NotificationCategory {
             NotificationCategory::Social => write!(f, "Social"),
             NotificationCategory::Security => write!(f, "Security"),
             NotificationCategory::Marketing => write!(f, "Marketing"),
+            NotificationCategory::Streaming => write!(f, "Streaming"),
         }
+    }
+}
+
+impl NotificationCategory {
+    /// Check if this is a streaming category
+    pub fn is_streaming(&self) -> bool {
+        matches!(self, NotificationCategory::Streaming)
     }
 }
 

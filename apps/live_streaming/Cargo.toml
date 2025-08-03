@@ -1,11 +1,15 @@
 [package]
-name = "cpc-twitch-clone"
+name = "cpc-live-streaming"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "twitch-clone"
+name = "live-streaming"
 path = "src/main.rs"
+
+[[bin]]
+name = "live-streaming-tauri"
+path = "src/main_tauri.rs"
 
 [dependencies]
 # Core dependencies
@@ -32,6 +36,10 @@ axum = "0.7"
 # WebRTC
 wry = "0.52.1"
 
+# Tauri
+tauri = { version = "2.0", features = ["wry"] }
+tauri-build = "2.0"
+
 # Media processing
 ffmpeg-wasm = "0.1"
 plotters = "0.3"
@@ -47,3 +55,13 @@ iroh = "0.1"
 
 # Audio processing
 rodio = "0.17"
+
+# WebSocket support
+tokio-tungstenite = "0.20.1"
+
+# Web frontend
+yew = { version = "0.21.0", features = ["csr"] }
+stylist = { version = "0.13.0", features = ["yew_integration"] }
+wasm-bindgen = "0.2.100"
+wasm-logger = "0.2.0"
+web-sys = "0.3.77"

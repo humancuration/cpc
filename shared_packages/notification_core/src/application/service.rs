@@ -160,3 +160,16 @@ pub struct HistoryQuery {
     /// End timestamp
     pub end_time: Option<chrono::DateTime<chrono::Utc>>,
 }
+
+/// Service for handling stream notifications
+#[async_trait::async_trait]
+pub trait StreamNotificationService: Send + Sync {
+    /// Send a stream started notification to followers
+    async fn send_stream_started_notification(&self, broadcaster_id: &str, stream_id: &str) -> Result<Vec<DeliveryResult>, NotificationError>;
+    
+    /// Send a chat mention notification
+    async fn send_chat_mention_notification(&self, mentioned_user_id: &str, stream_id: &str, message_id: &str) -> Result<Vec<DeliveryResult>, NotificationError>;
+    
+    /// Send a subscription notification
+    async fn send_subscription_notification(&self, subscriber_id: &str, channel_id: &str, tier: &str) -> Result<Vec<DeliveryResult>, NotificationError>;
+}

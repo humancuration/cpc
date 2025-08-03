@@ -337,5 +337,49 @@ pub struct MessageStatusUpdate {
     pub new_status: DeliveryStatus,
     
     /// Timestamp of the status update
-    pub timestamp: DateTime<Utc>,
+}
+
+/// A stream chat message with Twitch-style features
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StreamMessage {
+    /// The base message from the messenger system
+    pub base_message: Message,
+    
+    /// Emotes used in the message
+    pub emotes: Vec<Emote>,
+    
+    /// Badges the user has
+    pub badges: Vec<Badge>,
+    
+    /// Whether this is a moderator message
+    pub is_moderator: bool,
+    
+    /// Whether this is a subscriber message
+    pub is_subscriber: bool,
+}
+
+/// Represents an emote in chat
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Emote {
+    /// Emote ID
+    pub id: Uuid,
+    
+    /// Emote name (e.g., "Kappa")
+    pub name: String,
+    
+    /// Position in the message where the emote appears
+    pub positions: (usize, usize),
+}
+
+/// Represents a badge in chat
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Badge {
+    /// Badge ID
+    pub id: Uuid,
+    
+    /// Badge name (e.g., "moderator", "subscriber")
+    pub name: String,
+    
+    /// Badge version (for tiered badges)
+    pub version: Option<String>,
 }

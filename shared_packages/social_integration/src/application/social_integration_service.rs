@@ -104,3 +104,22 @@ pub trait AppClient {
     /// Get metadata for a post
     async fn get_post_metadata(&self, post_id: Uuid) -> Result<crate::domain::post::PostMetadata, Box<dyn std::error::Error + Send + Sync>>;
 }
+
+/// Service for handling stream events
+#[async_trait]
+pub trait StreamEventService: Send + Sync {
+    /// Handle a stream started event
+    async fn handle_stream_started(&self, user_id: Uuid, stream_id: Uuid) -> Result<(), Box<dyn std::error::Error + Send + Sync>>;
+    
+    /// Handle a stream ended event
+    async fn handle_stream_ended(&self, user_id: Uuid, stream_id: Uuid) -> Result<(), Box<dyn std::error::Error + Send + Sync>>;
+    
+    /// Handle a viewer joined event
+    async fn handle_viewer_joined(&self, user_id: Uuid, broadcaster_id: Uuid, stream_id: Uuid) -> Result<(), Box<dyn std::error::Error + Send + Sync>>;
+    
+    /// Handle a chat message sent event
+    async fn handle_chat_message_sent(&self, user_id: Uuid, stream_id: Uuid, message_id: Uuid) -> Result<(), Box<dyn std::error::Error + Send + Sync>>;
+    
+    /// Handle a subscription created event
+    async fn handle_subscription_created(&self, user_id: Uuid, channel_id: Uuid, tier: crate::domain::social_event::SubscriptionTier) -> Result<(), Box<dyn std::error::Error + Send + Sync>>;
+}
