@@ -8,6 +8,7 @@ use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use std::fmt;
+use common_utils::error::CommonError;
 
 /// Payment request structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -267,42 +268,11 @@ mod tests {
         assert_eq!(format!("{}", TransactionStatus::Failed), "Failed");
         assert_eq!(format!("{}", TransactionStatus::Cancelled), "Cancelled");
     }
-}
-
-/// Payment error types
-#[derive(Debug, thiserror::Error)]
-pub enum PaymentError {
-    /// Insufficient funds for the transaction
-    #[error("Insufficient funds for currency: {0}")]
-    InsufficientFunds(Currency),
     
-    /// Invalid amount (e.g., negative value)
-    #[error("Invalid amount")]
-    InvalidAmount,
-    
-    /// Currency mismatch in transaction
-    #[error("Currency mismatch: expected {expected}, got {actual}")]
-    CurrencyMismatch { expected: String, actual: String },
-    
-    /// User not found
-    #[error("User not found: {0}")]
-    UserNotFound(Uuid),
-    
-    /// Database error
-    #[error("Database error: {0}")]
-    DatabaseError(#[from] sqlx::Error),
-    
-    /// Wallet error
-    #[error("Wallet error: {0}")]
-    WalletError(#[from] wallet::domain::primitives::FinancialError),
-    
-    /// Notification error
-    #[error("Notification error: {0}")]
-    NotificationError(#[from] notification_core::NotificationError),
-    
-    /// General error
-    #[error("Payment processing error: {0}")]
-    General(String),
+    /// Payment error type
+    ///
+    /// This is a type alias to CommonError for consistency with the common_utils crate.
+    pub type PaymentError = CommonError;
 }
 
 /// Cause structure for donations

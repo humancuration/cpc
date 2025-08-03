@@ -1,0 +1,31 @@
+[package]
+name = "api_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-graphql = "5.0"
+async-graphql-axum = "5.0"
+axum = "0.6"
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+rust_decimal = "1.26"
+rust_decimal_macros = "1.26"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# CPC packages
+volunteer_core = { path = "../../shared_packages/volunteer_core" }
+skill_exchange_core = { path = "../../shared_packages/skill_exchange_core" }
+social_enhancements = { path = "../../shared_packages/social_enhancements" }
+wallet = { path = "../../shared_packages/wallet" }
+notification_core = { path = "../../shared_packages/notification_core" }
+social_integration = { path = "../../shared_packages/social_integration" }
+cpay_core = { path = "../../shared_packages/cpay_core" }
+common_utils = { path = "../../shared_packages/common_utils" }
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["full"] }

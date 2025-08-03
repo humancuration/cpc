@@ -1,6 +1,6 @@
 [package]
 name = "cpc-api-integration"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["CPC Cooperative <coop@cpc.dev>"]
 description = "API & Integration Hub module for CPC platform"
@@ -54,3 +54,6 @@ test-yew = ["wasm-bindgen-test"]
 
 [lib]
 crate-type = ["rlib"]
+
+# Common utilities
+common_utils = { version = "0.2.0", path = "../common_utils" }

@@ -4,27 +4,47 @@ use async_trait::async_trait;
 use uuid::Uuid;
 use crate::domain::social_event::{SocialEvent, SubscriptionTier};
 use std::error::Error;
+use std::sync::Arc;
+use serde_json::json;
+use cpc_notification_core::application::service::NotificationService;
+use cpc_notification_core::domain::types::{Notification, NotificationCategory, NotificationPriority, ChannelType};
 
 /// Service for handling stream events
 #[derive(Debug)]
 pub struct StreamEventService {
-    // In a real implementation, we would have dependencies here
-    // For example, a repository for storing events
+    /// Notification service for sending notifications
+    notification_service: Arc<NotificationService>,
 }
 
 impl StreamEventService {
     /// Create a new stream event service
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(notification_service: Arc<NotificationService>) -> Self {
+        Self {
+            notification_service,
+        }
     }
     
     /// Handle a stream started event
-    pub async fn handle_stream_started(&self, user_id: Uuid, stream_id: Uuid) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub async fn handle_stream_started(&self, user_id: Uuid, user_name: String, stream_id: Uuid) -> Result<(), Box<dyn Error + Send + Sync>> {
         let event = SocialEvent::StreamStarted {
             user_id,
             stream_id,
             timestamp: chrono::Utc::now(),
         };
+        
+        // Send notification for the stream started event
+        let notif = Notification::new_immediate(
+            "".to_string(), // TODO: Get follower IDs
+            NotificationCategory::Streaming,
+            NotificationPriority::High,
+            "Stream Started".into(),
+            format!("{} is live!", user_name),
+            json!({"stream_id": stream_id}),
+            vec![ChannelType::InApp, ChannelType::Push],
+        );
+        if let Err(e) = self.notification_service.send(notif).await {
+            tracing::error!("Stream started notification failed: {}", e);
+        }
         
         // In a real implementation, we would store the event and notify followers
         tracing::info!("Handling stream started event: {:?}", event);
@@ -45,13 +65,27 @@ impl StreamEventService {
     }
     
     /// Handle a viewer joined event
-    pub async fn handle_viewer_joined(&self, user_id: Uuid, broadcaster_id: Uuid, stream_id: Uuid) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub async fn handle_viewer_joined(&self, user_id: Uuid, user_name: String, broadcaster_id: Uuid, stream_id: Uuid) -> Result<(), Box<dyn Error + Send + Sync>> {
         let event = SocialEvent::ViewerJoined {
             user_id,
             broadcaster_id,
             stream_id,
             timestamp: chrono::Utc::now(),
         };
+        
+        // Send notification for the viewer joined event
+        let notif = Notification::new_immediate(
+            broadcaster_id.to_string(),
+            NotificationCategory::Streaming,
+            NotificationPriority::Low,
+            "Viewer Joined".into(),
+            format!("{} joined", user_name),
+            json!({"stream_id": stream_id}),
+            vec![ChannelType::InApp],
+        );
+        if let Err(e) = self.notification_service.send(notif).await {
+            tracing::error!("Viewer joined notification failed: {}", e);
+        }
         
         // In a real implementation, we would store the event
         tracing::info!("Handling viewer joined event: {:?}", event);
@@ -90,7 +124,7 @@ impl StreamEventService {
 #[async_trait]
 impl super::social_integration_service::StreamEventService for StreamEventService {
     async fn handle_stream_started(&self, user_id: Uuid, stream_id: Uuid) -> Result<(), Box<dyn Error + Send + Sync>> {
-        self.handle_stream_started(user_id, stream_id).await
+        self.handle_stream_started(user_id, "".to_string(), stream_id).await
     }
     
     async fn handle_stream_ended(&self, user_id: Uuid, stream_id: Uuid) -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -98,7 +132,7 @@ impl super::social_integration_service::StreamEventService for StreamEventServic
     }
     
     async fn handle_viewer_joined(&self, user_id: Uuid, broadcaster_id: Uuid, stream_id: Uuid) -> Result<(), Box<dyn Error + Send + Sync>> {
-        self.handle_viewer_joined(user_id, broadcaster_id, stream_id).await
+        self.handle_viewer_joined(user_id, "".to_string(), broadcaster_id, stream_id).await
     }
     
     async fn handle_chat_message_sent(&self, user_id: Uuid, stream_id: Uuid, message_id: Uuid) -> Result<(), Box<dyn Error + Send + Sync>> {

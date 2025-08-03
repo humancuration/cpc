@@ -8,6 +8,12 @@ use crate::domain::{
     primitives::{Money, Currency, FinancialError},
 };
 
+// Conditionally import common_utils logging or fallback to tracing
+#[cfg(feature = "common-utils-integration")]
+use common_utils::logging::{info, warn, error, debug};
+#[cfg(not(feature = "common-utils-integration"))]
+use tracing::{info, warn, error, debug};
+
 /// Repository trait for wallet persistence
 #[async_trait]
 pub trait WalletRepository {
@@ -47,6 +53,9 @@ pub trait WalletService {
     
     /// Distribute Universal Income to a user's wallet
     async fn distribute_universal_income(&self, user_id: Uuid, amount: Money, distribution_date: chrono::NaiveDate) -> Result<Wallet, FinancialError>;
+    
+    /// Credit Dabloons from volunteer hours conversion
+    async fn credit_volunteer_dabloons(&self, user_id: Uuid, amount: Money, hours_converted: rust_decimal::Decimal) -> Result<Wallet, FinancialError>;
 }
 
 /// Implementation of the WalletService
@@ -235,6 +244,30 @@ impl WalletService for WalletServiceImpl {
         
         // Record the transaction with a special description for Universal Income
         let description = Some(format!("Universal Income distribution for {}", distribution_date));
+        self.create_transaction(
+            wallet.id,
+            TransactionType::Credit,
+            amount,
+            description
+        ).await?;
+        
+        Ok(wallet)
+    }
+    
+    async fn credit_volunteer_dabloons(&self, user_id: Uuid, amount: Money, hours_converted: rust_decimal::Decimal) -> Result<Wallet, FinancialError> {
+        if amount.currency != Currency::Dabloons {
+            return Err(FinancialError::CurrencyMismatch {
+                expected: Currency::Dabloons.code().to_string(),
+                actual: amount.currency.code().to_string(),
+            });
+        }
+        
+        let mut wallet = self.get_or_create_wallet(user_id).await?;
+        wallet.add_dabloons(amount.clone())?;
+        self.wallet_repo.save_wallet(&wallet).await?;
+        
+        // Record the transaction with a special description for volunteer conversion
+        let description = Some(format!("Converted {} volunteer hours to Dabloons", hours_converted));
         self.create_transaction(
             wallet.id,
             TransactionType::Credit,

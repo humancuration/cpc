@@ -8,8 +8,8 @@ use crate::repositories::TraditionalCurrencyTransactionRepository;
 use wallet::application::WalletService;
 use wallet::domain::primitives::{Money, Currency as WalletCurrency};
 use uuid::Uuid;
-use tracing::{info, warn, error};
 use rust_decimal::Decimal;
+use common_utils::logging::{info, warn, error};
 
 /// Transaction processing engine
 pub struct TransactionEngine {
@@ -62,7 +62,7 @@ impl TransactionEngine {
                 request.description.clone()
             )
             .await
-            .map_err(|e| PaymentError::WalletError(e));
+            .map_err(|e| PaymentError::from(e));
         
         // Perform post-transaction actions regardless of transaction success
         self.perform_post_transaction_actions(&request).await?;
@@ -98,7 +98,7 @@ impl TransactionEngine {
         self.traditional_currency_repo
             .save_transaction(transaction)
             .await
-            .map_err(|e| PaymentError::DatabaseError(e))?;
+            .map_err(|e| PaymentError::from(e))?;
         
         // In a real implementation, this would connect to external payment processors
         // For now, we'll simulate a successful transaction
@@ -116,19 +116,19 @@ impl TransactionEngine {
         // Mock KYC provider integration
         if !self.mock_kyc_check(request.user_id).await {
             warn!("KYC check failed for user: {}", request.user_id);
-            return Err(PaymentError::General("KYC verification required".to_string()));
+            return Err(PaymentError::generic("KYC verification required"));
         }
         
         // Check transaction limits
         if !self.check_transaction_limits(request).await {
             warn!("Transaction limits exceeded for user: {}", request.user_id);
-            return Err(PaymentError::General("Transaction limits exceeded".to_string()));
+            return Err(PaymentError::generic("Transaction limits exceeded"));
         }
         
         // Fraud detection
         if self.detect_fraud(request).await {
             error!("Fraud detected for transaction: {}", request.id);
-            return Err(PaymentError::General("Suspicious activity detected".to_string()));
+            return Err(PaymentError::generic("Suspicious activity detected"));
         }
         
         Ok(())
@@ -204,6 +204,27 @@ impl TransactionEngine {
         Ok(())
     }
     
+    /// Process volunteer hour conversion to Dabloons
+    pub async fn process_volunteer_conversion(&self, user_id: Uuid, hours: Decimal, skill_rate: Decimal) -> Result<PaymentResponse, PaymentError> {
+        info!("Processing volunteer hour conversion for user: {} ({} hours at rate {})", user_id, hours, skill_rate);
+        
+        // Calculate Dabloons to credit
+        let dabloons_amount = hours * skill_rate;
+        
+        // Create a payment request for the conversion
+        let request = PaymentRequest::new(
+            user_id, // System user as sender
+            user_id, // User as recipient
+            dabloons_amount,
+            crate::models::Currency::Dabloons,
+            Some(format!("Converted {} volunteer hours", hours)),
+        );
+        
+        // Process as a Dabloons transaction
+        let amount = Money::new(dabloons_amount, WalletCurrency::Dabloons);
+        self.process_dabloons_transaction(request, amount).await
+    }
+    
     /// Calculate and store volunteer hours
     async fn calculate_volunteer_hours(&self, request: &PaymentRequest) -> Result<(), PaymentError> {
         info!("Calculating volunteer hours for transaction: {}", request.id);
@@ -220,13 +241,13 @@ impl TransactionEngine {
         let wallet_transactions = self.wallet_service
             .get_transaction_history(user_id)
             .await
-            .map_err(|e| PaymentError::WalletError(e))?;
+            .map_err(|e| PaymentError::from(e))?;
         
         // Get traditional currency transaction history
         let traditional_transactions = self.traditional_currency_repo
             .find_transactions_by_user_id(user_id)
             .await
-            .map_err(|e| PaymentError::DatabaseError(e))?;
+            .map_err(|e| PaymentError::from(e))?;
         
         // Convert wallet transactions to CPay transactions
         let mut transactions: Vec<Transaction> = wallet_transactions

@@ -1,6 +1,14 @@
 //! Notification types, channels
-//! 
+//!
 //! This module defines the core notification structures and channel types.
+//!
+//! ## Notification Types for Social & Volunteerism Features
+//!
+//! The following notification types have been added for the social and volunteerism features:
+//! - VOLUNTEER_HOURS_VERIFIED: Sent when volunteer hours are verified by an organization admin
+//! - SKILL_LISTING_CLAIMED: Sent when a skill listing is claimed by a user
+//! - SKILL_EXCHANGE_COMPLETED: Sent when a skill exchange is completed
+//! - NEW_ACHIEVEMENT: Sent when a user earns a new achievement
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -27,6 +35,12 @@ pub enum NotificationCategory {
     
     /// Live streaming notifications
     Streaming,
+    
+    /// Volunteer-related notifications
+    Volunteer,
+    
+    /// Skill exchange notifications
+    SkillExchange,
 }
 
 impl fmt::Display for NotificationCategory {
@@ -40,6 +54,8 @@ impl fmt::Display for NotificationCategory {
             NotificationCategory::Security => write!(f, "Security"),
             NotificationCategory::Marketing => write!(f, "Marketing"),
             NotificationCategory::Streaming => write!(f, "Streaming"),
+            NotificationCategory::Volunteer => write!(f, "Volunteer"),
+            NotificationCategory::SkillExchange => write!(f, "SkillExchange"),
         }
     }
 }

@@ -1,12 +1,22 @@
 //! # CPay Core
-//! 
+//!
 //! Core payment processing functionality for the CPC platform.
-//! 
+//!
 //! This crate provides the core business logic for payment processing, including:
 //! - Transaction processing engine
 //! - Wallet management
 //! - Compliance checks
 //! - Integration with notifications and social features
+//! - Integration with common_utils for standardized error handling, logging, crypto, and datetime
+//!
+//! ## Integration with common_utils
+//! This module integrates with the common_utils package to provide:
+//! - Standardized error handling through CommonError
+//! - Unified logging through common_utils::logging
+//! - Crypto functions through common_utils::crypto
+//! - DateTime handling through common_utils::datetime
+//!
+//! This integration is now direct and no longer requires feature flags.
 
 pub mod models;
 pub mod transaction_engine;
@@ -16,11 +26,11 @@ pub mod repositories;
 #[allow(clippy::derive_partial_eq_without_eq)]
 pub mod proto {
     tonic::include_proto!("cpay");
-}
+};
 
 use notification_core::application::service::NotificationService;
 use social_integration::application::social_integration_service::SocialIntegrationService;
-use tracing::info;
+use common_utils::logging::info;
 use tonic::{transport::Server, Request, Response, Status};
 use proto::{
     cpay_service_server::{CpayService, CpayServiceServer},
@@ -35,7 +45,23 @@ use proto::{
     SkillExchangeRatesResponse as ProtoSkillExchangeRatesResponse,
 };
 use std::str::FromStr;
+
 /// Main service trait for CPay functionality
+#[async_trait::async_trait]
+pub trait CpayService: Clone + Send + Sync + 'static {
+    /// Process a payment transaction
+    async fn process_payment(&self, request: models::PaymentRequest) -> Result<models::PaymentResponse, models::PaymentError>;
+    
+    /// Get transaction history for a user
+    async fn get_transaction_history(&self, user_id: uuid::Uuid) -> Result<Vec<models::Transaction>, models::PaymentError>;
+    
+    /// Get featured causes for donations
+    async fn get_featured_causes(&self) -> Result<Vec<Cause>, models::PaymentError>;
+    
+    /// Get skill exchange rates for volunteer hour conversion
+    async fn get_skill_exchange_rates(&self) -> Result<Vec<SkillRate>, models::PaymentError>;
+}
+}
 #[async_trait::async_trait]
 pub trait CpayService: Clone + Send + Sync + 'static {
     /// Process a payment transaction

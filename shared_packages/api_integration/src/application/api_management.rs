@@ -8,6 +8,11 @@ use crate::domain::{
     rate_limit::RateLimitRule,
 };
 use thiserror::Error;
+
+// Conditionally import common_utils logging or fallback to tracing
+#[cfg(feature = "common-utils-integration")]
+use common_utils::logging::{info, warn, error};
+#[cfg(not(feature = "common-utils-integration"))]
 use tracing::{info, warn, error};
 
 /// Error types for API management operations

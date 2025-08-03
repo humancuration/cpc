@@ -1,6 +1,6 @@
 [package]
 name = "cpay_core"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
@@ -25,6 +25,11 @@ rust-crypto = { workspace = true }
 notification_core = { path = "../notification_core" }
 social_integration = { path = "../social_integration" }
 wallet = { path = "../wallet" }
+
+common_utils = { version = "0.2.0", path = "../common_utils" }
+
+[features]
+default = []
 
 [build-dependencies]
 tonic-build = "0.14.0"

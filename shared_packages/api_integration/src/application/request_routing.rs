@@ -11,6 +11,11 @@ use crate::{
     application::api_management::ApiManagementError,
 };
 use thiserror::Error;
+
+// Conditionally import common_utils logging or fallback to tracing
+#[cfg(feature = "common-utils-integration")]
+use common_utils::logging::{info, warn, error, debug};
+#[cfg(not(feature = "common-utils-integration"))]
 use tracing::{info, warn, error, debug};
 
 /// Error types for request routing operations

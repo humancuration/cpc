@@ -105,6 +105,13 @@ pub trait AppClient {
     async fn get_post_metadata(&self, post_id: Uuid) -> Result<crate::domain::post::PostMetadata, Box<dyn std::error::Error + Send + Sync>>;
 }
 
+/// Trait for consuming social events
+#[async_trait]
+pub trait SocialEventConsumer: Send + Sync {
+    /// Handle a social event
+    async fn handle_event(&self, event: SocialEvent) -> Result<(), Box<dyn std::error::Error + Send + Sync>>;
+}
+
 /// Service for handling stream events
 #[async_trait]
 pub trait StreamEventService: Send + Sync {

@@ -23,6 +23,14 @@
 //! - GraphQL and REST API endpoints
 //! - gRPC internal service interface
 //! - Developer portal with documentation
+//! - Integration with common_utils for standardized error handling and logging
+//!
+//! ## Integration with common_utils
+//! This module integrates with the common_utils package to provide:
+//! - Standardized error handling through CommonError
+//! - Unified logging through common_utils::logging
+//!
+//! The integration is controlled by the "common-utils-integration" feature flag.
 
 // Domain entities and business logic
 pub mod domain;
@@ -39,6 +47,10 @@ pub mod presentation;
 // Test modules
 #[cfg(test)]
 mod tests;
+
+// Error compatibility shim for common_utils integration
+#[cfg(feature = "common-utils-integration")]
+pub mod error_shim;
 
 // Re-export key types for convenience
 pub use domain::{

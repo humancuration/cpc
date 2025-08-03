@@ -33,7 +33,7 @@ pub struct TraditionalCurrencyTransaction {
     /// User associated with the transaction
     pub user_id: Uuid,
     
-    /// Type of transaction (credit or debit)
+    /// Type of transaction (credit, debit, or volunteer_conversion)
     pub transaction_type: String,
     
     /// Amount of the transaction

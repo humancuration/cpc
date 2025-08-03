@@ -54,6 +54,19 @@ To run tests:
 cargo test
 ```
 
+
+## Deprecation Notice
+
+**Important**: Shim files (`*_shim.rs`) are deprecated and will be removed on **2025-10-01**.
+
+### Migration Instructions
+Replace imports with their common_utils equivalents:
+- `crypto_shim` → `common_utils::crypto`
+- `datetime_shim` → `common_utils::datetime`
+- `error_shim` → `common_utils::error`
+
+For full details, see the [Deprecation Announcement](../common_utils/ANNOUNCEMENT.md) and [Migration Guide](../common_utils/MIGRATION_GUIDE.md).
+
 ## License
 
 This project is licensed under the CPC License.
