@@ -30,6 +30,10 @@ path = "examples/basic_usage.rs"
 name = "full_example"
 path = "examples/full_example.rs"
 
+[[example]]
+name = "content_provider_example"
+path = "examples/content_provider_example.rs"
+
 [[test]]
 name = "integration_test"
 path = "tests/integration_test.rs"
@@ -37,6 +41,18 @@ path = "tests/integration_test.rs"
 [[test]]
 name = "repository_integration_test"
 path = "tests/repository_integration_test.rs"
+
+[[test]]
+name = "content_provider_test"
+path = "tests/content_provider_test.rs"
+
+[[test]]
+name = "content_fetching_test"
+path = "tests/content_fetching_test.rs"
+
+[[test]]
+name = "integration_content_provider_test"
+path = "tests/integration_content_provider_test.rs"
 
 [[bench]]
 name = "repository_benchmark"

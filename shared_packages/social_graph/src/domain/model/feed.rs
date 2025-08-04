@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use serde_json::Value as JsonValue;
+use async_trait::async_trait;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ContentType {
@@ -38,6 +39,18 @@ pub struct FeedFilter {
     pub content_type: Option<ContentType>,
     pub package: Option<String>,
     pub visibility: Option<Visibility>,
+}
+
+#[async_trait]
+pub trait ContentProvider: Send + Sync {
+    fn content_type(&self) -> ContentType;
+    async fn get_content(
+        &self,
+        user_id: Uuid,
+        after: Option<DateTime<Utc>>,
+        limit: usize,
+        filters: &[FeedFilter]
+    ) -> Result<Vec<ContentItem>, Box<dyn std::error::Error>>;
 }
 
 #[cfg(test)]

@@ -5,7 +5,8 @@ This package provides functionality for managing social relationships and intera
 ## Features
 
 - User relationship management (friends, followers, etc.)
-- Activity feed generation
+- Universal activity feed generation with multiple content types
+- Extensible ContentProvider system for integrating new content sources
 - Social graph querying
 - Consent integration with consent_manager crate
 - GraphQL API for social interactions
@@ -26,6 +27,7 @@ The package follows hexagonal architecture principles with clear separation of c
 - **User**: Represents a user in the social graph
 - **Relationship**: Represents connections between users
 - **Activity**: Represents user activities and interactions
+- **ContentProvider**: Trait for integrating new content sources into the universal feed
 - **RelationshipRepository**: Trait for relationship storage implementations
 - **ConsentAdapter**: Integrates with consent_manager crate for consent management
 - **SocialService**: Application service combining repositories and consent management
@@ -36,7 +38,7 @@ The package follows hexagonal architecture principles with clear separation of c
 The package provides a complete GraphQL API with the following queries:
 
 - `getFriends(user_id)`: Get friends of a user
-- `getActivityFeed(user_id)`: Get activity feed for a user
+- `getActivityFeed(userId, after, limit, filters)`: Get universal activity feed for a user with filtering and pagination
 - `getRecommendations(user_id)`: Get recommended users
 
 See [GraphQL API Documentation](docs/graphql_api.md) for detailed schema information.
@@ -104,6 +106,7 @@ let friendship = social_service.create_friendship(user1.id, user2.id).await?;
 ## Documentation
 
 - [Usage Guide](docs/usage_guide.md): Comprehensive guide to using the package
+- [ContentProvider Guide](docs/content_provider_guide.md): Guide to implementing and using ContentProviders
 - [GraphQL API](docs/graphql_api.md): Detailed GraphQL schema documentation
 - [Migration Scripts](migrations/): Database migration scripts
 
@@ -113,6 +116,7 @@ See the `examples/` directory for complete usage examples:
 
 - `basic_usage.rs`: Basic package usage
 - `full_example.rs`: Complete example showing all components
+- `content_provider_example.rs`: Example demonstrating the ContentProvider system
 
 To run an example:
 ```bash

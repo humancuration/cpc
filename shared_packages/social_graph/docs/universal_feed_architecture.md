@@ -16,10 +16,15 @@ graph TD
 
 #### Content Provider Interface
 ```rust
-trait ContentProvider {
-    fn content_type() -> ContentType;
-    fn get_content(after: DateTime<Utc>, limit: usize) -> Vec<ContentItem>;
-    fn should_include(item: &ContentItem, user_id: Uuid) -> bool;
+pub trait ContentProvider: Send + Sync {
+    fn content_type(&self) -> ContentType;
+    async fn get_content(
+        &self,
+        user_id: Uuid,
+        after: Option<DateTime<Utc>>,
+        limit: usize,
+        filters: &[FeedFilter]
+    ) -> Result<Vec<ContentItem>, Box<dyn std::error::Error>>;
 }
 ```
 
@@ -55,22 +60,27 @@ pub enum Visibility {
 }
 ```
 
-### 3. Consent Integration
-- All content items pass through consent_manager before display
-- Three-tier consent check:
-  1. Package-level consent
-  2. Content-type consent
-  3. Item-specific consent (via provider's `should_include`)
+### 3. Consent & Visibility Workflow
+- Content items are filtered through three consent checks:
+  1. **Package-level consent**: User must consent to the source package
+  2. **Content-type consent**: User must consent to the content type
+  3. **Visibility rules**:
+     - Public: Visible to all
+     - FollowersOnly: Only visible to people who follow the user
+     - FriendsOnly: Only visible if user is friends with owner
+     - GroupMembers: Only visible to group members
+     - Private: Only visible to owner
 
 ### 4. Ranking & Filtering
-- Pluggable ranking system with default algorithms:
-  - Chronological
-  - Relevance (engagement-based)
-  - Personalized (ML-based)
-- User-defined filters:
-  - By content type
-  - By source package
-  - By time range
+- **Ranking**:
+  - Primary sort: relevance_score (descending)
+  - Secondary sort: timestamp (descending)
+  - Custom algorithms can be implemented via providers
+  
+- **Filtering**:
+  - Providers handle type/package-specific filtering
+  - Aggregator applies global visibility/consent rules
+  - User filters refine final results
 
 ### 5. Performance Considerations
 - **Pagination**: cursor-based using timestamp + UUID
@@ -148,10 +158,15 @@ input FeedFilter {
    - Content signatures for verification
 
 ## Implementation Roadmap
-1. Update domain model and database schema
-2. Implement content provider interface
-3. Build feed aggregation service
-4. Add consent integration
-5. Implement ranking algorithms
-6. Extend GraphQL API
-7. Add performance optimizations
+1. Implement ContentProvider trait and registry
+2. Update get_universal_feed to:
+   - Collect content from registered providers
+   - Apply consent checks
+   - Sort by relevance_score and timestamp
+3. Add consent integration to content pipeline
+4. Implement default ranking algorithm
+5. Update GraphQL API to handle new filters
+6. Add performance optimizations:
+   - Provider-level caching
+   - Batched consent checks
+   - Streaming responses

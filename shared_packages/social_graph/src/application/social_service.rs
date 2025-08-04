@@ -2,17 +2,19 @@
 
 use crate::{
     domain::{
-        model::{User, Relationship, RelationshipType, Activity, ActivityType, ContentItem, FeedFilter},
+        model::{User, Relationship, RelationshipType, Activity, ActivityType, ContentItem, FeedFilter, ContentProvider, Visibility},
         repository::RelationshipRepository,
     },
     infrastructure::consent_adapter::ConsentAdapter,
 };
 use uuid::Uuid;
 use std::sync::Arc;
+use chrono::{DateTime, Utc};
 
 pub struct SocialService<R: RelationshipRepository> {
     repository: Arc<R>,
     consent_adapter: Arc<ConsentAdapter>,
+    content_providers: Vec<Arc<dyn ContentProvider>>,
 }
 
 impl<R: RelationshipRepository> SocialService<R> {
@@ -20,7 +22,12 @@ impl<R: RelationshipRepository> SocialService<R> {
         Self {
             repository,
             consent_adapter,
+            content_providers: Vec::new(),
         }
+    }
+    
+    pub fn register_content_provider(&mut self, provider: Arc<dyn ContentProvider>) {
+        self.content_providers.push(provider);
     }
     
     pub async fn create_friendship(&self, user_id: Uuid, friend_id: Uuid) -> Result<Relationship, Box<dyn std::error::Error>> {
@@ -96,14 +103,69 @@ impl<R: RelationshipRepository> SocialService<R> {
     pub async fn get_universal_feed(
         &self,
         user_id: Uuid,
-        after: Option<chrono::DateTime<chrono::Utc>>,
+        after: Option<DateTime<Utc>>,
         limit: usize,
         filters: Option<Vec<FeedFilter>>
     ) -> Result<Vec<ContentItem>, Box<dyn std::error::Error>> {
-        // 1. Get content from registered providers
-        // 2. Apply consent checks
-        // 3. Apply ranking
-        // 4. Return filtered results
-        Ok(vec![])
+        let mut all_items = Vec::new();
+        let filters = filters.unwrap_or_default();
+
+        // Collect content from all providers
+        for provider in &self.content_providers {
+            let items = provider.get_content(user_id, after, limit, &filters).await?;
+            all_items.extend(items);
+        }
+
+        // Apply consent checks
+        let consented_items = self.apply_consent(user_id, all_items).await?;
+
+        // Sort by relevance_score (desc) then timestamp (desc)
+        let mut sorted_items = consented_items;
+        sorted_items.sort_by(|a, b| {
+            b.relevance_score.partial_cmp(&a.relevance_score)
+                .unwrap_or_else(|| b.timestamp.cmp(&a.timestamp))
+        });
+
+        // Apply limit
+        Ok(sorted_items.into_iter().take(limit).collect())
+    }
+
+    async fn apply_consent(&self, user_id: Uuid, items: Vec<ContentItem>) -> Result<Vec<ContentItem>, Box<dyn std::error::Error>> {
+        // In a real implementation, we would check consent for each item
+        // For now, we'll just return all items as a placeholder
+        // In a full implementation, we would:
+        // 1. Check if the user has consented to see content from each source
+        // 2. Check if the user has consented to see each content type
+        // 3. Apply visibility rules (public, friends only, etc.)
+        
+        let mut consented_items = Vec::new();
+        
+        for item in items {
+            // Check if content is public or if user has appropriate consent
+            let is_visible = match item.visibility {
+                Visibility::Public => true,
+                Visibility::FriendsOnly => {
+                    // Check if user is friends with content owner
+                    // For now, we'll assume all friends-only content is visible
+                    true
+                },
+                Visibility::GroupMembers => {
+                    // Check if user is member of the group
+                    // For now, we'll assume all group content is visible
+                    true
+                },
+                Visibility::Private => {
+                    // Only visible to owner
+                    // For now, we'll assume all private content is visible
+                    true
+                }
+            };
+            
+            if is_visible {
+                consented_items.push(item);
+            }
+        }
+        
+        Ok(consented_items)
     }
 }

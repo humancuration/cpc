@@ -102,8 +102,39 @@ let schema = create_schema();
 
 Available queries:
 - `getFriends(user_id)`: Get friends of a user
-- `getActivityFeed(user_id)`: Get activity feed for a user
+- `getActivityFeed(userId, after, limit, filters)`: Get universal activity feed for a user with filtering and pagination
 - `getRecommendations(user_id)`: Get recommended users
+
+### Universal Feed
+
+The universal feed aggregates content from across the CPC ecosystem. It supports:
+
+- Multiple content types (SocialPost, Video, JobPosting, etc.)
+- Content visibility levels (Public, FriendsOnly, etc.)
+- Pagination with cursor-based navigation
+- Flexible filtering by content type, package, and visibility
+
+Example GraphQL query:
+
+```graphql
+query {
+  getActivityFeed(
+    userId: "123e4567-e89b-12d3-a456-426614174000"
+    limit: 10
+    filters: [
+      { contentType: SOCIAL_POST }
+      { visibility: PUBLIC }
+    ]
+  ) {
+    id
+    contentType
+    package
+    content
+    timestamp
+    visibility
+  }
+}
+```
 
 ## Repository Implementations
 

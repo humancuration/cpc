@@ -8,11 +8,12 @@ pub mod infrastructure;
 pub mod presentation;
 pub mod application;
 
-pub use domain::model::{User, Relationship, RelationshipType, Activity, ActivityType, ContentType, Visibility, ContentItem, FeedFilter};
+pub use domain::model::{User, Relationship, RelationshipType, Activity, ActivityType, ContentType, Visibility, ContentItem, FeedFilter, ContentProvider};
 pub use domain::repository::RelationshipRepository;
 pub use infrastructure::consent_adapter::ConsentAdapter;
 pub use infrastructure::in_memory_repository::InMemoryRelationshipRepository;
 pub use infrastructure::postgres_repository::PostgresRelationshipRepository;
+pub use infrastructure::content_providers::{SocialPostProvider, VideoProvider};
 pub use application::SocialService;
 pub use presentation::graphql::{create_schema, SocialGraphSchema};
 
