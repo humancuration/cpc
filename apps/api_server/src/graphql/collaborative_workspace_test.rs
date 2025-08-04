@@ -1,4 +1,5 @@
 //! Integration-like tests for Collaborative Workspace GraphQL
+// Refactor note: standardized schema construction via graphql::test_helpers::build_vc_schema_with_service to ensure VOLUNTEER_REPUTATION toggle consistency.
 //!
 //! Uses simple mock services implementing the service traits to validate
 //! resolver wiring, ID parsing, context auth, and DTO mapping.

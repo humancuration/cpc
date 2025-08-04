@@ -62,6 +62,24 @@ pub enum SocialEvent {
     /// Meeting started
     MeetingStarted {
         meeting_id: Uuid,
+    },
+    /// Volunteer: An opportunity was created/published
+    OpportunityCreated {
+        opportunity_id: Uuid,
+        org_id: Uuid,
+        created_by: Uuid,
+    },
+    /// Volunteer: A user submitted an application
+    ApplicationSubmitted {
+        application_id: Uuid,
+        opportunity_id: Uuid,
+        applicant_id: Uuid,
+    },
+    /// Volunteer: A contribution was logged
+    ContributionLogged {
+        contribution_id: Uuid,
+        opportunity_id: Uuid,
+        contributor_id: Uuid,
     }
 }
 
@@ -189,6 +207,15 @@ impl SocialEventHandler for LoggingEventHandler {
             SocialEvent::MeetingStarted { meeting_id } => {
                 println!("[{}] Meeting started: {}", self.name, meeting_id);
             }
+            SocialEvent::OpportunityCreated { opportunity_id, org_id, created_by } => {
+                println!("[{}] Opportunity created: {} by {} (org {})", self.name, opportunity_id, created_by, org_id);
+            }
+            SocialEvent::ApplicationSubmitted { application_id, opportunity_id, applicant_id } => {
+                println!("[{}] Application submitted: {} for {} by {}", self.name, application_id, opportunity_id, applicant_id);
+            }
+            SocialEvent::ContributionLogged { contribution_id, opportunity_id, contributor_id } => {
+                println!("[{}] Contribution logged: {} for {} by {}", self.name, contribution_id, opportunity_id, contributor_id);
+            }
         }
         Ok(())
     }
@@ -223,7 +250,10 @@ impl SocialEventHandler for NotificationEventHandler {
             SocialEvent::DocumentUpdated { .. }
             | SocialEvent::TaskMoved { .. }
             | SocialEvent::WhiteboardModified { .. }
-            | SocialEvent::MeetingStarted { .. } => { }
+            | SocialEvent::MeetingStarted { .. }
+            | SocialEvent::OpportunityCreated { .. }
+            | SocialEvent::ApplicationSubmitted { .. }
+            | SocialEvent::ContributionLogged { .. } => { }
         }
         Ok(())
     }

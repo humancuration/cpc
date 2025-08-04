@@ -1,0 +1,6 @@
+# Managed snapshot used by CI job `schema_guardrails`. Usage and update steps: see docs/dev/schema-checks-ci-snippet.md
+# GraphQL Schema Snapshot (canonical)
+# Source of truth for schema drift checks.
+# Generated from async-graphql Schema::sdl() with all schema-affecting stubs disabled.
+# Update/check via:
+#   cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema

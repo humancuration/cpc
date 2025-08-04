@@ -1,4 +1,5 @@
 //! Integration tests for GraphQL endpoints
+// Refactor note: standardized schema construction via graphql::test_helpers::build_vc_schema_with_service to ensure VOLUNTEER_REPUTATION toggle consistency.
 
 #[cfg(test)]
 mod tests {

@@ -29,6 +29,14 @@ pub fn create_website_builder_router(
     _template_service: TemplateService,
     _analytics_service: AnalyticsService,
 ) -> Router {
+    // NOTE: This is a backend Axum router. For the Volunteer Yew demo page,
+    // we expose a simple placeholder endpoint so the module has a discoverable path.
+    // The actual Yew routing happens on the client side. See pages::volunteer::opportunities.
+    async fn volunteer_demo_handler() -> &'static str {
+        // TODO: Serve a static shell that bootstraps the Yew app (future).
+        "Volunteer demo available in the frontend client at route /volunteer"
+    }
+
     Router::new()
         .route("/sites", post(create_site_handler))
         .route("/sites/:id", get(get_site_handler).put(update_site_handler))
@@ -39,4 +47,6 @@ pub fn create_website_builder_router(
         .route("/sites/:id/template/:template_id", post(apply_template_handler))
         .route("/links/:id/click", post(track_link_click_handler))
         .route("/sites/:id/analytics", get(get_analytics_handler))
+        // Frontend demo route hint
+        .route("/volunteer", get(volunteer_demo_handler))
 }

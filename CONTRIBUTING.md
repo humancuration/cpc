@@ -54,6 +54,21 @@ The database integration tests use the `sqlx::test` attribute which automaticall
 
 For more details about database tests, see [DATABASE_TESTS.md](packages/social_integration/DATABASE_TESTS.md).
 
+Please review docs/dev/docs-consistency-checks.md for the lightweight docs discoverability checks used in CI.
+See docs/adr/ for our Architecture Decision Records (ADRs) and rationale behind key decisions.
+
+### Troubleshooting docs consistency (required for contributors and reviewers)
+
+Before or during reviews, verify our docs stay consistent across entry/index pages. Run locally:
+cargo run -q --manifest-path tools/ci/Cargo.toml -- check-docs-consistency
+
+See the troubleshooting guide: docs/dev/docs-consistency-checks.md
+
+Notes:
+- On Windows, use forward slashes in paths.
+- required_substring matches are case-sensitive.
+- When adding new entry or index docs, update tools/ci/needles.txt accordingly.
+
 ### Test Organization
 
 Tests are organized in the same modules as the code they test, with a `_test` suffix:
@@ -78,6 +93,18 @@ cargo clippy
 
 ## Pull Request Process
 
+### Pre‑PR checklist (docs consistency)
+
+- [ ] Docs consistency: I ran cargo run -q --manifest-path tools/ci/Cargo.toml -- check-docs-consistency and resolved findings (see docs/dev/docs-consistency-checks.md). If I added new entry/index docs, I also updated tools/ci/needles.txt.
+- Run the docs-consistency checker locally before pushing.
+- If you add a new index or entry doc, update tools/ci/needles.txt accordingly.
+- CI will fail if discoverability checks break. See docs/dev/docs-consistency-checks.md
+
+### Pre‑PR checklist (schema drift)
+- [ ] Schema check passes locally:
+      cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema
+      Source of truth: docs/api_server/schema.graphql (or [SOURCE_OF_TRUTH_PATH] if different). See docs/dev/schema-checks.md.
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -92,6 +119,18 @@ Please use the issue tracker to report bugs or suggest features. Include as much
 - Expected behavior
 - Actual behavior
 - Environment information
+
+## See also
+
+- docs/dev/schema-checks.md — Procedure for local schema checks and troubleshooting
+- docs/dev/schema-guardrails-architecture.md — Principles, responsibilities, and forward-compatibility notes
+
+Reviewer quick reference — schema guardrails
+- Confirm contributor ran: cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema
+- Compare to snapshot: docs/api_server/schema.graphql
+- If diffs exist: request rationale + alignment with docs/dev/schema-checks.md
+- Cross-check intent with docs/dev/schema-guardrails-architecture.md
+- Ensure no drift surprises remain before merge
 
 ## Code of Conduct
 

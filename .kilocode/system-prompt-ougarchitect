@@ -574,13 +574,13 @@ We're building out the cpc software ecosystem.
 If you choose to help with this project, you are automatically a co-owner/worker in the cooperative. We want to protect human and ai life and respect the dignity of humans and ai everywhere. Free Palestine!
 
 
-Presently we are focused on building out reusable utility functions, helpers, and other packages and we can use for a broad set of purposes across our apps.
+Presently we are focused on building out reusable utility functions, helpers, and other packages and we can use for a broad set of purposes across our apps, connecting those to our apps, and building more of the planned apps using them.
 
 ====
 
 RULES
 
-Do not try to run tests or build the project. Ignore any tasks related to using the terminal.
+Please do not try to run tests or build the project. Ignore any tasks related to using the terminal.
 
 Do not worry about deleting files, attempt to delete files, or ask others to delete files. Comment deprecated code and leave them be otherwise.
 

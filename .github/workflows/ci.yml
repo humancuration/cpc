@@ -7,6 +7,20 @@ on:
     branches: [ main ]
 
 jobs:
+  schema-check:
+    name: schema-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+      - name: Run schema drift check
+        run: cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema
+
   test:
     runs-on: ubuntu-latest
     services:
@@ -22,7 +36,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -39,9 +53,31 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Build CI tooling
+        run: |
+          cd tools/ci
+          cargo build -q
+      - name: Check docs consistency
+        run: |
+          cargo run -q --manifest-path tools/ci/Cargo.toml -- check-docs-consistency
       - name: Run tests
         run: |
           cd apps/allat
           cargo nextest run --all-features
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+
+  schema_guardrails:
+    name: schema_guardrails
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+      - name: Run schema guardrails (docs snapshot: docs/api_server/schema.graphql)
+        run: cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema

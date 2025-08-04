@@ -1,0 +1,15 @@
+# Each non-empty, non-comment line is:
+# <target_file>|<required_substring>
+# Example initial rules mirroring current behavior:
+
+apps/api_server/README.md|docs/api_server/volunteer_reputation_stub.md
+docs/README.md|docs/adr/0009-bootstrap-stub-toggles.md
+docs/README.md|docs/dev/docs-consistency-checks.md
+docs/README.md|docs/adr/
+apps/api_server/README.md|docs/api_server/
+docs/README.md|CONTRIBUTING.md
+CONTRIBUTING.md|docs/dev/docs-consistency-checks.md
+docs/README.md|docs/adr
+CONTRIBUTING.md|docs/adr/
+Schema guardrails (quick-start)
+Schema guardrails index

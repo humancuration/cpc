@@ -2,6 +2,21 @@
 
 Welcome to the Comprehensive Documentation for the CPC (Cooperative Platform Cooperative) software ecosystem.
 
+##
+## What’s new
+
+Docs consistency checks are now data‑driven.
+- The checker reads rule pairs from tools/ci/needles.txt.
+- High‑signal needles help ensure key docs are discoverable.
+- Learn how to run/update the checker: docs/dev/docs-consistency-checks.md
+
+Docs consistency checks and troubleshooting → docs/dev/docs-consistency-checks.md
+Tip: If the docs-consistency check fails, see docs/dev/docs-consistency-checks.md and run locally: cargo run -q --manifest-path tools/ci/Cargo.toml -- check-docs-consistency (update tools/ci/needles.txt when adding entry/index docs; Windows: use forward slashes, case-sensitive substrings).
+
+- Schema drift guardrails: run locally before PRs
+  Tip: cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema
+  See docs/dev/schema-checks.md for troubleshooting and examples.
+ 
 ## Overview
 
 The CPC platform is a federated software suite built on cooperative principles, featuring a universal income system (dabloons), extensive data sharing capabilities, and a wide range of applications designed to address diverse user needs. This documentation provides comprehensive guides for developers, users, and contributors.
@@ -12,8 +27,12 @@ The CPC platform is a federated software suite built on cooperative principles, 
 
 Technical guides for developers building applications within the CPC ecosystem:
 
+- [Volunteer Reputation Stub (API Server)](./api_server/volunteer_reputation_stub.md) - Toggleable stub for deterministic verification in Volunteer Coordination
 - [Visualization Setup Guide](./developer/visualization_setup.md) - Installation and configuration of visualization components
 - [Visualization Architecture](./developer/visualization_architecture.md) - System architecture and design principles
+
+#### Docs Consistency Checks
+A lightweight CI guardrail ensures key docs remain discoverable via required substrings (“needles”). See docs/dev/docs-consistency-checks.md for intent, current needles, how CI runs, and how to evolve them.
 
 ### User Documentation
 
@@ -152,9 +171,23 @@ The CPC platform is built using modern, permissively licensed technologies:
 - Modular Design
 - Cooperative Values
 
+## ADRs / Architecture
+Recent additions:
+- [ADR 0009: Bootstrap Composition via Environment Toggles for Test Stubs](./adr/0009-bootstrap-stub-toggles.md)
+- [ADR 0005: Skill Development Tracking](./adr/0005-skill-development-tracking.md)
+- [ADR 0006: Concurrency Handling](./adr/0006-concurrency-handling.md)
+- [ADR 0007: Social Interaction Enhancements](./adr/0007-social-interaction-enhancements.md)
+- [ADR 0008: Collaborative Workspace](./adr/0008-collaborative-workspace.md)
+
+For the complete ADR index, see docs/adr/
+
+- Architecture decisions: See docs/adr for our Architecture Decision Records (ADRs) and design rationale.
+
 ## Contributing
 
 The CPC platform is developed as a cooperative effort. All contributors are considered co-owners/worker-owners of the project. We welcome contributions that align with our values of protecting human and AI life and respecting the dignity of all participants.
+
+- See CONTRIBUTING.md for how to get started contributing.
 
 ## License
 
@@ -163,3 +196,9 @@ The CPC software is distributed under the CPC license, our own iteration of a Co
 ## Support
 
 For technical support, please contact the development team at dev-support@cpc.coop or join our community channels.
+Schema guardrails (quick-start)
+- Run locally before PRs: cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema
+- Snapshot: docs/api_server/schema.graphql
+- How-to: docs/dev/schema-checks.md
+- Architecture: docs/dev/schema-guardrails-architecture.md
+- Examples: docs/dev/schema-checks-examples.md

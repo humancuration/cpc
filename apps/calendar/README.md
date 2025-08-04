@@ -112,3 +112,13 @@ The calendar module follows strict privacy principles:
 - Privacy-first design with data minimization
 
 All business features can be disabled at runtime, and the module can be "uninstalled" without affecting other parts of the system.
+
+### Schema guardrails
+Schema changes are checked locally and in CI to prevent drift. Run the schema check before you open a PR and compare against the snapshot.
+- How-to: see docs/dev/schema-checks.md
+- Architecture: see docs/dev/schema-guardrails-architecture.md
+Command (verbatim):
+cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema
+Snapshot (verbatim):
+docs/api_server/schema.graphql
+See also: docs/dev/guardrails-index.md

@@ -158,6 +158,132 @@ Extend `SocialEventBus` from `social_interactions` with new events:
 - `WhiteboardModified`
 - `MeetingStarted`
 
+### Volunteer Coordination
+
+Volunteer Coordination augments the collaborative workspace with structured opportunities, applications, and contributions to align volunteers with projects and track impact.
+
+Data model (high level):
+- VolunteerOpportunity: org_id, created_by, title, description, tags, status (Draft/Published/Closed/Archived), schedule window, location
+- VolunteerApplication: applicant_id, motivation, status (Submitted/UnderReview/Accepted/Rejected/Withdrawn)
+- VolunteerContribution: contributor_id, kind (Hours/Deliverable/Donation/Other), amount, notes, occurred_at, verified, verification_ref
+
+Services:
+- OpportunityService: create/publish/close/get
+- ApplicationService: submit/review/get
+- ContributionService: log/verify/get
+
+Integration points:
+1) Project Boards: Opportunities can be linked to project boards; accepted applications can auto-create project tasks for onboarding checklists. Task completion can suggest contributions to log.
+2) Reputation System: Contribution verification can call out to the reputation subsystem; verified contributions can award badges/points and update contributor reputation.
+3) Social Event Bus: New events emitted to SocialEventBus:
+   - OpportunityCreated { opportunity_id, org_id, created_by }
+   - ApplicationSubmitted { application_id, opportunity_id, applicant_id }
+   - ContributionLogged { contribution_id, opportunity_id, contributor_id }
+   These enable feeds, notifications, and cross-app automations.
+4) API: GraphQL resolvers expose CRUD and queries for opportunities, applications, and contributions.
+5) UI (Rust/Yew): Website Builder provides Yew components to create opportunities, review applications, and log contributions. Components share styling via stylist.
+
+Database tables (proposed):
+- volunteer_opportunities(id UUID PK, org_id UUID, created_by UUID, title TEXT, description TEXT, tags TEXT[] NULL, status SMALLINT, location TEXT NULL, starts_at TIMESTAMPTZ NULL, ends_at TIMESTAMPTZ NULL, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW())
+- volunteer_applications(id UUID PK, opportunity_id UUID REFERENCES volunteer_opportunities(id) ON DELETE CASCADE, applicant_id UUID, motivation TEXT NULL, status SMALLINT, submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), decided_at TIMESTAMPTZ NULL, reviewer_id UUID NULL)
+- volunteer_contributions(id UUID PK, opportunity_id UUID REFERENCES volunteer_opportunities(id) ON DELETE CASCADE, contributor_id UUID, kind SMALLINT, amount REAL, notes TEXT NULL, occurred_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), verified BOOLEAN NOT NULL DEFAULT FALSE, verification_ref UUID NULL)
+
+Event Bus:
+- Extend SocialEvent with OpportunityCreated, ApplicationSubmitted, ContributionLogged.
+- Ensure Serialize/Deserialize for all events.
+
+Testing:
+- Integration tests around service methods with SQLx test pool and in-memory event bus.
+
+Security:
+- Authorization checks for opportunity management by org owners/moderators.
+- Rate limiting for application spam and contribution flood.
+- Input validation and HTML sanitization for descriptions.
+
+### Volunteer Coordination
+
+Volunteer Coordination augments the collaborative workspace with structured opportunities, applications, and contributions to align volunteers with projects and track impact.
+
+Data model (high level):
+- VolunteerOpportunity: org_id, created_by, title, description, tags, status (Draft/Published/Closed/Archived), schedule window, location
+- VolunteerApplication: applicant_id, motivation, status (Submitted/UnderReview/Accepted/Rejected/Withdrawn)
+- VolunteerContribution: contributor_id, kind (Hours/Deliverable/Donation/Other), amount, notes, occurred_at, verified, verification_ref
+
+Services:
+- OpportunityService: create/publish/close/get
+- ApplicationService: submit/review/get
+- ContributionService: log/verify/get
+
+Integration points:
+1) Project Boards: Opportunities can be linked to project boards; accepted applications can auto-create project tasks for onboarding checklists. Task completion can suggest contributions to log.
+2) Reputation System: Contribution verification can call out to the reputation subsystem; verified contributions can award badges/points and update contributor reputation.
+3) Social Event Bus: New events emitted to SocialEventBus:
+   - OpportunityCreated { opportunity_id, org_id, created_by }
+   - ApplicationSubmitted { application_id, opportunity_id, applicant_id }
+   - ContributionLogged { contribution_id, opportunity_id, contributor_id }
+   These enable feeds, notifications, and cross-app automations.
+4) API: GraphQL resolvers expose CRUD and queries for opportunities, applications, and contributions.
+5) UI (Rust/Yew): Website Builder provides Yew components to create opportunities, review applications, and log contributions. Components share styling via stylist.
+
+Database tables (proposed):
+- volunteer_opportunities(id UUID PK, org_id UUID, created_by UUID, title TEXT, description TEXT, tags TEXT[] NULL, status SMALLINT, location TEXT NULL, starts_at TIMESTAMPTZ NULL, ends_at TIMESTAMPTZ NULL, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW())
+- volunteer_applications(id UUID PK, opportunity_id UUID REFERENCES volunteer_opportunities(id) ON DELETE CASCADE, applicant_id UUID, motivation TEXT NULL, status SMALLINT, submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), decided_at TIMESTAMPTZ NULL, reviewer_id UUID NULL)
+- volunteer_contributions(id UUID PK, opportunity_id UUID REFERENCES volunteer_opportunities(id) ON DELETE CASCADE, contributor_id UUID, kind SMALLINT, amount REAL, notes TEXT NULL, occurred_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), verified BOOLEAN NOT NULL DEFAULT FALSE, verification_ref UUID NULL)
+
+Event Bus:
+- Extend SocialEvent with OpportunityCreated, ApplicationSubmitted, ContributionLogged.
+- Ensure Serialize/Deserialize for all events.
+
+Testing:
+- Integration tests around service methods with SQLx test pool and in-memory event bus.
+
+Security:
+- Authorization checks for opportunity management by org owners/moderators.
+- Rate limiting for application spam and contribution flood.
+- Input validation and HTML sanitization for descriptions.
+
+### Volunteer Coordination
+
+Volunteer Coordination augments the collaborative workspace with structured opportunities, applications, and contributions to align volunteers with projects and track impact.
+
+Data model (high level):
+- VolunteerOpportunity: org_id, created_by, title, description, tags, status (Draft/Published/Closed/Archived), schedule window, location
+- VolunteerApplication: applicant_id, motivation, status (Submitted/UnderReview/Accepted/Rejected/Withdrawn)
+- VolunteerContribution: contributor_id, kind (Hours/Deliverable/Donation/Other), amount, notes, occurred_at, verified, verification_ref
+
+Services:
+- OpportunityService: create/publish/close/get
+- ApplicationService: submit/review/get
+- ContributionService: log/verify/get
+
+Integration points:
+1) Project Boards: Opportunities can be linked to project boards; accepted applications can auto-create project tasks for onboarding checklists. Task completion can suggest contributions to log.
+2) Reputation System: Contribution verification can call out to the reputation subsystem; verified contributions can award badges/points and update contributor reputation.
+3) Social Event Bus: New events emitted to SocialEventBus:
+   - OpportunityCreated { opportunity_id, org_id, created_by }
+   - ApplicationSubmitted { application_id, opportunity_id, applicant_id }
+   - ContributionLogged { contribution_id, opportunity_id, contributor_id }
+   These enable feeds, notifications, and cross-app automations.
+4) API: GraphQL resolvers expose CRUD and queries for opportunities, applications, and contributions.
+5) UI (Rust/Yew): Website Builder provides Yew components to create opportunities, review applications, and log contributions. Components share styling via stylist.
+
+Database tables (proposed):
+- volunteer_opportunities(id UUID PK, org_id UUID, created_by UUID, title TEXT, description TEXT, tags TEXT[] NULL, status SMALLINT, location TEXT NULL, starts_at TIMESTAMPTZ NULL, ends_at TIMESTAMPTZ NULL, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW())
+- volunteer_applications(id UUID PK, opportunity_id UUID REFERENCES volunteer_opportunities(id) ON DELETE CASCADE, applicant_id UUID, motivation TEXT NULL, status SMALLINT, submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), decided_at TIMESTAMPTZ NULL, reviewer_id UUID NULL)
+- volunteer_contributions(id UUID PK, opportunity_id UUID REFERENCES volunteer_opportunities(id) ON DELETE CASCADE, contributor_id UUID, kind SMALLINT, amount REAL, notes TEXT NULL, occurred_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), verified BOOLEAN NOT NULL DEFAULT FALSE, verification_ref UUID NULL)
+
+Event Bus:
+- Extend SocialEvent with OpportunityCreated, ApplicationSubmitted, ContributionLogged.
+- Ensure Serialize/Deserialize for all events.
+
+Testing:
+- Integration tests around service methods with SQLx test pool and in-memory event bus.
+
+Security:
+- Authorization checks for opportunity management by org owners/moderators.
+- Rate limiting for application spam and contribution flood.
+- Input validation and HTML sanitization for descriptions.
+
 ## Consequences
 
 ### Positive
@@ -208,3 +334,29 @@ Extend `SocialEventBus` from `social_interactions` with new events:
 - Collaborative code editing
 - Meeting recording with transcription
 - Integration with p2panda for decentralized collaboration
+
+## Reputation Verification Heuristic (Stub)
+
+Purpose and boundary:
+- We expose a hexagonal port for contribution reputation verification in the application layer: ReputationPort. For development and testing, we provide an infrastructure adapter ReputationStub that implements a minimal, deterministic heuristic.
+- VolunteerServiceImpl optionally depends on this port. When present, the service consults the port during verify_contribution to determine whether a contribution is verified and to set a verification reference that is persisted via the repository.
+
+Current stubbed heuristic (subject to change per ADR-0008 evolution):
+- For kind == Hours, if amount_hours is Some and >= 1.0, then verified = true; otherwise verified = false.
+- For all other contribution kinds (e.g., Deliverable), currently verified = true.
+- This heuristic is intentionally simplistic to optimize developer experience and enable early end-to-end testing.
+
+Implementation notes:
+- Port: shared_packages/volunteer_coordination/src/application/reputation_port.rs defines ReputationPort::verify_contribution and ReputationError.
+- Stub adapter: shared_packages/volunteer_coordination/src/infrastructure/reputation_stub.rs implements the above heuristic, with TODO(ADR-0008) markers for future refinement.
+- Service usage: VolunteerServiceImpl (shared_packages/volunteer_coordination/src/application/volunteer_service.rs) accepts Option<Arc<dyn ReputationPort + Send + Sync>>. During verify_contribution it maps Hours amounts to amount_hours, invokes the port when available, and persists verified and verification_ref via the ContributionRepository::verify update.
+- Public exports: shared_packages/volunteer_coordination/src/lib.rs exposes the reputation port and stub; also provides a helper fn reputation_stub() for composition convenience.
+
+Composition guidance:
+- Production default is to not enable the stub unless explicitly configured at the composition root (e.g., an environment variable or feature flag in the API server).
+- Development and test environments can wire the stub to exercise verification flows end-to-end.
+
+Future direction:
+- Replace the stub with richer, data-informed adapters (e.g., heuristics informed by contribution history, organizer attestations, peer feedback, and cross-app signals).
+- Introduce a SocialEventBus port and publish ContributionVerified events from VolunteerServiceImpl once eventing is formalized.
+- Expand GraphQL/API to expose verification status and references consistently (e.g., fields like verified, verified_by, and verificationRef aliasing as needed) while maintaining compatibility.

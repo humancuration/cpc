@@ -59,3 +59,12 @@ cargo tauri build
 ## License
 
 This project is licensed under the CPC License.
+
+### Schema guardrails
+Schema changes are checked locally and in CI to prevent drift. Run the schema check before you open a PR and compare against the snapshot.
+- How-to: see docs/dev/schema-checks.md
+- Architecture: see docs/dev/schema-guardrails-architecture.md
+Command (verbatim):
+cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema
+Snapshot (verbatim):
+docs/api_server/schema.graphql
