@@ -39,13 +39,16 @@ pub trait MessageService: Send + Sync {
     /// Get a message by ID
     async fn get_message(&self, message_id: Uuid) -> Result<Message, MessengerError>;
     
+    /// Update message content
+    async fn update_message(&self, message_id: Uuid, user_id: Uuid, new_content: crate::models::MessageContent) -> Result<Message, MessengerError>;
+    
     /// Update message delivery status
     async fn update_message_status(&self, update: MessageStatusUpdate) -> Result<(), MessengerError>;
     
     /// Mark messages as read
     async fn mark_messages_read(&self, conversation_id: Uuid, user_id: Uuid, up_to_message_id: Uuid) -> Result<usize, MessengerError>;
     
-    /// Delete a message
+    /// Delete a message (soft delete)
     async fn delete_message(&self, message_id: Uuid, user_id: Uuid) -> Result<(), MessengerError>;
 }
 
@@ -60,6 +63,64 @@ pub trait MediaService: Send + Sync {
     
     /// Delete media
     async fn delete_media(&self, media_id: Uuid, user_id: Uuid) -> Result<(), MessengerError>;
+}
+
+/// Service for reaction operations
+#[async_trait]
+pub trait ReactionService: Send + Sync {
+    /// Add a reaction to a message
+    async fn add_reaction(&self, message_id: Uuid, user_id: Uuid, reaction_type: String) -> Result<crate::models::Reaction, MessengerError>;
+    
+    /// Remove a reaction from a message
+    async fn remove_reaction(&self, message_id: Uuid, user_id: Uuid, reaction_type: String) -> Result<(), MessengerError>;
+    
+    /// Get all reactions for a message
+    async fn get_message_reactions(&self, message_id: Uuid) -> Result<Vec<crate::models::Reaction>, MessengerError>;
+}
+
+/// Service for thread operations
+#[async_trait]
+pub trait ThreadService: Send + Sync {
+    /// Create a new thread from a message
+    async fn create_thread(&self, parent_message_id: Uuid, conversation_id: Uuid) -> Result<crate::models::MessageThread, MessengerError>;
+    
+    /// Get a thread by ID
+    async fn get_thread(&self, thread_id: crate::models::ThreadId) -> Result<crate::models::MessageThread, MessengerError>;
+    
+    /// Get messages in a thread
+    async fn get_thread_messages(&self, thread_id: crate::models::ThreadId, limit: usize, before_message_id: Option<Uuid>) -> Result<Vec<crate::models::Message>, MessengerError>;
+    
+    /// Add a message to a thread
+    async fn add_message_to_thread(&self, thread_id: crate::models::ThreadId, message: crate::models::Message) -> Result<(), MessengerError>;
+}
+
+/// Service for group management operations
+#[async_trait]
+pub trait GroupService: Send + Sync {
+    /// Update group settings
+    async fn update_group_settings(&self, conversation_id: Uuid, user_id: Uuid, settings: crate::models::ConversationSettings) -> Result<crate::models::Conversation, MessengerError>;
+    
+    /// Transfer admin rights to another user
+    async fn transfer_admin(&self, conversation_id: Uuid, current_admin_id: Uuid, new_admin_id: Uuid) -> Result<crate::models::Conversation, MessengerError>;
+    
+    /// Ban a participant from a group
+    async fn ban_participant(&self, conversation_id: Uuid, admin_id: Uuid, user_id: Uuid) -> Result<crate::models::Conversation, MessengerError>;
+    
+    /// Update participant permissions
+    async fn update_participant_permissions(&self, conversation_id: Uuid, admin_id: Uuid, user_id: Uuid, permissions: crate::models::ParticipantPermissions) -> Result<crate::models::Conversation, MessengerError>;
+}
+
+/// Service for moderation operations
+#[async_trait]
+pub trait ModerationService: Send + Sync {
+    /// Delete a message
+    async fn delete_message(&self, message_id: Uuid, moderator_id: Uuid) -> Result<(), MessengerError>;
+    
+    /// Timeout a user
+    async fn timeout_user(&self, conversation_id: Uuid, moderator_id: Uuid, user_id: Uuid, duration: std::time::Duration) -> Result<(), MessengerError>;
+    
+    /// Remove timeout from a user
+    async fn remove_timeout(&self, conversation_id: Uuid, moderator_id: Uuid, user_id: Uuid) -> Result<(), MessengerError>;
 }
 
 /// Service for presence operations

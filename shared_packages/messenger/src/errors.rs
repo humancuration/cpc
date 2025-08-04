@@ -53,4 +53,28 @@ pub enum MessengerError {
     /// Validation error
     #[error("Validation error: {message}")]
     ValidationError { message: String },
+    
+    /// Reaction already exists
+    #[error("Reaction already exists for user {user_id} on message {message_id}")]
+    ReactionExists { user_id: Uuid, message_id: Uuid },
+    
+    /// Reaction not found
+    #[error("Reaction not found: {id}")]
+    ReactionNotFound { id: Uuid },
+    
+    /// Thread not found
+    #[error("Thread not found: {id}")]
+    ThreadNotFound { id: Uuid },
+    
+    /// User is not an admin
+    #[error("User {user_id} is not an admin in conversation {conversation_id}")]
+    NotAdmin { user_id: Uuid, conversation_id: Uuid },
+    
+    /// Cannot transfer admin to self
+    #[error("Cannot transfer admin rights to self")]
+    CannotTransferToSelf,
+    
+    /// User is already banned
+    #[error("User {user_id} is already banned from conversation {conversation_id}")]
+    UserAlreadyBanned { user_id: Uuid, conversation_id: Uuid },
 }

@@ -6,11 +6,17 @@
 //! The application follows hexagonal architecture principles with a strict
 //! separation between domain logic, application use cases, and infrastructure concerns.
 
-/// Re-export domain types
-pub use messenger_domain::*;
+/// Application services
+pub mod services;
 
-/// Re-export application services
-pub use messenger_app::services::*;
+/// Repositories
+pub mod repositories;
 
-/// Re-export infrastructure implementations
-pub use messenger_infrastructure::*;
+/// Infrastructure implementations
+pub mod infrastructure;
+
+/// UI components
+pub mod ui;
+
+/// Additional models
+pub mod models;

@@ -10,6 +10,8 @@ pub mod models;
 pub mod errors;
 /// Domain services
 pub mod services;
+/// GraphQL implementations
+pub mod graphql;
 
 // Re-export commonly used types
 pub use models::{Conversation, Message, Participant, MessageContent, MediaReference, DeliveryStatus};

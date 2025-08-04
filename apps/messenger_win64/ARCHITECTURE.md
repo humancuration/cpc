@@ -191,20 +191,43 @@ Following patterns from music player social interactions:
    - Implement standard GDPR-compliant data handling
    - Allow users to control who can contact them
 
-### 4.4 Media Handling
+## 4.4 Media Handling
 
-1. **Media Processing Pipeline**:
+### Enhanced Media Sharing Pipeline
+1. **End-to-End Media Flow**:
+   ```mermaid
+   graph LR
+       A[Upload Request] --> B{Validation}
+       B -->|Invalid| C[Reject]
+       B -->|Valid| D[Encrypt Media]
+       D --> E[Store Encrypted Media]
+       E --> F[Transcode to AV1/Opus]
+       F --> G[Generate Thumbnails]
+       G --> H[Store Metadata]
+       H --> I[Return MediaReference]
    ```
-   Upload → Validate → Server-side encryption → Store → Generate reference
-   ```
+   
+2. **Encryption**:
+   - AES-GCM with per-media keys
+   - Keys encrypted with system master key
+   - IV stored with each media item
 
-2. **Media Reference Structure**:
+3. **Transcoding**:
+   - Using ffmpeg.wasm with royalty-free codecs
+   - Video: AV1, Container: WebM
+   - Audio: Opus
+
+4. **Media Reference Structure**:
    ```rust
    pub struct MediaReference {
        id: Uuid,
        media_type: MediaType,
        storage_location: String,
        thumbnail: Option<ThumbnailReference>,
+       encryption_key: Vec<u8>, // Encrypted with system key
+       iv: Vec<u8>,
+       owner_id: Uuid,
+       created_at: DateTime<Utc>,
    }
    ```
 
@@ -482,16 +505,22 @@ New tables for Phase 2 features:
 |--------|------|-------------|
 | id | UUID | Primary key |
 | parent_message_id | UUID | Original message |
-| child_message_id | UUID | Reply message |
-| depth | INTEGER | Thread nesting level |
+| root_message_id | UUID | First message in thread |
+| conversation_id | UUID | Parent conversation |
+| created_at | TIMESTAMPTZ | Creation time |
 
 **media**
-| Column | Type | Description | ENHANCED |
-|--------|------|-------------|----------|
-| encryption_key | BYTEA | Server-side encryption key |
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary key |
+| owner_id | UUID | Uploading user |
+| media_type | VARCHAR(20) | MIME type |
+| storage_path | TEXT | Object storage path |
+| encryption_key | BYTEA | Encrypted media key |
 | iv | BYTEA | Initialization vector |
 | thumbnail_id | UUID | Reference to thumbnail |
 | original_filename | VARCHAR(255) | User-provided name |
+| created_at | TIMESTAMPTZ | Upload time |
 
 ### 10.3 Media Processing Pipeline
 
@@ -505,6 +534,26 @@ graph LR
     F --> G[Create Thumbnails]
     G --> H[Store Metadata]
     H --> I[Return Media Reference]
+```
+
+**Media Upload Sequence Diagram:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant MediaService
+    participant Storage
+    participant DB
+    
+    Client->>API: POST /media (encrypted metadata)
+    API->>MediaService: process_upload(metadata)
+    MediaService->>Storage: store_encrypted(raw_media)
+    MediaService->>MediaService: transcode_to_av1_opus()
+    MediaService->>MediaService: generate_thumbnails()
+    MediaService->>DB: store_media_metadata()
+    DB-->>MediaService: media_id
+    MediaService-->>API: MediaReference
+    API-->>Client: 201 Created (media_id)
 ```
 
 Media encryption uses AES-GCM with keys derived from:
@@ -535,22 +584,39 @@ sequenceDiagram
 
 ### 10.5 Group Management Design
 
-Enhanced ParticipantPermissions:
+**Enhanced Permissions Model:**
 ```rust
 pub struct ParticipantPermissions {
     pub can_send_messages: bool,
-    pub can_manage_participants: bool,  // NEW
-    pub can_change_settings: bool,      // NEW
+    pub can_manage_participants: bool,
+    pub can_change_settings: bool,
     pub can_delete_messages: bool,
-    pub can_moderate_content: bool,     // NEW
-    pub is_admin: bool,                 // NEW
+    pub can_moderate_content: bool,
+    pub is_admin: bool,
 }
 ```
 
-Group settings include:
-- Membership approval requirements
-- Message history visibility
-- Admin transfer protocols
+**Admin Transfer Protocol:**
+```mermaid
+sequenceDiagram
+    participant CurrentAdmin
+    participant Server
+    participant NewAdmin
+    
+    CurrentAdmin->>Server: InitiateTransfer(new_admin_id)
+    Server->>NewAdmin: Notification(TransferRequest)
+    NewAdmin->>Server: AcceptTransfer()
+    Server->>Server: ValidatePermissions()
+    Server->>CurrentAdmin: TransferComplete()
+    Server->>NewAdmin: PermissionsUpdated()
+    Server->>Group: BroadcastAdminChange()
+```
+
+**Moderation Tools:**
+- Message deletion with audit trails
+- Participant timeout/ban system
+- Content filtering based on federation policies
+- Reporting system with escalation paths
 
 ### 10.6 Federation Protocol
 
@@ -591,6 +657,23 @@ Critical test scenarios:
 3. Media encryption/decryption workflow
 4. Consent verification during message sending
 5. Failover during WebSocket disconnects
+
+**Reaction System Sequence Diagram:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant ReactionService
+    participant DB
+    participant WebSocket
+    
+    Client->>API: addReaction(messageId, "👍")
+    API->>ReactionService: add_reaction(user_id, message_id, reaction_type)
+    ReactionService->>DB: store_reaction()
+    DB-->>ReactionService: success
+    ReactionService->>WebSocket: broadcast(ReactionUpdate)
+    WebSocket->>All Clients: {event: "reaction_update", messageId, reaction}
+```
 
 ### 10.8 Consent Integration (REAL IMPLEMENTATION)
 
@@ -652,10 +735,26 @@ impl ConsentManager for CoreConsentManager {
 - [ ] Federated consent management
 - [ ] Message delivery guarantees
 
+**Phase 2.1: Core Enhancements (1 week)**
+- [ ] Implement message reactions system
+- [ ] Add threaded conversations
+- [ ] Deploy initial group management tools
+
+**Phase 2.2: Media System (2 weeks)**
+- [ ] Implement media sharing pipeline
+- [ ] Integrate AV1/Opus transcoding
+- [ ] Develop thumbnail generation service
+
+**Phase 2.3: Advanced Features (1 week)**
+- [ ] Implement admin transfer protocol
+- [ ] Add message editing
+- [ ] Develop moderation tools
+
 **Ongoing: Testing & Optimization**
 - [ ] Comprehensive integration tests
 - [ ] Performance benchmarking
 - [ ] Security audits
+- [ ] Federation readiness review
 
 ### 10.10 API Specifications Update
 

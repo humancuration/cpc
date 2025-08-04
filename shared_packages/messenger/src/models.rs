@@ -152,6 +152,12 @@ pub struct ParticipantPermissions {
     
     /// Whether the participant can delete messages
     pub can_delete_messages: bool,
+    
+    /// Whether the participant can moderate content
+    pub can_moderate_content: bool,
+    
+    /// Whether the participant is an admin
+    pub is_admin: bool,
 }
 
 impl Default for ParticipantPermissions {
@@ -161,6 +167,8 @@ impl Default for ParticipantPermissions {
             can_manage_participants: false,
             can_change_settings: false,
             can_delete_messages: false,
+            can_moderate_content: false,
+            is_admin: false,
         }
     }
 }
@@ -183,6 +191,9 @@ pub struct Message {
     /// When the message was sent
     pub sent_at: DateTime<Utc>,
     
+    /// When the message was last updated (if edited)
+    pub updated_at: Option<DateTime<Utc>>,
+    
     /// Delivery status of the message
     pub delivery_status: DeliveryStatus,
 }
@@ -196,6 +207,29 @@ impl Message {
             sender_id,
             content: MessageContent::Text(text),
             sent_at: Utc::now(),
+        }
+    }
+    
+    /// Create a new text message
+    pub fn new_text(conversation_id: Uuid, sender_id: Uuid, text: String) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            conversation_id,
+            sender_id,
+            content: MessageContent::Text(text),
+            sent_at: Utc::now(),
+            updated_at: None,
+    }
+    
+    /// Create a new media message
+    pub fn new_media(conversation_id: Uuid, sender_id: Uuid, media: MediaReference) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            conversation_id,
+            sender_id,
+            content: MessageContent::Media(media),
+            sent_at: Utc::now(),
+            updated_at: None,
             delivery_status: DeliveryStatus::Pending,
         }
     }
@@ -225,6 +259,24 @@ impl Message {
     /// Mark the message as read
     pub fn mark_read(&mut self) {
         self.delivery_status = DeliveryStatus::Read(Utc::now());
+    }
+    
+    /// Set the thread ID for this message
+    pub fn set_thread_id(&mut self, thread_id: ThreadId) {
+        // In a real implementation, we would update the database
+        // For now, we're just showing the method signature
+    }
+    
+    /// Update the message content
+    pub fn update_content(&mut self, new_content: MessageContent) {
+        self.content = new_content;
+        self.updated_at = Some(Utc::now());
+    }
+    
+    /// Mark the message as deleted (soft delete)
+    pub fn mark_deleted(&mut self) {
+        self.content = MessageContent::Text("[Deleted]".to_string());
+        self.updated_at = Some(Utc::now());
     }
 }
 
@@ -337,6 +389,48 @@ pub struct MessageStatusUpdate {
     pub new_status: DeliveryStatus,
     
     /// Timestamp of the status update
+}
+
+/// Unique identifier for a message thread
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ThreadId(pub Uuid);
+
+/// A reaction to a message
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Reaction {
+    /// Unique identifier for the reaction
+    pub id: Uuid,
+    
+    /// Message this reaction is for
+    pub message_id: Uuid,
+    
+    /// User who added the reaction
+    pub user_id: Uuid,
+    
+    /// Type of reaction (e.g., "👍", "❤️", "😂")
+    pub reaction_type: String,
+    
+    /// When the reaction was added
+    pub created_at: DateTime<Utc>,
+}
+
+/// A thread of messages
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MessageThread {
+    /// Unique identifier for the thread
+    pub id: ThreadId,
+    
+    /// The message that started this thread
+    pub parent_message_id: Uuid,
+    
+    /// The root message of the conversation (if different from parent)
+    pub root_message_id: Option<Uuid>,
+    
+    /// The conversation this thread belongs to
+    pub conversation_id: Uuid,
+    
+    /// When the thread was created
+    pub created_at: DateTime<Utc>,
 }
 
 /// A stream chat message with Twitch-style features

@@ -7,18 +7,25 @@ use axum::{
 use std::net::SocketAddr;
 use tracing::{info, error};
 use tracing_subscriber;
+use async_graphql::Schema;
 
-use messenger_infrastructure::{
-    database::{PostgresConversationRepository, PostgresMessageRepository, PostgresMediaRepository, SledPresenceRepository},
-    graphql::{create_schema, MessengerSchema},
+use cpc_messenger::infrastructure::{
     websocket::WebSocketServer,
-    auth::OAuth2IdentityProvider,
 };
-use messenger_app::{
-    services::{ConversationServiceImpl, MessageServiceImpl, MediaServiceImpl, PresenceServiceImpl},
-    integration::ConsentManagerImpl,
+use cpc_messenger::services::{
+    reaction::ReactionServiceImpl,
+    thread::ThreadServiceImpl,
+    group::GroupServiceImpl,
+    moderation::ModerationServiceImpl,
+};
+use cpc_messenger::repositories::{
+    reaction::ReactionRepository,
+    thread::ThreadRepository,
+    group::GroupRepository,
+    media::MediaRepository,
 };
 use messenger_domain::services::{ConversationService, MessageService, MediaService, PresenceService};
+use messenger_domain::graphql::{Mutation, Subscription};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -42,6 +49,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let message_repository = PostgresMessageRepository::new(pool.clone());
     let media_repository = PostgresMediaRepository::new(pool.clone());
     let presence_repository = SledPresenceRepository::new(&sled_path)?;
+    
+    // Initialize our new repositories
+    let reaction_repository = ReactionRepository::new(/* social reaction service */);
+    let thread_repository = ThreadRepository::new(pool.clone());
+    let group_repository = GroupRepository::new(pool.clone());
+    let our_media_repository = MediaRepository::new(pool.clone());
     
     // Initialize external services
     // In a real implementation, we would initialize the consent manager
@@ -72,12 +85,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::sync::Arc::new(presence_repository),
     );
     
+    // Create our new services
+    let reaction_service = ReactionServiceImpl::new(std::sync::Arc::new(reaction_repository));
+    let thread_service = ThreadServiceImpl::new(std::sync::Arc::new(thread_repository));
+    let group_service = GroupServiceImpl::new(std::sync::Arc::new(group_repository));
+    let moderation_service = ModerationServiceImpl::new();
+    let our_media_service = MediaServiceImpl::new(std::sync::Arc::new(our_media_repository));
+    
     // Create GraphQL schema
-    let schema = create_schema(
-        std::sync::Arc::new(conversation_service),
-        std::sync::Arc::new(message_service),
-        std::sync::Arc::new(presence_service),
-    );
+    let schema = async_graphql::Schema::build(
+        async_graphql::EmptyMutation,
+        messenger_domain::graphql::Mutation,
+        messenger_domain::graphql::Subscription
+    )
+    .data(std::sync::Arc::new(conversation_service))
+    .data(std::sync::Arc::new(message_service))
+    .data(std::sync::Arc::new(presence_service))
+    .data(std::sync::Arc::new(reaction_service))
+    .data(std::sync::Arc::new(thread_service))
+    .data(std::sync::Arc::new(group_service))
+    .finish();
     
     // Create WebSocket server
     let websocket_server = WebSocketServer::new(std::sync::Arc::new(message_service));
@@ -93,7 +120,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_state(AppState {
             schema,
             websocket_server,
-            identity_provider,
         });
     
     // Run the server
@@ -110,9 +136,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 // Application state
 #[derive(Clone)]
 struct AppState {
-    schema: MessengerSchema,
+    schema: async_graphql::Schema<async_graphql::EmptyMutation, messenger_domain::graphql::Mutation, messenger_domain::graphql::Subscription>,
     websocket_server: WebSocketServer,
-    identity_provider: OAuth2IdentityProvider,
 }
 
 // GraphQL playground handler

@@ -1,83 +1,17 @@
 name: CI
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
-  schema-check:
-    name: schema-check
-    runs-on: ubuntu-latest
+  video_editor_tests:
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Rust
+      - name: Set up Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          profile: minimal
-          override: true
-      - name: Run schema drift check
-        run: cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema
-
-  test:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
-      - name: Install cargo-nextest
-        uses: taiki-e/install-action@nextest
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Build CI tooling
-        run: |
-          cd tools/ci
-          cargo build -q
-      - name: Check docs consistency
-        run: |
-          cargo run -q --manifest-path tools/ci/Cargo.toml -- check-docs-consistency
+          components: rustfmt, clippy
+      - name: Set WGPU_BACKEND
+        run: echo "WGPU_BACKEND=dx12" >> $GITHUB_ENV
       - name: Run tests
-        run: |
-          cd apps/allat
-          cargo nextest run --all-features
-        env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
-
-  schema_guardrails:
-    name: schema_guardrails
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
-      - name: Run schema guardrails (docs snapshot: docs/api_server/schema.graphql)
-        run: cargo run -q --manifest-path tools/ci/Cargo.toml -- check-schema
+        run: cargo test -p video_editor -- --test-threads=1

@@ -1,0 +1,31 @@
+[package]
+name = "messenger_web"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+yew = "0.21.0"
+yew-router = "0.18.0"
+stylist = { version = "0.13.0", features = ["yew_integration"] }
+tauri = { version = "2.0", features = [] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = "0.3"
+js-sys = "0.3"
+wasm-logger = "0.2"
+gloo-net = "0.5"
+gloo-console = "0.3"
+gloo-timers = "0.3"
+
+# Messenger backend with UI components
+cpc-messenger = { path = "../messenger_win64", features = ["web"] }
+
+[build-dependencies]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
