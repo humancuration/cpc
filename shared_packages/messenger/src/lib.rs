@@ -10,6 +10,8 @@ pub mod models;
 pub mod errors;
 /// Domain services
 pub mod services;
+/// Authentication service
+pub mod auth;
 /// GraphQL implementations
 pub mod graphql;
 

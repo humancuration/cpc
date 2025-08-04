@@ -74,6 +74,10 @@ pub enum MessengerError {
     #[error("Cannot transfer admin rights to self")]
     CannotTransferToSelf,
     
+    /// Authentication error
+    #[error("Authentication error: {message}")]
+    AuthError { message: String },
+    
     /// User is already banned
     #[error("User {user_id} is already banned from conversation {conversation_id}")]
     UserAlreadyBanned { user_id: Uuid, conversation_id: Uuid },

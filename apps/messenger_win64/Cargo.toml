@@ -19,7 +19,7 @@ tracing-subscriber = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 
 # Domain layer
-messenger_domain = { path = "../../shared_packages/messenger", features = ["graphql"] }
+messenger_domain = { path = "../../shared_packages/messenger", features = ["graphql", "auth"] }
 
 # Application layer
 messenger_app = { path = "../../shared_packages/messenger_app" }
@@ -66,6 +66,10 @@ sled = "0.34"
 
 # Encryption
 rust-crypto = "0.2"
+
+# gRPC
+tonic = "0.9"
+prost = "0.11"
 
 # Consent manager
 consent_manager = { path = "../../packages/core/consent_manager" }

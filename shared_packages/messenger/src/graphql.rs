@@ -1,11 +1,13 @@
 //! GraphQL implementations for the Messenger application
 
-use async_graphql::{Context, Object, Result, SimpleObject, InputObject, Subscription};
+use async_graphql::{async_trait, Context, Extension, ExtensionFactory, Object, Result, SimpleObject, InputObject, Subscription};
 use async_stream::stream;
 use futures_util::stream::Stream;
+use std::sync::Arc;
 use uuid::Uuid;
 use crate::models::{Reaction, Message};
 use crate::services::MessageService;
+use crate::auth::AuthService;
 
 /// GraphQL representation of a Reaction
 #[derive(SimpleObject)]
@@ -63,6 +65,19 @@ pub struct UpdateMessageInput {
     pub message_id: Uuid,
     pub content: String,
 }
+/// Input for adding a reaction
+#[derive(InputObject)]
+pub struct AddReactionInput {
+    pub message_id: Uuid,
+    pub reaction_type: String,
+}
+
+/// Input for removing a reaction
+#[derive(InputObject)]
+pub struct RemoveReactionInput {
+    pub message_id: Uuid,
+    pub reaction_type: String,
+}
 
 /// GraphQL mutations for messenger features
 pub struct Mutation;
@@ -76,10 +91,24 @@ impl Mutation {
         // 3. Update message content
         // 4. Broadcast update event
         
-        // Placeholder implementation
-        todo!("Implement message update functionality")
-    }
-
+        // Get the message service from context
+        let message_service = ctx.data::<std::sync::Arc<dyn crate::services::MessageService>>()?;
+        
+        // Get user ID from context
+        let user_id = ctx.data::<Uuid>()?;
+        
+        // Update the message
+        let updated_message = message_service
+            .update_message(
+                input.message_id,
+                user_id,
+                crate::models::MessageContent::Text(input.content)
+            )
+            .await
+            .map_err(|e| async_graphql::Error::new(format!("Failed to update message: {}", e)))?;
+        
+        // Convert to GraphQL object
+        Ok(MessageObject::from(updated_message))
     async fn delete_message(&self, ctx: &Context<'_>, id: Uuid) -> Result<bool> {
         // In a real implementation, we would:
         // 1. Get the user ID from the context
@@ -87,8 +116,81 @@ impl Mutation {
         // 3. Soft delete with tombstone
         // 4. Broadcast deletion event
         
-        // Placeholder implementation
-        todo!("Implement message deletion functionality")
+        // Get the message service from context
+        let message_service = ctx.data::<std::sync::Arc<dyn crate::services::MessageService>>()?;
+        
+        // Get user ID from context
+        let user_id = ctx.data::<Uuid>()?;
+        
+        // Delete the message
+        match message_service.delete_message(id, user_id).await {
+            Ok(()) => Ok(true),
+            Err(e) => Err(async_graphql::Error::new(format!("Failed to delete message: {}", e))),
+        }
+    }
+        }
+    }
+    
+    async fn add_reaction(&self, ctx: &Context<'_>, input: AddReactionInput) -> Result<ReactionObject> {
+        // Get the reaction service from context
+        let reaction_service = ctx.data::<std::sync::Arc<dyn crate::services::ReactionService>>()?;
+        
+        // Get user ID from context
+        let user_id = ctx.data::<Uuid>()?;
+        
+        // Add the reaction
+        let reaction = reaction_service
+            .add_reaction(input.message_id, user_id, input.reaction_type)
+            .await
+            .map_err(|e| async_graphql::Error::new(format!("Failed to add reaction: {}", e)))?;
+        
+        // Convert to GraphQL object
+        Ok(ReactionObject::from(reaction))
+    async fn remove_reaction(&self, ctx: &Context<'_>, input: RemoveReactionInput) -> Result<bool> {
+        // Get the reaction service from context
+        let reaction_service = ctx.data::<std::sync::Arc<dyn crate::services::ReactionService>>()?;
+        
+        // Get user ID from context
+        let user_id = ctx.data::<Uuid>()?;
+        
+        // Remove the reaction
+        match reaction_service
+            .remove_reaction(input.message_id, user_id, input.reaction_type)
+            .await
+        {
+            Ok(()) => Ok(true),
+            Err(e) => Err(async_graphql::Error::new(format!("Failed to remove reaction: {}", e))),
+        }
+    }
+        }
+    }
+}
+
+/// Authentication middleware for GraphQL
+pub struct AuthMiddleware;
+
+impl ExtensionFactory for AuthMiddleware {
+    fn create(&self) -> Arc<dyn Extension> {
+        Arc::new(AuthExtension)
+    }
+}
+
+struct AuthExtension;
+
+#[async_trait]
+impl Extension for AuthExtension {
+    async fn prepare_request(
+        &self,
+        ctx: &ExtensionContext<'_>,
+        request: async_graphql::Request,
+        next: async_graphql::extensions::NextPrepareRequest<'_>,
+    ) -> async_graphql::ServerResult<async_graphql::Request> {
+        // Extract token from headers (simplified implementation)
+        // In a real implementation, you would extract the Authorization header
+        // and validate the token using the AuthService
+        
+        // For now, we'll just pass through the request
+        next.run(ctx, request).await
     }
 }
 

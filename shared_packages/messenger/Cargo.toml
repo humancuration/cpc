@@ -11,6 +11,8 @@ uuid = { workspace = true, features = ["v4", "serde"] }
 chrono = { workspace = true, features = ["serde"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
+tonic = { version = "0.9", optional = true }
+prost = { version = "0.11", optional = true }
 
 # Async support
 async-trait = { workspace = true }
@@ -28,3 +30,4 @@ event_bus = { path = "../../core/event_bus" }
 [features]
 default = []
 graphql = ["async-graphql", "async-stream", "futures-util", "tokio"]
+auth = ["tonic", "prost"]

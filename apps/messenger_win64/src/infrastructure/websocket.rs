@@ -9,6 +9,8 @@ use std::sync::Arc;
 use tokio::sync::{broadcast, RwLock};
 use tracing::{error, info};
 use uuid::Uuid;
+use messenger_domain::auth::AuthService;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// WebSocket server for handling real-time messaging
 pub struct WebSocketServer {
@@ -61,9 +63,19 @@ impl WebSocketServer {
     /// Handle a new WebSocket connection
     pub async fn handle_connection(
         &self,
-        user_id: Uuid,
+        auth_service: Arc<dyn AuthService>,
+        jwt_token: String,
         socket: async_tungstenite::tokio::WebSocketStream<async_tungstenite::tokio::TokioAdapter<tokio::net::TcpStream>>,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+        // Validate JWT token
+        let user_id = match validate_jwt(&auth_service, &jwt_token).await {
+            Ok(id) => id,
+            Err(e) => {
+                error!("JWT validation failed: {}", e);
+                return Err(e.into());
+            }
+        };
+        
         info!("New WebSocket connection for user: {}", user_id);
         
         let (mut ws_sender, mut ws_receiver) = socket.split();
@@ -198,5 +210,16 @@ impl WebSocketServer {
 impl Default for WebSocketServer {
     fn default() -> Self {
         Self::new()
+    }
+    
+    /// Validate JWT token and extract user ID using the authentication service
+    async fn validate_jwt(
+        auth_service: &Arc<dyn AuthService>,
+        token: &str
+    ) -> Result<Uuid, Box<dyn std::error::Error + Send + Sync>> {
+        match auth_service.validate_token(token).await {
+            Ok(user_id) => Ok(user_id),
+            Err(e) => Err(format!("Authentication failed: {}", e).into()),
+        }
     }
 }

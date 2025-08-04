@@ -1,0 +1,43 @@
+[package]
+name = "social_graph"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+async-graphql = "5.0"
+async-trait = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+tonic = "0.10"
+chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1.0", features = ["full"] }
+sqlx = { version = "0.7", features = ["postgres", "uuid", "chrono", "runtime-tokio-rustls"] }
+
+# Shared packages
+consent_manager = { path = "../consent_manager" }
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["macros", "rt"] }
+criterion = "0.5"
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
+
+[[example]]
+name = "full_example"
+path = "examples/full_example.rs"
+
+[[test]]
+name = "integration_test"
+path = "tests/integration_test.rs"
+
+[[test]]
+name = "repository_integration_test"
+path = "tests/repository_integration_test.rs"
+
+[[bench]]
+name = "repository_benchmark"
+harness = false

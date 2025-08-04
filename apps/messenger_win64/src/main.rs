@@ -1,10 +1,11 @@
 //! Main entry point for the Messenger application
 
 use axum::{
-    routing::get,
+    routing::{get, post},
     Router,
 };
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tracing::{info, error};
 use tracing_subscriber;
 use async_graphql::Schema;
@@ -26,6 +27,7 @@ use cpc_messenger::repositories::{
 };
 use messenger_domain::services::{ConversationService, MessageService, MediaService, PresenceService};
 use messenger_domain::graphql::{Mutation, Subscription};
+use messenger_domain::auth::{AuthService, GrpcAuthService};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -43,6 +45,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize Sled database for presence
     let sled_path = std::env::var("SLED_PATH")
         .unwrap_or_else(|_| "./data/sled".to_string());
+    
+    // Initialize gRPC client for identity service
+    // In a real implementation, this would connect to the actual identity service
+    let identity_client = messenger_domain::auth::identity_service_client::IdentityServiceClient::new(
+        tonic::transport::Channel::from_static("http://localhost:50051")
+            .connect()
+            .await?
+    );
+    
+    // Create authentication service
+    let auth_service = Arc::new(GrpcAuthService::new(identity_client));
     
     // Create repositories
     let conversation_repository = PostgresConversationRepository::new(pool.clone());
@@ -116,10 +129,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         .route("/graphql", get(graphql_playground).post(graphql_handler))
         .route("/ws", get(websocket_handler))
+        .route("/auth/refresh", post(refresh_token_handler))
         .route("/health", get(health_check))
         .with_state(AppState {
             schema,
             websocket_server,
+            auth_service,
         });
     
     // Run the server
@@ -138,6 +153,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 struct AppState {
     schema: async_graphql::Schema<async_graphql::EmptyMutation, messenger_domain::graphql::Mutation, messenger_domain::graphql::Subscription>,
     websocket_server: WebSocketServer,
+    auth_service: Arc<dyn AuthService>,
 }
 
 // GraphQL playground handler
@@ -179,16 +195,52 @@ async fn graphql_handler(
 async fn websocket_handler(
     axum::extract::State(state): axum::extract::State<AppState>,
     ws: axum::extract::ws::WebSocketUpgrade,
+    axum::extract::Query(params): axum::extract::Query<std::collections::HashMap<String, String>>,
 ) -> axum::response::Response {
     ws.on_upgrade(|socket| async move {
-        // In a real implementation, we would authenticate the user
-        // and pass their user_id to the WebSocket server
-        let user_id = uuid::Uuid::nil(); // Placeholder
-        
-        if let Err(e) = state.websocket_server.handle_connection(user_id, socket).await {
-            error!("WebSocket connection error: {}", e);
+        // Extract JWT token from query parameters
+        if let Some(token) = params.get("token") {
+            match state.auth_service.validate_token(token).await {
+                Ok(user_id) => {
+                    if let Err(e) = state.websocket_server.handle_connection(state.auth_service.clone(), token.clone(), socket).await {
+                        error!("WebSocket connection error: {}", e);
+                    }
+                },
+                Err(e) => {
+                    error!("Authentication failed: {}", e);
+                }
+            }
+        } else {
+            error!("No token provided in WebSocket connection");
         }
     })
+}
+
+/// Token refresh handler
+async fn refresh_token_handler(
+    axum::extract::State(state): axum::extract::State<AppState>,
+    axum::extract::Json(payload): axum::extract::Json<std::collections::HashMap<String, String>>,
+) -> axum::response::Json<std::collections::HashMap<String, serde_json::Value>> {
+    if let Some(refresh_token) = payload.get("refresh_token") {
+        match state.auth_service.refresh_token(refresh_token).await {
+            Ok(access_token) => {
+                let mut response = std::collections::HashMap::new();
+                response.insert("access_token".to_string(), serde_json::Value::String(access_token));
+                response.insert("expires_in".to_string(), serde_json::Value::Number(serde_json::Number::from(3600)));
+                axum::response::Json(response)
+            },
+            Err(e) => {
+                error!("Token refresh failed: {}", e);
+                let mut response = std::collections::HashMap::new();
+                response.insert("error".to_string(), serde_json::Value::String("Token refresh failed".to_string()));
+                axum::response::Json(response)
+            }
+        }
+    } else {
+        let mut response = std::collections::HashMap::new();
+        response.insert("error".to_string(), serde_json::Value::String("No refresh_token provided".to_string()));
+        axum::response::Json(response)
+    }
 }
 
 // Health check handler

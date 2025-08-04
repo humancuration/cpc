@@ -40,6 +40,15 @@ Enhanced group management features for better community moderation:
 - Participant banning and timeout features
 - Moderation tools for content management
 
+### 5. Real-time Messaging
+
+Enhanced real-time communication capabilities:
+
+- WebSocket server for immediate message delivery
+- GraphQL subscriptions for real-time updates
+- Message editing and deletion with instant propagation
+- Reaction events broadcast to all connected clients
+
 ## Architecture
 
 The application follows a hexagonal architecture with the following layers:
@@ -74,6 +83,7 @@ Technical implementations:
 - GraphQL endpoints for all new features
 - PostgreSQL repositories for data persistence
 - WebSocket server for real-time communication
+- Real-time event broadcasting system
 
 ## Database Schema
 
@@ -144,6 +154,10 @@ removeReaction(messageId: ID!, reactionType: String!): Boolean!
 
 # Media Processing
 generateMediaThumbnail(mediaId: ID!, size: String!): String!
+
+# Real-time Messaging
+updateMessage(input: UpdateMessageInput!): Message!
+deleteMessage(id: ID!): Boolean!
 ```
 
 ### Queries
@@ -151,6 +165,12 @@ generateMediaThumbnail(mediaId: ID!, size: String!): String!
 ```graphql
 messageReactions(messageId: ID!): [Reaction!]!
 thread(threadId: ID!): Thread!
+```
+
+### Subscriptions
+
+```graphql
+reactionEvents(messageId: ID!): Reaction!
 ```
 
 ## Security
@@ -182,6 +202,7 @@ The implementation includes:
 2. **Integration Tests**: For service implementations
 3. **Repository Tests**: For database implementations
 4. **API Tests**: For GraphQL endpoints
+5. **WebSocket Tests**: For real-time communication functionality
 
 ## Deployment
 
