@@ -1,0 +1,49 @@
+[package]
+name = "social_interactions"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+async-trait = "0.1"
+sqlx = { version = "0.7", features = ["postgres", "uuid", "chrono", "runtime-tokio-rustls"] }
+tokio = { version = "1.0", features = ["full"] }
+
+# Error handling
+thiserror = "1.0"
+
+# Utilities
+std = "0.0"
+futures = "0.3"
+
+# Shared packages
+notification_core = { path = "../notification_core" }
+
+[dev-dependencies]
+# Testing
+mockall = "0.12"
+tokio-test = "0.4"
+test-case = "3.0"
+
+[lib]
+name = "social_interactions"
+path = "src/lib.rs"
+
+[[test]]
+name = "reaction_service_tests"
+path = "tests/reaction_service_tests.rs"
+
+[[test]]
+name = "comment_service_tests"
+path = "tests/comment_service_tests.rs"
+
+[[test]]
+name = "share_service_tests"
+path = "tests/share_service_tests.rs"
+
+[[test]]
+name = "integration_tests"
+path = "tests/integration_tests.rs"

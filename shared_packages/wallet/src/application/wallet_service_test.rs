@@ -142,3 +142,302 @@ mod tests {
         // Setup
         let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
         let service = WalletServiceImpl::new(wallet_repo);
+        let user_id = Uuid::new_v4();
+        
+        // Execute
+        let amount = Money::new(Decimal::from(50), Currency::Dabloons);
+        let result = service.subtract_dabloons(user_id, amount, Some("Test withdrawal".to_string())).await;
+        
+        // Assert
+        assert!(result.is_ok());
+    }
+    
+    #[tokio::test]
+    async fn test_subtract_dabloons_wrong_currency() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let user_id = Uuid::new_v4();
+        
+        // Execute with wrong currency
+        let amount = Money::new(Decimal::from(50), Currency::USD);
+        let result = service.subtract_dabloons(user_id, amount, Some("Test withdrawal".to_string())).await;
+        
+        // Assert
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            FinancialError::CurrencyMismatch { .. } => {}, // Expected
+            _ => panic!("Expected CurrencyMismatch error"),
+        }
+    }
+    
+    #[tokio::test]
+    async fn test_transfer_dabloons_success() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let from_user_id = Uuid::new_v4();
+        let to_user_id = Uuid::new_v4();
+        
+        // Execute
+        let amount = Money::new(Decimal::from(25), Currency::Dabloons);
+        let result = service.transfer_dabloons(
+            from_user_id,
+            to_user_id,
+            amount,
+            Some("Test transfer".to_string())
+        ).await;
+        
+        // Assert
+        assert!(result.is_ok());
+    }
+    
+    #[tokio::test]
+    async fn test_transfer_dabloons_wrong_currency() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let from_user_id = Uuid::new_v4();
+        let to_user_id = Uuid::new_v4();
+        
+        // Execute with wrong currency
+        let amount = Money::new(Decimal::from(25), Currency::USD);
+        let result = service.transfer_dabloons(
+            from_user_id,
+            to_user_id,
+            amount,
+            Some("Test transfer".to_string())
+        ).await;
+        
+        // Assert
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            FinancialError::CurrencyMismatch { .. } => {}, // Expected
+            _ => panic!("Expected CurrencyMismatch error"),
+        }
+    }
+    
+    #[tokio::test]
+    async fn test_transfer_dabloons_insufficient_funds() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: true });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let from_user_id = Uuid::new_v4();
+        let to_user_id = Uuid::new_v4();
+        
+        // Execute
+        let amount = Money::new(Decimal::from(25), Currency::Dabloons);
+        let result = service.transfer_dabloons(
+            from_user_id,
+            to_user_id,
+            amount,
+            Some("Test transfer".to_string())
+        ).await;
+        
+        // Assert
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            FinancialError::InsufficientFunds(Currency::Dabloons) => {}, // Expected
+            _ => panic!("Expected InsufficientFunds error"),
+        }
+    }
+    
+    #[tokio::test]
+    async fn test_send_tip_success() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let from_user_id = Uuid::new_v4();
+        let to_user_id = Uuid::new_v4();
+        
+        // Execute
+        let amount = Money::new(Decimal::from(10), Currency::Dabloons);
+        let result = service.send_tip(
+            from_user_id,
+            to_user_id,
+            amount,
+            Some("Great work!".to_string())
+        ).await;
+        
+        // Assert
+        assert!(result.is_ok());
+    }
+    
+    #[tokio::test]
+    async fn test_send_tip_wrong_currency() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let from_user_id = Uuid::new_v4();
+        let to_user_id = Uuid::new_v4();
+        
+        // Execute with wrong currency
+        let amount = Money::new(Decimal::from(10), Currency::USD);
+        let result = service.send_tip(
+            from_user_id,
+            to_user_id,
+            amount,
+            Some("Great work!".to_string())
+        ).await;
+        
+        // Assert
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            FinancialError::CurrencyMismatch { .. } => {}, // Expected
+            _ => panic!("Expected CurrencyMismatch error"),
+        }
+    }
+    
+    #[tokio::test]
+    async fn test_send_tip_insufficient_funds() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: true });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let from_user_id = Uuid::new_v4();
+        let to_user_id = Uuid::new_v4();
+        
+        // Execute
+        let amount = Money::new(Decimal::from(10), Currency::Dabloons);
+        let result = service.send_tip(
+            from_user_id,
+            to_user_id,
+            amount,
+            Some("Great work!".to_string())
+        ).await;
+        
+        // Assert
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            FinancialError::InsufficientFunds(Currency::Dabloons) => {}, // Expected
+            _ => panic!("Expected InsufficientFunds error"),
+        }
+    }
+    
+    #[tokio::test]
+    async fn test_get_transaction_history_success() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let user_id = Uuid::new_v4();
+        
+        // Execute
+        let result = service.get_transaction_history(user_id).await;
+        
+        // Assert
+        assert!(result.is_ok());
+    }
+    
+    #[tokio::test]
+    async fn test_get_transaction_history_database_error() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: true, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let user_id = Uuid::new_v4();
+        
+        // Execute
+        let result = service.get_transaction_history(user_id).await;
+        
+        // Assert
+        assert!(result.is_err());
+    }
+    
+    #[tokio::test]
+    async fn test_distribute_universal_income_success() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let user_id = Uuid::new_v4();
+        let amount = Money::new(Decimal::from(100), Currency::Dabloons);
+        let distribution_date = chrono::Utc::now().date_naive();
+        
+        // Execute
+        let result = service.distribute_universal_income(user_id, amount, distribution_date).await;
+        
+        // Assert
+        assert!(result.is_ok());
+    }
+    
+    #[tokio::test]
+    async fn test_distribute_universal_income_wrong_currency() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let user_id = Uuid::new_v4();
+        let amount = Money::new(Decimal::from(100), Currency::USD);
+        let distribution_date = chrono::Utc::now().date_naive();
+        
+        // Execute
+        let result = service.distribute_universal_income(user_id, amount, distribution_date).await;
+        
+        // Assert
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            FinancialError::CurrencyMismatch { .. } => {}, // Expected
+            _ => panic!("Expected CurrencyMismatch error"),
+        }
+    }
+    
+    #[tokio::test]
+    async fn test_credit_volunteer_dabloons_success() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let user_id = Uuid::new_v4();
+        let amount = Money::new(Decimal::from(20), Currency::Dabloons);
+        let hours_converted = Decimal::from(2);
+        
+        // Execute
+        let result = service.credit_volunteer_dabloons(user_id, amount, hours_converted).await;
+        
+        // Assert
+        assert!(result.is_ok());
+    }
+    
+    #[tokio::test]
+    async fn test_credit_volunteer_dabloons_wrong_currency() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        let user_id = Uuid::new_v4();
+        let amount = Money::new(Decimal::from(20), Currency::USD);
+        let hours_converted = Decimal::from(2);
+        
+        // Execute
+        let result = service.credit_volunteer_dabloons(user_id, amount, hours_converted).await;
+        
+        // Assert
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            FinancialError::CurrencyMismatch { .. } => {}, // Expected
+            _ => panic!("Expected CurrencyMismatch error"),
+        }
+    }
+    
+    #[tokio::test]
+    async fn test_wallet_service_tip_event_broadcasting() {
+        // Setup
+        let wallet_repo = Arc::new(MockWalletRepository { should_fail: false, insufficient_funds: false });
+        let service = WalletServiceImpl::new(wallet_repo);
+        
+        // Subscribe to tip events
+        let mut receiver = service.subscribe_tip_events();
+        
+        // Execute a tip operation
+        let from_user_id = Uuid::new_v4();
+        let to_user_id = Uuid::new_v4();
+        let amount = Money::new(Decimal::from(10), Currency::Dabloons);
+        let result = service.send_tip(
+            from_user_id,
+            to_user_id,
+            amount,
+            Some("Great work!".to_string())
+        ).await;
+        
+        // Assert the operation succeeded
+        assert!(result.is_ok());
+        
+        // Check that a tip event was broadcast
+        let event = receiver.try_recv();
+        assert!(event.is_ok());
+    }
+}

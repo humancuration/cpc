@@ -9,6 +9,9 @@ pub mod models;
 pub mod services;
 pub mod achievements;
 
+#[cfg(test)]
+mod achievement_service_test;
+
 // Re-export key types
 pub use models::{Achievement, AchievementType, GroupChallenge, ChallengeProgress};
 pub use services::{SocialEnhancementService, SocialEnhancementServiceImpl};

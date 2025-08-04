@@ -16,6 +16,7 @@ use chrono::{DateTime, Utc};
 use std::fmt;
 
 /// Notification category
+/// Notification category
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum NotificationCategory {
     /// System notifications
@@ -41,8 +42,16 @@ pub enum NotificationCategory {
     
     /// Skill exchange notifications
     SkillExchange,
+    
+    /// Social reaction notifications
+    SocialReaction,
+    
+    /// New comment notifications
+    NewComment,
+    
+    /// Content share notifications
+    ContentShare,
 }
-
 impl fmt::Display for NotificationCategory {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -56,6 +65,9 @@ impl fmt::Display for NotificationCategory {
             NotificationCategory::Streaming => write!(f, "Streaming"),
             NotificationCategory::Volunteer => write!(f, "Volunteer"),
             NotificationCategory::SkillExchange => write!(f, "SkillExchange"),
+            NotificationCategory::SocialReaction => write!(f, "SocialReaction"),
+            NotificationCategory::NewComment => write!(f, "NewComment"),
+            NotificationCategory::ContentShare => write!(f, "ContentShare"),
         }
     }
 }

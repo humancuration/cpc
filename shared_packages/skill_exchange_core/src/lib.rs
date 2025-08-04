@@ -11,6 +11,9 @@ pub mod repositories;
 pub mod services;
 
 #[cfg(test)]
+mod skill_exchange_service_test;
+
+#[cfg(test)]
 mod lib_test;
 
 // Re-export key types

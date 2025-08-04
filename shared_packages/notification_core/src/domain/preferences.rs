@@ -1,11 +1,43 @@
 //! User preferences
-//! 
+//!
 //! This module handles user notification preferences and settings.
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use crate::domain::types::{NotificationCategory, ChannelType, NotificationPriority};
 
+/// Social interaction notification preferences
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SocialPreferences {
+    /// Whether to receive reaction notifications
+    pub reaction_notifications: bool,
+    
+    /// Whether to receive comment notifications
+    pub comment_notifications: bool,
+    
+    /// Whether to receive share notifications
+    pub share_notifications: bool,
+    
+    /// Whether to include comment replies in notifications
+    pub reply_notifications: bool,
+}
+
+impl SocialPreferences {
+    /// Create new social preferences with default settings
+    pub fn new() -> Self {
+        Self {
+            reaction_notifications: true,
+            comment_notifications: true,
+            share_notifications: true,
+            reply_notifications: true,
+        }
+    }
+}
+
+impl Default for SocialPreferences {
+    fn default() -> Self {
+        Self::new()
+    }
 /// User notification preferences
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserPreferences {
@@ -26,6 +58,11 @@ pub struct UserPreferences {
     
     /// Timezone for scheduling
     pub timezone: String,
+    
+    /// Social interaction preferences
+    pub social_preferences: SocialPreferences,
+}
+    pub timezone: String,
 }
 
 impl UserPreferences {
@@ -38,6 +75,7 @@ impl UserPreferences {
             channel_preferences: HashMap::new(),
             quiet_hours: None,
             timezone: "UTC".to_string(),
+            social_preferences: SocialPreferences::new(),
         }
     }
     
