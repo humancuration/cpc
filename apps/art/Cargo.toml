@@ -1,0 +1,25 @@
+[package]
+name = "art"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+bevy = "0.16"
+ffmpeg-next = "6.0" # For AV1/WebP support
+sled = "0.34"
+uuid = { version = "1.7", features = ["v4", "serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+thiserror = "1.0"
+async-trait = "0.1"
+
+# CPC shared packages
+collaboration_engine = { path = "../../shared_packages/collaboration_engine" }
+media = { path = "../../shared_packages/media" }
+common_utils = { path = "../../shared_packages/common_utils" }
+
+# For testing
+tempfile = "3.0"
