@@ -3,6 +3,8 @@ use stylist::{style, yew::styled_component};
 use uuid::Uuid;
 use std::collections::HashMap;
 use shared_packages::realtime_signaling::message::{PresenceUser, PresenceStatus};
+use crate::presentation::position_translator::PositionTranslator;
+use crate::presentation::presence_batcher::CursorVirtualizer;
 
 // Properties for the PresenceSidebar component
 #[derive(Properties, PartialEq)]
@@ -69,87 +71,142 @@ pub fn presence_sidebar(props: &PresenceSidebarProps) -> Html {
     }
     .expect("Failed to create user item style");
 
-    let users_list = props.users.iter().map(|(user_id, user)| {
-        let user_id = *user_id;
-        let on_click = {
-            let on_user_click = props.on_user_click.clone();
-            Callback::from(move |_| on_user_click.emit(user_id))
-        };
+    // Memoize users to avoid re-rendering when users haven't changed
+    let prev_users = use_state(|| HashMap::<Uuid, PresenceUser>::new());
+    let should_render = use_memo(&props.users, |current_users| {
+        // Only re-render if users have changed
+        !prev_users.eq(current_users) || prev_users.len() != current_users.len()
+    });
+    
+    // Update previous users
+    {
+        let prev_users = prev_users.clone();
+        let current_users = props.users.clone();
+        use_effect_with(current_users.clone(), move |_| {
+            prev_users.set(current_users);
+        });
+    }
 
-        html! {
-            <div 
-                class={user_item_style.clone()} 
-                onclick={on_click}
-            >
-                <AvatarBadge 
-                    avatar_url={user.avatar_url.clone()} 
-                    color={user.color.clone()} 
-                    user_id={user_id}
-                    is_typing={matches!(user.status, PresenceStatus::Online)}
-                />
-                <div style="margin-left: 0.5rem;">
-                    <div>{format!("User {}", &user_id.to_string()[..8])}</div>
-                    <StatusIndicator status={user.status.clone()} />
+    let users_list = if *should_render {
+        props.users.iter().map(|(user_id, user)| {
+            let user_id = *user_id;
+            let on_click = {
+                let on_user_click = props.on_user_click.clone();
+                Callback::from(move |_| on_user_click.emit(user_id))
+            };
+
+            html! {
+                <div
+                    class={user_item_style.clone()}
+                    onclick={on_click}
+                >
+                    <AvatarBadge
+                        avatar_url={user.avatar_url.clone()}
+                        color={user.color.clone()}
+                        user_id={user_id}
+                        is_typing={matches!(user.status, PresenceStatus::Online)}
+                    />
+                    <div style="margin-left: 0.5rem;">
+                        <div>{format!("User {}", &user_id.to_string()[..8])}</div>
+                        <StatusIndicator status={user.status.clone()} />
+                    </div>
                 </div>
-            </div>
-        }
-    }).collect::<Html>();
+            }
+        }).collect::<Html>()
+    } else {
+        // Reuse previous users list if no changes
+        html! {}
+    };
 
     html! {
         <div class={sidebar_style}>
             <h3>{"Present Users"}</h3>
             {users_list}
         </div>
-    }
-}
-
-/// Overlay component showing cursor positions of other users
-#[styled_component(CursorOverlay)]
-pub fn cursor_overlay(props: &CursorOverlayProps) -> Html {
-    let overlay_style = style! {
-        r#"
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 10;
-    "#
-    }
-    .expect("Failed to create overlay style");
-
-    let cursors = props.cursor_positions.iter().map(|(user_id, (line, column))| {
-        if let Some(user) = props.users.get(user_id) {
-            let cursor_style = style! {
-                r#"
-                position: absolute;
-                width: 2px;
-                height: 1.2em;
-                background-color: ${color};
-                left: ${left}px;
-                top: ${top}px;
-                animation: blink 1s infinite;
-                
-                @keyframes blink {
-                    0% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                    100% { opacity: 1; }
-                }
-            "#,
-                color = user.color,
-                left = column * 8, // Approximate character width
-                top = line * 20    // Approximate line height
-            }
-            .expect("Failed to create cursor style");
-
-            html! {
-                <div class={cursor_style}></div>
-            }
-        } else {
-            html! {}
+    
+    /// Overlay component showing cursor positions of other users
+    #[styled_component(CursorOverlay)]
+    pub fn cursor_overlay(props: &CursorOverlayProps) -> Html {
+        let overlay_style = style! {
+            r#"
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        "#
         }
-    }).collect::<Html>();
+        .expect("Failed to create overlay style");
+    
+        // Memoize cursor positions to avoid re-rendering when positions haven't changed
+        let prev_positions = use_state(|| HashMap::<Uuid, (usize, usize)>::new());
+        let should_render = use_memo((&props.cursor_positions, &props.users), |(current_positions, current_users)| {
+            // Only re-render if positions or users have changed
+            !prev_positions.eq(current_positions) || prev_positions.len() != current_positions.len()
+        });
+        
+        // Update previous positions
+        {
+            let prev_positions = prev_positions.clone();
+            let current_positions = props.cursor_positions.clone();
+            use_effect_with(current_positions.clone(), move |_| {
+                prev_positions.set(current_positions);
+            });
+        }
+    
+        let cursors = if *should_render {
+            // Create a position translator for accurate positioning
+            let translator = PositionTranslator::new();
+            
+            // Create a cursor virtualizer for performance
+            let mut virtualizer = CursorVirtualizer::new(1920.0, 1080.0); // Default viewport size
+            virtualizer.set_char_dimensions(8.0, 20.0); // Default character dimensions
+            
+            // Filter to only visible cursors
+            let visible_cursors = virtualizer.filter_visible_cursors(&props.cursor_positions);
+            
+            visible_cursors.iter().map(|(user_id, (line, column))| {
+                if let Some(user) = props.users.get(user_id) {
+                    // Use accurate positioning instead of approximations
+                    let (left, top) = translator.document_to_screen(*line, *column);
+                    
+                    let cursor_style = style! {
+                        r#"
+                        position: absolute;
+                        width: 2px;
+                        height: 1.2em;
+                        background-color: ${color};
+                        left: ${left}px;
+                        top: ${top}px;
+                        animation: blink 1s infinite;
+                        
+                        @keyframes blink {
+                            0% { opacity: 1; }
+                            50% { opacity: 0.5; }
+                            100% { opacity: 1; }
+                        }
+                    "#,
+                        color = user.color,
+                        left = left,
+                        top = top
+                    }
+                    .expect("Failed to create cursor style");
+    
+                    html! {
+                        <div class={cursor_style}></div>
+                    }
+                } else {
+                    html! {}
+                }
+            }).collect::<Html>()
+        } else {
+            // Reuse previous cursors if no changes
+            html! {}
+        };
+};
+    };
 
     html! {
         <div class={overlay_style}>

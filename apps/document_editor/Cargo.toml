@@ -10,6 +10,7 @@ collaboration_engine = { path = "../../shared_packages/collaboration_engine" }
 cpc-net = { path = "../../cpc-net" }
 collaborative_docs = { path = "../../shared_packages/collaborative_docs" }
 realtime_signaling = { path = "../../shared_packages/realtime_signaling" }
+ot = { path = "../../shared_packages/ot" }
 async-graphql = { workspace = true }
 async-graphql-axum = { workspace = true }
 axum = { workspace = true }
@@ -26,6 +27,7 @@ sqlx = { workspace = true }
 pdf = { workspace = true }
 docx-rs = "0.7"
 semver = "1.0"
+rand = "0.8"
 
 # p2p dependencies
 p2panda-core = { workspace = true }
@@ -56,6 +58,10 @@ base64 = "0.21"
 yew = { workspace = true, optional = true }
 web-sys = { workspace = true }
 stylist = { version = "0.13", features = ["yew_integration"] }
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4"
+gloo-timers = { version = "0.3", features = ["futures"] }
+lru = "0.12"
 
 [features]
 default = []

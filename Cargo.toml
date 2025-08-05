@@ -23,6 +23,7 @@ members = [
     "apps/video_editor",
     "apps/video_editor_desktop",
     "apps/document_editor",
+    "shared_packages/ot",
 ]
 
 [workspace.dependencies]

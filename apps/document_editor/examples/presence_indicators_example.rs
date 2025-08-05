@@ -46,3 +46,49 @@ fn presence_example() -> Html {
                 // Status indicators example
                 <div style="margin: 20px 0;">
                     <h3>{"Status Indicators:"}</h3>
+                    <div style="display: flex; gap: 20px;">
+                        <StatusIndicator status={PresenceStatus::Online} />
+                        <StatusIndicator status={PresenceStatus::Away} />
+                        <StatusIndicator status={PresenceStatus::Busy} />
+                        <StatusIndicator status={PresenceStatus::Offline} />
+                    </div>
+                </div>
+                
+                // Avatar badges example
+                <div style="margin: 20px 0;">
+                    <h3>{"Avatar Badges:"}</h3>
+                    <div style="display: flex; gap: 20px;">
+                        <AvatarBadge 
+                            avatar_url={Some("https://example.com/user1.png".to_string())} 
+                            color={"#ff0000".to_string()} 
+                            user_id={user1_id}
+                            is_typing={true}
+                        />
+                        <AvatarBadge 
+                            avatar_url={None} 
+                            color={"#00ff00".to_string()} 
+                            user_id={user2_id}
+                            is_typing={false}
+                        />
+                    </div>
+                </div>
+            </div>
+            
+            // Cursor overlay
+            <CursorOverlay 
+                users={users.clone()} 
+                cursor_positions={cursor_positions} 
+            />
+            
+            // Presence sidebar
+            <PresenceSidebar 
+                users={users} 
+                on_user_click={on_user_click} 
+            />
+        </div>
+    }
+}
+
+fn main() {
+    yew::Renderer::<PresenceExample>::new().render();
+}

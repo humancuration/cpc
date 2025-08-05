@@ -4,12 +4,16 @@ use shared_packages::collaborative_docs::core::{DocumentContent, DocumentMetadat
 use shared_packages::collaborative_docs::crdt::CrdtDocument;
 use uuid::Uuid;
 use serde_json::Value;
+use shared_packages::operational_transformation::{Operation, TextOperation, VersionVector};
+use std::collections::HashMap;
 
 #[derive(Properties, PartialEq)]
 pub struct ConflictResolutionDialogProps {
     pub document_id: Uuid,
     pub current_version: DocumentContent,
     pub conflicting_version: DocumentContent,
+    pub pending_operations: Vec<TextOperation>,
+    pub version_vector: VersionVector,
     pub on_resolve: Callback<ResolutionAction>,
     pub on_close: Callback<()>,
 }
@@ -25,10 +29,15 @@ pub enum ResolutionAction {
 pub fn conflict_resolution_dialog(props: &ConflictResolutionDialogProps) -> Html {
     let selected_version = use_state(|| "current".to_string());
     let merge_preview = use_state(|| String::new());
+    let conflict_details = use_state(|| Vec::<String>::new());
     
     // Parse document content to text for display
     let current_text = document_content_to_text(&props.current_version);
     let conflicting_text = document_content_to_text(&props.conflicting_version);
+    
+    // Analyze conflicts between pending operations and incoming operations
+    let conflicts = analyze_conflicts(&props.pending_operations, &props.version_vector);
+    conflict_details.set(conflicts);
     
     // Update merge preview when selection changes
     {
@@ -119,6 +128,17 @@ pub fn conflict_resolution_dialog(props: &ConflictResolutionDialogProps) -> Html
                                 </select>
                             </div>
                             
+                            <div class="conflict-details">
+                                <h3>{"Conflict Details"}</h3>
+                                <ul>
+                                    {for (*conflict_details).iter().map(|detail| {
+                                        html! {
+                                            <li>{detail}</li>
+                                        }
+                                    })}
+                                </ul>
+                            </div>
+                            
                             <div class="merge-preview">
                                 <h3>{"Merge Preview"}</h3>
                                 <div class="preview-content">
@@ -156,6 +176,42 @@ fn document_content_to_text(content: &DocumentContent) -> String {
         if let Some(crdt_data) = content.data.get("crdt_data") {
             format!("CRDT Document: {:?}", crdt_data)
         } else {
+/// Analyze conflicts between pending operations and the version vector
+fn analyze_conflicts(pending_ops: &Vec<TextOperation>, version_vector: &VersionVector) -> Vec<String> {
+    let mut conflicts = Vec::new();
+    
+    for op in pending_ops {
+        if !version_vector.is_causally_ready(op) {
+            conflicts.push(format!(
+                "Operation from user {} at version {} is not causally ready (current: {})",
+                op.user_id,
+                op.version,
+                version_vector.get(&op.user_id)
+            ));
+        }
+    }
+    
+    conflicts
+}
+
+/// Convert document content to text representation for display
+fn document_content_to_text(content: &DocumentContent) -> String {
+    if content.format == "crdt" {
+        // For CRDT documents, we would need to parse the CRDT data
+        // This is a simplified implementation
+        if let Some(crdt_data) = content.data.get("crdt_data") {
+            format!("CRDT Document: {:?}", crdt_data)
+        } else {
+            "Invalid CRDT document format".to_string()
+        }
+    } else {
+        // For other formats, try to convert to string
+        match serde_json::to_string_pretty(&content.data) {
+            Ok(text) => text,
+            Err(_) => format!("{:?}", content.data),
+        }
+    }
+}
             "Invalid CRDT document format".to_string()
         }
     } else {

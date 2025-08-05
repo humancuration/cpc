@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
+use ot::{Operation, TextOperation as OtTextOperation};
 
 /// Position in a document
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -39,6 +40,25 @@ pub struct PresenceUpdate {
     pub color: String,
     pub last_active: DateTime<Utc>,
     pub timestamp: DateTime<Utc>,
+}
+
+/// Viewport update message for synchronizing viewport positions
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct ViewportUpdate {
+    pub user_id: Uuid,
+    pub document_id: Uuid,
+    pub viewport: Rect,
+    pub resolution: f64, // LOD resolution for cursors
+    pub timestamp: DateTime<Utc>,
+}
+
+/// Rectangle representing a viewport or region
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Rect {
+    pub x: f64,
+    pub y: f64,
+    pub width: f64,
+    pub height: f64,
 }
 
 /// Presence summary message for efficient broadcasting
@@ -136,4 +156,10 @@ pub enum SignalingMessage {
         status: String, // e.g., "online", "away", "busy"
         timestamp: DateTime<Utc>,
     },
+    
+    /// Text operation for collaborative editing
+    TextOperation(OtTextOperation),
+    
+    /// Viewport update for synchronizing viewport positions
+    ViewportUpdate(ViewportUpdate),
 }
