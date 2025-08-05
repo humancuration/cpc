@@ -68,26 +68,27 @@ let relationship = repository.create_relationship(relationship).await?;
 The SocialService combines repositories and consent management:
 
 ```rust
-use social_graph::{SocialService, InMemoryRelationshipRepository, ConsentAdapter};
+use social_graph::{SocialService, InMemoryRelationshipRepository, ConsentServiceImpl, create_default_providers};
 use std::sync::Arc;
 
 let repository = Arc::new(InMemoryRelationshipRepository::new());
-let consent_adapter = Arc::new(ConsentAdapter::new(/* consent_service */));
-let social_service = SocialService::new(repository, consent_adapter);
+let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
+let content_providers = create_default_providers();
+let social_service = SocialService::new(repository, consent_service, content_providers);
 
 // Create a friendship
 let friendship = social_service.create_friendship(user1_id, user2_id).await?;
 ```
-
 ## Consent Integration
 
-The social_graph package integrates with the consent_manager crate to ensure all social interactions respect user consent preferences:
+The social_graph package integrates with the consent system to ensure all social interactions respect user consent preferences:
 
 ```rust
-use social_graph::ConsentAdapter;
+use social_graph::{ConsentService, ConsentServiceImpl};
 
-let consent_adapter = ConsentAdapter::new(consent_service);
-let has_consent = consent_adapter.check_consent(user_id, target_user_id).await?;
+let consent_service = ConsentServiceImpl::new(repository);
+let has_consent = consent_service.can_view_content(viewer_id, content_owner_id, visibility).await?;
+```
 ```
 
 ## GraphQL API

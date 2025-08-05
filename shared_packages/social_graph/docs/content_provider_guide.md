@@ -61,7 +61,7 @@ pub struct ContentItem {
 To implement a new content provider, you need to:
 
 1. Create a struct that implements the `ContentProvider` trait
-2. Register it with the `SocialService`
+2. Pass it to the `SocialService` constructor
 
 ### Example Implementation
 
@@ -130,32 +130,33 @@ impl ContentProvider for MyCustomProvider {
 }
 ```
 
-## Registering ContentProviders
+## Creating ContentProviders
 
-Content providers are registered with the `SocialService`:
+Content providers are passed to the `SocialService` constructor:
 
 ```rust
 use social_graph::{
     application::SocialService,
     infrastructure::{
-        content_providers::{register_providers},
+        content_providers::{create_default_providers},
         in_memory_repository::InMemoryRelationshipRepository,
-        consent_adapter::ConsentAdapter,
+        consent_service_impl::ConsentServiceImpl,
     },
+    domain::service::consent_service::ConsentService,
 };
 use std::sync::Arc;
 
 // Create social service
 let repository = Arc::new(InMemoryRelationshipRepository::new());
-let consent_service = consent_manager::ConsentService::new();
-let consent_adapter = Arc::new(ConsentAdapter::new(consent_service));
-let mut social_service = SocialService::new(repository, consent_adapter);
+let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
+let content_providers = create_default_providers();
+let social_service = SocialService::new(repository, consent_service, content_providers);
 
-// Register all built-in providers
-register_providers(&mut social_service);
-
-// Or register individual providers
-social_service.register_content_provider(Arc::new(MyCustomProvider));
+// Or create custom providers
+let custom_providers = vec![
+    Arc::new(MyCustomProvider) as Arc<dyn ContentProvider>,
+];
+let social_service = SocialService::new(repository, consent_service, custom_providers);
 ```
 
 ## Using the Universal Feed
@@ -210,3 +211,51 @@ To add new content types:
 2. Implement a new `ContentProvider` for your content source
 3. Register the provider with the `SocialService`
 4. Update the consent system if needed for new content types
+
+## Error Handling Improvements
+
+### New Error Type
+```rust
+#[derive(Debug)]
+pub enum ContentProviderError {
+    FetchFailed(String),
+    ConsentCheckFailed(Uuid),
+    InvalidParameters,
+    DependencyUnavailable(String),
+    // ...
+}
+```
+
+### Updated Trait Definition
+```rust
+#[async_trait]
+pub trait ContentProvider: Send + Sync {
+    async fn get_content(
+        &self,
+        user_id: Uuid,
+        after: Option<DateTime<Utc>>,
+        limit: usize,
+        filters: &[FeedFilter]
+    ) -> Result<Vec<ContentItem>, ContentProviderError>;
+}
+```
+
+### Benefits
+- Structured error information
+- Better error context
+- Improved diagnostics
+- Standardized handling
+
+## Using the Registry
+
+The dynamic provider system allows registering and unregistering content providers at runtime:
+
+```rust
+use social_graph::infrastructure::content_providers::{ContentProviderRegistry, ProviderMetadata};
+use std::sync::Arc;
+
+let registry = Arc::new(ContentProviderRegistry::new());
+// Register providers dynamically
+```
+
+See `DYNAMIC_PROVIDERS.md` for more details.

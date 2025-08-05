@@ -52,8 +52,8 @@
 The system is ready to use with the built-in SocialPostProvider and VideoProvider. New providers can be implemented by:
 
 1. Creating a struct that implements the `ContentProvider` trait
-2. Registering the provider with the `SocialService` using `register_content_provider`
-3. Or using the convenience function `register_providers` to register all built-in providers
+2. Passing the provider to the `SocialService` constructor using `create_default_providers()`
+3. Or using the convenience function `create_default_providers()` to create all built-in providers
 
 ## Next Steps
 

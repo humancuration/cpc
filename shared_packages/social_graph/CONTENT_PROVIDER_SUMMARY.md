@@ -12,14 +12,13 @@ This document summarizes the implementation of the ContentProvider system for th
 
 ### 2. Application Layer
 - Updated `SocialService` in `src/application/social_service.rs` to:
-  - Maintain a registry of content providers
-  - Implement `register_content_provider` method
+  - Accept content providers through constructor
   - Implement `get_universal_feed` method with aggregation logic
   - Implement `apply_consent` method for consent checking
 
 ### 3. Infrastructure Layer
 - Created `src/infrastructure/content_providers/` module with:
-  - `mod.rs`: Module definition and provider registration function
+  - `mod.rs`: Module definition and provider creation function
   - `social_post.rs`: SocialPostProvider implementation with placeholder content
   - `video.rs`: VideoProvider implementation with placeholder content
 
@@ -53,8 +52,8 @@ This document summarizes the implementation of the ContentProvider system for th
 The system is ready to use with the built-in SocialPostProvider and VideoProvider. New providers can be implemented by:
 
 1. Creating a struct that implements the `ContentProvider` trait
-2. Registering the provider with the `SocialService` using `register_content_provider`
-3. Or using the convenience function `register_providers` to register all built-in providers
+2. Passing the provider to the `SocialService` constructor using `create_default_providers()`
+3. Or using the convenience function `create_default_providers()` to create all built-in providers
 
 ## Next Steps
 

@@ -2,10 +2,9 @@
 
 use social_graph::{
     User, Relationship, RelationshipType, Activity, ActivityType,
-    ConsentAdapter, create_schema
+    create_schema
 };
 use uuid::Uuid;
-use consent_manager::ConsentService;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -43,12 +42,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         true
     );
     
+    
     println!("Created activity for user {}", user1.username);
     
-    // Create consent adapter (in a real app, you would inject the actual ConsentService)
+    // In a real app, you would create a ConsentService implementation
     // let consent_service = ConsentService::new(/* storage implementation */);
-    // let consent_adapter = ConsentAdapter::new(consent_service);
-    
     // Create GraphQL schema
     let schema = create_schema();
     println!("Created GraphQL schema: {:?}", schema);

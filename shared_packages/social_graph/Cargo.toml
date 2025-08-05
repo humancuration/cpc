@@ -14,6 +14,12 @@ tonic = "0.10"
 chrono = { version = "0.4", features = ["serde"] }
 tokio = { version = "1.0", features = ["full"] }
 sqlx = { version = "0.7", features = ["postgres", "uuid", "chrono", "runtime-tokio-rustls"] }
+postgres-types = { version = "0.2", features = ["derive"] }
+lru = "0.12"
+thiserror = "1.0"
+semver = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
 # Shared packages
 consent_manager = { path = "../consent_manager" }
@@ -33,6 +39,18 @@ path = "examples/full_example.rs"
 [[example]]
 name = "content_provider_example"
 path = "examples/content_provider_example.rs"
+
+[[example]]
+name = "state_migration_example"
+path = "examples/state_migration_example.rs"
+
+[[example]]
+name = "dynamic_provider_example"
+path = "examples/dynamic_provider_example.rs"
+
+[[example]]
+name = "hot_swap_example"
+path = "examples/hot_swap_example.rs"
 
 [[test]]
 name = "integration_test"
@@ -54,6 +72,26 @@ path = "tests/content_fetching_test.rs"
 name = "integration_content_provider_test"
 path = "tests/integration_content_provider_test.rs"
 
+[[test]]
+name = "consent_service_test"
+path = "tests/consent_service_test.rs"
+
+[[test]]
+name = "social_service_integration_test"
+path = "tests/social_service_integration_test.rs"
+
+[[test]]
+name = "integration_consent_test"
+path = "tests/integration_consent_test.rs"
+
+[[test]]
+name = "state_migration_test"
+path = "tests/state_migration_test.rs"
+
 [[bench]]
 name = "repository_benchmark"
 harness = false
+
+[[test]]
+name = "error_handling_test"
+path = "tests/error_handling_test.rs"

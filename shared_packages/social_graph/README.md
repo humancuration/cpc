@@ -12,6 +12,10 @@ This package provides functionality for managing social relationships and intera
 - GraphQL API for social interactions
 - Multiple repository implementations (in-memory, PostgreSQL)
 - Comprehensive testing and benchmarking
+- State migration for hot-swappable content providers
+- Robust error handling during provider registration and updates
+- Advanced dependency management with conflict resolution
+- Guaranteed state preservation through rollback mechanisms
 
 ## Architecture
 
@@ -29,9 +33,11 @@ The package follows hexagonal architecture principles with clear separation of c
 - **Activity**: Represents user activities and interactions
 - **ContentProvider**: Trait for integrating new content sources into the universal feed
 - **RelationshipRepository**: Trait for relationship storage implementations
-- **ConsentAdapter**: Integrates with consent_manager crate for consent management
+- **ConsentService**: Trait for consent management
 - **SocialService**: Application service combining repositories and consent management
 - **GraphQL Schema**: Provides queries for social interactions
+- **DependencyResolver**: Handles dependency validation and version checking for content providers
+- **StateMigrator**: Manages state transfer during provider updates
 
 ## GraphQL API
 
@@ -67,13 +73,13 @@ let repository = PostgresRelationshipRepository::new(pool);
 
 ## Consent Integration
 
-The social_graph package integrates with the consent_manager crate to ensure that all social interactions respect user consent preferences. The ConsentAdapter provides a clean interface for checking and updating consent levels for social interactions.
+The social_graph package integrates with the consent system to ensure that all social interactions respect user consent preferences. The ConsentService provides a clean interface for checking consent levels for social interactions.
 
 ```rust
-use social_graph::ConsentAdapter;
+use social_graph::{ConsentService, ConsentServiceImpl};
 
-let consent_adapter = ConsentAdapter::new(consent_service);
-let has_consent = consent_adapter.check_consent(user_id, target_user_id).await?;
+let consent_service = ConsentServiceImpl::new(repository);
+let has_consent = consent_service.can_view_content(viewer_id, content_owner_id, visibility).await?;
 ```
 
 ## Usage Example
@@ -82,7 +88,7 @@ let has_consent = consent_adapter.check_consent(user_id, target_user_id).await?;
 use social_graph::{
     User, Relationship, RelationshipType,
     InMemoryRelationshipRepository, RelationshipRepository,
-    ConsentAdapter, SocialService
+    ConsentServiceImpl, SocialService
 };
 use std::sync::Arc;
 
@@ -93,11 +99,11 @@ let user2 = User::new("bob".to_string(), "Bob Johnson".to_string(), "bob@example
 // Create repository
 let repository = Arc::new(InMemoryRelationshipRepository::new());
 
-// Create consent adapter
-let consent_adapter = Arc::new(ConsentAdapter::new(consent_service));
+// Create consent service
+let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
 
 // Create social service
-let social_service = SocialService::new(repository, consent_adapter);
+let social_service = SocialService::new(repository, consent_service, content_providers);
 
 // Create friendship
 let friendship = social_service.create_friendship(user1.id, user2.id).await?;
@@ -109,6 +115,7 @@ let friendship = social_service.create_friendship(user1.id, user2.id).await?;
 - [ContentProvider Guide](docs/content_provider_guide.md): Guide to implementing and using ContentProviders
 - [GraphQL API](docs/graphql_api.md): Detailed GraphQL schema documentation
 - [Migration Scripts](migrations/): Database migration scripts
+- [State Migration Guide](docs/state_migration_guide.md): Guide to state migration for content providers
 
 ## Examples
 
@@ -117,6 +124,9 @@ See the `examples/` directory for complete usage examples:
 - `basic_usage.rs`: Basic package usage
 - `full_example.rs`: Complete example showing all components
 - `content_provider_example.rs`: Example demonstrating the ContentProvider system
+- `state_migration_example.rs`: Example demonstrating state migration with error handling
+- `dynamic_provider_example.rs`: Example demonstrating dynamic provider registration with dependency resolution
+- `hot_swap_example.rs`: Example demonstrating hot-swapping of providers with state migration
 
 To run an example:
 ```bash

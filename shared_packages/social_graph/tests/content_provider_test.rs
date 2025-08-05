@@ -2,12 +2,13 @@
 
 use social_graph::{
     application::SocialService,
-    domain::model::{ContentType, FeedFilter},
+    domain::model::{ContentType, FeedFilter, ContentProviderError},
     infrastructure::{
-        content_providers::register_providers,
+        content_providers::{create_default_registry, ContentProviderRegistry},
         in_memory_repository::InMemoryRelationshipRepository,
-        consent_adapter::ConsentAdapter,
+        consent_service_impl::ConsentServiceImpl,
     },
+    domain::service::consent_service::ConsentService,
 };
 use std::sync::Arc;
 use uuid::Uuid;
@@ -15,13 +16,10 @@ use uuid::Uuid;
 #[tokio::test]
 async fn test_content_provider_registration() {
     let repository = Arc::new(InMemoryRelationshipRepository::new());
-    let consent_service = consent_manager::ConsentService::new();
-    let consent_adapter = Arc::new(ConsentAdapter::new(consent_service));
+    let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
     
-    let mut social_service = SocialService::new(repository, consent_adapter);
-    
-    // Register content providers
-    register_providers(&mut social_service);
+    let registry = create_default_registry(consent_service.clone());
+    let social_service = SocialService::new(repository, consent_service, registry);
     
     // The service should now have 2 content providers registered
     // Note: We can't directly access the content_providers field since it's private
@@ -31,14 +29,10 @@ async fn test_content_provider_registration() {
 #[tokio::test]
 async fn test_get_universal_feed() {
     let repository = Arc::new(InMemoryRelationshipRepository::new());
-    let consent_service = consent_manager::ConsentService::new();
-    let consent_adapter = Arc::new(ConsentAdapter::new(consent_service));
+    let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
     
-    let mut social_service = SocialService::new(repository, consent_adapter);
-    
-    // Register content providers
-    register_providers(&mut social_service);
-    
+    let registry = create_default_registry(consent_service.clone());
+    let social_service = SocialService::new(repository, consent_service, registry);
     // Get universal feed
     let user_id = Uuid::new_v4();
     let feed = social_service.get_universal_feed(
@@ -57,13 +51,10 @@ async fn test_get_universal_feed() {
 #[tokio::test]
 async fn test_feed_filtering() {
     let repository = Arc::new(InMemoryRelationshipRepository::new());
-    let consent_service = consent_manager::ConsentService::new();
-    let consent_adapter = Arc::new(ConsentAdapter::new(consent_service));
+    let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
     
-    let mut social_service = SocialService::new(repository, consent_adapter);
-    
-    // Register content providers
-    register_providers(&mut social_service);
+    let registry = create_default_registry(consent_service.clone());
+    let social_service = SocialService::new(repository, consent_service, registry);
     
     // Test filtering by content type
     let social_post_filter = vec![FeedFilter {

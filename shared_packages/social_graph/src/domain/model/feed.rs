@@ -26,6 +26,7 @@ pub enum Visibility {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ContentItem {
     pub id: Uuid,
+    pub owner_id: Uuid,
     pub content_type: ContentType,
     pub source_package: String,
     pub metadata: JsonValue,
@@ -50,8 +51,57 @@ pub trait ContentProvider: Send + Sync {
         after: Option<DateTime<Utc>>,
         limit: usize,
         filters: &[FeedFilter]
-    ) -> Result<Vec<ContentItem>, Box<dyn std::error::Error>>;
+    ) -> Result<Vec<ContentItem>, ContentProviderError>;
+    
+    /// Serialize the provider's state for migration purposes
+    fn serialize_state(&self) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+        // Default implementation returns empty state
+        Ok(Vec::new())
+    }
+    
+    /// Deserialize state into the provider
+    fn deserialize_state(&self, _data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+        // Default implementation does nothing
+        Ok(())
+    }
 }
+
+/// Errors that can occur during content provider operations
+#[derive(Debug)]
+pub enum ContentProviderError {
+    /// Failed to fetch content from the provider
+    FetchFailed(String),
+    
+    /// Consent check failed for a content item
+    ConsentCheckFailed(Uuid),
+    
+    /// Invalid parameters provided to the content provider
+    InvalidParameters,
+    
+    /// A required dependency is unavailable
+    DependencyUnavailable(String),
+    
+    /// Failed to serialize provider state during migration
+    StateSerializationError,
+    
+    /// Failed to deserialize provider state during migration
+    StateDeserializationError,
+}
+
+impl std::fmt::Display for ContentProviderError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ContentProviderError::FetchFailed(msg) => write!(f, "Fetch failed: {}", msg),
+            ContentProviderError::ConsentCheckFailed(id) => write!(f, "Consent check failed for user: {}", id),
+            ContentProviderError::InvalidParameters => write!(f, "Invalid parameters provided"),
+            ContentProviderError::DependencyUnavailable(dep) => write!(f, "Dependency unavailable: {}", dep),
+            ContentProviderError::StateSerializationError => write!(f, "Failed to serialize provider state"),
+            ContentProviderError::StateDeserializationError => write!(f, "Failed to deserialize provider state"),
+        }
+    }
+}
+
+impl std::error::Error for ContentProviderError {}
 
 #[cfg(test)]
 mod tests {
@@ -82,9 +132,9 @@ mod tests {
         let id = Uuid::new_v4();
         let timestamp = Utc::now();
         let metadata = json!({"title": "Test Post", "content": "Hello World"});
-        
         let content_item = ContentItem {
             id,
+            owner_id: Uuid::new_v4(),
             content_type: ContentType::SocialPost,
             source_package: "social_graph".to_string(),
             metadata: metadata.clone(),

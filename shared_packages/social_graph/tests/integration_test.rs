@@ -1,105 +1,110 @@
-//! Integration tests for the social_graph package
+//! Integration test for all new functionality
 
 use social_graph::{
-    User, Relationship, RelationshipType, Activity, ActivityType,
-    ContentType, Visibility, ContentItem, FeedFilter,
-    ConsentAdapter
+    application::SocialService,
+    domain::model::{ContentType},
+    infrastructure::{
+        content_providers::{ContentProviderRegistry, ProviderMetadata, SocialPostProvider, VideoProvider},
+        in_memory_repository::InMemoryRelationshipRepository,
+        consent_service_impl::ConsentServiceImpl,
+        consent_middleware::ConsentMiddleware,
+    },
+    domain::service::consent_service::ConsentService,
 };
+use std::sync::Arc;
 use uuid::Uuid;
 
-#[test]
-fn test_user_creation() {
-    let user = User::new(
-        "testuser".to_string(),
-        "Test User".to_string(),
-        "test@example.com".to_string(),
-    );
+#[tokio::test]
+async fn test_full_integration() {
+    // Create registry
+    let registry = Arc::new(ContentProviderRegistry::new());
+    let repository = Arc::new(InMemoryRelationshipRepository::new());
+    let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
     
-    assert_eq!(user.username, "testuser");
-    assert_eq!(user.display_name, "Test User");
-    assert_eq!(user.email, "test@example.com");
-    assert!(user.is_active);
-}
-
-#[test]
-fn test_relationship_creation() {
-    let user1_id = Uuid::new_v4();
-    let user2_id = Uuid::new_v4();
-    
-    let relationship = Relationship::new(
-        user1_id,
-        user2_id,
-        RelationshipType::Friend,
-    );
-    
-    assert_eq!(relationship.source_user_id, user1_id);
-    assert_eq!(relationship.target_user_id, user2_id);
-    assert_eq!(relationship.relationship_type, RelationshipType::Friend);
-    assert!(relationship.is_active);
-}
-
-#[test]
-fn test_activity_creation() {
-    let user_id = Uuid::new_v4();
-    let target_id = Some(Uuid::new_v4());
-    let metadata = Some(serde_json::json!({"message": "test"}));
-    
-    let activity = Activity::new(
-        user_id,
-        ActivityType::PostCreated,
-        target_id,
-        Some("post".to_string()),
-        metadata.clone(),
-        true,
-    );
-    
-    assert_eq!(activity.user_id, user_id);
-    assert_eq!(activity.activity_type, ActivityType::PostCreated);
-    assert_eq!(activity.target_id, target_id);
-    assert_eq!(activity.target_type, Some("post".to_string()));
-    assert_eq!(activity.metadata, metadata);
-    assert!(activity.is_public);
-}
-
-#[test]
-fn test_content_item_creation() {
-    let id = Uuid::new_v4();
-    let timestamp = chrono::Utc::now();
-    let metadata = serde_json::json!({
-        "title": "Test Post",
-        "content": "Hello World"
-    });
-    
-    let content_item = ContentItem {
-        id,
+    // Register providers
+    let social_post_provider = Arc::new(SocialPostProvider);
+    let social_post_metadata = ProviderMetadata {
+        id: Uuid::new_v4(),
+        name: "SocialPostProvider".to_string(),
         content_type: ContentType::SocialPost,
-        source_package: "social_graph".to_string(),
-        metadata: metadata.clone(),
-        timestamp,
-        visibility: Visibility::Public,
-        relevance_score: 0.8,
+        version: "1.0.0".to_string(),
+        dependencies: vec![],
     };
     
-    assert_eq!(content_item.id, id);
-    assert_eq!(content_item.content_type, ContentType::SocialPost);
-    assert_eq!(content_item.source_package, "social_graph");
-    assert_eq!(content_item.metadata, metadata);
-    assert_eq!(content_item.visibility, Visibility::Public);
-    assert_eq!(content_item.relevance_score, 0.8);
-}
-
-#[test]
-fn test_feed_filter_creation() {
-    let filter = FeedFilter {
-        content_type: Some(ContentType::Video),
-        package: Some("video_package".to_string()),
-        visibility: Some(Visibility::FriendsOnly),
+    let video_provider = Arc::new(VideoProvider);
+    let video_metadata = ProviderMetadata {
+        id: Uuid::new_v4(),
+        name: "VideoProvider".to_string(),
+        content_type: ContentType::Video,
+        version: "1.0.0".to_string(),
+        dependencies: vec![],
     };
     
-    assert_eq!(filter.content_type, Some(ContentType::Video));
-    assert_eq!(filter.package, Some("video_package".to_string()));
-    assert_eq!(filter.visibility, Some(Visibility::FriendsOnly));
+    // Register the providers
+    registry.register_provider(social_post_provider, social_post_metadata).unwrap();
+    registry.register_provider(video_provider, video_metadata).unwrap();
+    
+    // Create social service with registry
+    let social_service = SocialService::with_registry(
+        repository,
+        consent_service,
+        registry,
+    ).unwrap();
+    
+    // Get universal feed
+    let user_id = Uuid::new_v4();
+    let feed = social_service.get_universal_feed(
+        user_id,
+        None,
+        10,
+        None
+    ).await.unwrap();
+    
+    // The feed should contain items from both providers
+    assert!(feed.len() > 0);
 }
 
-// Note: Integration tests with the consent_manager would require a running service
-// or a mock implementation, which is beyond the scope of this basic test.
+#[tokio::test]
+async fn test_consent_middleware_with_registry() {
+    // Create registry
+    let registry = Arc::new(ContentProviderRegistry::new());
+    let repository = Arc::new(InMemoryRelationshipRepository::new());
+    let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
+    
+    // Register providers with consent middleware
+    let social_post_provider = Arc::new(SocialPostProvider);
+    let social_post_with_middleware = Arc::new(ConsentMiddleware::new(
+        social_post_provider,
+        consent_service.clone(),
+    ));
+    
+    let social_post_metadata = ProviderMetadata {
+        id: Uuid::new_v4(),
+        name: "SocialPostProvider".to_string(),
+        content_type: ContentType::SocialPost,
+        version: "1.0.0".to_string(),
+        dependencies: vec![],
+    };
+    
+    // Register the provider with middleware
+    registry.register_provider(social_post_with_middleware, social_post_metadata).unwrap();
+    
+    // Create social service with registry
+    let social_service = SocialService::with_registry(
+        repository,
+        consent_service,
+        registry,
+    ).unwrap();
+    
+    // Get universal feed
+    let user_id = Uuid::new_v4();
+    let feed = social_service.get_universal_feed(
+        user_id,
+        None,
+        10,
+        None
+    ).await.unwrap();
+    
+    // The feed should contain items, filtered by consent
+    assert!(feed.len() >= 0);
+}

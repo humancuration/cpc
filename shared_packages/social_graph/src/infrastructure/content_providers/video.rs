@@ -18,7 +18,7 @@ impl ContentProvider for VideoProvider {
         after: Option<DateTime<Utc>>,
         limit: usize,
         filters: &[FeedFilter]
-    ) -> Result<Vec<ContentItem>, Box<dyn std::error::Error>> {
+    ) -> Result<Vec<ContentItem>, ContentProviderError> {
         // Check if filters apply to this content type
         let mut applies = true;
         for filter in filters {
@@ -44,6 +44,7 @@ impl ContentProvider for VideoProvider {
             
             let item = ContentItem {
                 id: Uuid::new_v4(),
+                owner_id: user_id,
                 content_type: ContentType::Video,
                 source_package: "video_package".to_string(),
                 metadata: json!({

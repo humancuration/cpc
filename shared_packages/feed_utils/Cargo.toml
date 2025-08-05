@@ -1,0 +1,26 @@
+[package]
+name = "feed_utils"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+uuid = { version = "1.0", features = ["v4", "serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+async-trait = "0.1"
+thiserror = "1.0"
+tracing = "0.1"
+
+# Social graph for content items
+social_graph = { path = "../social_graph" }
+
+# Collaborative docs for document previews
+collaborative_docs = { path = "../collaborative_docs" }
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+tokio-test = "0.4"

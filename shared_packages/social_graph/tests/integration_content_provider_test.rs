@@ -2,12 +2,13 @@
 
 use social_graph::{
     application::SocialService,
-    domain::model::{ContentType, FeedFilter},
+    domain::model::{ContentType, FeedFilter, ContentProviderError},
     infrastructure::{
-        content_providers::{register_providers},
+        content_providers::{create_default_registry},
         in_memory_repository::InMemoryRelationshipRepository,
-        consent_adapter::ConsentAdapter,
+        consent_service_impl::ConsentServiceImpl,
     },
+    domain::service::consent_service::ConsentService,
 };
 use std::sync::Arc;
 use uuid::Uuid;
@@ -16,14 +17,13 @@ use uuid::Uuid;
 async fn test_complete_content_provider_flow() {
     // Create all necessary components
     let repository = Arc::new(InMemoryRelationshipRepository::new());
-    let consent_service = consent_manager::ConsentService::new();
-    let consent_adapter = Arc::new(ConsentAdapter::new(consent_service));
+    let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
+    
+    // Create content providers registry
+    let registry = create_default_registry(consent_service.clone());
     
     // Create social service
-    let mut social_service = SocialService::new(repository, consent_adapter);
-    
-    // Register all content providers
-    register_providers(&mut social_service);
+    let social_service = SocialService::new(repository, consent_service, registry);
     
     // Verify providers were registered
     // Note: We can't directly access the content_providers field since it's private
@@ -104,11 +104,13 @@ async fn test_complete_content_provider_flow() {
 #[tokio::test]
 async fn test_content_provider_limiting() {
     let repository = Arc::new(InMemoryRelationshipRepository::new());
-    let consent_service = consent_manager::ConsentService::new();
-    let consent_adapter = Arc::new(ConsentAdapter::new(consent_service));
+    let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
     
-    let mut social_service = SocialService::new(repository, consent_adapter);
-    register_providers(&mut social_service);
+    // Create content providers registry
+    let registry = create_default_registry(consent_service.clone());
+    
+    // Create social service
+    let social_service = SocialService::new(repository, consent_service, registry);
     
     let user_id = Uuid::new_v4();
     

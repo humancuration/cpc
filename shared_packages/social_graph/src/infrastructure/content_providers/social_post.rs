@@ -16,7 +16,7 @@ impl ContentProvider for SocialPostProvider {
         after: Option<DateTime<Utc>>,
         limit: usize,
         filters: &[FeedFilter]
-    ) -> Result<Vec<ContentItem>, Box<dyn std::error::Error>> {
+    ) -> Result<Vec<ContentItem>, ContentProviderError> {
         // Check if filters apply to this content type
         let mut applies = true;
         for filter in filters {
@@ -42,6 +42,7 @@ impl ContentProvider for SocialPostProvider {
             
             let item = ContentItem {
                 id: Uuid::new_v4(),
+                owner_id: user_id,
                 content_type: ContentType::SocialPost,
                 source_package: "social_graph".to_string(),
                 metadata: json!({

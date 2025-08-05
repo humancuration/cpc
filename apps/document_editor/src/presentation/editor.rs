@@ -1,24 +1,65 @@
 use yew::prelude::*;
 use collaboration_engine::presence::UserPresence;
 use collaboration_engine::core::Position;
+use realtime_signaling::SignalingClient;
 use uuid::Uuid;
 use std::collections::HashMap;
-
 #[derive(Properties, PartialEq)]
 pub struct DocumentEditorProps {
     pub document_id: String,
+    pub signaling_client: SignalingClient,
 }
-
 #[function_component(DocumentEditor)]
 pub fn document_editor(props: &DocumentEditorProps) -> Html {
     let document_content = use_state(|| String::from("Start typing your document here..."));
     let presences = use_state(|| Vec::<UserPresence>::new());
+    let signaling_client = use_state(|| props.signaling_client.clone());
+    
+    // Connect to signaling server on component mount
+    {
+        let signaling_client = signaling_client.clone();
+        use_effect_with((), move |_| {
+            wasm_bindgen_futures::spawn_local(async move {
+                // In a real implementation, we would connect to the signaling server
+                // and set up message handlers here
+                // For now, we'll just simulate the connection
+                /*
+                if let Err(e) = signaling_client.connect("ws://localhost:8080/ws").await {
+                    web_sys::console::error_1(&format!("Failed to connect to signaling server: {:?}", e).into());
+                }
+                */
+            });
+        });
+    }
     
     let oninput = {
         let document_content = document_content.clone();
+        let signaling_client = signaling_client.clone();
         Callback::from(move |e: InputEvent| {
             let input: HtmlInputElement = e.target_unchecked_into();
-            document_content.set(input.value());
+            let new_value = input.value();
+            document_content.set(new_value.clone());
+            
+            // Send typing indicator
+            wasm_bindgen_futures::spawn_local({
+                let signaling_client = signaling_client.clone();
+                async move {
+                    // In a real implementation, we would send typing indicator messages
+                    /*
+                    let message = realtime_signaling::message::SignalingMessage::TypingIndicator {
+                        document_id: Uuid::nil(), // Would be actual document ID
+                        user_id: Uuid::nil(), // Would be actual user ID
+                        is_typing: !new_value.is_empty(),
+                        timestamp: chrono::Utc::now(),
+                    };
+                    if let Err(e) = signaling_client.send_message(&message).await {
+                        web_sys::console::error_1(&format!("Failed to send typing indicator: {:?}", e).into());
+                    }
+                    */
+                }
+            });
+        })
+    };
         })
     };
     

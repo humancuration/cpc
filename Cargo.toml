@@ -22,6 +22,7 @@ members = [
     "shared_packages/feedback_visualization",
     "apps/video_editor",
     "apps/video_editor_desktop",
+    "apps/document_editor",
 ]
 
 [workspace.dependencies]

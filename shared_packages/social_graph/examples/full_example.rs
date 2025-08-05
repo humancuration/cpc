@@ -3,8 +3,8 @@
 use social_graph::{
     User, Relationship, RelationshipType, Activity, ActivityType,
     ContentType, Visibility, ContentItem, FeedFilter,
-    ConsentAdapter, InMemoryRelationshipRepository, RelationshipRepository,
-    SocialService, create_schema, SocialGraphSchema
+    InMemoryRelationshipRepository, RelationshipRepository,
+    SocialService, create_schema, SocialGraphSchema, ConsentServiceImpl
 };
 use std::sync::Arc;
 use uuid::Uuid;
@@ -31,12 +31,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 2. Create repository
     let repository = Arc::new(InMemoryRelationshipRepository::new());
     
-    // 3. Create consent adapter (in a real app, you would inject the actual ConsentService)
-    // For this example, we'll create a mock consent adapter
-    let consent_adapter = Arc::new(create_mock_consent_adapter());
+    // 3. Create consent service
+    let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
     
     // 4. Create social service
-    let social_service = SocialService::new(repository.clone(), consent_adapter.clone());
+    let social_service = SocialService::new(repository.clone(), consent_service);
     
     // 5. Create friendship
     match social_service.create_friendship(user1.id, user2.id).await {
@@ -69,52 +68,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(Uuid::new_v4()),
         Some("post".to_string()),
         Some(serde_json::json!({"title": "Hello World"})),
+        Some(serde_json::json!({"title": "Hello World"})),
         );
         
-        println!("Created activity for user {}: {:?}", user1.username, activity.activity_type);
-        
-        // 8. Create a content item for the universal feed
-        let content_item = ContentItem {
-            id: Uuid::new_v4(),
-            content_type: ContentType::SocialPost,
-            source_package: "social_graph".to_string(),
-            metadata: serde_json::json!({
-                "title": "Hello World",
-                "content": "This is my first post in the universal feed!"
-            }),
-            timestamp: chrono::Utc::now(),
-            visibility: Visibility::Public,
-            relevance_score: 0.9,
-        };
-        
-        println!("Created content item for universal feed: {:?}", content_item.content_type);
-        
-        // 9. Create GraphQL schema
-        let schema = create_schema();
-        println!("Created GraphQL schema: {:?}", schema);
-        
-        println!("\n=== Example completed successfully ===");
-        
-        Ok(())
-    }
-}
-
-// Mock consent adapter for demonstration purposes
-fn create_mock_consent_adapter() -> ConsentAdapter {
-    // In a real implementation, this would use the actual consent_manager crate
-    // For this example, we'll create a simple mock
+    println!("Created activity for user {}: {:?}", user1.username, activity.activity_type);
     
-    // Since we can't easily create a mock ConsentService without the storage,
-    // we'll create a simplified version that always returns true for consent
-    
-    // This is a placeholder implementation - in a real app you would inject
-    // the actual ConsentService from the consent_manager crate
-    ConsentAdapter::new(/* actual ConsentService would go here */)
+    Ok(())
 }
-
-// Note: The above function won't compile because we need to provide a real ConsentService.
-// In a real application, you would do something like this:
-//
-// let consent_storage = /* your storage implementation */;
-// let consent_service = ConsentService::new(consent_storage);
-// let consent_adapter = ConsentAdapter::new(consent_service);

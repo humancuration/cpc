@@ -7,15 +7,19 @@ pub mod domain;
 pub mod infrastructure;
 pub mod presentation;
 pub mod application;
+pub mod error;
 
-pub use domain::model::{User, Relationship, RelationshipType, Activity, ActivityType, ContentType, Visibility, ContentItem, FeedFilter, ContentProvider};
+pub use domain::model::{User, Relationship, RelationshipType, Activity, ActivityType, ContentType, Visibility, ContentItem, FeedFilter, ContentProvider, ContentProviderError};
 pub use domain::repository::RelationshipRepository;
-pub use infrastructure::consent_adapter::ConsentAdapter;
+pub use domain::service::consent_service::{ConsentService, ConsentError};
+pub use infrastructure::consent_service_impl::ConsentServiceImpl;
 pub use infrastructure::in_memory_repository::InMemoryRelationshipRepository;
 pub use infrastructure::postgres_repository::PostgresRelationshipRepository;
-pub use infrastructure::content_providers::{SocialPostProvider, VideoProvider};
+pub use infrastructure::content_providers::{SocialPostProvider, VideoProvider, ContentProviderRegistry, ProviderMetadata, ProviderChangeListener};
+pub use infrastructure::consent_middleware::ConsentMiddleware;
 pub use application::SocialService;
 pub use presentation::graphql::{create_schema, SocialGraphSchema};
+pub use error::SocialGraphError;
 
 // Re-export GraphQL types for convenience
 pub use presentation::graphql::{
@@ -43,4 +47,9 @@ mod tests {
         // It's a placeholder test that will be expanded with actual tests.
         assert!(true);
     }
+}
+
+#[cfg(test)]
+pub mod test_utils {
+    pub use crate::tests::test_utils::*;
 }

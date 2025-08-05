@@ -2,12 +2,13 @@
 
 use social_graph::{
     application::SocialService,
-    domain::model::{ContentType, FeedFilter},
+    domain::model::{ContentType, FeedFilter, ContentProviderError},
     infrastructure::{
-        content_providers::{SocialPostProvider, VideoProvider},
+        content_providers::{SocialPostProvider, VideoProvider, create_default_registry},
         in_memory_repository::InMemoryRelationshipRepository,
-        consent_adapter::ConsentAdapter,
+        consent_service_impl::ConsentServiceImpl,
     },
+    domain::service::consent_service::ConsentService,
 };
 use std::sync::Arc;
 use uuid::Uuid;
@@ -102,11 +103,10 @@ async fn test_provider_filtering() {
 #[tokio::test]
 async fn test_universal_feed_with_content() {
     let repository = Arc::new(InMemoryRelationshipRepository::new());
-    let consent_service = consent_manager::ConsentService::new();
-    let consent_adapter = Arc::new(ConsentAdapter::new(consent_service));
+    let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
     
-    let mut social_service = SocialService::new(repository, consent_adapter);
-    register_providers(&mut social_service);
+    let registry = create_default_registry(consent_service.clone());
+    let social_service = SocialService::new(repository, consent_service, registry);
     
     let user_id = Uuid::new_v4();
     let feed = social_service.get_universal_feed(

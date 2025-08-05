@@ -56,21 +56,19 @@ The system is ready to use with the built-in SocialPostProvider and VideoProvide
 use social_graph::{
     application::SocialService,
     infrastructure::{
-        content_providers::register_providers,
+        content_providers::create_default_providers,
         in_memory_repository::InMemoryRelationshipRepository,
-        consent_adapter::ConsentAdapter,
+        consent_service_impl::ConsentServiceImpl,
     },
+    domain::service::consent_service::ConsentService,
 };
 use std::sync::Arc;
 
 // Create social service
 let repository = Arc::new(InMemoryRelationshipRepository::new());
-let consent_service = consent_manager::ConsentService::new();
-let consent_adapter = Arc::new(ConsentAdapter::new(consent_service));
-let mut social_service = SocialService::new(repository, consent_adapter);
-
-// Register all built-in providers
-register_providers(&mut social_service);
+let consent_service = Arc::new(ConsentServiceImpl::new(repository.clone()));
+let content_providers = create_default_providers();
+let social_service = SocialService::new(repository, consent_service, content_providers);
 
 // Get universal feed
 let user_id = Uuid::new_v4();
