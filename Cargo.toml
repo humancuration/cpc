@@ -38,6 +38,7 @@ members = [
     "apps/website-builder",
     "apps/yapper",
     "apps/shtairir_example",
+    "apps/shtairir_cli",
     
     # Shared Packages
     "shared_packages/api_gateway",

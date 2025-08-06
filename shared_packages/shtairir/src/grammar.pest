@@ -1,5 +1,5 @@
 command = { app_name ":" function_call }
-app_name = { "bevy" | "ffmpeg" | "pdf" | "redis" | "postgres" | "tauri" | "yew" | "redis" | "sled" | "graphql" | "p2panda" | "axum" | "tracing" | "rodio" | "glow" | "ash" | "bevy" | ident }
+app_name = { "bevy" | "ffmpeg" | "pdf" | "redis" | "postgres" | "tauri" | "yew" | "sled" | "graphql" | "p2panda" | "axum" | "tracing" | "rodio" | "glow" | "ash" | ident }
 function_call = { ident ~ "(" ~ args? ~ ")" }
 args = { value ~ ("," ~ value)* }
 value = { number | string | ident | object | array }

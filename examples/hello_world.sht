@@ -1,0 +1,6 @@
+// Hello World example in Shtairir
+bevy:create_entity()
+bevy:add_component("entity1", "Position")
+bevy:set_component("entity1", "Position", {x=100, y=200})
+redis:set("greeting", "Hello, World!")
+redis:set("count", 42)
