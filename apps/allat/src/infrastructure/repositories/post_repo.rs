@@ -23,6 +23,7 @@ pub trait PostRepository: Send + Sync {
     async fn update(&self, post: &Post) -> Result<(), PostRepositoryError>;
     async fn delete(&self, id: Uuid) -> Result<(), PostRepositoryError>;
     async fn get_vote_count(&self, post_id: Uuid) -> Result<i32, PostRepositoryError>;
+    async fn search(&self, criteria: crate::application::search_service::SearchCriteria) -> Result<Vec<Post>, PostRepositoryError>;
 }
 
 pub struct PgPostRepository {
@@ -389,7 +390,66 @@ impl PostRepository for PgPostRepository {
         )
         .fetch_one(&self.pool)
         .await?;
+Ok((row.upvotes - row.downvotes) as i32)
+}
 
-        Ok((row.upvotes - row.downvotes) as i32)
-    }
+async fn search(&self, criteria: crate::application::search_service::SearchCriteria) -> Result<Vec<Post>, PostRepositoryError> {
+// Base query with full-text search
+let mut query = "SELECT id, community_id, user_id, title, content, created_at, updated_at, parent_id
+                FROM posts
+                WHERE search_vector @@ websearch_to_tsquery('english', $1)".to_string();
+
+let mut params: Vec<Box<dyn postgres_types::ToSql + Sync>> = vec![
+    Box::new(criteria.query)
+];
+let mut param_index = 2;
+
+// Add community filter if provided
+if let Some(community_id) = criteria.community_id {
+    query.push_str(&format!(" AND community_id = ${}", param_index));
+    params.push(Box::new(community_id));
+    param_index += 1;
+}
+
+// Add author filter if provided
+if let Some(author_id) = criteria.author_id {
+    query.push_str(&format!(" AND user_id = ${}", param_index));
+    params.push(Box::new(author_id));
+    param_index += 1;
+}
+
+// Add date range filters if provided
+if let Some(date_from) = criteria.date_from {
+    query.push_str(&format!(" AND created_at >= ${}", param_index));
+    params.push(Box::new(date_from));
+    param_index += 1;
+}
+
+if let Some(date_to) = criteria.date_to {
+    query.push_str(&format!(" AND created_at <= ${}", param_index));
+    params.push(Box::new(date_to));
+    param_index += 1;
+}
+
+// Add ordering by relevance and date
+query.push_str(" ORDER BY ts_rank(search_vector, websearch_to_tsquery('english', $1)) DESC, created_at DESC");
+
+// Add limit and offset if provided
+if let Some(limit) = criteria.limit {
+    query.push_str(&format!(" LIMIT ${}", param_index));
+    params.push(Box::new(limit as i64));
+    param_index += 1;
+}
+
+if let Some(offset) = criteria.offset {
+    query.push_str(&format!(" OFFSET ${}", param_index));
+    params.push(Box::new(offset as i64));
+}
+
+// Execute query
+// Note: This is a simplified approach. In practice, we'd need to use a more complex
+// parameter binding mechanism or a query builder.
+todo!("Implement parameter binding for dynamic query")
+}
+}
 }

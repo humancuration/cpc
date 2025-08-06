@@ -3,11 +3,13 @@ use crate::application::{
     community_service::CommunityService,
     post_service::PostService,
     comment_service::CommentService,
+    search_service::{SearchService, SearchCriteria},
 };
 use crate::api::objects::{
     community::CommunityObject,
     post::PostObject,
     comment::CommentObject,
+    input::SearchCriteriaInput,
 };
 
 pub struct QueryRoot;
@@ -61,6 +63,7 @@ impl QueryRoot {
     }
     
     async fn search_communities(&self, ctx: &Context<'_>, query: String) -> Result<Vec<CommunityObject>> {
+        // This is the old simple search - we'll keep it for backward compatibility
         let service = ctx.data::<std::sync::Arc<dyn CommunityService>>()?;
         let communities = service.search_communities(query).await?;
         
@@ -68,9 +71,35 @@ impl QueryRoot {
     }
     
     async fn search_posts(&self, ctx: &Context<'_>, query: String) -> Result<Vec<PostObject>> {
+        // This is the old simple search - we'll keep it for backward compatibility
         let service = ctx.data::<std::sync::Arc<dyn PostService>>()?;
         let posts = service.search_posts(query).await?;
         
+        Ok(posts.into_iter().map(PostObject::from).collect())
+    }
+    
+    // New advanced search queries
+    async fn search_communities_advanced(&self, ctx: &Context<'_>, criteria: SearchCriteriaInput) -> Result<Vec<CommunityObject>> {
+        let service = ctx.data::<std::sync::Arc<dyn SearchService>>()?;
+        let communities = service.search_communities(criteria.query).await?;
+        
+        Ok(communities.into_iter().map(CommunityObject::from).collect())
+    }
+    
+    async fn search_posts_advanced(&self, ctx: &Context<'_>, criteria: SearchCriteriaInput) -> Result<Vec<PostObject>> {
+        let service = ctx.data::<std::sync::Arc<dyn SearchService>>()?;
+        
+        let search_criteria = SearchCriteria {
+            query: criteria.query,
+            community_id: criteria.community_id,
+            author_id: criteria.author_id,
+            date_from: criteria.date_from,
+            date_to: criteria.date_to,
+            limit: criteria.limit.map(|l| l as u32),
+            offset: criteria.offset.map(|o| o as u32),
+        };
+        
+        let posts = service.search_posts(search_criteria).await?;
         Ok(posts.into_iter().map(PostObject::from).collect())
     }
 }

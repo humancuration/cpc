@@ -1,10 +1,13 @@
 use async_graphql::{Context, Object, Result, ID, Subscription};
 use async_stream::stream;
 use futures_util::stream::Stream;
+use uuid::Uuid;
 use crate::api::objects::{
     post::PostObject,
     comment::CommentObject,
 };
+use crate::domain::notification_events::NotificationEvent;
+use crate::application::notification_service::NotificationService;
 
 pub struct SubscriptionRoot;
 
@@ -36,4 +39,29 @@ impl SubscriptionRoot {
             // In a real implementation, this would emit PostObject when posts are updated
         }
     }
+    
+    async fn notifications(&self, ctx: &Context<'_>, user_id: Uuid) -> Result<impl Stream<Item = NotificationEventObject>> {
+        // In a real implementation, we would subscribe to the notification service
+        // and stream notifications to the client
+        todo!("Implement notification streaming")
+    }
+}
+
+// Create NotificationEventObject for GraphQL
+pub struct NotificationEventObject(crate::domain::notification_events::NotificationEvent);
+
+#[Object]
+impl NotificationEventObject {
+    async fn event_type(&self) -> &str {
+        match &self.0 {
+            crate::domain::notification_events::NotificationEvent::PostReply { .. } => "POST_REPLY",
+            crate::domain::notification_events::NotificationEvent::CommentReply { .. } => "COMMENT_REPLY",
+            crate::domain::notification_events::NotificationEvent::PostUpvoted { .. } => "POST_UPVOTED",
+            crate::domain::notification_events::NotificationEvent::CommentUpvoted { .. } => "COMMENT_UPVOTED",
+            crate::domain::notification_events::NotificationEvent::NewPostInCommunity { .. } => "NEW_POST",
+            crate::domain::notification_events::NotificationEvent::ContentReported { .. } => "CONTENT_REPORTED",
+        }
+    }
+    
+    // Add other fields as needed
 }

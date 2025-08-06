@@ -4,3 +4,4 @@ pub mod comment;
 pub mod media_asset;
 pub mod user;
 pub mod input;
+pub mod analytics;

@@ -1,3 +1,7 @@
+.clinerules/
+.kilocode/
+.kiro/
+.trae/
 target/
 combined_project_text_markdown.txt
 combined_project_cpc.txt

@@ -294,6 +294,17 @@ pub struct CommonProps {
     pub style: Option<String>,
 }
 
+impl Default for CommonProps {
+    fn default() -> Self {
+        Self {
+            class: None,
+            id: None,
+            disabled: false,
+            style: None,
+        }
+    }
+}
+
 /// Size variants for components
 ///
 /// This enum defines the size variants that components can have.

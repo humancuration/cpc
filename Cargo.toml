@@ -57,10 +57,15 @@ wry = "0.52.1"
 plotters = "0.3.7"
 axum = "0.8.4"
 sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "postgres", "sqlite", "chrono", "uuid", "json"] }
+sqlx-cli = 0.8.6
 tracing = "0.1.41"
 tracing-subscriber = "0.3.18"
 rodio = "0.21.1"
 pdf = "0.9.0"
+
+redis = 0.32.4
+diesel = 2.2.12
+bb8 = 0.9.0
 
 # GraphQL for Public API
 async-graphql = "7.0.17"

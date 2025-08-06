@@ -10,6 +10,11 @@ use crate::application::community_service::{CommunityService, CommunityServiceIm
 use crate::application::post_service::{PostService, PostServiceImpl};
 use crate::application::comment_service::{CommentService, CommentServiceImpl};
 use crate::application::vote_service::{VoteService, VoteServiceImpl};
+use crate::application::search_service::{SearchService, SearchServiceImpl};
+use crate::application::notification_service::{NotificationService, NotificationServiceImpl};
+use crate::application::analytics_service::{AnalyticsService, AnalyticsServiceImpl};
+use crate::infrastructure::notification_core_adapter::{NotificationCoreAdapter, MockCoreNotificationService};
+use crate::infrastructure::repositories::analytics_repo::{PgAnalyticsRepository, AnalyticsRepository};
 use crate::api::schema::create_schema;
 use std::sync::Arc;
 use sqlx::PgPool;
@@ -144,13 +149,66 @@ async fn main() {
     let comment_service: Arc<dyn CommentService> = Arc::new(CommentServiceImpl::new(comment_repo.clone(), post_repo.clone()));
     let vote_service: Arc<dyn VoteService> = Arc::new(VoteServiceImpl::new(vote_repo.clone(), post_repo.clone(), auth_service.clone()));
     
+    // Initialize search service
+    let search_service: Arc<dyn SearchService> = Arc::new(SearchServiceImpl::new(
+        post_repo.clone(),
+        community_repo.clone(),
+    ));
+    
+    // Initialize the core notification service
+    // In a real implementation, this would initialize the actual core notification service
+    // with all its channels and configuration
+    let core_notification_service: Arc<dyn crate::infrastructure::notification_core_adapter::CoreNotificationService> =
+        Arc::new(MockCoreNotificationService);
+    
+    // Create the adapter
+    let notification_core_adapter: Arc<dyn crate::application::notification_service::NotificationCoreService> =
+        Arc::new(NotificationCoreAdapter::new(core_notification_service.clone()));
+    
+    // Create the notification service
+    let notification_service: Arc<dyn NotificationService> = Arc::new(
+        NotificationServiceImpl::new(notification_core_adapter)
+    );
+    
     // Create GraphQL schema
     let schema = create_schema(
         community_service.clone(),
         post_service.clone(),
         comment_service.clone(),
         vote_service.clone(),
+        search_service.clone(),
     );
+    
+    // Initialize the analytics repository and service
+    let analytics_repo: Arc<dyn AnalyticsRepository> = Arc::new(PgAnalyticsRepository::new(pool.clone()));
+    let analytics_service: Arc<dyn AnalyticsService> = Arc::new(AnalyticsServiceImpl::new(
+        post_repo.clone(),
+        community_repo.clone(),
+        search_service.clone(),
+    );
+    
+    // Create GraphQL schema
+    let schema = create_schema(
+        community_service.clone(),
+        post_service.clone(),
+        comment_service.clone(),
+        vote_service.clone(),
+        search_service.clone(),
+        analytics_service.clone(),
+    );
+    
+    // Update service initializations to pass notification service
+    let comment_service: Arc<dyn CommentService> = Arc::new(CommentServiceImpl::new(
+        comment_repo.clone(),
+        post_repo.clone(),
+        Some(notification_service.clone()),
+    ));
+    
+    let post_service: Arc<dyn PostService> = Arc::new(PostServiceImpl::new(
+        post_repo.clone(),
+        community_repo.clone(),
+        Some(notification_service.clone()),
+    ));
     
     // Set up Axum router
     let app = Router::new()

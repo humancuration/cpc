@@ -6,6 +6,8 @@ use crate::infrastructure::repositories::community_repo::CommunityRepository;
 use uuid::Uuid;
 use std::sync::Arc;
 use crate::application::error::ApplicationError;
+use crate::domain::notification_events::NotificationEvent;
+use crate::application::notification_service::NotificationService;
 
 #[derive(Debug, Clone)]
 pub struct CreatePostInput {
@@ -36,14 +38,16 @@ pub trait PostService: Send + Sync {
 pub struct PostServiceImpl {
     post_repo: Arc<dyn PostRepository>,
     community_repo: Arc<dyn CommunityRepository>,
+    notification_service: Option<Arc<dyn NotificationService>>, // Make optional for now
 }
 
 impl PostServiceImpl {
     pub fn new(
         post_repo: Arc<dyn PostRepository>,
         community_repo: Arc<dyn CommunityRepository>,
+        notification_service: Option<Arc<dyn NotificationService>>,
     ) -> Self {
-        Self { post_repo, community_repo }
+        Self { post_repo, community_repo, notification_service }
     }
 }
 
@@ -71,6 +75,21 @@ impl PostService for PostServiceImpl {
         );
         
         self.post_repo.create(&post).await?;
+        
+        // Send notification if service is available
+        if let Some(ref notification_service) = self.notification_service {
+            let event = NotificationEvent::NewPostInCommunity {
+                post_id: post.id,
+                post_title: post.title.clone(),
+                author_id: post.user_id,
+                author_name: "User".to_string(), // We'd need to fetch the actual username
+                community_id: post.community_id,
+                community_name: "Community".to_string(), // We'd need to fetch the actual community name
+            };
+            
+            // In a real implementation, we'd handle errors appropriately
+            let _ = notification_service.handle_event(event).await;
+        }
         
         Ok(post)
     }

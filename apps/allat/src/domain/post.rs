@@ -3,6 +3,7 @@ use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use crate::domain::vote::Vote;
 use crate::domain::media_asset::MediaAsset;
+use std::fmt::Write;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Post {
@@ -33,5 +34,11 @@ impl Post {
             parent_id,
             media_assets,
         }
+    }
+    
+    pub fn get_searchable_text(&self) -> String {
+        let mut text = String::new();
+        write!(&mut text, "{} {}", self.title, self.content).unwrap();
+        text
     }
 }

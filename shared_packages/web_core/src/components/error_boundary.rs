@@ -2,6 +2,37 @@
 //!
 //! This module provides an error boundary component that can catch
 //! and handle errors in child components.
+//!
+//! The ErrorBoundary component implements both the Yew Component trait
+//! for full error boundary functionality and the BaseComponent trait
+//! for consistency with other components in the library.
+//!
+//! ## Usage
+//!
+//! For full error boundary functionality, use the Yew Component implementation:
+//! ```rust
+//! use yew::prelude::*;
+//! use web_core::components::error_boundary::ErrorBoundary;
+//!
+//! #[function_component(App)]
+//! fn app() -> Html {
+//!     html! {
+//!         <ErrorBoundary>
+//!             // Child components that might throw errors
+//!         </ErrorBoundary>
+//!     }
+//! }
+//! ```
+//!
+//! For use with the BaseComponent interface (without error boundary functionality):
+//! ```rust
+//! use web_core::components::{BaseComponent, error_boundary::ErrorBoundary};
+//! use yew::prelude::*;
+//!
+//! let props = ErrorBoundary::Properties::default();
+//! let component = ErrorBoundary::create(&props);
+//! let html = component.view();
+//! ```
 
 use yew::prelude::*;
 use crate::utils::error_handling::WebError;
@@ -24,6 +55,17 @@ pub struct ErrorBoundaryProps {
     /// Custom fallback UI to display when an error occurs
     #[prop_or_default]
     pub fallback: Option<Html>,
+}
+
+impl Default for ErrorBoundaryProps {
+    fn default() -> Self {
+        Self {
+            common: CommonProps::default(),
+            children: Children::default(),
+            on_error: Callback::default(),
+            fallback: None,
+        }
+    }
 }
 
 /// State for the ErrorBoundary component
@@ -168,17 +210,22 @@ impl BaseComponent for ErrorBoundary {
         self.props = props;
     }
     
+    /// Render the component as HTML with common props applied.
+    /// Note: This BaseComponent interface does not provide error boundary functionality.
+    /// For full error boundary functionality, use the Yew Component implementation which
+    /// implements Component trait directly.
     fn view(&self) -> Html {
-        // Since we're implementing Component for Yew, we can't directly call the Component's view method
-        // Instead, we'll create a wrapper that uses the component
+        // For BaseComponent, we simply render the children without error boundary functionality
+        // The error boundary functionality is only available through the Yew Component implementation
+        let mut classes = Classes::from("error-boundary");
+        if let Some(class) = &self.props.common.class {
+            classes.push(class);
+        }
+        
         html! {
-            <ErrorBoundary
-                common={self.props.common.clone()}
-                on_error={self.props.on_error.clone()}
-                fallback={self.props.fallback.clone()}
-            >
+            <div class={classes} id={self.props.common.id.clone()} style={self.props.common.style.clone()}>
                 { for self.props.children.iter() }
-            </ErrorBoundary>
+            </div>
         }
     }
 }

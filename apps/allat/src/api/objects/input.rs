@@ -44,3 +44,14 @@ pub struct VotePostInput {
     pub post_id: ID,
     pub vote_type: String, // "UPVOTE" or "DOWNVOTE"
 }
+
+#[derive(InputObject, Debug)]
+pub struct SearchCriteriaInput {
+    pub query: String,
+    pub community_id: Option<uuid::Uuid>,
+    pub author_id: Option<uuid::Uuid>,
+    pub date_from: Option<chrono::DateTime<chrono::Utc>>,
+    pub date_to: Option<chrono::DateTime<chrono::Utc>>,
+    pub limit: Option<i32>,
+    pub offset: Option<i32>,
+}

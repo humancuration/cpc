@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
+use std::fmt::Write;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Community {
@@ -20,5 +21,11 @@ impl Community {
             rules,
             created_at: Utc::now(),
         }
+    }
+    
+    pub fn get_searchable_text(&self) -> String {
+        let mut text = String::new();
+        write!(&mut text, "{} {}", self.name, self.description).unwrap();
+        text
     }
 }

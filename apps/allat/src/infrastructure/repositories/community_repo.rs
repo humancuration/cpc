@@ -19,6 +19,7 @@ pub trait CommunityRepository: Send + Sync {
     async fn find_by_name(&self, name: &str) -> Result<Option<Community>, CommunityRepositoryError>;
     async fn update(&self, community: &Community) -> Result<(), CommunityRepositoryError>;
     async fn delete(&self, id: Uuid) -> Result<(), CommunityRepositoryError>;
+    async fn search(&self, query: &str) -> Result<Vec<Community>, CommunityRepositoryError>;
 }
 
 pub struct PgCommunityRepository {
@@ -132,5 +133,32 @@ impl CommunityRepository for PgCommunityRepository {
         .execute(&self.pool)
         .await?;
         Ok(())
+    }
+    
+    async fn search(&self, query: &str) -> Result<Vec<Community>, CommunityRepositoryError> {
+        let rows = sqlx::query!(
+            r#"
+            SELECT id, name, description, rules, created_at
+            FROM communities
+            WHERE search_vector @@ websearch_to_tsquery('english', $1)
+            ORDER BY ts_rank(search_vector, websearch_to_tsquery('english', $1)) DESC, created_at DESC
+            "#,
+            query
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        let communities = rows
+            .into_iter()
+            .map(|row| Community {
+                id: row.id,
+                name: row.name,
+                description: row.description,
+                rules: row.rules,
+                created_at: row.created_at,
+            })
+            .collect();
+
+        Ok(communities)
     }
 }

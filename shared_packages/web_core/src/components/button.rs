@@ -3,12 +3,19 @@
 //! This module provides a flexible button component that can be
 //! styled and used throughout CPC web applications.
 
+use crate::components::{BaseComponent, CommonProps};
 use yew::prelude::*;
 use stylist::{style, yew::styled_component};
 
 /// Properties for the Button component
-#[derive(Properties, PartialEq)]
+#[derive(Properties, PartialEq, Clone)]
 pub struct ButtonProps {
+    /// Common properties
+    ///
+    /// These are common properties that all components support.
+    #[prop_or_default]
+    pub common: CommonProps,
+    
     /// The text to display on the button
     #[prop_or_default]
     pub children: Children,
@@ -24,10 +31,6 @@ pub struct ButtonProps {
     /// The variant of the button
     #[prop_or_default]
     pub variant: ButtonVariant,
-    
-    /// Additional CSS classes to apply
-    #[prop_or_default]
-    pub class: Option<String>,
 }
 
 /// Button variant styling options
@@ -47,7 +50,103 @@ impl Default for ButtonVariant {
 
 /// A reusable button component with theming
 #[styled_component(Button)]
-pub fn button(props: &ButtonProps) -> Html {
+pub struct Button {
+    props: ButtonProps,
+}
+
+impl BaseComponent for Button {
+    type Properties = ButtonProps;
+    
+    fn create(props: &Self::Properties) -> Self {
+        Self { props: props.clone() }
+    }
+    
+    fn update_props(&mut self, props: Self::Properties) {
+        self.props = props;
+    }
+    
+    fn view(&self) -> Html {
+        let variant_style = match self.props.variant {
+            ButtonVariant::Primary => style!(
+                r#"
+                background-color: #007bff;
+                color: white;
+                border: 1px solid #007bff;
+            "#
+            ),
+            ButtonVariant::Secondary => style!(
+                r#"
+                background-color: #6c757d;
+                color: white;
+                border: 1px solid #6c757d;
+            "#
+            ),
+            ButtonVariant::Danger => style!(
+                r#"
+                background-color: #dc3545;
+                color: white;
+                border: 1px solid #dc3545;
+            "#
+            ),
+            ButtonVariant::Text => style!(
+                r#"
+                background-color: transparent;
+                color: #007bff;
+                border: none;
+            "#
+            ),
+        };
+        
+        let base_style = style!(
+            r#"
+            display: inline-block;
+            font-weight: 400;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: 0.25rem;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            cursor: pointer;
+            
+            &:disabled {
+                opacity: 0.65;
+                cursor: not-allowed;
+            }
+            
+            &:hover:not(:disabled) {
+                opacity: 0.8;
+            }
+        "#
+        );
+        
+        let classes = classes!(
+            base_style.get_class_name(),
+            variant_style.get_class_name(),
+            self.props.common.class.clone()
+        );
+        
+        html! {
+            <button
+                class={classes}
+                onclick={self.props.onclick.clone()}
+                disabled={self.props.disabled}
+            >
+                { for self.props.children.iter() }
+            </button>
+        }
+    }
+}
+
+impl Button {
+    /// Create a new button component
+    pub fn new(props: ButtonProps) -> Self {
+        Self::create(&props)
+    }
+}
     let variant_style = match props.variant {
         ButtonVariant::Primary => style!(
             r#"

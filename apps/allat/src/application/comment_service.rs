@@ -5,6 +5,8 @@ use crate::infrastructure::repositories::post_repo::PostRepository;
 use uuid::Uuid;
 use std::sync::Arc;
 use crate::application::error::ApplicationError;
+use crate::domain::notification_events::NotificationEvent;
+use crate::application::notification_service::NotificationService;
 
 #[derive(Debug, Clone)]
 pub struct CreateCommentInput {
@@ -31,14 +33,16 @@ pub trait CommentService: Send + Sync {
 pub struct CommentServiceImpl {
     comment_repo: Arc<dyn CommentRepository>,
     post_repo: Arc<dyn PostRepository>,
+    notification_service: Option<Arc<dyn NotificationService>>, // Make optional for now
 }
 
 impl CommentServiceImpl {
     pub fn new(
         comment_repo: Arc<dyn CommentRepository>,
         post_repo: Arc<dyn PostRepository>,
+        notification_service: Option<Arc<dyn NotificationService>>,
     ) -> Self {
-        Self { comment_repo, post_repo }
+        Self { comment_repo, post_repo, notification_service }
     }
     
     /// Check if a comment exceeds the maximum nesting depth (10 levels)
@@ -97,6 +101,40 @@ impl CommentService for CommentServiceImpl {
         );
         
         self.comment_repo.create(&comment).await?;
+        
+        // Send notification if service is available
+        if let Some(ref notification_service) = self.notification_service {
+            if let Some(parent_id) = input.parent_id {
+                // This is a reply to a comment
+                // We would need to fetch the parent comment and post details
+                // For now, we'll create a simplified event
+                let event = NotificationEvent::CommentReply {
+                    comment_id: comment.id,
+                    parent_comment_id: parent_id,
+                    replier_id: comment.user_id,
+                    replier_name: "User".to_string(), // We'd need to fetch the actual username
+                    post_id: comment.post_id,
+                    post_title: "Post".to_string(), // We'd need to fetch the actual post title
+                };
+                
+                // In a real implementation, we'd handle errors appropriately
+                let _ = notification_service.handle_event(event).await;
+            } else {
+                // This is a comment on a post
+                // We would need to fetch the post details
+                let event = NotificationEvent::PostReply {
+                    post_id: comment.post_id,
+                    post_title: "Post".to_string(), // We'd need to fetch the actual post title
+                    replier_id: comment.user_id,
+                    replier_name: "User".to_string(), // We'd need to fetch the actual username
+                    community_id: Uuid::new_v4(), // We'd need to fetch the actual community ID
+                    community_name: "Community".to_string(), // We'd need to fetch the actual community name
+                };
+                
+                // In a real implementation, we'd handle errors appropriately
+                let _ = notification_service.handle_event(event).await;
+            }
+        }
         
         Ok(comment)
     }

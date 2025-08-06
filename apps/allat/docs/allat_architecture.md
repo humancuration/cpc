@@ -9,6 +9,8 @@ Allat is a decentralized forum application inspired by Reddit, following hexagon
 - **ThreadService**: Manages threaded conversations with nesting (up to 10 levels)
 - **VoteService**: Voting system (upvote/downvote) with karma tracking
 - **ModerationService**: Content moderation tools including post removal and user bans
+- **SearchService**: Advanced search functionality for posts and communities
+- **NotificationService**: Notification system for social interactions
 
 ## Integration Points
 - **Identity**: Uses `cpc_oauth2` for authentication and unified identity
@@ -35,12 +37,16 @@ User → Create Post → Media Processing → Store Post → Update Feed → Rew
 - **PostService**: Create and manage posts with media attachments
 - **VoteService**: Handle voting and update karma accordingly
 - **ModerationService**: Enforce community rules and content policies
+- **SearchService**: Implement advanced search functionality for posts and communities
+- **NotificationService**: Handle notification events and integrate with the notification core service
 
 ### Infrastructure Layer
 - **PostgreSQL Repository**: Persistent storage for communities, posts, and votes
 - **Redis Cache**: Caching for frequently accessed content
 - **WebSocket Server**: Real-time updates for new content
 - **gRPC Client**: Integration with media processing pipeline
+- **PostgreSQL Full-Text Search**: Implementation of advanced search using PostgreSQL's tsvector
+- **Notification Core Adapter**: Integration with the CPC notification system
 
 ## API Contracts
 
@@ -97,7 +103,7 @@ type User {
 - Secure media upload and processing
 
 ## TODO
-- [ ] Implement advanced search functionality
+- [x] Implement advanced search functionality
 - [ ] Add community analytics dashboard
-- [ ] Integrate with notification system
+- [x] Integrate with notification system
 - [ ] Implement cross-posting to Yapper

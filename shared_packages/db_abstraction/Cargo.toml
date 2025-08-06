@@ -1,0 +1,20 @@
+[package]
+name = "db_abstraction"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+diesel = { version = "2.2.12", features = ["postgres", "sqlite", "r2d2", "chrono", "uuid"] }
+diesel_migrations = "2.2.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+db_pool = { path = "../db_pool" }
+
+[dev-dependencies]
+tokio-test = "0.4"

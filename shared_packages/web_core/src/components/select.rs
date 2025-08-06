@@ -32,47 +32,219 @@ use yew::prelude::*;
 use stylist::{style, yew::styled_component};
 
 /// Properties for the Select component
+///
+/// This struct defines the properties that can be passed to the Select component.
+///
+/// ## Examples
+///
+/// ```
+/// use web_core::components::{Select, SelectProps, SelectOption, CommonProps};
+///
+/// let props = SelectProps {
+///     common: CommonProps::default(),
+///     value: "option1".to_string(),
+///     options: vec![
+///         SelectOption { value: "option1".to_string(), label: "Option 1".to_string(), disabled: false },
+///         SelectOption { value: "option2".to_string(), label: "Option 2".to_string(), disabled: false },
+///     ],
+///     onchange: yew::Callback::default(),
+///     placeholder: Some("Select an option".to_string()),
+///     disabled: false,
+///     multiple: false,
+/// };
+/// ```
+///
+/// ## Related Modules
+///
+/// - [Select]
+/// - [SelectOption]
 #[derive(Properties, PartialEq, Clone)]
 pub struct SelectProps {
     /// Common properties
+    ///
+    /// These are common properties that all components support.
     #[prop_or_default]
     pub common: CommonProps,
     
     /// The current value of the select
+    ///
+    /// This should match the value of one of the options.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use web_core::components::SelectProps;
+    ///
+    /// let props = SelectProps {
+    ///     value: "option1".to_string(),
+    ///     ..Default::default()
+    /// };
+    /// ```
     #[prop_or_default]
     pub value: String,
     
     /// Available options
+    ///
+    /// A list of options that the user can select from.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use web_core::components::{SelectProps, SelectOption};
+    ///
+    /// let props = SelectProps {
+    ///     options: vec![
+    ///         SelectOption { value: "option1".to_string(), label: "Option 1".to_string(), disabled: false },
+    ///         SelectOption { value: "option2".to_string(), label: "Option 2".to_string(), disabled: false },
+    ///     ],
+    ///     ..Default::default()
+    /// };
+    /// ```
     #[prop_or_default]
     pub options: Vec<SelectOption>,
     
     /// Callback when the select value changes
+    ///
+    /// This callback is called when the user selects a different option.
+    /// The callback receives the value of the selected option.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use web_core::components::SelectProps;
+    /// use yew::prelude::*;
+    ///
+    /// let props = SelectProps {
+    ///     onchange: Callback::from(|value: String| println!("Selected: {}", value)),
+    ///     ..Default::default()
+    /// };
+    /// ```
     #[prop_or_default]
     pub onchange: Callback<String>,
     
     /// Placeholder text
+    ///
+    /// Text to display when no option is selected.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use web_core::components::SelectProps;
+    ///
+    /// let props = SelectProps {
+    ///     placeholder: Some("Select an option".to_string()),
+    ///     ..Default::default()
+    /// };
+    /// ```
     #[prop_or_default]
     pub placeholder: Option<String>,
     
     /// Whether the select is disabled
+    ///
+    /// When true, the select will be rendered in a disabled state
+    /// and will not respond to user interactions.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use web_core::components::SelectProps;
+    ///
+    /// let props = SelectProps {
+    ///     disabled: true,
+    ///     ..Default::default()
+    /// };
+    /// ```
     #[prop_or_default]
     pub disabled: bool,
     
     /// Whether multiple selection is allowed
+    ///
+    /// When true, the user can select multiple options.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use web_core::components::SelectProps;
+    ///
+    /// let props = SelectProps {
+    ///     multiple: true,
+    ///     ..Default::default()
+    /// };
+    /// ```
     #[prop_or_default]
     pub multiple: bool,
 }
 
 /// Option for the Select component
+///
+/// This struct defines an option that can be used with the Select component.
+///
+/// ## Examples
+///
+/// ```
+/// use web_core::components::SelectOption;
+///
+/// let option = SelectOption {
+///     value: "option1".to_string(),
+///     label: "Option 1".to_string(),
+///     disabled: false,
+/// };
+/// ```
+///
+/// ## Related Modules
+///
+/// - [Select]
+/// - [SelectProps]
 #[derive(PartialEq, Clone, Debug)]
 pub struct SelectOption {
     /// The value of the option
+    ///
+    /// This is the value that will be passed to the onchange callback
+    /// when this option is selected.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use web_core::components::SelectOption;
+    ///
+    /// let option = SelectOption {
+    ///     value: "option1".to_string(),
+    ///     ..Default::default()
+    /// };
+    /// ```
     pub value: String,
     
     /// The label to display for the option
+    ///
+    /// This is the text that will be displayed to the user for this option.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use web_core::components::SelectOption;
+    ///
+    /// let option = SelectOption {
+    ///     label: "Option 1".to_string(),
+    ///     ..Default::default()
+    /// };
+    /// ```
     pub label: String,
     
     /// Whether the option is disabled
+    ///
+    /// When true, the option will be rendered in a disabled state
+    /// and will not be selectable.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use web_core::components::SelectOption;
+    ///
+    /// let option = SelectOption {
+    ///     disabled: true,
+    ///     ..Default::default()
+    /// };
+    /// ```
     #[prop_or_default]
     pub disabled: bool,
 }
