@@ -1,0 +1,12 @@
+[package]
+name = "opengl_renderer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rendering_core = { path = "../rendering_core" }
+wry = "0.52.1"
+glow = "0.16.0"
+
+[dev-dependencies]
+tempfile = "3.0"

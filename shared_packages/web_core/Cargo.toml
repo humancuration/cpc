@@ -1,0 +1,23 @@
+[package]
+name = "web_core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+yew = "0.21.0"
+yew-router = "0.18.0"
+stylist = { version = "0.13.0", features = ["yew_integration"] }
+gloo-net = "0.5"
+gloo-mocks = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+wasm-bindgen = "0.2"
+web-sys = "0.3"
+js-sys = "0.3"
+md5 = "0.7"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+tonic = { version = "0.8", features = ["codegen", "transport"] }
+prost = "0.11"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"

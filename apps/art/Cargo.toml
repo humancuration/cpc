@@ -15,11 +15,15 @@ tokio = { version = "1.0", features = ["full"] }
 tracing = "0.1"
 thiserror = "1.0"
 async-trait = "0.1"
+rayon = "1.7"
 
 # CPC shared packages
 collaboration_engine = { path = "../../shared_packages/collaboration_engine" }
 media = { path = "../../shared_packages/media" }
 common_utils = { path = "../../shared_packages/common_utils" }
+rendering_core = { path = "../../shared_packages/rendering_core" }
+opengl_renderer = { path = "../../shared_packages/opengl_renderer" }
+vulkan_renderer = { path = "../../shared_packages/vulkan_renderer" }
 
 # For testing
 tempfile = "3.0"

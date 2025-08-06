@@ -7,19 +7,28 @@ use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages};
 use crate::core::models::{Project, Layer, LayerType};
 use std::collections::HashMap;
+use crate::main::RenderBackend;
 
 // Import new modules
 pub mod tile_manager;
 pub mod texture_cache;
+pub mod render_manager;
 pub mod pipeline;
+pub mod abstract_pipeline;
 pub mod quality_manager;
 pub mod scaling;
+pub mod effects;
+pub mod selection;
+pub mod transform;
 
 use tile_manager::TileManager;
 use texture_cache::TextureCache;
 use pipeline::{ArtRenderPipeline, dispatch_blending_compute};
 use quality_manager::{QualityManager, RenderQuality};
 use scaling::ScalingManager;
+use effects::dispatch_effects_compute;
+use selection::render_selection_overlays;
+use transform::dispatch_transform_compute;
 
 /// Plugin for art rendering functionality
 pub struct ArtRenderingPlugin;
@@ -39,6 +48,9 @@ impl Plugin for ArtRenderingPlugin {
                 render_layers,
                 handle_input,
                 dispatch_blending_compute,
+                dispatch_effects_compute,
+                render_selection_overlays,
+                dispatch_transform_compute,
                 quality_manager::apply_quality_settings,
                 scaling::update_scaling,
             ));
@@ -249,8 +261,8 @@ fn render_layers(
             for layer in &project.layers {
                 if layer.visible {
                     // Get or create texture for this layer
-                    let texture_handle = texture_cache.get_or_create_texture(layer, &mut images);
-                    
+                    let texture_entry = texture_cache.get_or_create_texture(layer, &mut images);
+                            
                     // Create mesh for the layer
                     let mesh_handle = meshes.add(Mesh::from(shape::Quad::new(Vec2::new(
                         layer.bounds.width,
@@ -259,7 +271,7 @@ fn render_layers(
                     
                     // Create material with the layer texture
                     let material_handle = materials.add(ColorMaterial {
-                        texture: Some(texture_handle.clone()),
+                        texture: Some(texture_entry.bevy_handle.clone()),
                         color: Color::rgba(1.0, 1.0, 1.0, layer.opacity),
                     });
                     

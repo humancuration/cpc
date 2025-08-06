@@ -3,6 +3,7 @@
 //! This module handles different quality presets and their configurations.
 
 use bevy::prelude::*;
+use rendering_core::Renderer;
 
 /// Quality levels for rendering
 #[derive(Debug, Clone, PartialEq)]
@@ -131,6 +132,46 @@ pub fn apply_quality_settings(
     if quality_manager.current_quality != render_settings.quality {
         quality_manager.set_quality(render_settings.quality.clone());
         info!("Applied quality settings: {:?}", render_settings.quality);
+    }
+}
+
+/// Configure backend with current quality settings
+impl QualityManager {
+    pub fn configure_backend(&self, renderer: &mut dyn Renderer) {
+        // Convert app-specific settings to core settings
+        let core_settings = rendering_core::RenderSettings {
+            resolution_scale: 1.0,
+            max_anisotropy: match self.current_quality {
+                RenderQuality::Low => 1,
+                RenderQuality::Medium => 4,
+                RenderQuality::High => 16,
+            },
+            shadow_quality: match self.current_quality {
+                RenderQuality::Low => 1,
+                RenderQuality::Medium => 2,
+                RenderQuality::High => 4,
+            },
+            texture_filtering: match self.current_quality {
+                RenderQuality::Low => rendering_core::TextureFiltering::Nearest,
+                RenderQuality::Medium => rendering_core::TextureFiltering::Linear,
+                RenderQuality::High => rendering_core::TextureFiltering::Anisotropic,
+            },
+            anti_aliasing: match self.current_quality {
+                RenderQuality::Low => rendering_core::AntiAliasingMode::None,
+                RenderQuality::Medium => rendering_core::AntiAliasingMode::MSAAx2,
+                RenderQuality::High => rendering_core::AntiAliasingMode::MSAAx4,
+            },
+            tile_rendering_enabled: true,
+            tile_size: 256,
+            quality_preset: match self.current_quality {
+                RenderQuality::Low => rendering_core::QualityPreset::Low,
+                RenderQuality::Medium => rendering_core::QualityPreset::Medium,
+                RenderQuality::High => rendering_core::QualityPreset::High,
+            },
+        };
+        
+        renderer.apply_quality_settings(&core_settings);
+        info!("Applied quality settings to backend renderer");
     }
 }
 

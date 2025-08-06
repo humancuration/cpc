@@ -8,19 +8,56 @@ use rendering::{ArtRenderingPlugin, RenderProject};
 use tools::brush::BrushToolPlugin;
 use core::models::{Project, Layer, LayerType};
 
+// Renderer backends
+use rendering_core::Renderer;
+use opengl_renderer::OpenGLRenderer;
+use vulkan_renderer::VulkanRenderer;
+use rendering::render_manager::RenderManager;
+
 mod core;
 mod rendering;
 mod tools;
 mod persistence;
 
+/// Available rendering backends
+#[derive(Debug, Clone, PartialEq)]
+pub enum RenderBackend {
+    Bevy,
+    OpenGL,
+    Vulkan,
+}
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_plugins(ArtRenderingPlugin)
-        .add_plugins(BrushToolPlugin)
-        .add_systems(Startup, setup)
-        .add_systems(Update, update)
-        .run();
+    // For now, we'll default to Bevy renderer
+    // In a real implementation, this would be configurable
+    let backend = RenderBackend::Bevy;
+    
+    // Create render manager
+    let mut render_manager = RenderManager::new();
+    render_manager.switch_backend(backend.clone());
+    render_manager.init_renderer();
+    
+    match backend {
+        RenderBackend::Bevy => {
+            App::new()
+                .add_plugins(DefaultPlugins)
+                .add_plugins(ArtRenderingPlugin)
+                .add_plugins(BrushToolPlugin)
+                .add_systems(Startup, setup)
+                .add_systems(Update, update)
+                .run();
+        },
+        RenderBackend::OpenGL => {
+            // Initialize OpenGL renderer
+            // This would require a different initialization approach
+            println!("Using OpenGL renderer");
+        },
+        RenderBackend::Vulkan => {
+            // Initialize Vulkan renderer
+            // This would require a different initialization approach
+            println!("Using Vulkan renderer");
+        },
+    }
+}
 }
 
 fn setup(

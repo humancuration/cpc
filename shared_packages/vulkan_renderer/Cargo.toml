@@ -1,0 +1,13 @@
+[package]
+name = "vulkan_renderer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rendering_core = { path = "../rendering_core" }
+wry = "0.52.1"
+vulkano = "0.38.0"
+vulkano-shaders = "0.38.0"
+
+[dev-dependencies]
+tempfile = "3.0"

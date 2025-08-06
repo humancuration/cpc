@@ -10,6 +10,7 @@ use bevy::render::{
     Render, RenderApp, RenderSet,
 };
 use crate::rendering::{RenderSettings, RenderQuality};
+use rendering_core::{Renderer, RenderSettings as CoreRenderSettings};
 
 /// Custom pipeline for art rendering
 #[derive(Resource)]

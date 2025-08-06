@@ -1,0 +1,12 @@
+[package]
+name = "rendering_core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wry = "0.52.1"
+uuid = { version = "1.7", features = ["v4"] }
+
+[dev-dependencies]
+# For testing
+tempfile = "3.0"

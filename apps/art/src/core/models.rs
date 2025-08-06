@@ -190,6 +190,47 @@ pub enum Action {
         from_index: usize,
         to_index: usize,
     },
+    /// Selection created
+    SelectionCreated {
+        selection_id: Uuid,
+    },
+    /// Selection modified
+    SelectionModified {
+        selection_id: Uuid,
+        old_bounds: Rect,
+        new_bounds: Rect,
+    },
+    /// Selection cleared
+    SelectionCleared,
+    /// Layer transformed (moved, scaled, rotated)
+    LayerTransformed {
+        layer_id: Uuid,
+        old_bounds: Rect,
+        new_bounds: Rect,
+    },
+    /// Text layer content changed
+    TextContentChanged {
+        layer_id: Uuid,
+        old_content: String,
+        new_content: String,
+    },
+    /// Layer effect added
+    LayerEffectAdded {
+        layer_id: Uuid,
+        effect_id: Uuid,
+    },
+    /// Layer effect removed
+    LayerEffectRemoved {
+        layer_id: Uuid,
+        effect_id: Uuid,
+    },
+    /// Layer effect modified
+    LayerEffectModified {
+        layer_id: Uuid,
+        effect_id: Uuid,
+        old_properties: serde_json::Value,
+        new_properties: serde_json::Value,
+    },
 }
 
 /// Project representation - the top-level container for artwork

@@ -4,6 +4,9 @@
 //! for efficient GPU utilization.
 
 use bevy::prelude::*;
+use rendering_core::TextureHandle;
+use opengl_renderer;
+use vulkan_renderer;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages};
 use crate::core::models::{Layer, LayerType};
 use crate::rendering::Rect as LayerRect; // Use Rect from rendering module
@@ -111,11 +114,18 @@ impl TextureAtlas {
     }
 }
 
+/// Multi-backend texture handle
+pub struct MultiBackendTexture {
+    pub bevy_handle: Handle<Image>,
+    pub opengl_handle: Option<opengl_renderer::texture::OpenGLTextureHandle>,
+    pub vulkan_handle: Option<vulkan_renderer::texture::VulkanTextureHandle>,
+}
+
 /// Cache for layer textures and atlases
 #[derive(Resource, Default)]
 pub struct TextureCache {
     /// Cache of layer textures by layer ID
-    pub layer_textures: HashMap<Uuid, Handle<Image>>,
+    pub layer_textures: HashMap<Uuid, MultiBackendTexture>,
     /// Cache of texture atlases by layer ID
     pub layer_atlases: HashMap<Uuid, TextureAtlas>,
     /// Set of dirty layer IDs that need texture updates
@@ -163,22 +173,27 @@ impl TextureCache {
         &mut self,
         layer: &Layer,
         images: &mut Assets<Image>,
-    ) -> Handle<Image> {
-        if let Some(handle) = self.layer_textures.get(&layer.id) {
+    ) -> &mut MultiBackendTexture {
+        if let Some(texture) = self.layer_textures.get(&layer.id) {
             if self.is_dirty(layer.id) {
                 // Update existing texture
                 let image = layer_to_image(layer);
-                images.set(handle.clone(), image);
+                images.set(texture.bevy_handle.clone(), image);
                 self.clear_dirty(layer.id);
             }
-            handle.clone()
+            self.layer_textures.get_mut(&layer.id).unwrap()
         } else {
             // Create new texture
             let image = layer_to_image(layer);
             let handle = images.add(image);
-            self.layer_textures.insert(layer.id, handle.clone());
+            let multi_texture = MultiBackendTexture {
+                bevy_handle: handle.clone(),
+                opengl_handle: None,
+                vulkan_handle: None,
+            };
+            self.layer_textures.insert(layer.id, multi_texture);
             self.clear_dirty(layer.id);
-            handle
+            self.layer_textures.get_mut(&layer.id).unwrap()
         }
     }
     
@@ -279,8 +294,63 @@ mod tests {
         
         cache.mark_dirty(layer_id);
         assert!(cache.is_dirty(layer_id));
-        
         cache.clear_dirty(layer_id);
         assert!(!cache.is_dirty(layer_id));
     }
+}
+
+/// Convert a Bevy image to an OpenGL texture handle
+impl TextureCache {
+    pub fn as_opengl_texture(&self, texture: &MultiBackendTexture) -> &opengl_renderer::texture::OpenGLTextureHandle {
+        // In a real implementation, we would convert the Bevy image to an OpenGL texture
+        // For now, we'll return a placeholder or create one if needed
+        texture.opengl_handle.as_ref().unwrap()
+    }
+    
+    /// Convert a Bevy image to a Vulkan texture handle
+    pub fn as_vulkan_texture(&self, texture: &MultiBackendTexture) -> &vulkan_renderer::texture::VulkanTextureHandle {
+        // In a real implementation, we would convert the Bevy image to a Vulkan texture
+        // For now, we'll return a placeholder or create one if needed
+        texture.vulkan_handle.as_ref().unwrap()
+    }
+    
+    /// Create OpenGL texture representation if it doesn't exist
+    pub fn create_opengl_texture(&mut self, layer_id: Uuid) {
+        if let Some(texture) = self.layer_textures.get_mut(&layer_id) {
+            if texture.opengl_handle.is_none() {
+                // In a real implementation, we would create the OpenGL texture
+                // For now, we'll create a placeholder
+                texture.opengl_handle = Some(opengl_renderer::texture::OpenGLTextureHandle {
+                    texture: unsafe { std::mem::zeroed() }, // Placeholder
+                    descriptor: rendering_core::texture::TextureDescriptor {
+                        width: 256,
+                        height: 256,
+                        format: rendering_core::texture::TextureFormat::Rgba8Unorm,
+                        usage: rendering_core::texture::TextureUsage::default(),
+                    },
+                    gl: unsafe { std::mem::zeroed() }, // Placeholder
+                });
+            }
+        }
+    }
+    
+    /// Create Vulkan texture representation if it doesn't exist
+    pub fn create_vulkan_texture(&mut self, layer_id: Uuid) {
+        if let Some(texture) = self.layer_textures.get_mut(&layer_id) {
+            if texture.vulkan_handle.is_none() {
+                // In a real implementation, we would create the Vulkan texture
+                // For now, we'll create a placeholder
+                texture.vulkan_handle = Some(vulkan_renderer::texture::VulkanTextureHandle {
+                    image_view: unsafe { std::mem::zeroed() }, // Placeholder
+                    descriptor: rendering_core::texture::TextureDescriptor {
+                        width: 256,
+                        height: 256,
+                        format: rendering_core::texture::TextureFormat::Rgba8Unorm,
+                        usage: rendering_core::texture::TextureUsage::default(),
+                    },
+                });
+            }
+        }
+    }
+}
 }

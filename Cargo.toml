@@ -24,6 +24,9 @@ members = [
     "apps/video_editor_desktop",
     "apps/document_editor",
     "shared_packages/ot",
+    "shared_packages/rendering_core",
+    "shared_packages/opengl_renderer",
+    "shared_packages/vulkan_renderer",
 ]
 
 [workspace.dependencies]
@@ -39,6 +42,8 @@ p2panda-store = "0.4.0"
 p2panda-stream = "0.4.0"
 p2panda-sync = "0.4.0"
 
+glow = "0.16.0"
+ash = "0.38.0"
 tauri = "2.7.0"
 yew = { version = "0.21.0", features = ["csr"] }
 yew-router = "0.18.0"

@@ -67,6 +67,10 @@ Internal services
 - RustCrypto 0.2.36
 - oauth2 (for TikTok etc)
 
+- glow = 0.16.0
+- ash = 0.38.0
+
+
 - ffmpeg.wasm/main 0.13.1
 ONLY the royalty-free codecs AV1 for video, Opus for audio, WebM for video container
 - rodio 0.21

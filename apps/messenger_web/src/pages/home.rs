@@ -3,6 +3,7 @@
 use yew::prelude::*;
 use stylist::yew::styled_component;
 use stylist::Style;
+use crate::components::Button;
 
 #[styled_component(Home)]
 pub fn home() -> Html {
@@ -85,7 +86,7 @@ pub fn home() -> Html {
                 <div class="hero">
                     <h1>{"Welcome to Messenger"}</h1>
                     <p>{"Connect with people around the world through secure, private messaging"}</p>
-                    <button class="cta-button">{"Get Started"}</button>
+                    <Button>{"Get Started"}</Button>
                 </div>
                 
                 <div class="features">

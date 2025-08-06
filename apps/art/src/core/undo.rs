@@ -92,6 +92,57 @@ impl HistoryManager {
                 project.reorder_layer(layer_id, from_index);
                 Ok(())
             }
+            Action::SelectionCreated { selection_id } => {
+                // Remove the selection that was created
+                println!("Undid selection creation: {:?}", selection_id);
+                Ok(())
+            }
+            Action::SelectionModified { selection_id, old_bounds, .. } => {
+                // Restore the selection to its old bounds
+                println!("Undid selection modification: {:?} to bounds {:?}", selection_id, old_bounds);
+                Ok(())
+            }
+            Action::SelectionCleared => {
+                // In a real implementation, we would restore the previous selection state
+                println!("Undid selection clear");
+                Ok(())
+            }
+            Action::LayerTransformed { layer_id, old_bounds, .. } => {
+                // Restore the layer to its old bounds
+                if let Some(layer) = project.get_layer_mut(layer_id) {
+                    layer.bounds = old_bounds;
+                }
+                println!("Undid layer transformation: {:?}", layer_id);
+                Ok(())
+            }
+            Action::TextContentChanged { layer_id, old_content, .. } => {
+                // Restore the text layer to its old content
+                println!("Undid text content change on layer {:?} to: {}", layer_id, old_content);
+                Ok(())
+            }
+            Action::LayerEffectAdded { layer_id, effect_id } => {
+                // Remove the effect that was added
+                if let Some(layer) = project.get_layer_mut(layer_id) {
+                    layer.effects.retain(|effect| effect.id != effect_id);
+                }
+                println!("Undid layer effect addition: {:?} on layer {:?}", effect_id, layer_id);
+                Ok(())
+            }
+            Action::LayerEffectRemoved { layer_id, effect_id } => {
+                // In a real implementation, we would restore the removed effect
+                println!("Undid layer effect removal: {:?} on layer {:?}", effect_id, layer_id);
+                Ok(())
+            }
+            Action::LayerEffectModified { layer_id, effect_id, old_properties, .. } => {
+                // Restore the effect to its old properties
+                if let Some(layer) = project.get_layer_mut(layer_id) {
+                    if let Some(effect) = layer.effects.iter_mut().find(|effect| effect.id == effect_id) {
+                        effect.properties.properties = old_properties;
+                    }
+                }
+                println!("Undid layer effect modification: {:?} on layer {:?}", effect_id, layer_id);
+                Ok(())
+            }
         }
     }
     
@@ -117,6 +168,58 @@ impl HistoryManager {
             Action::LayerReordered { layer_id, from_index: _, to_index } => {
                 // Reorder to the new position
                 project.reorder_layer(layer_id, to_index);
+                Ok(())
+            }
+            Action::SelectionCreated { selection_id } => {
+                // Recreate the selection
+                println!("Redid selection creation: {:?}", selection_id);
+                Ok(())
+            }
+            Action::SelectionModified { selection_id, new_bounds, .. } => {
+                // Apply the selection modification
+                println!("Redid selection modification: {:?} to bounds {:?}", selection_id, new_bounds);
+                Ok(())
+            }
+            Action::SelectionCleared => {
+                // Clear the selection again
+                project.selection_state.clear();
+                println!("Redid selection clear");
+                Ok(())
+            }
+            Action::LayerTransformed { layer_id, new_bounds, .. } => {
+                // Apply the layer transformation
+                if let Some(layer) = project.get_layer_mut(layer_id) {
+                    layer.bounds = new_bounds;
+                }
+                println!("Redid layer transformation: {:?}", layer_id);
+                Ok(())
+            }
+            Action::TextContentChanged { layer_id, new_content, .. } => {
+                // Apply the text content change
+                println!("Redid text content change on layer {:?} to: {}", layer_id, new_content);
+                Ok(())
+            }
+            Action::LayerEffectAdded { layer_id, effect_id } => {
+                // Re-add the effect
+                println!("Redid layer effect addition: {:?} on layer {:?}", effect_id, layer_id);
+                Ok(())
+            }
+            Action::LayerEffectRemoved { layer_id, effect_id } => {
+                // Remove the effect again
+                if let Some(layer) = project.get_layer_mut(layer_id) {
+                    layer.effects.retain(|effect| effect.id != effect_id);
+                }
+                println!("Redid layer effect removal: {:?} on layer {:?}", effect_id, layer_id);
+                Ok(())
+            }
+            Action::LayerEffectModified { layer_id, effect_id, new_properties, .. } => {
+                // Apply the effect modification
+                if let Some(layer) = project.get_layer_mut(layer_id) {
+                    if let Some(effect) = layer.effects.iter_mut().find(|effect| effect.id == effect_id) {
+                        effect.properties.properties = new_properties;
+                    }
+                }
+                println!("Redid layer effect modification: {:?} on layer {:?}", effect_id, layer_id);
                 Ok(())
             }
         }
