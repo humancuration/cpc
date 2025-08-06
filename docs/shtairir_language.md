@@ -2,7 +2,7 @@
 
 ## Overview
 
-Shtairir is a unified scripting language that combines Arabic and Hebrew elements for liberation. It enables cross-app interoperability across the CPC ecosystem by providing a common grammar and execution environment for all applications.
+Shtairir (from Arabic and Hebrew for liberation) is a unified scripting language. It enables cross-app interoperability across the CPC ecosystem by providing a common grammar and execution environment for all applications.
 
 ## Language Design
 

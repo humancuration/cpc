@@ -10,23 +10,23 @@ feedback_analysis = { path = "../../shared_packages/feedback_analysis" }
 feedback_visualization = { path = "../../shared_packages/feedback_visualization" }
 reviews = { path = "../../shared_packages/reviews" }
 survey = { path = "../../shared_packages/survey" }
-plotters = "0.3.7"
-uuid = { version = "1.0", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde", "js-sys"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-rand = "0.8"
+plotters = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde", "js-sys"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+rand = { workspace = true }
 fake = "2.4"
 rayon = "1.5"
-yew = "0.21"
+yew = { workspace = true }
 yew-components = "0.5"
-gloo-timers = { version = "0.3", features = ["futures"] }
-wasm-bindgen-futures = "0.4"
-web-sys = { version = "0.3", features = ["Blob", "Url", "HtmlAnchorElement", "HtmlCanvasElement", "CanvasRenderingContext2d", "TextMetrics", "ResizeObserver", "Clipboard"] }
-js-sys = "0.3"
-uuid = { version = "1.0", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde", "js-sys"] }
-stylist = "0.13"
+gloo-timers = { workspace = true, features = ["futures"] }
+wasm-bindgen-futures = { workspace = true }
+web-sys = { workspace = true, features = ["Blob", "Url", "HtmlAnchorElement", "HtmlCanvasElement", "CanvasRenderingContext2d", "TextMetrics", "ResizeObserver", "Clipboard"] }
+js-sys = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde", "js-sys"] }
+stylist = { workspace = true }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

@@ -14,10 +14,10 @@ path = "src/main.rs"
 
 [dependencies]
 # Core dependencies
-axum = "0.8.4"
-tokio = { version = "1.0", features = ["full"] }
-tracing = "0.1"
-tracing-subscriber = "0.3"
+axum = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
 
 # CPC modules
 cpc-api-integration = { path = "../api_integration" }
@@ -27,11 +27,11 @@ visualization_context = { path = "../../packages/visualization_context" }
 reqwest = { version = "0.11", features = ["json"] }
 
 # Serialization
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 
 # UUID support
-uuid = { version = "1.0", features = ["v4", "serde"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
 
 # Testing
 tower = { version = "0.4", features = ["util"] }

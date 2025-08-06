@@ -20,7 +20,7 @@ event_bus = { path = "../event_bus" }
 async-trait = { workspace = true }
 
 # OAuth2 for social notifications
-oauth2 = "4.4"
+oauth2 = { workspace = true }
 
 # Email library
 lettre = { version = "0.11", optional = true }

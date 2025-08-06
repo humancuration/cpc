@@ -5,6 +5,7 @@ use std::collections::HashMap;
 pub enum Value {
     Number(f64),
     String(String),
+    Boolean(bool),
     Identifier(String),
     Object(HashMap<String, Value>),
     Array(Vec<Value>),

@@ -19,7 +19,7 @@ uuid = { workspace = true, features = ["v4", "serde"] }
 chrono = { workspace = true, features = ["serde"] }
 
 # Storage backend
-sled = "0.34"
+sled = { workspace = true }
 semver = "1.0"
 
 # Integration with other CPC packages

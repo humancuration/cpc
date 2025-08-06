@@ -5,27 +5,27 @@ edition = "2021"
 
 [dependencies]
 # Core dependencies
-async-graphql = "5.0"
-async-trait = "0.1"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-uuid = { version = "1.0", features = ["v4", "serde"] }
-tonic = "0.10"
-chrono = { version = "0.4", features = ["serde"] }
-tokio = { version = "1.0", features = ["full"] }
-sqlx = { version = "0.7", features = ["postgres", "uuid", "chrono", "runtime-tokio-rustls"] }
+async-graphql = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+tonic = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+tokio = { workspace = true, features = ["full"] }
+sqlx = { workspace = true, features = ["postgres", "uuid", "chrono", "runtime-tokio-rustls"] }
 postgres-types = { version = "0.2", features = ["derive"] }
 lru = "0.12"
-thiserror = "1.0"
+thiserror = { workspace = true }
 semver = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 
 # Shared packages
 consent_manager = { path = "../consent_manager" }
 
 [dev-dependencies]
-tokio = { version = "1.0", features = ["macros", "rt"] }
+tokio = { workspace = true, features = ["macros", "rt"] }
 criterion = "0.5"
 
 [[example]]

@@ -4,24 +4,24 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-yew = { version = "0.21.0", features = ["csr"] }
-yew-router = "0.18.0"
-stylist = { version = "0.13.0", features = ["yew_integration"] }
-wasm-bindgen = "0.2.92"
-wasm-bindgen-futures = "0.4.42"
-web-sys = "0.3.69"
-js-sys = "0.3.69"
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.115"
+yew = { workspace = true, features = ["csr"] }
+yew-router = { workspace = true }
+stylist = { workspace = true, features = ["yew_integration"] }
+wasm-bindgen = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+web-sys = { workspace = true }
+js-sys = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 serde-wasm-bindgen = "0.6.5"
-uuid = { version = "1.7.0", features = ["v4", "serde"] }
-chrono = { version = "0.4.37", features = ["serde"] }
-rust_decimal = "1.35.0"
-thiserror = "1.0.58"
-async-trait = "0.1.77"
-log = "0.4.21"
-wasm-logger = "0.2.0"
-gloo-timers = { version = "0.3.0", features = ["futures"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+rust_decimal = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+log = { workspace = true }
+wasm-logger = { workspace = true }
+gloo-timers = { workspace = true, features = ["futures"] }
 gloo-events = "0.2.0"
 
 # Android-specific dependencies for haptics

@@ -5,12 +5,12 @@ edition = "2021"
 
 [dependencies]
 # Core dependencies
-uuid = { version = "1.0", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-thiserror = "1.0"
-tracing = "0.1"
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
 
 # CPC core modules
 cpc-core-storage-abstraction = { path = "../../packages/core/storage_abstraction" }
@@ -18,16 +18,16 @@ cpc-core-event-bus = { path = "../../packages/core/event_bus" }
 cpc-core-bi-visualization = { path = "../../packages/core/bi_visualization" }
 
 # Database
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
+sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
 
 # Spreadsheet processing
 calamine = "0.24"
 
 # Caching
-sled = "0.34"
-redis = "0.24"
+sled = { workspace = true }
+redis = { workspace = true }
 sha2 = "0.10"
 redis_utils = { path = "../../shared_packages/redis_utils" }
 
 # For testing
-tokio = { version = "1.0", features = ["full"] }
+tokio = { workspace = true, features = ["full"] }

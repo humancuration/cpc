@@ -4,21 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-async-trait = "0.1"
-uuid = { version = "1.8", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-serde = { version = "1.0", features = ["derive"] }
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio", "uuid", "chrono"] }
+async-trait = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+serde = { workspace = true, features = ["derive"] }
+sqlx = { workspace = true, features = ["postgres", "runtime-tokio", "uuid", "chrono"] }
 social_interactions = { path = "../social_interactions" }
 
 # Added for application services
 automerge = "0.5"
-tokio = { version = "1.0", features = ["rt-multi-thread", "fs"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "fs"] }
 # object-storage crate to be added later; for now we use local FS adapter in file_service
 # object-storage = { path = "../object_storage" }
 
 # Utility deps used in tests and hashing
-thiserror = "1.0"
+thiserror = { workspace = true }
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tempfile = "3.10"
 

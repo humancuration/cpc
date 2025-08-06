@@ -10,39 +10,31 @@ path = "src/main.rs"
 
 [dependencies]
 # Core dependencies
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-uuid = { version = "1.0", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-thiserror = "1.0"
-tracing = "0.1"
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+thiserror = { workspace = true }
+tracing = { workspace = true }
 
 # Database
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
+sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
 
 # Async
-tokio = { version = "1.0", features = ["full"] }
-async-trait = "0.1"
+tokio = { workspace = true, features = ["full"] }
+async-trait = { workspace = true }
 
 # GraphQL
-async-graphql = "7.0"
+async-graphql = { workspace = true }
 
-# CPC dependencies
-# Note: Update these paths based on current shared_packages structure
-# cpc-core = { path = "../../shared_packages/core" }
-# cpc-net = { path = "../../shared_packages/network" }
-# cpc-protos = { path = "../../shared_packages/protos" }
-
-# Media processing
-ffmpeg-wasm = "0.1"
-plotters = "0.3"
+plotters = { workspace = true }
 
 # Web framework
-axum = "0.7"
+axum = { workspace = true }
 
 # P2P networking
-p2panda = "0.1"
+p2panda = { workspace = true }
 iroh = "0.1"
 
 # Audio processing
-rodio = "0.17"
+rodio = { workspace = true }

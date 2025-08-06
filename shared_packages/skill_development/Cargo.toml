@@ -4,23 +4,23 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-native-tls", "migrate"] }
+sqlx = { workspace = true, features = ["postgres", "runtime-tokio-native-tls", "migrate"] }
 clap = { version = "4.4", features = ["derive"] }
 dotenvy = "0.15"
-tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
-anyhow = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-uuid = { version = "1.0", features = ["v4"] }
-chrono = { version = "0.4", features = ["serde"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+uuid = { workspace = true, features = ["v4"] }
+chrono = { workspace = true, features = ["serde"] }
 validator = { version = "0.16", features = ["derive"] }
-rand = "0.8"
-tonic = { version = "0.12", default-features = false, features = ["prost", "codegen"] }
-prost = "0.13"
-async-trait = "0.1"
-sled = "0.34"
-serde_json = "1.0"
-tracing = "0.1"
-tracing-subscriber = "0.3"
+rand = { workspace = true }
+tonic = { workspace = true, features = ["prost", "codegen"] }
+prost = { workspace = true }
+async-trait = { workspace = true }
+sled = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
 
 [build-dependencies]
 tonic-build = "0.12"

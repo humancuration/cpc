@@ -6,6 +6,6 @@ edition = "2021"
 [dependencies]
 feedback_core = { path = "../feedback_core" }
 feedback_analysis = { path = "../feedback_analysis" }
-plotters = "0.3"
-chrono = { version = "0.4", features = ["serde"] }
-serde = { version = "1.0", features = ["derive"] }
+plotters = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+serde = { workspace = true, features = ["derive"] }

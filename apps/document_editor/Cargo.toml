@@ -27,7 +27,7 @@ sqlx = { workspace = true }
 pdf = { workspace = true }
 docx-rs = "0.7"
 semver = "1.0"
-rand = "0.8"
+rand = { workspace = true }
 
 # p2p dependencies
 p2panda-core = { workspace = true }
@@ -37,7 +37,7 @@ libp2p = { version = "0.53", features = ["tcp", "dns", "websocket", "noise", "ya
 
 # QUIC transport dependencies
 quinn = "0.10.0"
-rustls = "0.21"
+rustls = { workspace = true }
 rcgen = "0.11"
 
 # STUN/TURN dependencies
@@ -57,10 +57,10 @@ base64 = "0.21"
 # Yew for UI components
 yew = { workspace = true, optional = true }
 web-sys = { workspace = true }
-stylist = { version = "0.13", features = ["yew_integration"] }
-wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
-wasm-bindgen-futures = "0.4"
-gloo-timers = { version = "0.3", features = ["futures"] }
+stylist = { workspace = true, features = ["yew_integration"] }
+wasm-bindgen = { workspace = true, features = ["serde-serialize"] }
+wasm-bindgen-futures = { workspace = true }
+gloo-timers = { workspace = true, features = ["futures"] }
 lru = "0.12"
 
 [features]

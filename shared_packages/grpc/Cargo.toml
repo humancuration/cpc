@@ -5,13 +5,13 @@ edition = "2021"
 
 [dependencies]
 # Core dependencies
-tonic = "0.8"
-prost = "0.11"
-tokio = { version = "1.0", features = ["full"] }
-uuid = { version = "1.0", features = ["v4", "serde"] }
-serde = { version = "1.0", features = ["derive"] }
-async-trait = "0.1"
-thiserror = "1.0"
+tonic = { workspace = true }
+prost = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
+serde = { workspace = true, features = ["derive"] }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
 
 # CPC domain dependencies
 packages.domains.finance = { path = "../../domains/finance" }

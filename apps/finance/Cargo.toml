@@ -8,32 +8,32 @@ edition = "2021"
 cpc-core = { path = "../", features = ["finance"] }
 cpc-net = { path = "../../cpc-net" }
 cpc_wallet = { path = "../../packages/core/wallet" }
-async-graphql = "4.0"
+async-graphql = { workspace = true }
 async-graphql-actix-web = "4.0"
 actix-web = "4.0"
 rust-decimal = "1.29"
-uuid = { version = "1.4", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-serde = { version = "1.0", features = ["derive"] }
-thiserror = "1.0"
-tokio = { version = "1.0", features = ["full"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+serde = { workspace = true, features = ["derive"] }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
 futures = "0.3"
-async-trait = "0.1"
-tracing = "0.1"
+async-trait = { workspace = true }
+tracing = { workspace = true }
 base64 = "0.21"
 regex = "1.0"
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "rust_decimal"] }
+sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "rust_decimal"] }
 db_pool = { path = "../../shared_packages/db_pool" }
 db_abstraction = { path = "../../shared_packages/db_abstraction" }
 
 # p2p dependencies
-p2panda = { version = "0.1", optional = true }
+p2panda = { workspace = true, optional = true }
 libp2p = { version = "0.53", features = ["tcp", "dns", "websocket", "noise", "yamux", "ping", "macros"] }
 
 # Visualization dependencies
-bevy = { version = "0.13", optional = true }
-plotters = { version = "0.3", optional = true }
-yew = { version = "0.21", optional = true }
+bevy = { workspace = true, optional = true }
+plotters = { workspace = true, optional = true }
+yew = { workspace = true, optional = true }
 
 [features]
 default = []

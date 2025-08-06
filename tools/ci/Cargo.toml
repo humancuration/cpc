@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-async-graphql = "7"
+async-graphql = { workspace = true }
 clap = { version = "4", features = ["derive"] }
 similar = "2.6"
-anyhow = "1.0"
-thiserror = "1.0"
+anyhow = { workspace = true }
+thiserror = { workspace = true }
 walkdir = "2.5"
 
 # Depend on the API server crate to access its deterministic schema builder

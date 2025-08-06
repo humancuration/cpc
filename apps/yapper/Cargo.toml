@@ -5,25 +5,25 @@ edition = "2021"
 
 [dependencies]
 async-channel = "1.8.0"
-async-trait = "0.1.77"
-argon2 = "0.2.36"
-axum = "0.8.4"
+async-trait = { workspace = true }
+argon2 = { workspace = true }
+axum = { workspace = true }
 consent_manager = { path = "../../packages/core/consent_manager" }
 cpc_auth = { path = "../../packages/cpc_auth" }
 cpc_rbac = { path = "../../packages/cpc_rbac" }
 cpc_karma = { path = "../../packages/cpc_karma" }
 cpc_consent = { path = "../../packages/cpc_consent" }
 cpc_wallet = { path = "../../packages/core/wallet" }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-sled = "0.34"
-tokio = { version = "1.0", features = ["full"] }
-uuid = { version = "1.0", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-rust_decimal = "1.26"
-thiserror = "1.0"
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sled = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+rust_decimal = { workspace = true }
+thiserror = { workspace = true }
 social_integration = { path = "../../packages/social_integration" }
-jsonwebtoken = "0.16.0"
-tonic = "0.9"
-prost = "0.12"
-redis = "0.23"
+jsonwebtoken = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true }
+redis = { workspace = true }

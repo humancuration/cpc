@@ -7,28 +7,28 @@ description = "Business Intelligence & Analytics module for CPC platform"
 
 [dependencies]
 # Core dependencies
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-uuid = { version = "1.0", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-thiserror = "1.0"
-async-trait = "0.1"
-rust_decimal = "1.29"
-tokio = { version = "1.0", features = ["full"] }
-tracing = "0.1"
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+rust_decimal = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true }
 base64 = "0.21"
 
 # CPC core dependencies
 cpc-core = { path = "../../packages/core" }
 
 # Database dependencies
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "rust_decimal"] }
+sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "rust_decimal"] }
 
 # P2P dependencies
-p2panda = { git = "https://github.com/p2panda/p2panda", rev = "v0.8.1" }
+p2panda = { workspace = true }
 
 # Visualization dependencies
-bevy = { version = "0.16", optional = true, features = [
+bevy = { workspace = true, optional = true }
     "bevy_pbr",
     "bevy_text",
     "bevy_ui",
@@ -39,23 +39,23 @@ bevy = { version = "0.16", optional = true, features = [
     "bevy_winit",
     "bevy_image",
 ] }
-plotters = { version = "0.3", optional = true }
+plotters = { workspace = true, optional = true }
 image = { version = "0.24", optional = true }
 
 # GraphQL dependencies
-async-graphql = { version = "7.0", optional = true }
-async-graphql-axum = { version = "7.0", optional = true }
+async-graphql = { workspace = true, optional = true }
+async-graphql-axum = { workspace = true, optional = true }
 
 # WebSocket dependencies
-tokio-tungstenite = { version = "0.21", optional = true }
-axum = { version = "0.8", optional = true, features = ["ws"] }
+tokio-tungstenite = { workspace = true, optional = true }
+axum = { workspace = true, features = ["ws"], optional = true }
 
 # gRPC dependencies
-tonic = { version = "0.14", optional = true }
-prost = { version = "0.14", optional = true }
+tonic = { workspace = true, optional = true }
+prost = { workspace = true, optional = true }
 
 # Sled for edge caching
-sled = "0.34"
+sled = { workspace = true }
 
 # Test dependencies
 wasm-bindgen-test = { version = "0.3", optional = true }

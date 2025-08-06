@@ -13,36 +13,36 @@ path = "src/main_tauri.rs"
 
 [dependencies]
 # Core dependencies
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-uuid = { version = "1.0", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-thiserror = "1.0"
-tracing = "0.1"
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+thiserror = { workspace = true }
+tracing = { workspace = true }
 
 # Database
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
+sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
 
 # Async
-tokio = { version = "1.0", features = ["full"] }
-async-trait = "0.1"
+tokio = { workspace = true, features = ["full"] }
+async-trait = { workspace = true }
 
 # GraphQL
-async-graphql = "7.0"
+async-graphql = { workspace = true }
 
 # Web framework
-axum = "0.7"
+axum = { workspace = true }
 
 # WebRTC
-wry = "0.52.1"
+wry = { workspace = true }
 
 # Tauri
-tauri = { version = "2.0", features = ["wry"] }
+tauri = { workspace = true, features = ["wry"] }
 tauri-build = "2.0"
 
 # Media processing
 ffmpeg-wasm = "0.1"
-plotters = "0.3"
+plotters = { workspace = true }
 
 # CPC dependencies
 cpc-messenger = { path = "../messenger" }
@@ -50,18 +50,18 @@ cpc-social-integration = { path = "../../shared_packages/social_integration" }
 cpc-notification-core = { path = "../../shared_packages/notification_core" }
 
 # P2P networking
-p2panda = "0.1"
+p2panda = { workspace = true }
 iroh = "0.1"
 
 # Audio processing
-rodio = "0.17"
+rodio = { workspace = true }
 
 # WebSocket support
-tokio-tungstenite = "0.20.1"
+tokio-tungstenite = { workspace = true }
 
 # Web frontend
-yew = { version = "0.21.0", features = ["csr"] }
-stylist = { version = "0.13.0", features = ["yew_integration"] }
-wasm-bindgen = "0.2.100"
-wasm-logger = "0.2.0"
-web-sys = "0.3.77"
+yew = { workspace = true, features = ["csr"] }
+stylist = { workspace = true, features = ["yew_integration"] }
+wasm-bindgen = { workspace = true }
+wasm-logger = { workspace = true }
+web-sys = { workspace = true }

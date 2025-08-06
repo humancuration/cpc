@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-wry = "0.52.1"
-uuid = { version = "1.7", features = ["v4"] }
+wry = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
 
 [dev-dependencies]
 # For testing

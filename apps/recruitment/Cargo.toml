@@ -21,15 +21,15 @@ sqlx = { workspace = true }
 pdf = { workspace = true }
 
 # Additional dependencies needed for recruitment
-rust_decimal = { version = "1.34", features = ["serde", "std"] }
-rust_decimal_macros = "1.34"
+rust_decimal = { workspace = true, features = ["serde", "std"] }
+rust_decimal_macros = { workspace = true }
 
 # Yew for UI components
 yew = { workspace = true, optional = true }
 
 # gRPC for internal service communication
-tonic = { version = "0.8", optional = true }
-prost = { version = "0.11", optional = true }
+tonic = { workspace = true, optional = true }
+prost = { workspace = true, optional = true }
 
 [features]
 default = []

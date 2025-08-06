@@ -7,7 +7,7 @@ edition = "2021"
 feedback_core = { path = "../feedback_core" }
 reviews = { path = "../reviews" }
 survey = { path = "../survey" }
-plotters = "0.3"
-chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1.0", features = ["v4", "serde"] }
-serde = { version = "1.0", features = ["derive"] }
+plotters = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
+serde = { workspace = true, features = ["derive"] }

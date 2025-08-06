@@ -27,7 +27,7 @@ storage_abstraction = { path = "../storage_abstraction" }
 async-trait = { workspace = true }
 
 # PDF generation
-pdf = { version = "0.7", optional = true }
+pdf = { workspace = true, optional = true }
 
 # Time handling
 chrono = { workspace = true, features = ["serde"] }

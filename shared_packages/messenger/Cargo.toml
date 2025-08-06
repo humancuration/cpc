@@ -11,15 +11,15 @@ uuid = { workspace = true, features = ["v4", "serde"] }
 chrono = { workspace = true, features = ["serde"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
-tonic = { version = "0.9", optional = true }
-prost = { version = "0.11", optional = true }
+tonic = { workspace = true, optional = true }
+prost = { workspace = true, optional = true }
 
 # Async support
 async-trait = { workspace = true }
-async-graphql = { version = "7.0", optional = true }
-async-stream = { version = "0.3", optional = true }
-futures-util = { version = "0.3", optional = true }
-tokio = { version = "1.0", features = ["time"], optional = true }
+async-graphql = { workspace = true, optional = true }
+async-stream = { workspace = true, optional = true }
+futures-util = { workspace = true, optional = true }
+tokio = { workspace = true, features = ["time"], optional = true }
 
 # Storage abstraction
 storage_abstraction = { path = "../../core/storage_abstraction" }

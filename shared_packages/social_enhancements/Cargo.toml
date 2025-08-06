@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
-uuid = { version = "1.0", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-rust_decimal = "1.26"
-async-trait = "0.1"
+serde = { workspace = true, features = ["derive"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+rust_decimal = { workspace = true }
+async-trait = { workspace = true }
 common_utils = { path = "../common_utils" }
 social_integration = { path = "../social_integration" }
 volunteer_core = { path = "../volunteer_core" }
 skill_exchange_core = { path = "../skill_exchange_core" }
-sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "decimal"] }
+sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "decimal"] }
 
 [features]
 default = ["common-utils-integration"]
