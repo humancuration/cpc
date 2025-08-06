@@ -8,6 +8,7 @@ pest = { workspace = true }
 pest_derive = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
 
 [dev-dependencies]
 criterion = { workspace = true }

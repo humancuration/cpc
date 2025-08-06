@@ -12,6 +12,11 @@ serde_json = { workspace = true }
 uuid = { workspace = true, features = ["v4", "serde"] }
 tokio = { workspace = true, features = ["full"] }
 
+# Execution pipeline dependencies
+dashmap = "5.5"
+wasm-timer = "0.2"
+futures = { workspace = true }
+
 # HTTP client
 reqwest = { version = "0.11", features = ["json"] }
 
@@ -31,15 +36,24 @@ sha2 = "0.10"
 
 # CPC modules
 visualization_context = { path = "../../packages/visualization_context" }
+shtairir = { path = "../../shared_packages/shtairir" }
+shtairir_editor = { path = "../../shared_packages/shtairir_editor" }
 
 # Web framework
 yew = { workspace = true, features = ["csr"] }
+yew-router = "0.17"
 
 # JSON handling
 serde_json = { workspace = true }
 
+# Logging
+wasm-logger = "0.2"
+
 # Testing
 wasm-bindgen-test = "0.3"
+
+# Build
+trunk = "0.17"
 
 [features]
 default = []

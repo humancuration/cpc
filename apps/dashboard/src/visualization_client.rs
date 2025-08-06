@@ -1,285 +1,131 @@
-//! Example visualization client for the Dashboard app
-//!
-//! This module demonstrates how to integrate with the visualization gateway
-//! from a client application.
+use shtairir::ast::Value;
 
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-use visualization_context::{VisualizationContext, SharingScope, AccessibilityMode};
-
-/// Visualization client for making requests to the API gateway
-pub struct VisualizationClient {
-    client: Client,
-    gateway_url: String,
+/// Client for executing visualization scripts
+pub fn execute_visual_script(vis_data: Value) -> Result<Value, String> {
+    // In a real implementation, this would send the visualization data to a visualization service
+    // For now, we'll just return a mock response
+    
+    match vis_data {
+        Value::Object(data) => {
+            // Extract visualization information
+            let vis_type = data.get("type")
+                .and_then(|v| if let Value::String(s) = v { Some(s) } else { None })
+                .unwrap_or("unknown");
+            
+            let title = data.get("title")
+                .and_then(|v| if let Value::String(s) = v { Some(s) } else { None })
+                .unwrap_or("Untitled Visualization");
+            
+            // Generate a unique visualization ID
+            let vis_id = format!("vis_{}_{}", vis_type, uuid::Uuid::new_v4().to_string().split('-').next().unwrap_or("unknown"));
+            
+            // Create response
+            let mut response = std::collections::HashMap::new();
+            response.insert("visualization_id".to_string(), Value::String(vis_id));
+            response.insert("status".to_string(), Value::String("created".to_string()));
+            response.insert("rendered_at".to_string(), Value::String(chrono::Utc::now().to_rfc3339()));
+            response.insert("view_url".to_string(), Value::String(format!("/visualization/view/{}", vis_id)));
+            
+            // Add rendering metadata
+            let mut metadata = std::collections::HashMap::new();
+            metadata.insert("renderer".to_string(), Value::String("webgl".to_string()));
+            metadata.insert("dimensions".to_string(), Value::Object({
+                let mut dims = std::collections::HashMap::new();
+                dims.insert("width".to_string(), Value::Number(800.0));
+                dims.insert("height".to_string(), Value::Number(600.0));
+                dims
+            }));
+            metadata.insert("theme".to_string(), Value::String("default".to_string()));
+            
+            response.insert("metadata".to_string(), Value::Object(metadata));
+            
+            Ok(Value::Object(response))
+        }
+        _ => Err("Invalid visualization data format".to_string())
+    }
 }
 
-impl VisualizationClient {
-    /// Create a new visualization client
-    pub fn new(gateway_url: String) -> Self {
-        Self {
-            client: Client::new(),
-            gateway_url,
-        }
+/// Updates an existing visualization
+pub fn update_visualization(vis_id: &str, vis_data: Value) -> Result<Value, String> {
+    // In a real implementation, this would update an existing visualization
+    // For now, we'll just return a success response
+    
+    let mut response = std::collections::HashMap::new();
+    response.insert("visualization_id".to_string(), Value::String(vis_id.to_string()));
+    response.insert("status".to_string(), Value::String("updated".to_string()));
+    response.insert("updated_at".to_string(), Value::String(chrono::Utc::now().to_rfc3339()));
+    
+    Ok(Value::Object(response))
+}
+
+/// Deletes a visualization
+pub fn delete_visualization(vis_id: &str) -> Result<Value, String> {
+    // In a real implementation, this would delete a visualization
+    // For now, we'll just return a success response
+    
+    let mut response = std::collections::HashMap::new();
+    response.insert("visualization_id".to_string(), Value::String(vis_id.to_string()));
+    response.insert("status".to_string(), Value::String("deleted".to_string()));
+    response.insert("deleted_at".to_string(), Value::String(chrono::Utc::now().to_rfc3339()));
+    
+    Ok(Value::Object(response))
+}
+
+/// Lists all visualizations
+pub fn list_visualizations() -> Result<Value, String> {
+    // In a real implementation, this would list all visualizations
+    // For now, we'll return a mock list
+    
+    let mut visualizations = Vec::new();
+    
+    // Add some mock visualizations
+    for i in 1..=3 {
+        let mut vis = std::collections::HashMap::new();
+        vis.insert("id".to_string(), Value::String(format!("vis_{}", i)));
+        vis.insert("title".to_string(), Value::String(format!("Visualization {}", i)));
+        vis.insert("type".to_string(), Value::String("chart".to_string()));
+        vis.insert("created_at".to_string(), Value::String("2023-01-01T00:00:00Z".to_string()));
+        vis.insert("updated_at".to_string(), Value::String(chrono::Utc::now().to_rfc3339()));
+        
+        visualizations.push(Value::Object(vis));
     }
     
-    /// Get a 3D visualization
-    pub async fn get_visualization(
-        &self,
-        visualization_id: Uuid,
-        context: &VisualizationContext,
-        width: Option<u32>,
-        height: Option<u32>,
-        lod_level: Option<u8>,
-    ) -> Result<VisualizationResponse, Box<dyn std::error::Error>> {
-        let mut url = format!("{}/visualizations/{}", self.gateway_url, visualization_id);
-        
-        // Add query parameters
-        let mut params = Vec::new();
-        if let Some(w) = width {
-            params.push(format!("width={}", w));
-        }
-        if let Some(h) = height {
-            params.push(format!("height={}", h));
-        }
-        if let Some(lod) = lod_level {
-            params.push(format!("lod_level={}", lod));
-        }
-        
-        if !params.is_empty() {
-            url.push_str("?");
-            url.push_str(&params.join("&"));
-        }
-        
-        // Convert context to headers
-        let headers = context.to_headers();
-        
-        let response = self.client
-            .get(&url)
-            .headers(headers)
-            .send()
-            .await?;
-            
-        let visualization_response = response.json::<VisualizationResponse>().await?;
-        Ok(visualization_response)
-    }
+    let mut response = std::collections::HashMap::new();
+    response.insert("visualizations".to_string(), Value::Array(visualizations));
+    response.insert("count".to_string(), Value::Number(3.0));
     
-    /// Get visualization as image
-    pub async fn get_visualization_image(
-        &self,
-        visualization_id: Uuid,
-        context: &VisualizationContext,
-        width: Option<u32>,
-        height: Option<u32>,
-    ) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
-        let mut url = format!("{}/visualizations/{}/image", self.gateway_url, visualization_id);
-        
-        // Add query parameters
-        let mut params = Vec::new();
-        if let Some(w) = width {
-            params.push(format!("width={}", w));
-        }
-        if let Some(h) = height {
-            params.push(format!("height={}", h));
-        }
-        
-        if !params.is_empty() {
-            url.push_str("?");
-            url.push_str(&params.join("&"));
-        }
-        
-        // Convert context to headers
-        let headers = context.to_headers();
-        
-        let response = self.client
-            .get(&url)
-            .headers(headers)
-            .send()
-            .await?;
-            
-        let image_data = response.bytes().await?;
-        Ok(image_data.to_vec())
-    }
+    Ok(Value::Object(response))
+}
+
+/// Gets visualization data by ID
+pub fn get_visualization(vis_id: &str) -> Result<Value, String> {
+    // In a real implementation, this would get visualization data from a database
+    // For now, we'll return mock data
     
-    /// Apply LOD configuration
-    pub fn apply_lod_config(&self, config: AppLodConfig) -> AppLodConfig {
-        // In a real implementation, this would apply dynamic detail adjustment
-        // For now, we'll just return the config as-is
+    let mut vis_data = std::collections::HashMap::new();
+    vis_data.insert("id".to_string(), Value::String(vis_id.to_string()));
+    vis_data.insert("title".to_string(), Value::String("Sample Visualization".to_string()));
+    vis_data.insert("type".to_string(), Value::String("chart".to_string()));
+    vis_data.insert("data".to_string(), Value::Object({
+        let mut data = std::collections::HashMap::new();
+        data.insert("labels".to_string(), Value::Array(vec![
+            Value::String("A".to_string()),
+            Value::String("B".to_string()),
+            Value::String("C".to_string()),
+        ]));
+        data.insert("values".to_string(), Value::Array(vec![
+            Value::Number(10.0),
+            Value::Number(20.0),
+            Value::Number(30.0),
+        ]));
+        data
+    }));
+    vis_data.insert("config".to_string(), Value::Object({
+        let mut config = std::collections::HashMap::new();
+        config.insert("theme".to_string(), Value::String("default".to_string()));
+        config.insert("responsive".to_string(), Value::Boolean(true));
         config
-    }
-}
-
-/// Response from visualization endpoint
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct VisualizationResponse {
-    pub visualization_data: VisualizationData,
-    pub metadata: ResponseMetadata,
-    pub compliance: ComplianceMetadata,
-}
-
-/// Visualization data payload
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type")]
-pub enum VisualizationData {
-    Scene3D {
-        payload: serde_json::Value,
-        accessibility: AccessibilityMetadata,
-    },
-    Image {
-        payload: String, // Base64 encoded image
-        format: String,
-        accessibility: AccessibilityMetadata,
-    },
-    Stream {
-        endpoint: String,
-        stream_id: String,
-        accessibility: AccessibilityMetadata,
-    },
-}
-
-/// Accessibility metadata
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AccessibilityMetadata {
-    pub alt_text: String,
-    pub navigation_map: std::collections::HashMap<String, NavigationHint>,
-    pub aria_properties: AriaProperties,
-}
-
-/// Navigation hint for accessibility
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct NavigationHint {
-    pub label: String,
-    pub key: String,
-    pub position: [f32; 3],
-}
-
-/// ARIA properties for accessibility
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AriaProperties {
-    pub role: String,
-    pub live_region: String,
-    pub keyboard_shortcuts: Vec<String>,
-}
-
-/// Response metadata
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ResponseMetadata {
-    pub cache_ttl: u64,
-    pub lod_config: LodConfig,
-    pub compliance_flags: Vec<String>,
-}
-/// Level of detail configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LodConfig {
-    pub level: u8,
-    pub max_points: u32,
-}
-
-/// Compliance metadata
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ComplianceMetadata {
-    pub data_sovereignty: String, // Country/region of origin
-    pub pii_redacted: bool,       // Whether PII has been removed
-    pub sharing_permissions: Vec<String>, // Who can access this data
-}
-
-/// App-specific LOD configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AppLodConfig {
-    pub default_lod: u8,
-    pub max_points: u32,
-}
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use tokio;
+    }));
     
-    #[tokio::test]
-    async fn test_visualization_client_creation() {
-        let client = VisualizationClient::new("http://localhost:3001".to_string());
-        assert_eq!(client.gateway_url, "http://localhost:3001");
-    }
-    
-    #[test]
-    fn test_visualization_response_structs() {
-        let response = VisualizationResponse {
-            visualization_data: VisualizationData::Scene3D {
-                payload: serde_json::json!({"test": "data"}),
-                accessibility: AccessibilityMetadata {
-                    alt_text: "Test visualization".to_string(),
-                    navigation_map: std::collections::HashMap::new(),
-                    aria_properties: AriaProperties {
-                        role: "application".to_string(),
-                        live_region: "off".to_string(),
-                        keyboard_shortcuts: vec![],
-                    },
-                },
-            },
-            metadata: ResponseMetadata {
-                cache_ttl: 300,
-                lod_config: LodConfig {
-                    level: 2,
-                    max_points: 1000,
-                },
-                compliance_flags: vec![],
-            },
-        };
-        
-        match response.visualization_data {
-            VisualizationData::Scene3D { payload, .. } => {
-                assert_eq!(payload["test"], "data");
-            }
-            _ => panic!("Expected Scene3D variant"),
-        }
-    }
-    
-    #[test]
-    fn test_visualization_response_with_compliance() {
-        let response = VisualizationResponse {
-            visualization_data: VisualizationData::Scene3D {
-                payload: serde_json::json!({"test": "data"}),
-                accessibility: AccessibilityMetadata {
-                    alt_text: "Test visualization".to_string(),
-                    navigation_map: std::collections::HashMap::new(),
-                    aria_properties: AriaProperties {
-                        role: "application".to_string(),
-                        live_region: "off".to_string(),
-                        keyboard_shortcuts: vec![],
-                    },
-                },
-            },
-            metadata: ResponseMetadata {
-                cache_ttl: 300,
-                lod_config: LodConfig {
-                    level: 2,
-                    max_points: 1000,
-                },
-                compliance_flags: vec![],
-            },
-            compliance: ComplianceMetadata {
-                data_sovereignty: "US".to_string(),
-                pii_redacted: true,
-                sharing_permissions: vec!["user".to_string()],
-            },
-        };
-        
-        assert_eq!(response.compliance.data_sovereignty, "US");
-        assert!(response.compliance.pii_redacted);
-        assert_eq!(response.compliance.sharing_permissions.len(), 1);
-    }
-    
-    #[test]
-    fn test_lod_config_application() {
-        let client = VisualizationClient::new("http://localhost:3001".to_string());
-        let config = AppLodConfig {
-            default_lod: 2,
-            max_points: 1000,
-        };
-        
-        let applied_config = client.apply_lod_config(config);
-        assert_eq!(applied_config.default_lod, 2);
-        assert_eq!(applied_config.max_points, 1000);
-    }
+    Ok(Value::Object(vis_data))
 }

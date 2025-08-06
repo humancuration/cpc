@@ -1,0 +1,16 @@
+[build]
+target = "index.html"
+release = false
+dist = "dist"
+
+[clean]
+dist = "dist"
+
+[serve]
+address = "127.0.0.1"
+port = 8080
+open = false
+
+[[proxy]]
+backend = "http://localhost:3001/api/"
+rewrite = "/api/"

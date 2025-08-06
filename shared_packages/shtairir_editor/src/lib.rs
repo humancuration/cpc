@@ -17,6 +17,15 @@ pub struct Node {
     pub position: (i32, i32),
     pub input_ports: Vec<Port>,
     pub output_ports: Vec<Port>,
+    pub status: Option<NodeStatus>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum NodeStatus {
+    Pending,
+    Running,
+    Completed,
+    Failed(String),
 }
 
 impl Node {
@@ -112,6 +121,7 @@ impl Graph {
                 position: (100 * i as i32, 100),
                 input_ports: vec![Port::default_input()],
                 output_ports: vec![Port::default_output()],
+                status: None,
             };
             graph.add_node(node);
         }
@@ -274,9 +284,17 @@ pub fn visual_editor(props: &VisualEditorProps) -> Html {
             let on_port_click = on_port_click.clone();
             let on_node_click = on_node_click.clone();
             
+            let status_class = match &node.status {
+                Some(NodeStatus::Pending) => "node-pending",
+                Some(NodeStatus::Running) => "node-running",
+                Some(NodeStatus::Completed) => "node-completed",
+                Some(NodeStatus::Failed(_)) => "node-failed",
+                None => "",
+            };
+            
             html! {
                 <div
-                    class="node"
+                    class={classes!("node", status_class)}
                     style={format!("position: absolute; left: {}px; top: {}px;", node.position.0, node.position.1)}
                     onmousedown={Callback::from(move |e: MouseEvent| {
                         e.stop_propagation();
@@ -287,8 +305,23 @@ pub fn visual_editor(props: &VisualEditorProps) -> Html {
                     })}
                 >
                     <div class="node-header">
-                        <span class="node-title">{format!("{}:{}", node.app, node.function)}</span>
-                        <span class="node-id">{format!("({})", node.id)}</span>
+                        <div class="node-title-row">
+                            <span class="node-title">{format!("{}:{}", node.app, node.function)}</span>
+                            <span class="node-id">{format!("({})", node.id)}</span>
+                        </div>
+                        {
+                            if let Some(status) = &node.status {
+                                let status_indicator = match status {
+                                    NodeStatus::Pending => html! { <span class="status-indicator pending" title="Pending">{"⏳"}</span> },
+                                    NodeStatus::Running => html! { <span class="status-indicator running" title="Running">{"▶"}</span> },
+                                    NodeStatus::Completed => html! { <span class="status-indicator completed" title="Completed">{"✓"}</span> },
+                                    NodeStatus::Failed(msg) => html! { <span class="status-indicator failed" title={format!("Failed: {}", msg)}>{"✗"}</span> },
+                                };
+                                html! { <div class="node-status">{status_indicator}</div> }
+                            } else {
+                                html! {}
+                            }
+                        }
                     </div>
                     <div class="node-body">
                         <div class="input-ports">

@@ -9,6 +9,9 @@ yew = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 
+# UI feedback components
+gloo-timers = { workspace = true }
+
 [dev-dependencies]
 yew = { version = "0.20", features = ["ssr"] }
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }

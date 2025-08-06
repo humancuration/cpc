@@ -35,6 +35,12 @@ The dashboard integrates with the visualization system through the API Gateway:
 3. **Accessibility**: Screen reader support with enhanced metadata
 4. **Caching**: Edge caching for improved performance
 
+## Visual Scripting
+
+The dashboard includes a powerful visual scripting system for creating custom data pipelines and visualizations.
+
+For details on creating and executing visual scripts, see the [Visual Scripting Execution Documentation](docs/visual_scripting_execution.md).
+
 ## Development
 
 To run the dashboard application:
