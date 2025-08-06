@@ -1,0 +1,14 @@
+command = { app_name ":" function_call }
+app_name = { "bevy" | "ffmpeg" | "pdf" | "redis" | "postgres" | "tauri" | "yew" | "redis" | "sled" | "graphql" | "p2panda" | "axum" | "tracing" | "rodio" | "glow" | "ash" | "bevy" | ident }
+function_call = { ident ~ "(" ~ args? ~ ")" }
+args = { value ~ ("," ~ value)* }
+value = { number | string | ident | object | array }
+number = @{ "-"? ~ ("0" | '1'..'9' ~ ASCII_DIGIT*) ~ ("." ~ ASCII_DIGIT+)? }
+string = @{ "\"" ~ inner_str* ~ "\"" }
+inner_str = { !("\"" | "\\") ~ ANY | "\\" ~ ("\"" | "\\") }
+ident = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+object = { "{" ~ (key_value ~ ("," ~ key_value)* )? ~ "}" }
+key_value = { ident ~ "=" ~ value }
+array = { "[" ~ (value ~ ("," ~ value)* )? ~ "]" }
+
+WHITESPACE = _{ " " | "\t" | "\n" | "\r" }

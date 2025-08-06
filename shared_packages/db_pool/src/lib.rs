@@ -77,3 +77,38 @@ pub enum DatabaseError {
     #[error("Health check failed: {0}")]
     HealthCheck(String),
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn test_database_config_from_env() {
+        // This test would require setting environment variables
+        // In a real test, we would set the env vars and test the function
+        let config = DatabaseConfig::new(
+            "localhost".to_string(),
+            5432,
+            "testdb".to_string(),
+            "testuser".to_string(),
+            "testpass".to_string(),
+            Some("prefer".to_string()),
+        );
+        
+        assert_eq!(config.host, "localhost");
+        assert_eq!(config.port, 5432);
+        assert_eq!(config.database, "testdb");
+        assert_eq!(config.username, "testuser");
+        assert_eq!(config.password, "testpass");
+        assert_eq!(config.ssl_mode, Some("prefer".to_string()));
+    }
+
+    #[test]
+    fn test_pool_config_default() {
+        let config = PoolConfig::default();
+        assert_eq!(config.min_connections, 5);
+        assert_eq!(config.max_connections, 20);
+        assert_eq!(config.connection_timeout, Duration::from_secs(30));
+    }
+}

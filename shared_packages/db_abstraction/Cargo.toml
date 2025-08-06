@@ -18,3 +18,7 @@ db_pool = { path = "../db_pool" }
 
 [dev-dependencies]
 tokio-test = "0.4"
+
+[[example]]
+name = "schema_example"
+path = "examples/schema_example.rs"

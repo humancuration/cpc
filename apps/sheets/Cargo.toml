@@ -27,6 +27,7 @@ calamine = "0.24"
 sled = "0.34"
 redis = "0.24"
 sha2 = "0.10"
+redis_utils = { path = "../../shared_packages/redis_utils" }
 
 # For testing
 tokio = { version = "1.0", features = ["full"] }

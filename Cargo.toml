@@ -1,37 +1,107 @@
 [workspace]
 resolver = "2"
 members = [
-    "packages/domains/messenger",
-    "packages/apps/messenger",
-    "packages/infrastructure/messenger",
-    "apps/messenger",
-    "apps/api_gateway",
-    "apps/dashboard",
+    # Applications
+    "apps/advanced_crm",
+    "apps/allat",
+    "apps/api_server",
+    "apps/art",
+    "apps/bi_analytics",
+    "apps/calendar",
+    "apps/community_connect",
     "apps/cpay",
-    "apps/ethical_scanner",
-    "packages/social_integration",
-    "packages/core/wallet",
-    "packages/media",
-    "packages/productivity/task_manager",
-    "shared_packages/cpay_core",
-    "shared_packages/cause_management",
-    "shared_packages/skill_volunteering",
-    "shared_packages/survey",
-    "shared_packages/feedback_core",
-    "shared_packages/feedback_analysis",
-    "shared_packages/feedback_visualization",
-    "apps/video_editor",
-    "apps/video_editor_desktop",
+    "apps/crm",
+    "apps/dashboard",
+    "apps/daw",
     "apps/document_editor",
-    "shared_packages/ot",
-    "shared_packages/rendering_core",
+    "apps/ethical_scanner",
+    "apps/feedback_showcase",
+    "apps/finance",
+    "apps/finance-sheets",
+    "apps/gallery",
+    "apps/health",
+    "apps/invoicing",
+    "apps/learning_platform",
+    "apps/learning_platform_server",
+    "apps/live_streaming",
+    "apps/messenger_web",
+    "apps/messenger_win64",
+    "apps/music-player",
+    "apps/recruitment",
+    "apps/scm",
+    "apps/sheets",
+    "apps/skill_profile_ui",
+    "apps/skill_tracking",
+    "apps/social_integration",
+    "apps/task_manager",
+    "apps/video_editor_win64",
+    "apps/website-builder",
+    "apps/yapper",
+    "apps/shtairir_example",
+    
+    # Shared Packages
+    "shared_packages/api_gateway",
+    "shared_packages/api_integration",
+    "shared_packages/audit_framework",
+    "shared_packages/bi_visualization",
+    "shared_packages/cause_management",
+    "shared_packages/collaboration_engine",
+    "shared_packages/collaborative_docs",
+    "shared_packages/collaborative_workspace",
+    "shared_packages/common_utils",
+    "shared_packages/consent_manager",
+    "shared_packages/cooperative_fundraising",
+    "shared_packages/cpay_core",
+    "shared_packages/data_lakehouse",
+    "shared_packages/db_abstraction",
+    "shared_packages/db_pool",
+    "shared_packages/event_bus",
+    "shared_packages/feedback_analysis",
+    "shared_packages/feedback_core",
+    "shared_packages/feedback_visualization",
+    "shared_packages/feed_utils",
+    "shared_packages/grpc",
+    "shared_packages/learning_core",
+    "shared_packages/media",
+    "shared_packages/messenger",
+    "shared_packages/messenger_ui",
+    "shared_packages/network",
+    "shared_packages/notification_core",
+    "shared_packages/oauth2",
     "shared_packages/opengl_renderer",
+    "shared_packages/operational_transformation",
+    "shared_packages/protos",
+    "shared_packages/realtime_signaling",
+    "shared_packages/redis_utils",
+    "shared_packages/rendering_core",
+    "shared_packages/reviews",
+    "shared_packages/shtairir",
+    "shared_packages/shtairir_editor",
+    "shared_packages/skill_development",
+    "shared_packages/skill_exchange_core",
+    "shared_packages/skill_volunteering",
+    "shared_packages/social_enhancements",
+    "shared_packages/social_graph",
+    "shared_packages/social_integration",
+    "shared_packages/social_interactions",
+    "shared_packages/storage_abstraction",
+    "shared_packages/survey",
+    "shared_packages/task_manager",
+    "shared_packages/visualization_context",
+    "shared_packages/volunteer_coordination",
+    "shared_packages/volunteer_core",
     "shared_packages/vulkan_renderer",
+    "shared_packages/wallet",
+    "shared_packages/web_core",
+    
+    # Tools and Templates
+    "tools/ci",
+    "templates/web_app",
 ]
-
 [workspace.dependencies]
 # Core Technologies
 bevy = "0.16.1"
+p2panda = "0.4.0"  # P2P implementation on hold as noted
 p2panda-auth = "0.4.0"
 p2panda-blobs = "0.4.0"
 p2panda-core = "0.4.0"
@@ -42,42 +112,69 @@ p2panda-store = "0.4.0"
 p2panda-stream = "0.4.0"
 p2panda-sync = "0.4.0"
 
-glow = "0.16.0"
-ash = "0.38.0"
+# UI and Desktop Framework
 tauri = "2.7.0"
 yew = { version = "0.21.0", features = ["csr"] }
 yew-router = "0.18.0"
 stylist = { version = "0.13.0", features = ["yew_integration"] }
+wry = "0.52.1"
+
+# Graphics and Rendering
+glow = "0.16.0"
+ash = "0.38.0"
+
+# Web Assembly
 wasm-bindgen = "0.2.100"
 wasm-bindgen-futures = "0.4.50"
 web-sys = "0.3.77"
 js-sys = "0.3.77"
 gloo-timers = { version = "0.3.0", features = ["futures"] }
-wry = "0.52.1"
+
+# Data Visualization
 plotters = "0.3.7"
+
+# Web Server Framework
 axum = "0.8.4"
+
+# Database
 sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "postgres", "sqlite", "chrono", "uuid", "json"] }
-sqlx-cli = 0.8.6
+sqlx-cli = "0.8.6"
+tokio-postgres = "0.7.13"
+diesel = "2.2.12"
+sled = "0.34.7"
+
+# Redis and Connection Pooling
+redis = "0.32.4"
+bb8 = "0.9.0"
+bb8-redis = "0.24.0"
+
+# Logging
 tracing = "0.1.41"
 tracing-subscriber = "0.3.18"
-rodio = "0.21.1"
-pdf = "0.9.0"
 
-redis = 0.32.4
-diesel = 2.2.12
-bb8 = 0.9.0
+# Media Processing (royalty-free codecs only: AV1, Opus, WebM, etc)
+rodio = "0.21"
+pdf = "0.9.0"
+gstreamer = "0.24.0"
 
 # GraphQL for Public API
 async-graphql = "7.0.17"
 async-graphql-axum = "7.0.17"
+graphql-parser = "0.4.1"
+graphql_client = "0.14.0"
+graphql_query_derive = "0.14.0"
+graphql_client_codegen = "0.14.0"
 
-# gRPC for Internal API
-tonic = "0.14.0"
+# gRPC for Internal API (version 1.73.1 maps to tonic)
+tonic = "0.14.0"  # Latest stable version for gRPC
 prost = "0.14.1"
 prost-types = "0.14.1"
 
-# Media Processing (royalty-free codecs only)
-# Note: ffmpeg.wasm not available as Rust crate, will need WASM integration
+# Parser Generation
+pest = "2.8.1"
+pest_derive = "2.8.1"
+pest_meta = "2.8.1"
+pest_generator = "2.8.1"
 
 # Common dependencies
 tokio = { version = "1.47.0", features = ["full"] }
@@ -95,17 +192,15 @@ futures-util = "0.3.31"
 log = "0.4.27"
 wasm-logger = "0.2.0"
 rand = "0.8.5"
-plotters = "0.3.7"
-serde_json = "1.0.141"
 
 # WebSocket support
 tokio-tungstenite = "0.20.1"
 
-# OAuth2 for authentication
-oauth2 = "4.4.2"
-
-# Sled for local caching
-sled = "0.34.7"
-
-# Encryption
-rust-crypto = "0.2.36"
+# Authentication and Security
+oauth2 = "5.0.0"
+jsonwebtoken = "9.3.1"
+argon2 = "0.5.3"
+aes-gcm = "0.10.3"
+chacha20poly1305 = "0.10.1"
+rustls = "0.23.31"
+ed25519-dalek = "2.2.0"

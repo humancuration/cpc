@@ -4,11 +4,11 @@
 
 use crate::error::DbError;
 use crate::models::{User, NewUser, UpdateUser, Entity, NewEntity};
-use db_pool::{Pool, PostgresConnectionManager, SqliteConnectionManager};
+use db_pool::{Pool, PostgresConnectionManager, SqliteConnectionManager, DatabaseError};
 use diesel::prelude::*;
-use diesel::r2d2::ConnectionManager;
 use uuid::Uuid;
 use std::sync::Arc;
+use async_trait::async_trait;
 
 /// Database manager for handling connections
 pub struct DbManager {
@@ -37,41 +37,15 @@ impl DbManager {
 }
 
 /// Connection pool trait
-#[async_trait::async_trait]
 pub trait ConnectionPool: Send + Sync {
     /// Get a connection from the pool
-    async fn get_connection(&self) -> Result<Box<dyn DatabaseConnection>, DbError>;
+    fn get_connection(&self) -> Result<Box<dyn DatabaseConnection>, DbError>;
 }
 
 /// Database connection trait
-pub trait DatabaseConnection: diesel::Connection + 'static {
+pub trait DatabaseConnection: diesel::Connection {
     /// Begin a transaction
-    fn begin_transaction(&mut self) -> Result<Transaction, DbError>;
-}
-
-/// Transaction wrapper
-pub struct Transaction<'a, C: diesel::Connection> {
-    connection: &'a mut C,
-}
-
-impl<'a, C: diesel::Connection> Transaction<'a, C> {
-    /// Create a new transaction
-    pub fn new(connection: &'a mut C) -> Result<Self, DbError> {
-        connection.begin_transaction()?;
-        Ok(Self { connection })
-    }
-
-    /// Commit the transaction
-    pub fn commit(self) -> Result<(), DbError> {
-        self.connection.commit_transaction()?;
-        Ok(())
-    }
-
-    /// Rollback the transaction
-    pub fn rollback(self) -> Result<(), DbError> {
-        self.connection.rollback_transaction()?;
-        Ok(())
-    }
+    fn begin_transaction(&mut self) -> Result<(), DbError>;
 }
 
 /// PostgreSQL pool wrapper
@@ -79,12 +53,11 @@ struct PostgresPoolWrapper {
     pool: Pool<PostgresConnectionManager>,
 }
 
-#[async_trait::async_trait]
 impl ConnectionPool for PostgresPoolWrapper {
-    async fn get_connection(&self) -> Result<Box<dyn DatabaseConnection>, DbError> {
-        // Note: This is a simplified implementation
-        // In a real implementation, we would need to handle the async connection properly
-        Err(DbError::Database(diesel::result::Error::InvalidCString("Not implemented".into())))
+    fn get_connection(&self) -> Result<Box<dyn DatabaseConnection>, DbError> {
+        // This is a simplified implementation
+        // In a real implementation, we would need to properly handle the connection
+        Err(DbError::InvalidInput("PostgreSQL connection not implemented".to_string()))
     }
 }
 
@@ -92,14 +65,13 @@ impl ConnectionPool for PostgresPoolWrapper {
 struct SqlitePoolWrapper {
     pool: Pool<SqliteConnectionManager>,
 }
-
-#[async_trait::async_trait]
 impl ConnectionPool for SqlitePoolWrapper {
-    async fn get_connection(&self) -> Result<Box<dyn DatabaseConnection>, DbError> {
-        // Note: This is a simplified implementation
-        // In a real implementation, we would need to handle the async connection properly
-        Err(DbError::Database(diesel::result::Error::InvalidCString("Not implemented".into())))
+    fn get_connection(&self) -> Result<Box<dyn DatabaseConnection>, DbError> {
+        // This is a simplified implementation
+        // In a real implementation, we would need to properly handle the connection
+        Err(DbError::InvalidInput("SQLite connection not implemented".to_string()))
     }
+}
 }
 
 /// User repository for user-related operations
@@ -115,37 +87,37 @@ impl UserRepository {
 
     /// Create a new user
     pub async fn create(&self, user: NewUser) -> Result<User, DbError> {
-        // This is a placeholder implementation
         // In a real implementation, this would use Diesel to insert the user
-        Err(DbError::InvalidInput("Not implemented".to_string()))
+        // For now, we'll return an error indicating the functionality is not implemented
+        Err(DbError::InvalidInput("User creation not implemented".to_string()))
     }
 
     /// Find a user by ID
     pub async fn find_by_id(&self, id: Uuid) -> Result<Option<User>, DbError> {
-        // This is a placeholder implementation
         // In a real implementation, this would use Diesel to query the user
-        Err(DbError::InvalidInput("Not implemented".to_string()))
+        // For now, we'll return an error indicating the functionality is not implemented
+        Err(DbError::InvalidInput("User lookup not implemented".to_string()))
     }
 
     /// Find all users
     pub async fn find_all(&self) -> Result<Vec<User>, DbError> {
-        // This is a placeholder implementation
         // In a real implementation, this would use Diesel to query all users
-        Err(DbError::InvalidInput("Not implemented".to_string()))
+        // For now, we'll return an error indicating the functionality is not implemented
+        Err(DbError::InvalidInput("User listing not implemented".to_string()))
     }
 
     /// Update a user
     pub async fn update(&self, id: Uuid, user: UpdateUser) -> Result<Option<User>, DbError> {
-        // This is a placeholder implementation
         // In a real implementation, this would use Diesel to update the user
-        Err(DbError::InvalidInput("Not implemented".to_string()))
+        // For now, we'll return an error indicating the functionality is not implemented
+        Err(DbError::InvalidInput("User update not implemented".to_string()))
     }
 
     /// Delete a user
     pub async fn delete(&self, id: Uuid) -> Result<bool, DbError> {
-        // This is a placeholder implementation
         // In a real implementation, this would use Diesel to delete the user
-        Err(DbError::InvalidInput("Not implemented".to_string()))
+        // For now, we'll return an error indicating the functionality is not implemented
+        Err(DbError::InvalidInput("User deletion not implemented".to_string()))
     }
 }
 
@@ -162,36 +134,36 @@ impl EntityRepository {
 
     /// Create a new entity
     pub async fn create(&self, entity: NewEntity) -> Result<Entity, DbError> {
-        // This is a placeholder implementation
         // In a real implementation, this would use Diesel to insert the entity
-        Err(DbError::InvalidInput("Not implemented".to_string()))
+        // For now, we'll return an error indicating the functionality is not implemented
+        Err(DbError::InvalidInput("Entity creation not implemented".to_string()))
     }
 
     /// Find an entity by ID
     pub async fn find_by_id(&self, id: Uuid) -> Result<Option<Entity>, DbError> {
-        // This is a placeholder implementation
         // In a real implementation, this would use Diesel to query the entity
-        Err(DbError::InvalidInput("Not implemented".to_string()))
+        // For now, we'll return an error indicating the functionality is not implemented
+        Err(DbError::InvalidInput("Entity lookup not implemented".to_string()))
     }
 
     /// Find all entities
     pub async fn find_all(&self) -> Result<Vec<Entity>, DbError> {
-        // This is a placeholder implementation
         // In a real implementation, this would use Diesel to query all entities
-        Err(DbError::InvalidInput("Not implemented".to_string()))
+        // For now, we'll return an error indicating the functionality is not implemented
+        Err(DbError::InvalidInput("Entity listing not implemented".to_string()))
     }
 
     /// Update an entity
     pub async fn update(&self, id: Uuid, entity: NewEntity) -> Result<Option<Entity>, DbError> {
-        // This is a placeholder implementation
         // In a real implementation, this would use Diesel to update the entity
-        Err(DbError::InvalidInput("Not implemented".to_string()))
+        // For now, we'll return an error indicating the functionality is not implemented
+        Err(DbError::InvalidInput("Entity update not implemented".to_string()))
     }
 
     /// Delete an entity
     pub async fn delete(&self, id: Uuid) -> Result<bool, DbError> {
-        // This is a placeholder implementation
         // In a real implementation, this would use Diesel to delete the entity
-        Err(DbError::InvalidInput("Not implemented".to_string()))
+        // For now, we'll return an error indicating the functionality is not implemented
+        Err(DbError::InvalidInput("Entity deletion not implemented".to_string()))
     }
 }

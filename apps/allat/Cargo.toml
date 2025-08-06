@@ -4,29 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-async-trait = "0.1.77"
-consent_manager = { path = "../../packages/core/consent_manager" }
-cpc_consent = { path = "../../packages/cpc_consent" }
-cpc_rbac = { path = "../../packages/cpc_rbac" }
-cpc_karma = { path = "../../packages/cpc_karma" }
-cpc_wallet = { path = "../../packages/core/wallet" }
-serde = { version = "1.0", features = ["derive"] }
-tokio = { version = "1.0", features = ["full"] }
-uuid = { version = "1.0", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-rust_decimal = "1.26"
-thiserror = "1.0"
-social_integration = { path = "../../packages/social_integration" }
-cpc_auth = { path = "../../packages/cpc_auth" }
-sled = "0.34"
-bincode = "1.3"
-sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "migrate", "uuid", "chrono", "json"] }
-async-std = "1.12"
-async-graphql = "7.0.17"
-async-graphql-axum = "7.0.17"
-axum = "0.8.4"
-tower = "0.5.1"
-tower-http = { version = "0.6.1", features = ["cors"] }
+async-trait = { workspace = true }
+consent_manager = { path = "../../shared_packages/consent_manager" }
+cpc_wallet = { path = "../../shared_packages/wallet" }
+serde = { workspace = true }
+tokio = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+rust_decimal = { workspace = true }
+thiserror = { workspace = true }
+social_integration = { path = "../../shared_packages/social_integration" }
+sled = { workspace = true }
+sqlx = { workspace = true }
+async-graphql = { workspace = true }
+async-graphql-axum = { workspace = true }
+axum = { workspace = true }
 plotters = { workspace = true }
 bi_visualization = { path = "../../shared_packages/bi_visualization" }
 

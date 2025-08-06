@@ -23,6 +23,8 @@ tracing = "0.1"
 base64 = "0.21"
 regex = "1.0"
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "rust_decimal"] }
+db_pool = { path = "../../shared_packages/db_pool" }
+db_abstraction = { path = "../../shared_packages/db_abstraction" }
 
 # p2p dependencies
 p2panda = { version = "0.1", optional = true }
