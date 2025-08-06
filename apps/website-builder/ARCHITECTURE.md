@@ -179,16 +179,6 @@ Example workflow for link-in-bio creation:
 4. User adds links through the same content update mutation used for pages
 5. Analytics service tracks clicks on published site
 
-## 6. Dependencies on Other Modules
-
-| Dependency | Purpose |
-|------------|---------|
-| `cpc-core` | Access to cooperative member models and authentication |
-| `cpc-net` | p2panda integration for distributed site storage |
-| `cpc-protos` | Shared gRPC definitions for worker communication |
-| `sqlx` | Database access (already in backend dependencies) |
-| `tracing` | Structured logging |
-
 
 ## 7. Frontend Implementation
 The frontend is implemented as part of this vertical slice using:
@@ -257,9 +247,7 @@ CREATE TABLE site_analytics (
 
 ### Key Implementation Notes
 
-1. **Mobile-First Design**: All templates include responsive configurations by default
 2. **p2p Storage**: Published sites are stored via p2panda with content addressing
-3. **Authentication**: All operations validate cooperative membership through `cpc-core`
 4. **Analytics**: Click tracking uses atomic increments to handle high concurrency
 5. **Template System**: Templates are stored as JSON structures that define both layout and content constraints
 

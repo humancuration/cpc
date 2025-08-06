@@ -19,7 +19,6 @@ This module adheres to our cooperative principles by:
 ## 2. Directory Structure Following Vertical Slice Pattern
 
 ```
-packages/cpc-core/document_editor/
 ├── Cargo.toml
 ├── migrations/
 │   └── 20250801000000_create_document_tables.sql
@@ -108,13 +107,7 @@ packages/cpc-core/document_editor/
 
 ## 5. Integration Points with Other Modules
 
-| Integration Point | Module | Purpose |
-|-------------------|--------|---------|
-| Media Processing | `cpc-core/media` | Handle image insertion, conversion, and optimization |
-| p2p Storage | `cpc-net` | Distributed storage of documents for offline access and sharing |
-| Authentication | `cpc-core/auth` | Verify document ownership and access permissions |
-| User Profile | `cpc-core/user` | Retrieve user preferences for document editor |
-| Cooperative | `cpc-core/cooperative` | Handle sharing permissions within cooperative context |
+
 
 The module will provide the following integration points for other modules:
 
@@ -197,8 +190,7 @@ The module will provide the following integration points for other modules:
 ## 9. Compliance Verification
 
 ✅ Hexagonal Architecture with clear domain/application/infrastructure separation  
-✅ Screaming Architecture reflecting document editing capabilities  
-✅ Vertical slice implementation within `packages/cpc-core/`  
+✅ Screaming Architecture reflecting document editing capabilities   
 ✅ Permissively licensed dependencies (MIT/Apache 2.0)  
 ✅ Integration with existing media processing infrastructure  
 ✅ Support for royalty-free image formats  

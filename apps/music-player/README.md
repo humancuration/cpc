@@ -91,10 +91,6 @@ See [migrations/20250727000000_music_player_schema.sql](migrations/2025072700000
 
 ## Dependencies
 
-- `cpc-core` - Access to cooperative member models and authentication
-- `cpc-net` - p2panda integration for distributed streaming
-- `cpc-protos` - Shared gRPC definitions for worker communication
-- `ffmpeg-wasm` - Client-side audio processing with royalty-free codecs
 - `plotters` - Waveform visualization data generation
 - `sqlx` - Database access
 - `tracing` - Structured logging

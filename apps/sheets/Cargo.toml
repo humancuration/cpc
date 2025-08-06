@@ -12,10 +12,6 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 
-# CPC core modules
-cpc-core-storage-abstraction = { path = "../../packages/core/storage_abstraction" }
-cpc-core-event-bus = { path = "../../packages/core/event_bus" }
-cpc-core-bi-visualization = { path = "../../packages/core/bi_visualization" }
 
 # Database
 sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }

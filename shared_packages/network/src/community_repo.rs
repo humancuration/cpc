@@ -9,7 +9,6 @@ use tokio::sync::RwLock;
 
 
 // Data Transfer Objects (DTOs) for the networking layer.
-// These are intentionally kept simple and decoupled from `cpc-core` models.
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Community {

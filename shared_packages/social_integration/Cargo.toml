@@ -5,8 +5,6 @@ edition = "2021"
 
 [dependencies]
 # Core dependencies
-cpc-core = { path = "../core" }
-cpc-oauth2 = { path = "../core/oauth2" }
 async-trait = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 uuid = { workspace = true, features = ["v4", "serde"] }

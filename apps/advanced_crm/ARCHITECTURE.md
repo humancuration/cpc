@@ -325,6 +325,81 @@ CREATE TABLE email_campaign_recipients (
 );
 ```
 
+## 4. Shtairir Core Integration
+
+The Advanced CRM integrates with Shtairir Core by implementing the AppIntegration and AppIntegrationExt traits in src/shtairir_integration.rs. See: apps/advanced_crm/src/shtairir_integration.rs
+
+Exposed capabilities:
+- Commands:
+  - calculate_lead_score(lead_id: Uuid) -> Number
+  - create_email_campaign(name: String, subject: String, content: String) -> Object(EmailCampaign)
+  - sales_report_summary(period: String) -> Object(ReportSummary)
+- Schemas:
+  - LeadScore
+  - EmailCampaign
+  - ReportSummary
+- Events:
+  - Consumed: UserCreated (from HR), PaymentProcessed (from Finance)
+  - Published (planned): LeadCreated, CampaignSent, ScoreUpdated
+
+Health checks and capabilities:
+- health_check() returns Healthy with basic metrics (version, checked_at).
+- get_capabilities(): ["lead_scoring", "email_marketing", "sales_reporting", "event_handling"]
+- get_dependencies(): ["database", "redis"]
+- can_handle_event(): true for "UserCreated" and "PaymentProcessed".
+
+### Bootstrap & Registration
+
+This example shows a canonical bootstrap/registration flow using the Shtairir Core AdapterRegistry. Adjust paths if integrating from another crate; within this crate use `crate::...` module paths.
+
+Example (pseudocode for clarity):
+
+use std::sync::Arc;
+use shtairir_core::AdapterRegistry;
+use crate::shtairir_integration::CrmIntegration;
+use crate::application::lead_scoring_service::LeadScoringService;
+use crate::application::reporting_service::AdvancedReportingService;
+use crate::application::email_campaign_service::EmailCampaignService;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // Construct dependencies (wire real repositories and health services in production)
+    let lead_scoring = Arc::new(LeadScoringService::new(/* repo, health */));
+    let reporting = Arc::new(AdvancedReportingService::new(/* report_repo, crm_data_access */));
+    let email_campaigns = Arc::new(EmailCampaignService::new(/* no external deps currently */));
+
+    // Build adapter
+    let adapter = Arc::new(CrmIntegration::new(
+        Arc::clone(&lead_scoring),
+        Arc::clone(&reporting),
+        Arc::clone(&email_campaigns),
+    ));
+
+    // Create registry and register app
+    let registry = AdapterRegistry::new();
+    registry.register_app(adapter).await?;
+
+    // Optionally: verify schemas or capabilities after registration
+    // let schemas = registry.get_app_schemas("advanced_crm").await?;
+    // let caps = registry.get_app("advanced_crm").await?.get_capabilities().await?;
+
+    Ok(())
+}
+
+Registration:
+- The CrmIntegration is constructed and registered into the Shtairir AdapterRegistry by the client/bootstrapper.
+- For implementation details, see apps/advanced_crm/src/shtairir_integration.rs which defines:
+  - Commands: calculate_lead_score, create_email_campaign, sales_report_summary
+  - Schemas: LeadScore, EmailCampaign, ReportSummary
+  - Events consumed: UserCreated, PaymentProcessed
+  - Health checks via AppIntegrationExt::health_check with Healthy status and basic metrics
+
+Notes:
+- CrmIntegration::new expects Arc<LeadScoringService>, Arc<AdvancedReportingService>, Arc<EmailCampaignService>.
+- Services constructors may require repositories or configuration; pass concrete implementations in host/bootstrap code.
+- After registration, commands and schemas become discoverable via AdapterRegistry getters.
+- In a multi-app host, prefer AdapterRegistryBuilder to chain .with_app(...).await calls before build().
+
 ## 6. Integration with HR Module
 
 ### Data Flow Architecture
@@ -358,16 +433,6 @@ sequenceDiagram
    - Endpoint: `POST /api/hr/commissions/calculate`
    - Request: `CommissionCalculationRequest`
    - Response: `CommissionCalculationResult`
-
-## 7. Dependencies
-
-| Dependency | Purpose |
-|------------|---------|
-| `cpc-core::crm` | Base CRM functionality |
-| `cpc-core::hr` | HR module integration |
-| `cpc-net` | P2P data sharing for email campaigns |
-| `rodio` | Audio notifications for campaign events |
-| `pdf-rs` | PDF report generation |
 
 ## 8. Privacy and Cooperative Values Implementation
 

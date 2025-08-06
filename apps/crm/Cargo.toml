@@ -14,8 +14,6 @@ chrono = { workspace = true, features = ["serde"] }
 thiserror = { workspace = true }
 async-trait = { workspace = true }
 
-# CPC core dependencies
-cpc-core = { path = "../.." }
 
 # Database dependencies
 sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }

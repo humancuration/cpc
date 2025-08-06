@@ -80,14 +80,6 @@ The module exposes the following GraphQL operations:
 - `sitePublished(siteId: ID!)` - Site publishing updates
 - `linkClicked(siteId: ID!)` - Link click events
 
-## Integration
-
-The module integrates with:
-
-- `cpc-core` - For cooperative member models and authentication
-- `cpc-net` - For p2panda integration
-- `cpc-protos` - For gRPC definitions
-- `cpc-cooperative-fundraising` - For fundraising campaign integration
 
 ## Dependencies
 

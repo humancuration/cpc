@@ -13,7 +13,7 @@ The calendar module provides comprehensive calendar functionality for the CPC pl
 
 ## Architecture
 
-The calendar module follows a hexagonal architecture with vertical slices, implementing all functionality within the `packages/cpc-core/calendar/` directory.
+The calendar module follows a hexagonal architecture with vertical slices, implementing all functionality within the directory.
 
 ### Module Structure
 

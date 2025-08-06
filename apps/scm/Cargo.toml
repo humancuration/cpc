@@ -16,8 +16,6 @@ async-trait = { workspace = true }
 rust_decimal = { workspace = true }
 rust_decimal_macros = { workspace = true }
 
-# CPC core dependencies
-cpc-core = { path = "../.." }
 
 # Database dependencies
 sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "rust_decimal"] }

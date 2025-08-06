@@ -17,8 +17,6 @@ tokio = { workspace = true, features = ["full"] }
 tracing = { workspace = true }
 
 # CPC core dependencies
-cpc-core = { path = "../../packages/core" }
-visualization_context = { path = "../../packages/visualization_context" }
 
 # Database dependencies
 sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }

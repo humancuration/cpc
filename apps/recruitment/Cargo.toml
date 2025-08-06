@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 # Core dependencies from workspace
-cpc-core = { path = "../", features = ["recruitment"] }
 async-graphql = { workspace = true }
 async-graphql-axum = { workspace = true }
 axum = { workspace = true }

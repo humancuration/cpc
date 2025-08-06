@@ -11,12 +11,15 @@
 //! The module follows the hexagonal architecture pattern with vertical slicing:
 //!
 //! ```text
-//! packages/cpc-core/advanced_crm/
+
 //! ├── domain/          # Pure business logic
 //! ├── application/     # Service orchestration
 //! ├── infrastructure/  # Database and external service implementations
 //! └── presentation/    # UI components (Yew/Bevy)
 //! ```
+
+/** Shtairir Core integration module */
+pub mod shtairir_integration;
 
 /// Domain layer containing pure business logic
 pub mod domain;

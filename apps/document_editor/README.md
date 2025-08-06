@@ -48,14 +48,3 @@ The module exposes a GraphQL API for document management:
 
 - Subscriptions:
   - `documentUpdated(documentId: UUID!)`: Subscribe to real-time document updates
-
-## Testing
-
-The module includes unit tests for all components. To run the tests:
-
-```bash
-cd packages/cpc-core/document_editor
-cargo test
-```
-
-Note: Some tests require a PostgreSQL database to be available.

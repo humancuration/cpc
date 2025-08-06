@@ -5,8 +5,6 @@ edition = "2021"
 
 [dependencies]
 # Core dependencies
-cpc-core = { path = "../", features = ["health"] }
-cpc-net = { path = "../../cpc-net" }
 async-graphql = { workspace = true }
 async-graphql-actix-web = "4.0"
 actix-web = "4.0"

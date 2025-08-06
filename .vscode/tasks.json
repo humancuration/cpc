@@ -1,0 +1,96 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cargo",
+            "command": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "label": "Cargo: Build Workspace",
+            "args": [
+                "--workspace"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "type": "cargo",
+            "command": "check",
+            "group": "build",
+            "label": "Cargo: Check Workspace",
+            "args": [
+                "--workspace"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "type": "cargo",
+            "command": "clippy",
+            "group": "build",
+            "label": "Cargo: Clippy Workspace",
+            "args": [
+                "--workspace",
+                "--",
+                "-D",
+                "warnings"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "type": "cargo",
+            "command": "build",
+            "group": "build",
+            "label": "Cargo: Build Package",
+            "args": [
+                "--package",
+                "${input:package}"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "type": "cargo",
+            "command": "run",
+            "group": "build",
+            "label": "Cargo: Run Package",
+            "args": [
+                "--package",
+                "${input:package}"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "type": "shell",
+            "command": "cargo",
+            "args": [
+                "fmt",
+                "--all"
+            ],
+            "group": "build",
+            "label": "Cargo: Format All",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "package",
+            "description": "Package name",
+            "type": "promptString"
+        }
+    ]
+}

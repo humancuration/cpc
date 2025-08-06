@@ -2,7 +2,7 @@
 
 ## Module Structure (Hexagonal Architecture with Vertical Slices)
 
-The calendar module follows screaming architecture principles by implementing all functionality as a vertical slice within `packages/cpc-core/calendar/`. This structure ensures clear separation of concerns while maintaining domain integrity.
+The calendar module follows screaming architecture principles by implementing all functionality as a vertical slice. This structure ensures clear separation of concerns while maintaining domain integrity.
 
 ```
 apps/calendar/

@@ -5,9 +5,7 @@ edition = "2021"
 
 [dependencies]
 # Core dependencies
-cpc-core = { path = "../", features = ["document_editor"] }
 collaboration_engine = { path = "../../shared_packages/collaboration_engine" }
-cpc-net = { path = "../../cpc-net" }
 collaborative_docs = { path = "../../shared_packages/collaborative_docs" }
 realtime_signaling = { path = "../../shared_packages/realtime_signaling" }
 ot = { path = "../../shared_packages/ot" }

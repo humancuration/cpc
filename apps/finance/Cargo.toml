@@ -5,9 +5,6 @@ edition = "2021"
 
 [dependencies]
 # Core dependencies
-cpc-core = { path = "../", features = ["finance"] }
-cpc-net = { path = "../../cpc-net" }
-cpc_wallet = { path = "../../packages/core/wallet" }
 async-graphql = { workspace = true }
 async-graphql-actix-web = "4.0"
 actix-web = "4.0"
@@ -37,7 +34,6 @@ yew = { workspace = true, optional = true }
 
 [features]
 default = []
-ocr = ["cpc-core/ocr"]
 p2p = ["p2panda"]
 visualization = ["bevy", "plotters"]
 web = ["yew"]

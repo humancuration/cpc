@@ -20,7 +20,6 @@ graph TD
 The CRM module implements a sophisticated consent-based data sharing framework:
 
 ```rust
-// packages/cpc-core/crm/src/domain/contact.rs
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum DataSharingLevel {
     None,
