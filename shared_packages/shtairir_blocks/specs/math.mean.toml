@@ -1,0 +1,37 @@
+# Compute the mean of a list of numbers using statrs
+id = "stdlib.shtairir/math.mean@0.1.0"
+namespace = "stdlib.shtairir"
+name = "math.mean"
+version = "0.1.0"
+title = "Mean"
+description = "Computes the mean (average) of a list of numbers using the statrs statistics library."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["math", "statistics", "mean", "statrs"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: list of numbers
+inputs = [
+  { name = "values", ty = "list<f64>" }
+]
+
+# No params for this block
+params = []
+
+# Output: mean of the values
+outputs = [
+  { name = "result", ty = "f64" }
+]
+
+examples = [
+  "result = math.mean(values:[1.0,2.0,3.0,4.0,5.0])  # → 3.0"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

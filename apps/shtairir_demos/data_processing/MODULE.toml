@@ -1,0 +1,17 @@
+name = "demos.shtairir.data_processing"
+version = "0.1.0"
+title = "Real-time Data Processing Pipeline"
+description = "A stream processing workflow that ingests sensor data, processes it, and generates analytics"
+authors = ["CPC Cooperative"]
+categories = ["demos", "data-processing", "streaming"]
+min_shtairir_version = "0.2.0"
+
+# Paths are relative to this MODULE.toml location.
+blocks = [
+  "blocks/mock_sensor_data.toml",
+]
+
+# Paths to graph specs (v0.2)
+graphs = [
+  "graphs/sensor_data_pipeline.toml",
+]

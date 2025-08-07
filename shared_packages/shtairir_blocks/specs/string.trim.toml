@@ -1,0 +1,37 @@
+# Trim whitespace from the beginning and end of a string
+id = "stdlib.shtairir/string.trim@0.1.0"
+namespace = "stdlib.shtairir"
+name = "string.trim"
+version = "0.1.0"
+title = "Trim"
+description = "Removes whitespace from the beginning and end of a string. Unicode-aware implementation."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["string", "pure", "trim"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: string to trim
+inputs = [
+  { name = "text", ty = "string" }
+]
+
+# No params for this block
+params = []
+
+# Output: trimmed string
+outputs = [
+  { name = "result", ty = "string" }
+]
+
+examples = [
+  "result = string.trim(text:\"  hello world  \")  # → \"hello world\""
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

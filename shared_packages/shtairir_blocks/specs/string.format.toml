@@ -1,0 +1,38 @@
+# Format a string using template-based interpolation
+id = "stdlib.shtairir/string.format@0.1.0"
+namespace = "stdlib.shtairir"
+name = "string.format"
+version = "0.1.0"
+title = "Format"
+description = "Formats a string using template-based interpolation. Implements template-based string interpolation. Unicode-aware implementation."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["string", "pure", "format", "template"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: template string and values to interpolate
+inputs = [
+  { name = "template", ty = "string" },
+  { name = "values", ty = "map<string,object>" }
+]
+
+# No params for this block
+params = []
+
+# Output: formatted string
+outputs = [
+  { name = "result", ty = "string" }
+]
+
+examples = [
+  "result = string.format(template:\"Hello {name}! You are {age} years old.\", values:{\"name\":\"Alice\", \"age\":30})  # → \"Hello Alice! You are 30 years old.\""
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

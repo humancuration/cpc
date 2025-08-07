@@ -1,0 +1,38 @@
+# Multiply two fixed-point numbers using the fixed crate
+id = "stdlib.shtairir/math.fixed_multiply@0.1.0"
+namespace = "stdlib.shtairir"
+name = "math.fixed_multiply"
+version = "0.1.0"
+title = "Fixed Multiply"
+description = "Multiplies two fixed-point numbers using the fixed crate for precise decimal arithmetic."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["math", "fixed-point", "arithmetic", "financial"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: two fixed-point numbers as strings
+inputs = [
+  { name = "a", ty = "string" },
+  { name = "b", ty = "string" }
+]
+
+# No params for this block
+params = []
+
+# Output: product as a string
+outputs = [
+  { name = "result", ty = "string" }
+]
+
+examples = [
+  "result = math.fixed_multiply(a:\"1.5\", b:\"2.0\")  # → \"3.0\""
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

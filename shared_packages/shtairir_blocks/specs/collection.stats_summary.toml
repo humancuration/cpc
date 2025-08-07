@@ -1,0 +1,37 @@
+# Compute statistical summary using statrs
+id = "stdlib.shtairir/collection.stats_summary@0.1.0"
+namespace = "stdlib.shtairir"
+name = "collection.stats_summary"
+version = "0.1.0"
+title = "Statistics Summary"
+description = "Computes statistical summary (mean, variance, std dev) of a list of numbers using the statrs crate."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["collection", "statistics", "summary", "statrs"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: list of numbers
+inputs = [
+  { name = "values", ty = "list<f64>" }
+]
+
+# No params for this block
+params = []
+
+# Output: statistical summary as an object
+outputs = [
+  { name = "summary", ty = "object" }
+]
+
+examples = [
+  "summary = collection.stats_summary(values:[1.0,2.0,3.0,4.0,5.0])  # → {\"mean\":3.0,\"variance\":2.0,\"std_dev\":1.414...}"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

@@ -1,0 +1,17 @@
+name = "demos.shtairir.user_profiles"
+version = "0.1.0"
+title = "User Profile Management Workflow"
+description = "A workflow for managing user profile data with validation and transformation"
+authors = ["CPC Cooperative"]
+categories = ["demos", "user-management", "validation"]
+min_shtairir_version = "0.2.0"
+
+# Paths are relative to this MODULE.toml location.
+blocks = [
+  "blocks/mock_user_data.toml",
+]
+
+# Paths to graph specs (v0.2)
+graphs = [
+  "graphs/user_profile_workflow.toml",
+]

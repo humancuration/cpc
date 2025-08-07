@@ -1,0 +1,37 @@
+# Mock sensor data generator block
+id = "demos.shtairir.data_processing/mock_sensor_data@0.1.0"
+namespace = "demos.shtairir.data_processing"
+name = "mock_sensor_data"
+version = "0.1.0"
+title = "Mock Sensor Data Generator"
+description = "Generates realistic mock sensor data for testing the data processing pipeline"
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["mock", "sensor", "data-generator"]
+purity = "effect"
+effects = []
+determinism = "NonDeterministic"
+
+# Inputs: number of data points to generate
+inputs = [
+  { name = "count", ty = "i64", default = 10 }
+]
+
+# No params for this block
+params = []
+
+# Output: list of sensor readings
+outputs = [
+  { name = "readings", ty = "list<object>" }
+]
+
+examples = [
+  "readings = mock_sensor_data(count:5)  # → [{\"timestamp\":1234567890,\"temperature\":23.5,\"humidity\":65.0},{...}]"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

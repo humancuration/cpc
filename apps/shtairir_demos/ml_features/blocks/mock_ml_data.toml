@@ -1,0 +1,38 @@
+# Mock ML data generator block
+id = "demos.shtairir.ml_features/mock_ml_data@0.1.0"
+namespace = "demos.shtairir.ml_features"
+name = "mock_ml_data"
+version = "0.1.0"
+title = "Mock ML Data Generator"
+description = "Generates realistic mock data for machine learning feature engineering"
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["mock", "ml", "data-generator", "features"]
+purity = "effect"
+effects = []
+determinism = "NonDeterministic"
+
+# Inputs: number of samples and feature count
+inputs = [
+  { name = "samples", ty = "i64", default = 100 },
+  { name = "features", ty = "i64", default = 5 }
+]
+
+# No params for this block
+params = []
+
+# Output: dataset as list of feature vectors
+outputs = [
+  { name = "dataset", ty = "list<list<f64>>" }
+]
+
+examples = [
+  "dataset = mock_ml_data(samples:10, features:3)  # → [[0.5,0.2,0.8],[0.1,0.9,0.3],...]"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

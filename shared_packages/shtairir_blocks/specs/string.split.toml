@@ -1,0 +1,38 @@
+# Split a string into parts based on a delimiter
+id = "stdlib.shtairir/string.split@0.1.0"
+namespace = "stdlib.shtairir"
+name = "string.split"
+version = "0.1.0"
+title = "Split"
+description = "Splits a string into parts based on a delimiter or pattern. Supports both simple and pattern-based operations. Unicode-aware implementation."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["string", "pure", "split"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: string to split and delimiter
+inputs = [
+  { name = "text", ty = "string" },
+  { name = "delimiter", ty = "string" }
+]
+
+# No params for this block
+params = []
+
+# Output: list of string parts
+outputs = [
+  { name = "parts", ty = "list<string>" }
+]
+
+examples = [
+  "parts = string.split(text:\"hello,world,test\", delimiter:\",\")  # → [\"hello\", \"world\", \"test\"]"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

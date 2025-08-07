@@ -1,17 +1,22 @@
 //! Basic usage example for Shtairir codeblocks
-//! 
+//!
 //! This example demonstrates how to use the core building blocks
-//! of the Shtairir system.
+//! of the Shtairir system, including the new memory management
+//! and planning capabilities.
 
-use shtairir::block::{Block, BlockInputs, BlockOutputs, ExecutionContext, BlockResult, ValidationError};
+use shtairir::block::{Block, BlockInputs, BlockOutputs, ExecutionContext, BlockResult, ValidationError, BlockParams};
 use shtairir::composition::{BlockComposition, Connection, OutputPortRef, InputPortRef, EdgeAdapter};
 use shtairir::visual::{VisualNode, VisualEdge, EdgeEndpoint, EdgePolicy, BackpressureStrategy, OrderingStrategy};
-use shtairir::port::{InputPort, OutputPort};
-use shtairir::block::PortKind;
+use shtairir::port::{InputPort, OutputPort, PortKind};
 use shtairir::edge::EdgeAdapter as EdgeAdapterPolicy;
-use shtairir_registry::model::{BlockSpec, Determinism, Purity, EngineReq};
+use shtairir_registry::model::{BlockSpec, Determinism, Purity, EngineReq, GraphSpec, Node, NodeKind};
 use shtairir_registry::value::Value;
 use shtairir_registry::types::{Type, ScalarType};
+use shtairir_core::error::ShtairirError;
+use shtairir_execution::memory::{MemoryManager, MemoryPoolConfig};
+use shtairir_execution::planning::{ExecutionPlanner, PlanningConfig, OptimizationLevel, ResourceLimits};
+use shtairir_execution::scheduler::Scheduler;
+use shtairir_execution::registry::RegistryAdapter;
 use async_trait::async_trait;
 use std::sync::Arc;
 use std::collections::HashMap;
@@ -84,18 +89,18 @@ impl Block for AddBlock {
         let a = inputs.get("a").and_then(|v| match v {
             Value::I64(n) => Some(*n),
             _ => None,
-        }).unwrap_or(0);
+        }).ok_or_else(|| ShtairirError::Validation("Missing input 'a'".to_string()))?;
         
         let b = inputs.get("b").and_then(|v| match v {
             Value::I64(n) => Some(*n),
             _ => None,
-        }).unwrap_or(0);
+        }).ok_or_else(|| ShtairirError::Validation("Missing input 'b'".to_string()))?;
         
         let result = a + b;
         Ok(BlockOutputs::new().with_output("result".to_string(), Value::I64(result)))
     }
     
-    fn validate(&self, _params: &shtairir::block::BlockParams) -> Result<(), shtairir::block::ValidationError> {
+    fn validate(&self, _params: &BlockParams) -> Result<(), ValidationError> {
         Ok(())
     }
     
@@ -176,18 +181,18 @@ impl Block for MultiplyBlock {
         let a = inputs.get("a").and_then(|v| match v {
             Value::I64(n) => Some(*n),
             _ => None,
-        }).unwrap_or(0);
+        }).ok_or_else(|| ShtairirError::Validation("Missing input 'a'".to_string()))?;
         
         let b = inputs.get("b").and_then(|v| match v {
             Value::I64(n) => Some(*n),
             _ => None,
-        }).unwrap_or(0);
+        }).ok_or_else(|| ShtairirError::Validation("Missing input 'b'".to_string()))?;
         
         let result = a * b;
         Ok(BlockOutputs::new().with_output("result".to_string(), Value::I64(result)))
     }
     
-    fn validate(&self, _params: &shtairir::block::BlockParams) -> Result<(), shtairir::block::ValidationError> {
+    fn validate(&self, _params: &BlockParams) -> Result<(), ValidationError> {
         Ok(())
     }
     
@@ -306,6 +311,64 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     println!("   Created input port: {} (type: {:?})", input_port.name, input_port.ty);
     println!("   Created output port: {} (type: {:?})", output_port.name, output_port.ty);
+    
+    // Demonstrate new memory management capabilities
+    println!("\n5. Demonstrating memory management:");
+    
+    let memory_manager = MemoryManager::new();
+    let pool_config = MemoryPoolConfig::default();
+    memory_manager.create_pool("example_pool".to_string(), pool_config).map_err(|e| format!("Memory manager error: {:?}", e))?;
+    
+    let block_id = memory_manager.allocate("example_pool", 1024).map_err(|e| format!("Memory allocation error: {:?}", e))?;
+    println!("   Allocated memory block: {}", block_id);
+    
+    memory_manager.free("example_pool", block_id, 1024).map_err(|e| format!("Memory free error: {:?}", e))?;
+    println!("   Freed memory block: {}", block_id);
+    
+    // Demonstrate new planning capabilities
+    println!("\n6. Demonstrating execution planning:");
+    
+    let planning_config = PlanningConfig {
+        max_concurrency: 4,
+        resource_aware: true,
+        resource_limits: ResourceLimits::default(),
+        optimization_level: OptimizationLevel::Balanced,
+    };
+    
+    let planner = ExecutionPlanner::new(planning_config);
+    
+    // Create a simple graph for planning
+    let nodes = vec![
+        Node {
+            id: "node1".to_string(),
+            kind: NodeKind::Block,
+            spec: add_block.spec().clone(),
+            inputs: vec![],
+            outputs: vec![],
+            position: None,
+            metadata: None,
+        }
+    ];
+    
+    let graph = GraphSpec {
+        id: "example_graph".to_string(),
+        name: "Example Graph".to_string(),
+        description: "An example graph for planning".to_string(),
+        version: "1.0.0".to_string(),
+        authors: vec![],
+        license: "CPC".to_string(),
+        nodes,
+        connections: vec![],
+        metadata: None,
+    };
+    
+    let plan = planner.plan_execution(Arc::new(graph)).map_err(|e| format!("Planning error: {:?}", e))?;
+    println!("   Created execution plan with {} stages", plan.stages.len());
+    
+    // Demonstrate enhanced scheduler
+    let registry_adapter = RegistryAdapter::new(Arc::new(shtairir_registry::model::Registry::new()));
+    let scheduler = Scheduler::with_config(registry_adapter, planning_config);
+    println!("   Created enhanced scheduler with custom planning config");
     
     println!("\nExample completed successfully!");
     

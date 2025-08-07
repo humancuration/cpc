@@ -1,0 +1,240 @@
+schema_version = "0.2"
+id = "graph:demos.shtairir.ml_features/ml_feature_pipeline@0.1.0"
+namespace = "demos.shtairir.ml_features"
+name = "ml_feature_pipeline"
+version = "0.1.0"
+title = "Machine Learning Feature Pipeline"
+description = "A pipeline for preparing data for machine learning models with feature engineering and normalization"
+authors = ["CPC Coop"]
+tags = ["demo", "ml", "features", "normalization", "engineering"]
+visibility = "public"
+effects = []
+
+[[nodes]]
+id = "mock_data"
+kind = "block"
+fq_block = "demos.shtairir.ml_features/mock_ml_data"
+version_req = "^0.1"
+title = "Mock ML Data"
+purity = "effect"
+effects = []
+
+[nodes.inputs]
+samples = 1000
+features = 10
+
+[[nodes.outputs]]
+name = "dataset"
+port_id = "dataset_out"
+ty = "list<list<f64>>"
+kind = "value"
+
+[[nodes]]
+id = "add_features"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.map"
+version_req = "^0.1"
+title = "Feature Engineering"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+function = { ref = "feature_engineering_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "engineered_out"
+ty = "list<list<f64>>"
+kind = "value"
+
+[[nodes]]
+id = "compute_means"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.map"
+version_req = "^0.1"
+title = "Compute Feature Means"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+function = { ref = "mean_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "means_out"
+ty = "list<f64>"
+kind = "value"
+
+[[nodes]]
+id = "compute_stds"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.map"
+version_req = "^0.1"
+title = "Compute Feature Std Devs"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+function = { ref = "std_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "stds_out"
+ty = "list<f64>"
+kind = "value"
+
+[[nodes]]
+id = "normalize_features"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.map"
+version_req = "^0.1"
+title = "Normalize Features"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+function = { ref = "normalize_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "normalized_out"
+ty = "list<list<f64>>"
+kind = "value"
+
+[[nodes]]
+id = "split_data"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.random_sample"
+version_req = "^0.1"
+title = "Create Train/Test Split"
+purity = "effect"
+effects = []
+determinism = "NonDeterministic"
+
+[nodes.inputs]
+size = 200
+distribution = "uniform"
+
+[[nodes.outputs]]
+name = "samples"
+port_id = "indices_out"
+ty = "list<f64>"
+kind = "value"
+
+[[nodes]]
+id = "quality_check"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.stats_summary"
+version_req = "^0.1"
+title = "Data Quality Check"
+purity = "pure"
+effects = []
+
+[[nodes.outputs]]
+name = "summary"
+port_id = "quality_out"
+ty = "object"
+kind = "value"
+
+[[nodes]]
+id = "format_report"
+kind = "block"
+fq_block = "stdlib.shtairir/string.format"
+version_req = "^0.1"
+title = "Format Report"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+template = "ML Pipeline: {samples} samples, {features} features. Quality: mean={mean:.2}, std={std:.2}"
+
+[[nodes.outputs]]
+name = "result"
+port_id = "report_out"
+ty = "string"
+kind = "value"
+
+# Edges connecting the nodes
+edges = [
+  # Connect mock data to feature engineering
+  { from_node = "mock_data", from_port = "dataset_out", to_node = "add_features", to_port = "collection" },
+  
+  # Connect engineered data to normalization steps
+  { from_node = "add_features", from_port = "engineered_out", to_node = "compute_means", to_port = "collection" },
+  { from_node = "add_features", from_port = "engineered_out", to_node = "compute_stds", to_port = "collection" },
+  
+  # Connect normalization parameters to normalization
+  { from_node = "compute_means", from_port = "means_out", to_node = "normalize_features", to_port = "means" },
+  { from_node = "compute_stds", from_port = "stds_out", to_node = "normalize_features", to_port = "stds" },
+  { from_node = "add_features", from_port = "engineered_out", to_node = "normalize_features", to_port = "collection" },
+  
+  # Connect normalized data to quality check
+  { from_node = "normalize_features", from_port = "normalized_out", to_node = "quality_check", to_port = "values" },
+  
+  # Connect data dimensions and quality to format report
+  { from_node = "mock_data", from_port = "dataset_out", to_node = "format_report", to_port = "values.samples" },
+  { from_node = "quality_check", from_port = "quality_out.mean", to_node = "format_report", to_port = "values.mean" },
+  { from_node = "quality_check", from_port = "quality_out.std_dev", to_node = "format_report", to_port = "values.std" },
+]
+
+# Function definitions
+[functions]
+feature_engineering_function = '''
+fn add_features(sample) -> list<f64> {
+  // Add engineered features like polynomial terms or interactions
+  let extended = sample.clone()
+  
+  // Add squared terms for each feature
+  for (i, feature) in sample.enumerate() {
+    extended.push(feature * feature)  // Square each feature
+  }
+  
+  // Add interaction terms between first two features
+  if (list.length(sample) >= 2) {
+    extended.push(sample[0] * sample[1])  // Product of first two features
+  }
+  
+  return extended
+}
+'''
+
+mean_function = '''
+fn compute_mean(feature_column) -> f64 {
+  return math.mean(feature_column)
+}
+'''
+
+std_function = '''
+fn compute_std(feature_column) -> f64 {
+  // Compute standard deviation (simplified)
+  let mean = math.mean(feature_column)
+  let squared_diffs = collection.map(feature_column, fn(x) -> (x - mean) * (x - mean))
+  let variance = math.mean(squared_diffs)
+  return math.sqrt(variance)
+}
+'''
+
+normalize_function = '''
+fn normalize_sample(sample, means, stds) -> list<f64> {
+  // Z-score normalization: (x - mean) / std
+  return collection.map(sample.enumerate(), fn(i, x) -> (x - means[i]) / stds[i])
+}
+'''
+
+# Exports - what the graph outputs
+[[exports]]
+export_id = "report"
+from_node = "format_report"
+from_port = "report_out"
+
+[[exports]]
+export_id = "normalized_data"
+from_node = "normalize_features"
+from_port = "normalized_out"
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["streams", "serde"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

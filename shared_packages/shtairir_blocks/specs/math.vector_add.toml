@@ -1,0 +1,38 @@
+# Add two 3D vectors using nalgebra
+id = "stdlib.shtairir/math.vector_add@0.1.0"
+namespace = "stdlib.shtairir"
+name = "math.vector_add"
+version = "0.1.0"
+title = "Vector Add"
+description = "Adds two 3D vectors using the nalgebra linear algebra library."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["math", "vector", "linear-algebra", "nalgebra"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: two 3D vectors as lists of 3 numbers
+inputs = [
+  { name = "a", ty = "list<f64>" },
+  { name = "b", ty = "list<f64>" }
+]
+
+# No params for this block
+params = []
+
+# Output: sum of the two vectors
+outputs = [
+  { name = "result", ty = "list<f64>" }
+]
+
+examples = [
+  "result = math.vector_add(a:[1.0,2.0,3.0], b:[4.0,5.0,6.0])  # → [5.0,7.0,9.0]"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

@@ -1,0 +1,206 @@
+schema_version = "0.2"
+id = "graph:demos.shtairir.data_processing/sensor_data_pipeline@0.1.0"
+namespace = "demos.shtairir.data_processing"
+name = "sensor_data_pipeline"
+version = "0.1.0"
+title = "Sensor Data Processing Pipeline"
+description = "A stream processing workflow that ingests sensor data, processes it, and generates analytics"
+authors = ["CPC Coop"]
+tags = ["demo", "stream", "data-processing", "analytics"]
+visibility = "public"
+effects = []
+
+[[nodes]]
+id = "mock_data"
+kind = "block"
+fq_block = "demos.shtairir.data_processing/mock_sensor_data"
+version_req = "^0.1"
+title = "Mock Sensor Data"
+purity = "effect"
+effects = []
+
+[nodes.inputs]
+count = 100
+
+[[nodes.outputs]]
+name = "readings"
+port_id = "readings_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "map_transform"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.map"
+version_req = "^0.1"
+title = "Transform Readings"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+function = { ref = "transform_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "mapped_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "filter_outliers"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.filter"
+version_req = "^0.1"
+title = "Filter Outliers"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+predicate = { ref = "filter_predicate" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "filtered_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "extract_temps"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.map"
+version_req = "^0.1"
+title = "Extract Temperatures"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+function = { ref = "extract_temp_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "temps_out"
+ty = "list<f64>"
+kind = "value"
+
+[[nodes]]
+id = "compute_stats"
+kind = "block"
+fq_block = "stdlib.shtairir/math.mean"
+version_req = "^0.1"
+title = "Compute Mean Temperature"
+purity = "pure"
+effects = []
+
+[[nodes.outputs]]
+name = "result"
+port_id = "mean_out"
+ty = "f64"
+kind = "value"
+
+[[nodes]]
+id = "format_report"
+kind = "block"
+fq_block = "stdlib.shtairir/string.format"
+version_req = "^0.1"
+title = "Format Report"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+template = "Average temperature: {mean}°C, Processed {count} readings"
+
+[[nodes.outputs]]
+name = "result"
+port_id = "report_out"
+ty = "string"
+kind = "value"
+
+[[nodes]]
+id = "count_readings"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.reduce"
+version_req = "^0.1"
+title = "Count Readings"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+initial = 0
+function = { ref = "count_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "count_out"
+ty = "i64"
+kind = "value"
+
+# Edges connecting the nodes
+edges = [
+  # Connect mock data to map transform
+  { from_node = "mock_data", from_port = "readings_out", to_node = "map_transform", to_port = "collection" },
+  
+  # Connect mapped data to filter
+  { from_node = "map_transform", from_port = "mapped_out", to_node = "filter_outliers", to_port = "collection" },
+  
+  # Connect filtered data to extract temperatures
+  { from_node = "filter_outliers", from_port = "filtered_out", to_node = "extract_temps", to_port = "collection" },
+  
+  # Connect temperatures to compute stats
+  { from_node = "extract_temps", from_port = "temps_out", to_node = "compute_stats", to_port = "values" },
+  
+  # Connect filtered data to count readings
+  { from_node = "filter_outliers", from_port = "filtered_out", to_node = "count_readings", to_port = "collection" },
+  
+  # Connect stats and count to format report
+  { from_node = "compute_stats", from_port = "mean_out", to_node = "format_report", to_port = "values.mean" },
+  { from_node = "count_readings", from_port = "count_out", to_node = "format_report", to_port = "values.count" },
+]
+
+# Function definitions
+[functions]
+transform_function = '''
+fn transform(reading) -> object {
+  // Add a processed timestamp and normalize data
+  return {
+    "id": reading.id,
+    "timestamp": reading.timestamp,
+    "processed_at": now(),
+    "temperature": reading.temperature,
+    "humidity": reading.humidity,
+    "location": reading.location
+  }
+}
+'''
+
+filter_predicate = '''
+fn is_valid(reading) -> bool {
+  // Filter out readings with extreme values
+  return reading.temperature >= -50.0 && reading.temperature <= 100.0 && 
+         reading.humidity >= 0.0 && reading.humidity <= 100.0
+}
+'''
+
+extract_temp_function = '''
+fn extract_temp(reading) -> f64 {
+  return reading.temperature
+}
+'''
+
+count_function = '''
+fn count(acc, item) -> i64 {
+  return acc + 1
+}
+'''
+
+# Exports - what the graph outputs
+[[exports]]
+export_id = "report"
+from_node = "format_report"
+from_port = "report_out"
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["streams", "serde"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

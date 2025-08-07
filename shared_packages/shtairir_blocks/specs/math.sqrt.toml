@@ -1,0 +1,38 @@
+# Compute the square root of a number using libm
+id = "stdlib.shtairir/math.sqrt@0.1.0"
+namespace = "stdlib.shtairir"
+name = "math.sqrt"
+version = "0.1.0"
+title = "Square Root"
+description = "Computes the square root of a number using the libm mathematical library."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["math", "pure", "arithmetic", "libm"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: value to compute square root of
+inputs = [
+  { name = "value", ty = "f64" }
+]
+
+# No params for this block
+params = []
+
+# Output: square root of the value
+outputs = [
+  { name = "result", ty = "f64" }
+]
+
+examples = [
+  "result = math.sqrt(value:16.0)  # → 4.0",
+  "result = math.sqrt(value:2.0)  # → 1.414..."
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

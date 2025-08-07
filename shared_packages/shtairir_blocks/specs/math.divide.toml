@@ -1,0 +1,43 @@
+# Divide two values of the same numeric type
+id = "stdlib.shtairir/math.divide@0.1.0"
+namespace = "stdlib.shtairir"
+name = "math.divide"
+version = "0.1.0"
+title = "Divide"
+description = "Divides the first value by the second value of the same numeric type. Returns an error for division by zero."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["math", "pure", "arithmetic"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+[[generics]]
+name = "T"
+bounds = ["Add", "Default", "Serialize"]
+
+# Inputs: two values of the same type
+inputs = [
+  { name = "a", ty = "T" },
+  { name = "b", ty = "T" },
+]
+
+# No params for this block
+params = []
+
+# Output: quotient of the two values or error
+outputs = [
+  { name = "result", ty = "T" }
+]
+
+examples = [
+  "result = math.divide(a:6, b:3)  # → 2",
+  "result = math.divide(a:5.0, b:2.0)  # → 2.5"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

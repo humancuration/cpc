@@ -1,0 +1,42 @@
+# Filter a collection based on a predicate
+id = "stdlib.shtairir/collection.filter@0.1.0"
+namespace = "stdlib.shtairir"
+name = "collection.filter"
+version = "0.1.0"
+title = "Filter"
+description = "Filters a collection based on a predicate function and returns a new collection with only the elements that satisfy the predicate. Supports both Stream and non-Stream inputs."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["collection", "functional", "filter"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+[[generics]]
+name = "T"
+bounds = ["Serialize"]
+
+# Inputs: collection and predicate function
+inputs = [
+  { name = "collection", ty = "list<T>" },
+  { name = "predicate", ty = "Function" }
+]
+
+# No params for this block
+params = []
+
+# Output: new collection with filtered values
+outputs = [
+  { name = "result", ty = "list<T>" }
+]
+
+examples = [
+  "result = collection.filter(collection:[1,2,3,4], predicate:x -> x > 2)  # → [3,4]"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

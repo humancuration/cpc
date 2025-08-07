@@ -1,0 +1,43 @@
+# Multiply two values of the same numeric type
+id = "stdlib.shtairir/math.multiply@0.1.0"
+namespace = "stdlib.shtairir"
+name = "math.multiply"
+version = "0.1.0"
+title = "Multiply"
+description = "Multiplies two values of the same numeric type."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["math", "pure", "arithmetic"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+[[generics]]
+name = "T"
+bounds = ["Add", "Default", "Serialize"]
+
+# Inputs: two values of the same type
+inputs = [
+  { name = "a", ty = "T" },
+  { name = "b", ty = "T" },
+]
+
+# No params for this block
+params = []
+
+# Output: product of the two values
+outputs = [
+  { name = "result", ty = "T" }
+]
+
+examples = [
+  "result = math.multiply(a:5, b:3)  # → 15",
+  "result = math.multiply(a:2.5, b:2.0)  # → 5.0"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

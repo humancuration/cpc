@@ -1,0 +1,259 @@
+schema_version = "0.2"
+id = "graph:demos.shtairir.user_profiles/user_profile_workflow@0.1.0"
+namespace = "demos.shtairir.user_profiles"
+name = "user_profile_workflow"
+version = "0.1.0"
+title = "User Profile Management Workflow"
+description = "A workflow for managing user profile data with validation and transformation"
+authors = ["CPC Coop"]
+tags = ["demo", "user", "validation", "transformation"]
+visibility = "public"
+effects = []
+
+[[nodes]]
+id = "mock_data"
+kind = "block"
+fq_block = "demos.shtairir.user_profiles/mock_user_data"
+version_req = "^0.1"
+title = "Mock User Data"
+purity = "effect"
+effects = []
+
+[nodes.inputs]
+count = 10
+
+[[nodes.outputs]]
+name = "profiles"
+port_id = "profiles_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "normalize_names"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.map"
+version_req = "^0.1"
+title = "Normalize Names"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+function = { ref = "normalize_name_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "normalized_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "trim_emails"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.map"
+version_req = "^0.1"
+title = "Trim Emails"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+function = { ref = "trim_email_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "trimmed_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "validate_profiles"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.filter"
+version_req = "^0.1"
+title = "Validate Profiles"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+predicate = { ref = "validation_predicate" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "validated_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "create_display_names"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.map"
+version_req = "^0.1"
+title = "Create Display Names"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+function = { ref = "display_name_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "display_names_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "format_summary"
+kind = "block"
+fq_block = "stdlib.shtairir/string.format"
+version_req = "^0.1"
+title = "Format Summary"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+template = "Processed {total} user profiles. {valid} valid profiles, {invalid} invalid profiles."
+
+[[nodes.outputs]]
+name = "result"
+port_id = "summary_out"
+ty = "string"
+kind = "value"
+
+[[nodes]]
+id = "count_total"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.reduce"
+version_req = "^0.1"
+title = "Count Total Profiles"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+initial = 0
+function = { ref = "count_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "total_out"
+ty = "i64"
+kind = "value"
+
+[[nodes]]
+id = "count_valid"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.reduce"
+version_req = "^0.1"
+title = "Count Valid Profiles"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+initial = 0
+function = { ref = "count_function" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "valid_out"
+ty = "i64"
+kind = "value"
+
+# Edges connecting the nodes
+edges = [
+  # Connect mock data to name normalization
+  { from_node = "mock_data", from_port = "profiles_out", to_node = "normalize_names", to_port = "collection" },
+  
+  # Connect normalized data to email trimming
+  { from_node = "normalize_names", from_port = "normalized_out", to_node = "trim_emails", to_port = "collection" },
+  
+  # Connect trimmed data to validation
+  { from_node = "trim_emails", from_port = "trimmed_out", to_node = "validate_profiles", to_port = "collection" },
+  
+  # Connect validated data to display name creation
+  { from_node = "validate_profiles", from_port = "validated_out", to_node = "create_display_names", to_port = "collection" },
+  
+  # Connect original data to total count
+  { from_node = "mock_data", from_port = "profiles_out", to_node = "count_total", to_port = "collection" },
+  
+  # Connect validated data to valid count
+  { from_node = "validate_profiles", from_port = "validated_out", to_node = "count_valid", to_port = "collection" },
+  
+  # Connect counts to format summary
+  { from_node = "count_total", from_port = "total_out", to_node = "format_summary", to_port = "values.total" },
+  { from_node = "count_valid", from_port = "valid_out", to_node = "format_summary", to_port = "values.valid" },
+  
+  # Calculate invalid count as total - valid
+  # (This would require a math.subtract block in a real implementation)
+]
+
+# Function definitions
+[functions]
+normalize_name_function = '''
+fn normalize(profile) -> object {
+  // Normalize name by trimming whitespace and capitalizing properly
+  let name = string.trim(profile.name)
+  let parts = string.split(name, " ")
+  let normalized_parts = collection.map(parts, fn(part) -> string.concat(string.uppercase(string.substring(part, 0, 1)), string.lowercase(string.substring(part, 1))))
+  let normalized_name = string.join(normalized_parts, " ")
+  
+  return {
+    ...profile,
+    name: normalized_name
+  }
+}
+'''
+
+trim_email_function = '''
+fn trim_email(profile) -> object {
+  // Trim whitespace from email
+  return {
+    ...profile,
+    email: string.trim(profile.email)
+  }
+}
+'''
+
+validation_predicate = '''
+fn is_valid(profile) -> bool {
+  // Validate profile data
+  return string.length(profile.name) > 0 && 
+         string.contains(profile.email, "@") && 
+         profile.age >= 13  // COPPA compliance
+}
+'''
+
+display_name_function = '''
+fn create_display_name(profile) -> object {
+  // Create a display name from first name
+  let parts = string.split(profile.name, " ")
+  let first_name = if (list.length(parts) > 0) parts[0] else profile.name
+  let display_name = string.concat(first_name, " (", profile.id, ")")
+  
+  return {
+    ...profile,
+    display_name: display_name
+  }
+}
+'''
+
+count_function = '''
+fn count(acc, item) -> i64 {
+  return acc + 1
+}
+'''
+
+# Exports - what the graph outputs
+[[exports]]
+export_id = "summary"
+from_node = "format_summary"
+from_port = "summary_out"
+
+[[exports]]
+export_id = "processed_profiles"
+from_node = "create_display_names"
+from_port = "display_names_out"
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["streams", "serde"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

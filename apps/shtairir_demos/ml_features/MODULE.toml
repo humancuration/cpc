@@ -1,0 +1,17 @@
+name = "demos.shtairir.ml_features"
+version = "0.1.0"
+title = "Machine Learning Feature Pipeline"
+description = "A pipeline for preparing data for machine learning models"
+authors = ["CPC Cooperative"]
+categories = ["demos", "ml", "data-preparation"]
+min_shtairir_version = "0.2.0"
+
+# Paths are relative to this MODULE.toml location.
+blocks = [
+  "blocks/mock_ml_data.toml",
+]
+
+# Paths to graph specs (v0.2)
+graphs = [
+  "graphs/ml_feature_pipeline.toml",
+]

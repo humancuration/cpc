@@ -39,6 +39,9 @@ members = [
     "apps/yapper",
     "apps/shtairir_examples",
     "apps/shtairir_cli",
+    "apps/shtairir_demos/data_processing",
+    "apps/shtairir_demos/user_profiles",
+    "apps/shtairir_demos/ml_features",
     
     # Shared Packages
     "shared_packages/shtairir_execution",
@@ -79,6 +82,7 @@ members = [
     "shared_packages/reviews",
     "shared_packages/shtairir",
     "shared_packages/shtairir_editor",
+    "shared_packages/shtairir_blocks",
     "shared_packages/skill_development",
     "shared_packages/skill_exchange_core",
     "shared_packages/skill_volunteering",
@@ -207,3 +211,17 @@ chacha20poly1305 = "0.10.1"
 rustls = "0.23.31"
 ed25519-dalek = "2.2.0"
 rayon = "1.10"
+
+# Math
+
+libm = "0.2.15"
+nalgebra = "0.34.0"
+statrs = "0.18.0"
+fixed = "1.29.0"
+glam = "0.30.5"
+argmin = "0.10.0"
+rand_distr = "0.5.1"
+polars = "0.50.0"
+ndarray = "0.16.1"
+ndarray-stats = "0.6.0"
+linfa = "0.7.1"

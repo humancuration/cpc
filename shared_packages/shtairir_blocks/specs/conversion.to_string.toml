@@ -1,0 +1,42 @@
+# Convert a value to its string representation
+id = "stdlib.shtairir/conversion.to_string@0.1.0"
+namespace = "stdlib.shtairir"
+name = "conversion.to_string"
+version = "0.1.0"
+title = "To String"
+description = "Converts a value to its string representation. Supports all scalar types in conversions. Comprehensive error handling for invalid conversions."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["conversion", "string", "serialize"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+[[generics]]
+name = "T"
+bounds = ["Serialize"]
+
+# Inputs: value to convert
+inputs = [
+  { name = "value", ty = "T" }
+]
+
+# No params for this block
+params = []
+
+# Output: string representation
+outputs = [
+  { name = "result", ty = "string" }
+]
+
+examples = [
+  "result = conversion.to_string(value:42)  # → \"42\"",
+  "result = conversion.to_string(value:true)  # → \"true\""
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

@@ -1,0 +1,40 @@
+# Convert a string to a numeric value
+id = "stdlib.shtairir/conversion.to_number@0.1.0"
+namespace = "stdlib.shtairir"
+name = "conversion.to_number"
+version = "0.1.0"
+title = "To Number"
+description = "Converts a string to a numeric value. Comprehensive error handling for invalid conversions. Supports all scalar numeric types in conversions."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["conversion", "number", "parse"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: string to convert
+inputs = [
+  { name = "text", ty = "string" }
+]
+
+# Params: target type (i64, f64, etc.)
+params = [
+  { name = "target_type", ty = "string", default = "i64" }
+]
+
+# Output: numeric value or error
+outputs = [
+  { name = "result", ty = "object" }
+]
+
+examples = [
+  "result = conversion.to_number(text:\"42\")  # → 42 (i64)",
+  "result = conversion.to_number(text:\"3.14\", target_type:\"f64\")  # → 3.14 (f64)"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

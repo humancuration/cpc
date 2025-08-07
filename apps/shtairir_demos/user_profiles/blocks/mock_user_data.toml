@@ -1,0 +1,37 @@
+# Mock user data generator block
+id = "demos.shtairir.user_profiles/mock_user_data@0.1.0"
+namespace = "demos.shtairir.user_profiles"
+name = "mock_user_data"
+version = "0.1.0"
+title = "Mock User Data Generator"
+description = "Generates realistic mock user profile data for testing the user profile workflow"
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["mock", "user", "data-generator"]
+purity = "effect"
+effects = []
+determinism = "NonDeterministic"
+
+# Inputs: number of user profiles to generate
+inputs = [
+  { name = "count", ty = "i64", default = 5 }
+]
+
+# No params for this block
+params = []
+
+# Output: list of user profiles
+outputs = [
+  { name = "profiles", ty = "list<object>" }
+]
+
+examples = [
+  "profiles = mock_user_data(count:3)  # → [{\"id\":\"user1\",\"name\":\"Alice Smith\",\"email\":\"alice@example.com\",...},{...}]"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

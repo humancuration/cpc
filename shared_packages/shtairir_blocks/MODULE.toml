@@ -1,0 +1,41 @@
+name = "stdlib.shtairir"
+version = "0.1.0"
+title = "Shtairir Standard Library"
+description = "Standard library blocks for the Shtairir visual programming ecosystem."
+authors = ["CPC Cooperative"]
+categories = ["stdlib", "core"]
+min_shtairir_version = "0.2.0"
+
+# Paths are relative to this MODULE.toml location.
+blocks = [
+  # Math operations
+  "specs/math.add.toml",
+  "specs/math.subtract.toml",
+  "specs/math.multiply.toml",
+  "specs/math.divide.toml",
+  "specs/math.sqrt.toml",
+  "specs/math.vector_add.toml",
+  "specs/math.mean.toml",
+  "specs/math.fixed_multiply.toml",
+  
+  # Collection processing
+  "specs/collection.map.toml",
+  "specs/collection.filter.toml",
+  "specs/collection.reduce.toml",
+  "specs/collection.random_sample.toml",
+  "specs/collection.stats_summary.toml",
+  
+  # String manipulation
+  "specs/string.concat.toml",
+  "specs/string.split.toml",
+  "specs/string.trim.toml",
+  "specs/string.format.toml",
+  
+  # Type conversion
+  "specs/conversion.to_string.toml",
+  "specs/conversion.to_number.toml",
+  "specs/conversion.parse_json.toml",
+]
+
+# No graphs in this module yet
+graphs = []

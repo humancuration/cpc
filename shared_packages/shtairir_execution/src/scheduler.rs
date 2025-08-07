@@ -1,11 +1,13 @@
 //! Scheduler for Shtairir graphs
 //!
 //! This module implements deterministic scheduling using topological sorting
-//! with support for concurrent execution of independent nodes.
+//! with support for concurrent execution of independent nodes and advanced
+//! planning capabilities.
 
 use std::collections::{HashMap, HashSet, VecDeque};
 use anyhow::Result;
 use futures_util::future;
+use std::sync::Arc;
 
 use shtairir_registry::model::{GraphSpec, Node, NodeKind};
 
@@ -13,6 +15,7 @@ use crate::graph::{build_dependency_graph, topological_sort};
 use crate::executor::{NodeExecutor, BlockExecutor, SubgraphExecutor, MacroExecutor};
 use crate::registry::RegistryAdapter;
 use crate::concurrency::ConcurrencyController;
+use crate::planning::{ExecutionPlanner, PlanningConfig};
 use shtairir_registry::value::Value;
 
 /// Scheduler for executing Shtairir graphs
@@ -21,6 +24,8 @@ pub struct Scheduler {
     registry: RegistryAdapter,
     /// Concurrency controller for managing parallel execution
     concurrency_controller: ConcurrencyController,
+    /// Execution planner for optimizing parallel execution
+    execution_planner: ExecutionPlanner,
 }
 
 /// Execution context for a single graph execution
@@ -38,36 +43,42 @@ impl Scheduler {
         Self {
             registry,
             concurrency_controller: ConcurrencyController::new(),
+            execution_planner: ExecutionPlanner::new(PlanningConfig::default()),
+        }
+    }
+    
+    /// Create a new scheduler with custom configuration
+    pub fn with_config(registry: RegistryAdapter, planning_config: PlanningConfig) -> Self {
+        Self {
+            registry,
+            concurrency_controller: ConcurrencyController::new(),
+            execution_planner: ExecutionPlanner::new(planning_config),
         }
     }
 
     /// Schedule and execute a graph
     pub async fn schedule(&self, graph: &GraphSpec) -> Result<ExecutionContext> {
-        // Build dependency graph
-        let dependency_graph = build_dependency_graph(graph);
+        // Create an execution plan
+        let plan = self.execution_planner.plan_execution(Arc::new(graph.clone()))?;
+        let optimized_plan = self.execution_planner.optimize_plan(plan);
         
-        // Perform topological sort to determine execution order
-        let sorted_nodes = topological_sort(&dependency_graph, &graph.nodes)?;
-        
-        // Execute nodes in order
+        // Execute according to the plan
         let mut context = ExecutionContext {
             node_outputs: HashMap::new(),
             execution_order: Vec::new(),
         };
         
-        // Group nodes by their dependency level for concurrent execution
-        let levels = self.group_nodes_by_level(&dependency_graph, &sorted_nodes);
-        for level in levels {
-            // Execute all nodes in this level concurrently
+        // Execute each stage
+        for stage in optimized_plan.stages {
+            // Execute all nodes in this stage concurrently
             let mut futures = Vec::new();
-            for node_id in &level {
-                let node = graph.nodes.iter().find(|n| n.id == *node_id).unwrap().clone();
+            for node in &stage.nodes {
                 let context_clone = context.clone();
-                let future = self.execute_node(&node, &context_clone);
+                let future = self.execute_node(node, &context_clone);
                 futures.push(future);
             }
             
-            // Wait for all nodes in this level to complete
+            // Wait for all nodes in this stage to complete
             let results = futures_util::future::try_join_all(futures).await?;
             
             // Collect results
@@ -80,48 +91,6 @@ impl Scheduler {
         Ok(context)
     }
     
-    /// Group nodes by their dependency level for concurrent execution
-    fn group_nodes_by_level(
-        &self,
-        dependency_graph: &HashMap<String, HashSet<String>>,
-        sorted_nodes: &[String],
-    ) -> Vec<Vec<String>> {
-        let mut levels: Vec<Vec<String>> = Vec::new();
-        let mut nodes_at_current_level: HashSet<String> = HashSet::new();
-        
-        for node_id in sorted_nodes {
-            let dependencies: HashSet<String> = dependency_graph
-                .get(node_id)
-                .cloned()
-                .unwrap_or_default();
-            
-            // Find the level where this node can be placed
-            // It must be placed after all its dependencies
-            let mut level_index = 0;
-            while level_index < levels.len() {
-                // Check if any dependency is in this level or later levels
-                let has_dependency_in_current_or_later_level = dependencies
-                    .iter()
-                    .any(|dep| {
-                        levels.iter().skip(level_index).any(|level| level.contains(dep))
-                    });
-                
-                if has_dependency_in_current_or_later_level {
-                    level_index += 1;
-                } else {
-                    break;
-                }
-            }
-            
-            // Add node to appropriate level
-            if level_index >= levels.len() {
-                levels.push(Vec::new());
-            }
-            levels[level_index].push(node_id.clone());
-        }
-        
-        levels
-    }
     
     /// Execute a single node
     async fn execute_node(

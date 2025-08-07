@@ -1,0 +1,38 @@
+# Generate random samples using rand_distr
+id = "stdlib.shtairir/collection.random_sample@0.1.0"
+namespace = "stdlib.shtairir"
+name = "collection.random_sample"
+version = "0.1.0"
+title = "Random Sample"
+description = "Generates random samples from a specified distribution using the rand_distr crate."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["collection", "random", "statistics", "sampling"]
+purity = "effect"
+effects = []
+determinism = "NonDeterministic"
+
+# Inputs: size of sample and distribution type
+inputs = [
+  { name = "size", ty = "i64" },
+  { name = "distribution", ty = "string" }
+]
+
+# No params for this block
+params = []
+
+# Output: list of random samples
+outputs = [
+  { name = "samples", ty = "list<f64>" }
+]
+
+examples = [
+  "samples = collection.random_sample(size:5, distribution:\"normal\")  # → [0.5,-1.2,0.8,...]"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

@@ -1,0 +1,43 @@
+# Subtract two values of the same numeric type
+id = "stdlib.shtairir/math.subtract@0.1.0"
+namespace = "stdlib.shtairir"
+name = "math.subtract"
+version = "0.1.0"
+title = "Subtract"
+description = "Subtracts the second value from the first value of the same numeric type."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["math", "pure", "arithmetic"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+[[generics]]
+name = "T"
+bounds = ["Add", "Default", "Serialize"]
+
+# Inputs: two values of the same type
+inputs = [
+  { name = "a", ty = "T" },
+  { name = "b", ty = "T" },
+]
+
+# No params for this block
+params = []
+
+# Output: difference of the two values
+outputs = [
+  { name = "result", ty = "T" }
+]
+
+examples = [
+  "result = math.subtract(a:5, b:3)  # → 2",
+  "result = math.subtract(a:2.5, b:1.5)  # → 1.0"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

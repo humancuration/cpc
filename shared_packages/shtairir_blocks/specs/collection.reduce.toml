@@ -1,0 +1,47 @@
+# Reduce a collection to a single value using a function
+id = "stdlib.shtairir/collection.reduce@0.1.0"
+namespace = "stdlib.shtairir"
+name = "collection.reduce"
+version = "0.1.0"
+title = "Reduce"
+description = "Reduces a collection to a single value using an accumulator function. Implements stateful-breaker pattern for cycle safety. Supports both Stream and non-Stream inputs."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["collection", "functional", "reduce", "fold"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+[[generics]]
+name = "T"
+bounds = ["Serialize"]
+
+[[generics]]
+name = "U"
+bounds = ["Serialize"]
+
+# Inputs: collection, initial value, and reducer function
+inputs = [
+  { name = "collection", ty = "list<T>" },
+  { name = "initial", ty = "U" },
+  { name = "function", ty = "Function" }
+]
+
+# No params for this block
+params = []
+
+# Output: reduced value
+outputs = [
+  { name = "result", ty = "U" }
+]
+
+examples = [
+  "result = collection.reduce(collection:[1,2,3,4], initial:0, function:(acc, x) -> acc + x)  # → 10"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

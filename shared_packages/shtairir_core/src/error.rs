@@ -47,6 +47,18 @@ pub enum ShtairirError {
     /// I/O errors
     #[error("I/O error: {0}")]
     Io(String),
+
+    /// Execution errors
+    #[error("Execution error: {0}")]
+    Execution(String),
+
+    /// Memory management errors
+    #[error("Memory error: {0}")]
+    Memory(String),
+
+    /// Planning errors
+    #[error("Planning error: {0}")]
+    Planning(String),
 }
 
 impl From<serde_json::Error> for ShtairirError {

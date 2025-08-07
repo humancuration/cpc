@@ -1,0 +1,24 @@
+[package]
+name = "shtairir_demos_data_processing"
+version = "0.1.0"
+edition = "2021"
+publish = false
+build = "build.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+rand = { workspace = true }
+chrono = { workspace = true }
+shtairir_core = { path = "../../../shared_packages/shtairir_core" }
+shtairir_registry = { path = "../../../shared_packages/shtairir_registry" }
+shtairir_execution = { path = "../../../shared_packages/shtairir_execution" }
+shtairir_blocks = { path = "../../../shared_packages/shtairir_blocks" }
+
+[[bin]]
+name = "data_processing_demo"
+path = "src/main.rs"

@@ -1,0 +1,37 @@
+# Parse a JSON string into a structured value
+id = "stdlib.shtairir/conversion.parse_json@0.1.0"
+namespace = "stdlib.shtairir"
+name = "conversion.parse_json"
+version = "0.1.0"
+title = "Parse JSON"
+description = "Parses a JSON string into a structured value. Implements proper streaming parsing where applicable. Comprehensive error handling for invalid JSON."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["conversion", "json", "parse"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: JSON string to parse
+inputs = [
+  { name = "json_text", ty = "string" }
+]
+
+# No params for this block
+params = []
+
+# Output: parsed value or error
+outputs = [
+  { name = "result", ty = "object" }
+]
+
+examples = [
+  "result = conversion.parse_json(json_text:\"{\"name\":\"Alice\",\"age\":30}\")  # → {\"name\":\"Alice\",\"age\":30}"
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"
