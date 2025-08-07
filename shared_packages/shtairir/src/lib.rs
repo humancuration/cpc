@@ -9,6 +9,11 @@ pub mod context;
 pub mod visual;
 pub mod port;
 pub mod edge;
+pub mod plugin;
+pub mod adapter;
+pub mod testing;
+pub mod cache;
+pub mod memory_structures;
 
 pub use parser::parse_script;
 pub use engine::{execute_script, AppAdapter, ExecutionContext};

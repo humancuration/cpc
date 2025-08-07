@@ -9,6 +9,11 @@ pest_derive = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 chrono = { version = "0.4", features = ["serde"] }
+tokio = { workspace = true, features = ["full"] }
+async-trait = { workspace = true }
+shtairir_core = { path = "../shtairir_core" }
+shtairir_registry = { path = "../shtairir_registry" }
+shtairir_execution = { path = "../shtairir_execution" }
 
 [dev-dependencies]
 criterion = { workspace = true }
@@ -16,3 +21,7 @@ criterion = { workspace = true }
 [[bench]]
 name = "parser_benchmark"
 harness = false
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
