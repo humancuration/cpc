@@ -1,0 +1,35 @@
+# Deterministic sum over a list of i64 values
+id = "examples.shtairir/math.sum_list@0.2.0"
+namespace = "examples.shtairir"
+name = "math.sum_list"
+version = "0.2.0"
+title = "Sum List"
+description = "Sums a list of 64-bit integers."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["math", "pure", "list"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Single composite input: values: list<i64> with a default empty list
+inputs = [
+  { name = "values", ty = "list<i64>", default = [] },
+]
+
+# No params for this block
+params = []
+
+# Single output: total sum as i64
+outputs = [
+  { name = "total", ty = "i64" }
+]
+
+examples = ["total = math.sum_list(values:[1,2,3,4])  # → 10"]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

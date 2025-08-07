@@ -1,0 +1,39 @@
+# Join key-value pairs into a single string
+id = "examples.shtairir/util.join_kv_pairs@0.2.0"
+namespace = "examples.shtairir"
+name = "util.join_kv_pairs"
+version = "0.2.0"
+title = "Join KV Pairs"
+description = "Joins a map<string,string> into a single string with an optional separator."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["util", "pure", "map"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: pairs as map<string,string> with default {}, and optional separator with default null
+inputs = [
+  { name = "pairs", ty = "map<string,string>", default = {} },
+  { name = "separator", ty = "option<string>", default = null },
+]
+
+# No params for this minimal example
+params = []
+
+# Output: resulting text
+outputs = [
+  { name = "text", ty = "string" }
+]
+
+# Example usage
+examples = [
+  "text = util.join_kv_pairs(pairs:{\"a\":\"1\",\"b\":\"2\"}, separator:\",\")  # → \"a=1,b=2\""
+]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

@@ -1,0 +1,52 @@
+schema_version = "0.2"
+id = "graph:examples.shtairir/stream_sum@0.2.0"
+namespace = "examples.shtairir"
+name = "stream_sum"
+version = "0.2.0"
+title = "Stream Sum"
+description = "A specialized fold over Stream<i64> that sums all values"
+authors = ["CPC Coop"]
+tags = ["demo", "stream", "fold"]
+visibility = "public"
+effects = []
+
+[[nodes]]
+id = "fold1"
+kind = "block"
+fq_block = "std.stream/fold"
+version_req = "^0.2"
+title = "Fold"
+purity = "pure"
+effects = []
+
+[nodes.params]
+init = 0
+
+[nodes.params.step]
+ref = "std.math/add_i64"
+
+[[nodes.inputs]]
+name = "stream"
+port_id = "in"
+ty = "Stream<i64>"
+kind = "stream"
+
+[[nodes.outputs]]
+name = "out"
+port_id = "out"
+ty = "Stream<i64>"
+kind = "stream"
+
+edges = []
+
+[[exports]]
+export_id = "sum"
+from_node = "fold1"
+from_port = "out"
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["streams", "serde"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

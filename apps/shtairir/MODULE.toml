@@ -1,0 +1,5 @@
+name = "shtairir"
+version = "0.0.1"
+kind = "toolchain"
+title = "Shtairir Language Tooling"
+description = "Text/visual front-ends, IR, and utilities"

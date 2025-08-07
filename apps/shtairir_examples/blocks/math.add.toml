@@ -1,0 +1,43 @@
+# Minimal deterministic add block using only allowed types
+id = "examples.shtairir/math.add@0.2.0"
+namespace = "examples.shtairir"
+name = "math.add"
+version = "0.2.0"
+title = "Add"
+description = "Adds two 64-bit integers with an optional bias parameter."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["math", "pure", "demo"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+[[generics]]
+name = "T"
+bounds = ["Add", "Default", "Serializable"]
+
+# Two inputs: a and b as i64. Provide a default for b to also demo default validation.
+inputs = [
+  { name = "a", ty = "i64" },
+  { name = "b", ty = "i64", default = 0 },
+]
+
+# Optional param "bias": i64 with default 0 (compatible with i64).
+params = [
+  { name = "bias", ty = "i64", default = 0 }
+]
+
+# At least one output: result as i64.
+outputs = [
+  { name = "result", ty = "i64" }
+]
+
+# Tiny example usage snippet (free-form for humans)
+examples = ["result = math.add(a:2, b:3, bias:1)  # → 6"]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

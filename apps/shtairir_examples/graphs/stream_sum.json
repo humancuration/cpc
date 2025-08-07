@@ -1,0 +1,64 @@
+// DEPRECATED: This file has been replaced with stream_sum.toml
+// This file is kept for reference only and should not be used
+{
+  "schema_version": "0.2",
+  "id": "graph:examples.shtairir/stream_sum@0.2.0",
+  "namespace": "examples.shtairir",
+  "name": "stream_sum",
+  "version": "0.2.0",
+  "title": "Stream Sum (DEPRECATED - USE TOML VERSION)",
+  "description": "A specialized fold over Stream<i64> that sums all values. This file is deprecated and replaced with stream_sum.toml",
+  "authors": ["CPC Coop"],
+  "tags": ["demo", "stream", "fold", "deprecated"],
+  "visibility": "public",
+  "effects": [],
+  "nodes": [
+    {
+      "id": "fold1",
+      "kind": "block",
+      "fq_block": "std.stream/fold",
+      "version_req": "^0.2",
+      "title": "Fold",
+      "purity": "pure",
+      "effects": [],
+      "params": {
+        "init": 0,
+        "step": {
+          "ref": "std.math/add_i64"
+        }
+      },
+      "inputs": [
+        {
+          "name": "stream",
+          "port_id": "in",
+          "ty": "Stream<i64>",
+          "kind": "stream"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "out",
+          "port_id": "out",
+          "ty": "Stream<i64>",
+          "kind": "stream"
+        }
+      ]
+    }
+  ],
+  "edges": [],
+  "exports": [
+    {
+      "export_id": "sum",
+      "from_node": "fold1",
+      "from_port": "out"
+    }
+  ],
+  "engine": {
+    "version_req": "^0.2",
+    "capability_flags": ["streams", "serde"]
+  },
+  "integrity": {
+    "content_hash": "sha256:REPLACEME"
+  },
+  "deprecated": true
+}

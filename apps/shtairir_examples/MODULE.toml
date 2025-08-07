@@ -1,0 +1,20 @@
+name = "examples.shtairir"
+version = "0.2.0"
+title = "Shtairir Examples"
+description = "Minimal example module demonstrating how to ship Shtairir block specs and use the registry."
+authors = ["CPC Cooperative"]
+categories = ["examples"]
+min_shtairir_version = "0.2.0"
+
+# Paths are relative to this MODULE.toml location.
+blocks = [
+  "blocks/math.add.toml",
+  "blocks/string.concat.toml",
+  "blocks/math.sum_list.toml",
+  "blocks/util.join_kv_pairs.toml",
+]
+
+# Paths to graph specs (v0.2)
+graphs = [
+  "graphs/stream_sum.toml",
+]

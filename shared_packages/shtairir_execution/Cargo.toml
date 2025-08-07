@@ -1,0 +1,27 @@
+[package]
+name = "shtairir_execution"
+version = "0.2.0"
+edition = "2021"
+description = "Execution scheduler for Shtairir graphs with deterministic scheduling and concurrent execution support."
+authors = ["CPC Cooperative"]
+
+[dependencies]
+# Workspace dependencies
+serde = { workspace = true, features = ["derive"] }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+rayon = { workspace = true }
+async_trait = { workspace = true }
+futures_util = { workspace = true }
+
+# Local dependencies
+shtairir_registry = { path = "../shtairir_registry" }
+
+[lib]
+name = "shtairir_execution"
+path = "src/lib.rs"
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"

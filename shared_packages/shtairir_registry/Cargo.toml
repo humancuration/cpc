@@ -1,0 +1,20 @@
+[package]
+name = "shtairir_registry"
+version = "0.2.0"
+edition = "2021"
+description = "In-memory loader/validator/registry for Shtairir modules and block specs (TOML manifests)."
+authors = ["CPC Cooperative"]
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+toml = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+walkdir = { workspace = true }
+semver = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+
+[lib]
+name = "shtairir_registry"
+path = "src/lib.rs"

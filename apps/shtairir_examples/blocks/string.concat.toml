@@ -1,0 +1,38 @@
+# Minimal deterministic string concat block
+id = "examples.shtairir/string.concat@0.2.0"
+namespace = "examples.shtairir"
+name = "string.concat"
+version = "0.2.0"
+title = "Concat"
+description = "Concatenates two strings with an optional separator."
+authors = ["CPC Coop"]
+license = "CPC"
+tags = ["string", "pure", "demo"]
+purity = "pure"
+effects = []
+determinism = "Deterministic"
+
+# Inputs: two strings a and b
+inputs = [
+  { name = "a", ty = "string" },
+  { name = "b", ty = "string" },
+]
+
+# Param: optional separator with default null to demonstrate option<string> default handling
+params = [
+  { name = "separator", ty = "option<string>", default = null }
+]
+
+# Output: combined string
+outputs = [
+  { name = "combined", ty = "string" }
+]
+
+examples = ["combined = string.concat(a:\"foo\", b:\"bar\", separator:null)  # → \"foobar\""]
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "pure_values"]
+
+[integrity]
+content_hash = "sha256:REPLACEME"

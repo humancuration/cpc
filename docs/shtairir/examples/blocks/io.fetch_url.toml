@@ -1,0 +1,20 @@
+# Documentation-only example. Not included in any loaded MODULE.toml. Effects shown for illustration.
+# If only Deterministic is supported, this example is conceptual.
+
+name = "io.fetch_url"
+determinism = "NonDeterministic"
+effects = ["net"]
+
+[inputs]
+# Required URL to fetch
+url = "string"
+# Optional HTTP method; defaults to null (host may default to GET)
+method = "option<string>"  # default: null
+
+[params]
+# No params for this simple example
+# (left intentionally empty)
+
+[outputs]
+status = "i64"
+body = "string"

@@ -37,10 +37,11 @@ members = [
     "apps/video_editor_win64",
     "apps/website-builder",
     "apps/yapper",
-    "apps/shtairir_example",
+    "apps/shtairir_examples",
     "apps/shtairir_cli",
     
     # Shared Packages
+    "shared_packages/shtairir_execution",
     "shared_packages/api_gateway",
     "shared_packages/api_integration",
     "shared_packages/audit_framework",
@@ -205,3 +206,4 @@ aes-gcm = "0.10.3"
 chacha20poly1305 = "0.10.1"
 rustls = "0.23.31"
 ed25519-dalek = "2.2.0"
+rayon = "1.10"

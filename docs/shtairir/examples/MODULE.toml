@@ -1,0 +1,8 @@
+name = "docs.examples"
+version = "1.0.0"
+title = "Documentation Examples"
+description = "Illustrative, non-loaded examples for Shtairir docs."
+authors = ["CPC Team"]
+categories = ["docs", "reference"]
+min_shtairir_version = "1.0.0"
+blocks = ["blocks/io.fetch_url.toml"]

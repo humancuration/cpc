@@ -1,0 +1,17 @@
+[package]
+name = "shtairir_examples"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+anyhow = { workspace = true }
+shtairir_registry = { path = "../../shared_packages/shtairir_registry" }
+
+[lib]
+# No lib for this example
+path = "src/lib.rs"
+
+[[bin]]
+name = "demo"
+path = "src/bin/demo.rs"
