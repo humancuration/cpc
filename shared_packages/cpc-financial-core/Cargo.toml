@@ -1,0 +1,21 @@
+[package]
+name = "cpc-financial-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Workspace dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+rust_decimal = { workspace = true }
+rust_decimal_macros = { workspace = true }
+audit_framework = { path = "../audit_framework" }
+
+[dev-dependencies]
+# Used for examples and tests
+tokio = { workspace = true, features = ["full"] }
+audit_framework = { path = "../audit_framework" }

@@ -4,3 +4,4 @@
 
 pub mod service;
 pub mod transformer;
+pub mod statistical_service;

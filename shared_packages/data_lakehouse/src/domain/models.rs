@@ -248,6 +248,84 @@ pub struct JobExecutionResult {
     pub output_asset_id: Option<Uuid>,
 }
 
+/// Data capabilities for a data source
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DataCapabilities {
+    /// Whether the source supports filtering operations
+    pub supports_filtering: bool,
+    
+    /// Maximum number of rows the source can handle (None for unlimited)
+    pub max_rows: Option<usize>,
+    
+    /// Whether the source supports streaming operations
+    pub streaming: bool,
+    
+    /// Memory limit in bytes (None for unlimited)
+    pub memory_limit_bytes: Option<usize>,
+    
+    /// Whether automatic down-sampling is enabled
+    pub auto_downsample: bool,
+}
+
+impl DataCapabilities {
+    /// Create new data capabilities with default web settings
+    pub fn new_web_default() -> Self {
+        Self {
+            supports_filtering: true,
+            max_rows: Some(5000), // Limit to 5k rows for web context
+            streaming: true,
+            memory_limit_bytes: Some(5 * 1024 * 1024), // 5MB memory limit for web
+            auto_downsample: true,
+        }
+    }
+    
+    /// Create new data capabilities with default desktop settings
+    pub fn new_desktop_default() -> Self {
+        Self {
+            supports_filtering: true,
+            max_rows: None, // No row limit for desktop
+            streaming: true,
+            memory_limit_bytes: None, // No memory limit for desktop
+            auto_downsample: false, // No auto-downsampling for desktop
+        }
+    }
+    
+    /// Check if the data exceeds memory limits
+    pub fn exceeds_memory_limit(&self, data_size_bytes: usize) -> bool {
+        if let Some(limit) = self.memory_limit_bytes {
+            data_size_bytes > limit
+        } else {
+            false
+        }
+    }
+    
+    /// Check if the data exceeds row limits
+    pub fn exceeds_row_limit(&self, row_count: usize) -> bool {
+        if let Some(limit) = self.max_rows {
+            row_count > limit
+        } else {
+            false
+        }
+    }
+    
+    /// Get the recommended sample size if downsampling is needed
+    pub fn recommended_sample_size(&self, row_count: usize) -> Option<usize> {
+        if self.auto_downsample {
+            if let Some(max_rows) = self.max_rows {
+                if row_count > max_rows {
+                    Some(max_rows)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+}
+
 /// Data error types
 #[derive(Debug, thiserror::Error)]
 pub enum DataError {

@@ -13,4 +13,6 @@ pub mod finance_aggregator;
 pub mod events;
 pub mod expense_tracker;
 pub mod user_preferences;
+pub mod statistical_forecasting;
+pub mod impact_analysis;
 pub mod currency;

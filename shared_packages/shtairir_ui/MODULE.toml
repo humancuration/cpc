@@ -1,0 +1,26 @@
+# Shtairir UI Components Module Manifest
+
+name = "shtairir_ui"
+version = "0.1.0"
+title = "Shtairir UI Components"
+description = "Reusable UI components for Shtairir-based applications"
+authors = ["CPC Coop"]
+categories = ["ui", "components", "frontend"]
+min_shtairir_version = "0.2.0"
+
+# Block specifications provided by this module
+blocks = []
+
+# Graph specifications provided by this module
+graphs = []
+
+[metadata]
+license = "CPC"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+yew = { workspace = true }
+yew-router = { workspace = true }
+stylist = { workspace = true }
+shtairir = { path = "../shtairir" }

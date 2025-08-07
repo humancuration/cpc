@@ -9,5 +9,6 @@ pub mod infrastructure;
 pub mod presentation;
 
 // Re-export key types for convenience
-pub use domain::models::{DataAsset, IngestionJob, DataAssetType, StorageFormat, DataSource, JobSchedule};
+pub use domain::models::{DataAsset, IngestionJob, DataAssetType, StorageFormat, DataSource, JobSchedule, DataCapabilities};
 pub use application::ingestion_service::IngestionService;
+pub use application::memory_manager::{MemoryManager, ProcessingStrategy, WorkerMessage};

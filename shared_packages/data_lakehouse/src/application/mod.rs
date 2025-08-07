@@ -3,3 +3,4 @@
 pub mod ingestion_service;
 pub mod processing_service;
 pub mod versioning_service;
+pub mod memory_manager;

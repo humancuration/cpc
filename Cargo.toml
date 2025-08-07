@@ -42,6 +42,7 @@ members = [
     "apps/shtairir_demos/data_processing",
     "apps/shtairir_demos/user_profiles",
     "apps/shtairir_demos/ml_features",
+    "apps/shtairir_editor",
     
     # Shared Packages
     "shared_packages/shtairir_execution",
@@ -83,6 +84,7 @@ members = [
     "shared_packages/shtairir",
     "shared_packages/shtairir_editor",
     "shared_packages/shtairir_blocks",
+    "shared_packages/shtairir_ui",
     "shared_packages/skill_development",
     "shared_packages/skill_exchange_core",
     "shared_packages/skill_volunteering",
@@ -99,6 +101,8 @@ members = [
     "shared_packages/vulkan_renderer",
     "shared_packages/wallet",
     "shared_packages/web_core",
+    "shared_packages/cpc-financial-core",
+    "shared_packages/cpc-statistics-core",
     
     # Tools and Templates
     "tools/ci",
@@ -225,3 +229,4 @@ polars = "0.50.0"
 ndarray = "0.16.1"
 ndarray-stats = "0.6.0"
 linfa = "0.7.1"
+toml = "0.8.8"

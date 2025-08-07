@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shtairir Visual Editor</title>
+    <meta name="description" content="Visual programming editor for Shtairir workflows">
+    
+    <!-- Base styles - will be overridden by component styles -->
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        #app {
+            height: 100%;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-size: 1.2rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="loading">
+            Loading Shtairir Visual Editor...
+        </div>
+    </div>
+    
+    <!-- Include the wasm-pack generated JavaScript -->
+    <script type="module">
+        import init, { run_app } from './pkg/shtairir_editor.js';
+        
+        async function main() {
+            try {
+                // Initialize the WebAssembly module
+                await init();
+                
+                // Run the Yew application
+                run_app();
+            } catch (error) {
+                console.error('Failed to start Shtairir Editor:', error);
+                document.querySelector('.loading').innerHTML = 
+                    '<div style="text-align: center; color: #e74c3c;">' +
+                    '<h2>Failed to load Shtairir Editor</h2>' +
+                    '<p>Please check the console for details.</p>' +
+                    '</div>';
+            }
+        }
+        
+        main();
+    </script>
+</body>
+</html>

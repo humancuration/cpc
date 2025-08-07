@@ -1,0 +1,163 @@
+# Sample Shtairir Workflow
+# This is an example of what a workflow created in the Shtairir Visual Editor would look like
+
+schema_version = "0.2"
+id = "graph:examples/sample_workflow@1.0.0"
+namespace = "examples"
+name = "sample_workflow"
+version = "1.0.0"
+title = "Sample Data Processing Workflow"
+description = "A simple data processing workflow demonstrating the capabilities of the Shtairir Visual Editor"
+authors = ["Shtairir Editor Team"]
+tags = ["example", "data-processing", "demo"]
+visibility = "public"
+effects = []
+
+# Nodes in the workflow
+[[nodes]]
+id = "data_source"
+kind = "block"
+fq_block = "stdlib.shtairir/io.read_csv"
+version_req = "^0.1"
+title = "Read CSV Data"
+purity = "effect"
+effects = ["io"]
+
+[nodes.inputs]
+path = "data/input.csv"
+
+[[nodes.outputs]]
+name = "data"
+port_id = "data_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "filter_data"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.filter"
+version_req = "^0.1"
+title = "Filter Valid Records"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+predicate = { ref = "is_valid_record" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "filtered_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "transform_data"
+kind = "block"
+fq_block = "stdlib.shtairir/collection.map"
+version_req = "^0.1"
+title = "Transform Data"
+purity = "pure"
+effects = []
+
+[nodes.inputs]
+function = { ref = "transform_record" }
+
+[[nodes.outputs]]
+name = "result"
+port_id = "mapped_out"
+ty = "list<object>"
+kind = "value"
+
+[[nodes]]
+id = "calculate_stats"
+kind = "block"
+fq_block = "examples.shtairir/analytics.compute_statistics"
+version_req = "^1.0"
+title = "Compute Statistics"
+purity = "pure"
+effects = []
+
+[[nodes.outputs]]
+name = "mean"
+port_id = "mean_out"
+ty = "f64"
+kind = "value"
+
+[[nodes.outputs]]
+name = "median"
+port_id = "median_out"
+ty = "f64"
+kind = "value"
+
+[[nodes]]
+id = "export_results"
+kind = "block"
+fq_block = "stdlib.shtairir/io.write_json"
+version_req = "^0.1"
+title = "Export Results"
+purity = "effect"
+effects = ["io"]
+
+[nodes.inputs]
+path = "output/results.json"
+
+# Edges connecting the nodes
+[[edges]]
+id = "data_to_filter"
+from_node = "data_source"
+from_port = "data_out"
+to_node = "filter_data"
+to_port = "collection"
+
+[[edges]]
+id = "filter_to_transform"
+from_node = "filter_data"
+from_port = "filtered_out"
+to_node = "transform_data"
+to_port = "collection"
+
+[[edges]]
+id = "transform_to_stats"
+from_node = "transform_data"
+from_port = "mapped_out"
+to_node = "calculate_stats"
+to_port = "data"
+
+[[edges]]
+id = "stats_to_export"
+from_node = "calculate_stats"
+from_port = "mean_out"
+to_node = "export_results"
+to_port = "data.mean"
+
+# Function definitions
+[functions]
+is_valid_record = '''
+fn is_valid(record) -> bool {
+    return record.value > 0 && record.timestamp > 0
+}
+'''
+
+transform_record = '''
+fn transform(record) -> object {
+    return {
+        "id": record.id,
+        "normalized_value": record.value / 100.0,
+        "timestamp": record.timestamp,
+        "processed_at": now()
+    }
+}
+'''
+
+# Exports - what the graph outputs
+[[exports]]
+export_id = "statistics"
+from_node = "calculate_stats"
+from_port = "mean_out"
+
+[engine]
+version_req = "^0.2"
+capability_flags = ["serde", "io"]
+
+[integrity]
+content_hash = "sha256:example_hash_here"

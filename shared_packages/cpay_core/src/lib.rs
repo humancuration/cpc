@@ -45,6 +45,7 @@ use proto::{
     SkillExchangeRatesResponse as ProtoSkillExchangeRatesResponse,
 };
 use std::str::FromStr;
+use cpc_financial_core::{MonetaryAmount, CurrencyCode};
 
 /// Main service trait for CPay functionality
 #[async_trait::async_trait]
@@ -60,22 +61,6 @@ pub trait CpayService: Clone + Send + Sync + 'static {
     
     /// Get skill exchange rates for volunteer hour conversion
     async fn get_skill_exchange_rates(&self) -> Result<Vec<SkillRate>, models::PaymentError>;
-}
-}
-#[async_trait::async_trait]
-pub trait CpayService: Clone + Send + Sync + 'static {
-    /// Process a payment transaction
-    async fn process_payment(&self, request: models::PaymentRequest) -> Result<models::PaymentResponse, models::PaymentError>;
-    
-    /// Get transaction history for a user
-    async fn get_transaction_history(&self, user_id: uuid::Uuid) -> Result<Vec<models::Transaction>, models::PaymentError>;
-    
-    /// Get featured causes for donations
-    async fn get_featured_causes(&self) -> Result<Vec<Cause>, models::PaymentError>;
-    
-    /// Get skill exchange rates for volunteer hour conversion
-    async fn get_skill_exchange_rates(&self) -> Result<Vec<SkillRate>, models::PaymentError>;
-}
 }
 
 /// Implementation of the CPayService
@@ -100,7 +85,6 @@ impl CpayServiceImpl {
         }
     }
 }
-
 
 #[async_trait::async_trait]
 impl CpayService for CpayServiceImpl {
@@ -143,23 +127,25 @@ impl cpay_service_server::CpayService for CpayServiceImpl {
         let recipient_id = uuid::Uuid::parse_str(&proto_request.recipient_id)
             .map_err(|e| Status::invalid_argument(format!("Invalid recipient ID: {}", e)))?;
             
-        let amount = rust_decimal::Decimal::from_str(&proto_request.amount)
+        let amount_decimal = rust_decimal::Decimal::from_str(&proto_request.amount)
             .map_err(|e| Status::invalid_argument(format!("Invalid amount: {}", e)))?;
             
-        let currency = match proto_request.currency {
-            0 => models::Currency::Dabloons,
-            1 => models::Currency::USD,
-            2 => models::Currency::EUR,
-            3 => models::Currency::GBP,
-            4 => models::Currency::JPY,
+        let currency_code = match proto_request.currency {
+            0 => CurrencyCode::DBL,
+            1 => CurrencyCode::USD,
+            2 => CurrencyCode::EUR,
+            3 => CurrencyCode::GBP,
+            4 => CurrencyCode::JPY,
             _ => return Err(Status::invalid_argument("Invalid currency")),
         };
+        
+        let amount = MonetaryAmount::new(amount_decimal, currency_code);
         
         let internal_request = models::PaymentRequest::new(
             user_id,
             recipient_id,
             amount,
-            currency,
+            currency_code,
             proto_request.description,
             proto_request.is_public,
             proto_request.share_to_social,
@@ -203,13 +189,13 @@ impl cpay_service_server::CpayService for CpayServiceImpl {
                         id: t.id.to_string(),
                         sender_id: t.sender_id.to_string(),
                         recipient_id: t.recipient_id.to_string(),
-                        amount: t.amount.to_string(),
+                        amount: t.amount.value().to_string(),
                         currency: match t.currency {
-                            models::Currency::Dabloons => 0,
-                            models::Currency::USD => 1,
-                            models::Currency::EUR => 2,
-                            models::Currency::GBP => 3,
-                            models::Currency::JPY => 4,
+                            CurrencyCode::DBL => 0,
+                            CurrencyCode::USD => 1,
+                            CurrencyCode::EUR => 2,
+                            CurrencyCode::GBP => 3,
+                            CurrencyCode::JPY => 4,
                         },
                         status: match t.status {
                             models::TransactionStatus::Pending => 0,
@@ -248,7 +234,7 @@ impl cpay_service_server::CpayService for CpayServiceImpl {
                         name: c.name,
                         description: c.description,
                         image_url: c.image_url.unwrap_or_default(),
-                        total_donations: c.total_donations.to_string(),
+                        total_donations: c.total_donations.value().to_string(),
                     })
                     .collect();
                 
@@ -274,11 +260,11 @@ impl cpay_service_server::CpayService for CpayServiceImpl {
                         skill_name: r.skill_name,
                         rate_per_hour: r.rate_per_hour.to_string(),
                         currency: match r.currency {
-                            models::Currency::Dabloons => 0,
-                            models::Currency::USD => 1,
-                            models::Currency::EUR => 2,
-                            models::Currency::GBP => 3,
-                            models::Currency::JPY => 4,
+                            CurrencyCode::DBL => 0,
+                            CurrencyCode::USD => 1,
+                            CurrencyCode::EUR => 2,
+                            CurrencyCode::GBP => 3,
+                            CurrencyCode::JPY => 4,
                         },
                     })
                     .collect();
@@ -309,23 +295,25 @@ impl payment_service_server::PaymentService for CpayServiceImpl {
         let recipient_id = uuid::Uuid::parse_str(&proto_request.recipient_id)
             .map_err(|e| Status::invalid_argument(format!("Invalid recipient ID: {}", e)))?;
             
-        let amount = rust_decimal::Decimal::from_str(&proto_request.amount)
+        let amount_decimal = rust_decimal::Decimal::from_str(&proto_request.amount)
             .map_err(|e| Status::invalid_argument(format!("Invalid amount: {}", e)))?;
             
-        let currency = match proto_request.currency {
-            0 => models::Currency::Dabloons,
-            1 => models::Currency::USD,
-            2 => models::Currency::EUR,
-            3 => models::Currency::GBP,
-            4 => models::Currency::JPY,
+        let currency_code = match proto_request.currency {
+            0 => CurrencyCode::DBL,
+            1 => CurrencyCode::USD,
+            2 => CurrencyCode::EUR,
+            3 => CurrencyCode::GBP,
+            4 => CurrencyCode::JPY,
             _ => return Err(Status::invalid_argument("Invalid currency")),
         };
+        
+        let amount = MonetaryAmount::new(amount_decimal, currency_code);
         
         let internal_request = models::PaymentRequest::new(
             user_id,
             recipient_id,
             amount,
-            currency,
+            currency_code,
             proto_request.description,
             proto_request.is_public,
             proto_request.share_to_social,
@@ -369,13 +357,13 @@ impl payment_service_server::PaymentService for CpayServiceImpl {
                         id: t.id.to_string(),
                         sender_id: t.sender_id.to_string(),
                         recipient_id: t.recipient_id.to_string(),
-                        amount: t.amount.to_string(),
+                        amount: t.amount.value().to_string(),
                         currency: match t.currency {
-                            models::Currency::Dabloons => 0,
-                            models::Currency::USD => 1,
-                            models::Currency::EUR => 2,
-                            models::Currency::GBP => 3,
-                            models::Currency::JPY => 4,
+                            CurrencyCode::DBL => 0,
+                            CurrencyCode::USD => 1,
+                            CurrencyCode::EUR => 2,
+                            CurrencyCode::GBP => 3,
+                            CurrencyCode::JPY => 4,
                         },
                         status: match t.status {
                             models::TransactionStatus::Pending => 0,
@@ -413,11 +401,11 @@ impl payment_service_server::PaymentService for CpayServiceImpl {
                         skill_name: r.skill_name,
                         rate_per_hour: r.rate_per_hour.to_string(),
                         currency: match r.currency {
-                            models::Currency::Dabloons => 0,
-                            models::Currency::USD => 1,
-                            models::Currency::EUR => 2,
-                            models::Currency::GBP => 3,
-                            models::Currency::JPY => 4,
+                            CurrencyCode::DBL => 0,
+                            CurrencyCode::USD => 1,
+                            CurrencyCode::EUR => 2,
+                            CurrencyCode::GBP => 3,
+                            CurrencyCode::JPY => 4,
                         },
                     })
                     .collect();
@@ -432,166 +420,4 @@ impl payment_service_server::PaymentService for CpayServiceImpl {
         }
     }
 }
-    async fn process_payment(
-        &self,
-        request: Request<ProtoPaymentRequest>,
-    ) -> Result<Response<ProtoPaymentResponse>, Status> {
-        let proto_request = request.into_inner();
-        
-        // Convert proto request to internal model
-        let user_id = uuid::Uuid::parse_str(&proto_request.user_id)
-            .map_err(|e| Status::invalid_argument(format!("Invalid user ID: {}", e)))?;
-            
-        let recipient_id = uuid::Uuid::parse_str(&proto_request.recipient_id)
-            .map_err(|e| Status::invalid_argument(format!("Invalid recipient ID: {}", e)))?;
-            
-        let amount = rust_decimal::Decimal::from_str(&proto_request.amount)
-            .map_err(|e| Status::invalid_argument(format!("Invalid amount: {}", e)))?;
-            
-        let currency = match proto_request.currency {
-            0 => models::Currency::Dabloons,
-            1 => models::Currency::USD,
-            2 => models::Currency::EUR,
-            3 => models::Currency::GBP,
-            4 => models::Currency::JPY,
-            _ => return Err(Status::invalid_argument("Invalid currency")),
-        };
-        
-        let internal_request = models::PaymentRequest::new(
-            user_id,
-            recipient_id,
-            amount,
-            currency,
-            proto_request.description,
-            proto_request.is_public,
-            proto_request.share_to_social,
-            proto_request.cause_id.as_ref().and_then(|id| uuid::Uuid::parse_str(id).ok()),
-            proto_request.volunteer_hours.as_ref().and_then(|vh| rust_decimal::Decimal::from_str(vh).ok()),
-        );
-        
-        // Process the payment
-        match self.process_payment(internal_request).await {
-            Ok(response) => {
-                let proto_response = ProtoPaymentResponse {
-                    transaction_id: response.transaction_id.to_string(),
-                    status: match response.status {
-                        models::TransactionStatus::Pending => 0,
-                        models::TransactionStatus::Completed => 1,
-                        models::TransactionStatus::Failed => 2,
-                        models::TransactionStatus::Cancelled => 3,
-                    },
-                    timestamp: response.timestamp.timestamp(),
-                };
-                Ok(Response::new(proto_response))
-            }
-            Err(e) => Err(Status::internal(format!("Payment processing failed: {}", e))),
-        }
-    }
-    
-    async fn get_transaction_history(
-        &self,
-        request: Request<ProtoTransactionHistoryRequest>,
-    ) -> Result<Response<ProtoTransactionHistoryResponse>, Status> {
-        let proto_request = request.into_inner();
-        
-        let user_id = uuid::Uuid::parse_str(&proto_request.user_id)
-            .map_err(|e| Status::invalid_argument(format!("Invalid user ID: {}", e)))?;
-        
-        match self.get_transaction_history(user_id).await {
-            Ok(transactions) => {
-                let proto_transactions: Vec<proto::Transaction> = transactions
-                    .into_iter()
-                    .map(|t| proto::Transaction {
-                        id: t.id.to_string(),
-                        sender_id: t.sender_id.to_string(),
-                        recipient_id: t.recipient_id.to_string(),
-                        amount: t.amount.to_string(),
-                        currency: match t.currency {
-                            models::Currency::Dabloons => 0,
-                            models::Currency::USD => 1,
-                            models::Currency::EUR => 2,
-                            models::Currency::GBP => 3,
-                            models::Currency::JPY => 4,
-                        },
-                        status: match t.status {
-                            models::TransactionStatus::Pending => 0,
-                            models::TransactionStatus::Completed => 1,
-                            models::TransactionStatus::Failed => 2,
-                            models::TransactionStatus::Cancelled => 3,
-                        },
-                        description: t.description,
-                        social_post_id: t.social_post_id.map(|id| id.to_string()).unwrap_or_default(),
-                        volunteer_hours: t.volunteer_hours.map(|vh| vh.to_string()).unwrap_or_default(),
-                        created_at: t.created_at.timestamp(),
-                        completed_at: t.completed_at.map(|t| t.timestamp()),
-                    })
-                    .collect();
-                
-                let response = ProtoTransactionHistoryResponse {
-                    transactions: proto_transactions,
-                };
-                
-                Ok(Response::new(response))
-            }
-            Err(e) => Err(Status::internal(format!("Failed to fetch transaction history: {}", e))),
-        }
-    }
-    
-    async fn get_featured_causes(
-        &self,
-        _request: Request<ProtoFeaturedCausesRequest>,
-    ) -> Result<Response<ProtoFeaturedCausesResponse>, Status> {
-        match self.get_featured_causes().await {
-            Ok(causes) => {
-                let proto_causes: Vec<proto::Cause> = causes
-                    .into_iter()
-                    .map(|c| proto::Cause {
-                        id: c.id.to_string(),
-                        name: c.name,
-                        description: c.description,
-                        image_url: c.image_url.unwrap_or_default(),
-                        total_donations: c.total_donations.to_string(),
-                    })
-                    .collect();
-                
-                let response = ProtoFeaturedCausesResponse {
-                    causes: proto_causes,
-                };
-                
-                Ok(Response::new(response))
-            }
-            Err(e) => Err(Status::internal(format!("Failed to fetch featured causes: {}", e))),
-        }
-    }
-    
-    async fn get_skill_exchange_rates(
-        &self,
-        _request: Request<ProtoSkillExchangeRatesRequest>,
-    ) -> Result<Response<ProtoSkillExchangeRatesResponse>, Status> {
-        match self.get_skill_exchange_rates().await {
-            Ok(rates) => {
-                let proto_rates: Vec<proto::SkillRate> = rates
-                    .into_iter()
-                    .map(|r| proto::SkillRate {
-                        skill_name: r.skill_name,
-                        rate_per_hour: r.rate_per_hour.to_string(),
-                        currency: match r.currency {
-                            models::Currency::Dabloons => 0,
-                            models::Currency::USD => 1,
-                            models::Currency::EUR => 2,
-                            models::Currency::GBP => 3,
-                            models::Currency::JPY => 4,
-                        },
-                    })
-                    .collect();
-                
-                let response = ProtoSkillExchangeRatesResponse {
-                    rates: proto_rates,
-                };
-                
-                Ok(Response::new(response))
-            }
-            Err(e) => Err(Status::internal(format!("Failed to fetch skill exchange rates: {}", e))),
-        }
-    }
 }

@@ -10,11 +10,14 @@ use wallet::domain::primitives::{Money, Currency as WalletCurrency};
 use uuid::Uuid;
 use rust_decimal::Decimal;
 use common_utils::logging::{info, warn, error};
+use cpc_financial_core::{MonetaryAmount, CurrencyCode};
+use cpc_financial_core::audit::FinancialAuditHook;
 
 /// Transaction processing engine
 pub struct TransactionEngine {
     wallet_service: std::sync::Arc<dyn WalletService>,
     traditional_currency_repo: std::sync::Arc<dyn TraditionalCurrencyTransactionRepository>,
+    audit_hook: std::sync::Arc<FinancialAuditHook>,
 }
 
 impl TransactionEngine {
@@ -22,10 +25,12 @@ impl TransactionEngine {
     pub fn new(
         wallet_service: std::sync::Arc<dyn WalletService>,
         traditional_currency_repo: std::sync::Arc<dyn TraditionalCurrencyTransactionRepository>,
+        audit_hook: std::sync::Arc<FinancialAuditHook>,
     ) -> Self {
         Self {
             wallet_service,
             traditional_currency_repo,
+            audit_hook,
         }
     }
     
@@ -33,16 +38,30 @@ impl TransactionEngine {
     pub async fn process_payment(&self, request: PaymentRequest) -> Result<PaymentResponse, PaymentError> {
         info!("Processing payment request: {}", request.id);
         
+        // Record audit log for payment processing
+        let _ = self.audit_hook.record_operation(
+            Some(request.user_id.to_string()),
+            "payment_processing",
+            serde_json::json!({
+                "payment_id": request.id.to_string(),
+                "amount": request.amount.value().to_string(),
+                "currency": request.currency.to_string(),
+                "recipient_id": request.recipient_id.to_string()
+            }),
+            serde_json::json!({}),
+            serde_json::json!({}),
+        ).await;
+        
         // Perform compliance checks
         self.perform_compliance_checks(&request).await?;
         
         // Convert currency to wallet currency format
         let wallet_currency = self.convert_currency(&request.currency);
-        let amount = Money::new(request.amount, wallet_currency);
+        let amount = Money::new(request.amount.value(), wallet_currency);
         
         // Process the transaction based on currency type
         match request.currency {
-            crate::models::Currency::Dabloons => {
+            CurrencyCode::DBL => {
                 self.process_dabloons_transaction(request, amount).await
             },
             _ => {
@@ -86,12 +105,12 @@ impl TransactionEngine {
         let transaction = crate::repositories::TraditionalCurrencyTransaction::new(
             request.user_id,
             "debit".to_string(),
-            request.amount,
+            request.amount.value(),
             request.currency.to_string(),
             None, // external_reference
             request.description.clone(),
             None, // social_post_id
-            None, // volunteer_hours
+            request.volunteer_hours, // volunteer_hours
         );
         
         // Save the transaction
@@ -158,13 +177,17 @@ impl TransactionEngine {
     }
     
     /// Convert currency from CPay format to wallet format
-    fn convert_currency(&self, currency: &crate::models::Currency) -> WalletCurrency {
+    fn convert_currency(&self, currency: &CurrencyCode) -> WalletCurrency {
         match currency {
-            crate::models::Currency::Dabloons => WalletCurrency::Dabloons,
-            crate::models::Currency::USD => WalletCurrency::USD,
-            crate::models::Currency::EUR => WalletCurrency::EUR,
-            crate::models::Currency::GBP => WalletCurrency::GBP,
-            crate::models::Currency::JPY => WalletCurrency::JPY,
+            CurrencyCode::DBL => WalletCurrency::Dabloons,
+            CurrencyCode::USD => WalletCurrency::USD,
+            CurrencyCode::EUR => WalletCurrency::EUR,
+            CurrencyCode::GBP => WalletCurrency::GBP,
+            CurrencyCode::JPY => WalletCurrency::JPY,
+            CurrencyCode::CAD => WalletCurrency::USD, // Using USD as fallback for CAD
+            CurrencyCode::AUD => WalletCurrency::USD, // Using USD as fallback for AUD
+            CurrencyCode::CHF => WalletCurrency::USD, // Using USD as fallback for CHF
+            CurrencyCode::CNY => WalletCurrency::USD, // Using USD as fallback for CNY
         }
     }
     
@@ -208,16 +231,29 @@ impl TransactionEngine {
     pub async fn process_volunteer_conversion(&self, user_id: Uuid, hours: Decimal, skill_rate: Decimal) -> Result<PaymentResponse, PaymentError> {
         info!("Processing volunteer hour conversion for user: {} ({} hours at rate {})", user_id, hours, skill_rate);
         
+        // Record audit log for volunteer conversion
+        let _ = self.audit_hook.record_calculation(
+            Some(user_id.to_string()),
+            "volunteer_hour_conversion",
+            vec![hours.to_string(), skill_rate.to_string()],
+            (hours * skill_rate).to_string(),
+        ).await;
+        
         // Calculate Dabloons to credit
         let dabloons_amount = hours * skill_rate;
+        let monetary_amount = MonetaryAmount::new(dabloons_amount, CurrencyCode::DBL);
         
         // Create a payment request for the conversion
         let request = PaymentRequest::new(
             user_id, // System user as sender
             user_id, // User as recipient
-            dabloons_amount,
-            crate::models::Currency::Dabloons,
+            monetary_amount,
+            CurrencyCode::DBL,
             Some(format!("Converted {} volunteer hours", hours)),
+            false, // is_public
+            false, // share_to_social
+            None,  // cause_id
+            None,  // volunteer_hours
         );
         
         // Process as a Dabloons transaction
@@ -236,6 +272,15 @@ impl TransactionEngine {
     /// Get transaction history for a user
     pub async fn get_transaction_history(&self, user_id: Uuid) -> Result<Vec<Transaction>, PaymentError> {
         info!("Fetching transaction history for user: {}", user_id);
+        
+        // Record audit log for transaction history access
+        let _ = self.audit_hook.record_operation(
+            Some(user_id.to_string()),
+            "transaction_history_access",
+            serde_json::json!({}),
+            serde_json::json!({}),
+            serde_json::json!({}),
+        ).await;
         
         // Get wallet transaction history
         let wallet_transactions = self.wallet_service
@@ -256,7 +301,7 @@ impl TransactionEngine {
                 id: wt.id,
                 sender_id: user_id, // This would need to be looked up in a real implementation
                 recipient_id: user_id, // This would need to be looked up in a real implementation
-                amount: wt.amount.amount,
+                amount: MonetaryAmount::new(wt.amount.amount, self.convert_wallet_currency(&wt.amount.currency)),
                 currency: self.convert_wallet_currency(&wt.amount.currency),
                 status: TransactionStatus::Completed,
                 description: wt.description,
@@ -281,13 +326,13 @@ impl TransactionEngine {
     }
     
     /// Convert wallet currency to CPay currency
-    fn convert_wallet_currency(&self, currency: &WalletCurrency) -> crate::models::Currency {
+    fn convert_wallet_currency(&self, currency: &WalletCurrency) -> CurrencyCode {
         match currency {
-            WalletCurrency::Dabloons => crate::models::Currency::Dabloons,
-            WalletCurrency::USD => crate::models::Currency::USD,
-            WalletCurrency::EUR => crate::models::Currency::EUR,
-            WalletCurrency::GBP => crate::models::Currency::GBP,
-            WalletCurrency::JPY => crate::models::Currency::JPY,
+            WalletCurrency::Dabloons => CurrencyCode::DBL,
+            WalletCurrency::USD => CurrencyCode::USD,
+            WalletCurrency::EUR => CurrencyCode::EUR,
+            WalletCurrency::GBP => CurrencyCode::GBP,
+            WalletCurrency::JPY => CurrencyCode::JPY,
         }
     }
 }
@@ -334,14 +379,18 @@ mod tests {
         
         let user_id = Uuid::new_v4();
         let recipient_id = Uuid::new_v4();
-        let amount = Decimal::from(100u64);
+        let amount = MonetaryAmount::new(Decimal::from(100u64), CurrencyCode::DBL);
         
         let request = PaymentRequest::new(
             user_id,
             recipient_id,
             amount,
-            Currency::Dabloons,
+            CurrencyCode::DBL,
             Some("Test payment".to_string()),
+            false, // is_public
+            false, // share_to_social
+            None,  // cause_id
+            None,  // volunteer_hours
         );
         
         // Act
@@ -363,14 +412,18 @@ mod tests {
         
         let user_id = Uuid::new_v4();
         let recipient_id = Uuid::new_v4();
-        let amount = Decimal::from(100u64);
+        let amount = MonetaryAmount::new(Decimal::from(100u64), CurrencyCode::USD);
         
         let request = PaymentRequest::new(
             user_id,
             recipient_id,
             amount,
-            Currency::USD,
+            CurrencyCode::USD,
             Some("Test payment".to_string()),
+            false, // is_public
+            false, // share_to_social
+            None,  // cause_id
+            None,  // volunteer_hours
         );
         
         // Act

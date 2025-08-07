@@ -5,3 +5,4 @@
 pub mod plotters;
 pub mod bevy;
 pub mod export;
+pub mod statistical_adapters;

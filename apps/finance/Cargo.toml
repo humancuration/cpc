@@ -32,8 +32,12 @@ bevy = { workspace = true, optional = true }
 plotters = { workspace = true, optional = true }
 yew = { workspace = true, optional = true }
 
+# Statistical dependencies
+cpc-statistics-core = { path = "../../shared_packages/cpc-statistics-core", optional = true }
+
 [features]
 default = []
 p2p = ["p2panda"]
 visualization = ["bevy", "plotters"]
 web = ["yew"]
+statistics = ["cpc-statistics-core"]

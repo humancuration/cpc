@@ -2,3 +2,4 @@
 
 pub mod components;
 pub mod settings;
+pub mod statistical_components;

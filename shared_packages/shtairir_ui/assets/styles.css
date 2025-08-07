@@ -1,0 +1,213 @@
+/* Shtairir UI Components - Base Styles */
+
+:root {
+    --shtairir-primary: #2c3e50;
+    --shtairir-secondary: #3498db;
+    --shtairir-accent: #2ecc71;
+    --shtairir-warning: #f39c12;
+    --shtairir-error: #e74c3c;
+    --shtairir-background: #f5f5f5;
+    --shtairir-panel-bg: #ffffff;
+    --shtairir-border: #ddd;
+    --shtairir-text: #333;
+    --shtairir-text-secondary: #666;
+}
+
+/* Block Browser Styles */
+.shtairir-block-browser {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.shtairir-block-browser-controls {
+    padding: 1rem;
+    border-bottom: 1px solid var(--shtairir-border);
+    background-color: var(--shtairir-panel-bg);
+}
+
+.shtairir-block-browser-search {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--shtairir-border);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.shtairir-block-browser-category {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--shtairir-border);
+    border-radius: 4px;
+}
+
+.shtairir-block-browser-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.shtairir-block-browser-item {
+    background-color: #f8f9fa;
+    border: 1px solid var(--shtairir-border);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shtairir-block-browser-item:hover {
+    border-color: var(--shtairir-secondary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.shtairir-block-browser-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.shtairir-block-browser-item-title {
+    font-size: 1rem;
+    color: var(--shtairir-primary);
+    margin: 0;
+}
+
+.shtairir-block-browser-item-version {
+    font-size: 0.8rem;
+    color: var(--shtairir-text-secondary);
+    background-color: #e9ecef;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+}
+
+.shtairir-block-browser-item-description {
+    font-size: 0.9rem;
+    color: var(--shtairir-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.shtairir-block-browser-item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.shtairir-block-browser-tag {
+    font-size: 0.75rem;
+    background-color: #e0e0e0;
+    color: #666;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+}
+
+.shtairir-block-browser-item-meta {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.shtairir-block-browser-purity {
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+}
+
+.shtairir-block-browser-purity-pure {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.shtairir-block-browser-purity-effect {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Button Styles */
+.shtairir-btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.shtairir-btn-primary {
+    background-color: var(--shtairir-secondary);
+    color: white;
+}
+
+.shtairir-btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.shtairir-btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.shtairir-btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.shtairir-btn-danger {
+    background-color: var(--shtairir-error);
+    color: white;
+}
+
+.shtairir-btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* Node Styles */
+.shtairir-node {
+    position: absolute;
+    background-color: var(--shtairir-panel-bg);
+    border: 2px solid var(--shtairir-border);
+    border-radius: 8px;
+    min-width: 200px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    cursor: move;
+    z-index: 10;
+    transition: box-shadow 0.2s ease;
+}
+
+.shtairir-node:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+/* Port Styles */
+.shtairir-port {
+    display: flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.2s ease;
+}
+
+.shtairir-port:hover {
+    background-color: #ecf0f1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .shtairir-block-browser-controls {
+        padding: 0.75rem;
+    }
+    
+    .shtairir-block-browser-item {
+        padding: 0.75rem;
+    }
+    
+    .shtairir-block-browser-item-title {
+        font-size: 0.9rem;
+    }
+}

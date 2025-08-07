@@ -21,6 +21,14 @@ ffmpeg-wasm = "0.13.1"
 
 # For data processing
 polars = "0.40.0"
-
 # For the health module integration
 cpc-core-health = { path = "../health" }
+
+# For financial data processing
+cpc-financial-core = { path = "../cpc-financial-core" }
+
+# WebAssembly support
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true }
+js-sys = { workspace = true }

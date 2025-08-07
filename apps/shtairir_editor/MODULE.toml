@@ -1,0 +1,22 @@
+# Shtairir Editor Module Manifest
+
+name = "shtairir_editor"
+version = "0.1.0"
+title = "Shtairir Visual Editor"
+description = "Web-based visual programming editor for Shtairir workflows"
+authors = ["CPC Coop"]
+categories = ["development", "editor", "visualization"]
+min_shtairir_version = "0.2.0"
+
+# Block specifications provided by this module
+blocks = []
+
+# Graph specifications provided by this module
+graphs = [
+    "examples/sample_workflow.toml"
+]
+
+[metadata]
+license = "CPC"
+repository = "https://github.com/cpc-coop/shtairir_editor"
+documentation = "https://docs.cpc.coop/shtairir_editor"

@@ -6,6 +6,7 @@
 use crate::domain::{
     chart::{ChartConfig, InteractiveConfig},
     data::{DataSeries, ProcessedData, RawData},
+    confidence_interval::StatisticalChartConfig,
     VisualizationError,
 };
 use image::{ImageBuffer, Rgba};
@@ -96,6 +97,19 @@ impl VisualizationService {
         
         debug!("Data transformed successfully from source: {}", data.source);
         Ok(processed_data)
+    }
+    
+    /// Generate statistical chart with confidence intervals and significance indicators
+    #[cfg(feature = "statistics")]
+    pub fn generate_statistical_chart(
+        statistical_config: StatisticalChartConfig,
+        data: Vec<DataSeries>,
+    ) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, VisualizationError> {
+        // Delegate to statistical analysis service
+        crate::application::statistical_service::StatisticalAnalysisService::generate_chart_with_confidence(
+            statistical_config,
+            data,
+        )
     }
 }
 

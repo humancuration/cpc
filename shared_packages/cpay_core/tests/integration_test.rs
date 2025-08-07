@@ -1,12 +1,13 @@
 //! Integration tests for CPay Core
 
 use cpay_core::{
-    CpayService, 
-    CpayServiceImpl, 
+    CpayService,
+    CpayServiceImpl,
     transaction_engine::TransactionEngine,
     repositories::mock::MockTraditionalCurrencyTransactionRepository,
-    models::{PaymentRequest, Currency, TransactionStatus}
+    models::{PaymentRequest, CurrencyCode, TransactionStatus}
 };
+use cpc_financial_core::audit::FinancialAuditHook;
 use wallet::application::{WalletService, WalletServiceImpl};
 use std::sync::Arc;
 use uuid::Uuid;
@@ -70,6 +71,31 @@ impl social_integration::application::social_integration_service::SocialIntegrat
     }
 }
 
+// Mock audit service for testing
+struct MockAuditService;
+
+#[async_trait::async_trait]
+impl audit_framework::application::service::AuditService for MockAuditService {
+    async fn record_event(&self, _event: audit_framework::domain::event::AuditEvent) -> Result<(), audit_framework::AuditError> {
+        // In a real implementation, this would record the event
+        // For testing, we'll just return Ok
+        Ok(())
+    }
+    
+    async fn get_events_by_user(&self, _user_id: &str, _limit: Option<u32>) -> Result<Vec<audit_framework::domain::event::AuditEvent>, audit_framework::AuditError> {
+        Ok(vec![])
+    }
+    
+    async fn get_events_by_domain(&self, _domain: &str, _limit: Option<u32>) -> Result<Vec<audit_framework::domain::event::AuditEvent>, audit_framework::AuditError> {
+        Ok(vec![])
+    }
+}
+
+fn create_mock_audit_hook() -> FinancialAuditHook {
+    let audit_service: Arc<dyn audit_framework::application::service::AuditService> = Arc::new(MockAuditService);
+    FinancialAuditHook::new(audit_service)
+}
+
 #[tokio::test]
 async fn test_cpay_service_creation() {
     // Arrange
@@ -77,7 +103,9 @@ async fn test_cpay_service_creation() {
     let wallet_service: Arc<dyn WalletService> = Arc::new(WalletServiceImpl::new(wallet_repo));
     
     let traditional_currency_repo = Arc::new(MockTraditionalCurrencyTransactionRepository::new());
-    let transaction_engine = Arc::new(TransactionEngine::new(wallet_service, traditional_currency_repo));
+    // Create a mock audit hook for testing
+    let audit_hook = Arc::new(create_mock_audit_hook());
+    let transaction_engine = Arc::new(TransactionEngine::new(wallet_service, traditional_currency_repo, audit_hook));
     
     let notification_service: Arc<dyn notification_core::application::service::NotificationService> = Arc::new(MockNotificationService);
     let social_service: Arc<dyn social_integration::application::social_integration_service::SocialIntegrationService> = Arc::new(MockSocialService);
@@ -99,21 +127,25 @@ async fn test_payment_request_creation() {
     // Arrange
     let user_id = Uuid::new_v4();
     let recipient_id = Uuid::new_v4();
-    let amount = Decimal::from(100u64);
+    let amount = cpc_financial_core::MonetaryAmount::new(Decimal::from(100u64), CurrencyCode::USD);
     
     // Act
     let request = PaymentRequest::new(
         user_id,
         recipient_id,
-        amount,
-        Currency::USD,
+        amount.clone(),
+        CurrencyCode::USD,
         Some("Test payment".to_string()),
+        false, // is_public
+        false, // share_to_social
+        None,  // cause_id
+        None,  // volunteer_hours
     );
     
     // Assert
     assert_eq!(request.user_id, user_id);
     assert_eq!(request.recipient_id, recipient_id);
     assert_eq!(request.amount, amount);
-    assert_eq!(request.currency, Currency::USD);
+    assert_eq!(request.currency, CurrencyCode::USD);
     assert_eq!(request.description, Some("Test payment".to_string()));
 }

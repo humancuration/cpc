@@ -15,3 +15,4 @@ pub mod infrastructure;
 // Re-export commonly used types
 pub use domain::{chart::ChartConfig, data::DataSeries, VisualizationError};
 pub use application::service::VisualizationService;
+pub use domain::confidence_interval::{ConfidenceIntervalConfig, SignificanceIndicator, SignificanceLevel, StatisticalChartConfig};

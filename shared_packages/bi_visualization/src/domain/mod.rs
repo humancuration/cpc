@@ -5,5 +5,7 @@
 pub mod chart;
 pub mod data;
 pub mod errors;
+pub mod confidence_interval;
 
 pub use errors::VisualizationError;
+pub use confidence_interval::{ConfidenceIntervalConfig, SignificanceIndicator, SignificanceLevel, StatisticalChartConfig};

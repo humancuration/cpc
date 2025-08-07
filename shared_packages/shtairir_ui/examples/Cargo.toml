@@ -1,0 +1,12 @@
+[package]
+name = "shtairir_ui_examples"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+shtairir_ui = { path = ".." }
+shtairir_registry = { path = "../../shtairir_registry" }
+yew = { workspace = true }
+wasm-logger = { workspace = true }
+web-sys = { workspace = true }
+js-sys = { workspace = true }

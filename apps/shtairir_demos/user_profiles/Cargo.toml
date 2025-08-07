@@ -3,6 +3,7 @@ name = "shtairir_demos_user_profiles"
 version = "0.1.0"
 edition = "2021"
 publish = false
+build = "build.rs"
 
 [dependencies]
 anyhow = { workspace = true }
