@@ -1,0 +1,9 @@
+[package]
+name = "launcher"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tauri = { workspace = true }
+core_app_logic = { path = "../../shared_packages/core_app_logic" }
+ui_toolkit = { path = "../../shared_packages/ui_toolkit" }

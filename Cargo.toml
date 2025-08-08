@@ -47,6 +47,8 @@ members = [
     "apps/cause_management_admin",
     "apps/financial_impact_admin",
     "apps/community_impact_dashboard",
+    "apps/launcher",
+    "apps/web_portal",
     
     # Shared Packages
     "shared_packages/shtairir_execution",
@@ -116,6 +118,8 @@ members = [
     "shared_packages/volunteer_impact_tracker",
     "shared_packages/financial_impact_tracker",
     "shared_packages/cause_impact_tracker",
+    "shared_packages/core_app_logic",
+    "shared_packages/ui_toolkit",
     
     # Tools and Templates
     "tools/ci",
@@ -249,3 +253,6 @@ toml = "0.8.8"
 # Finance dependencies
 env_logger = "0.11.5"
 tower-http = { version = "0.5", features = ["cors"] }
+
+[profile.release]
+lto = true

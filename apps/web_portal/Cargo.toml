@@ -1,0 +1,11 @@
+[package]
+name = "web_portal"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+yew = { workspace = true }
+core_app_logic = { path = "../../shared_packages/core_app_logic" }
+ui_toolkit = { path = "../../shared_packages/ui_toolkit" }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true }

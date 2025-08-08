@@ -1,0 +1,37 @@
+flowchart TB
+    subgraph Build Pipeline
+        shared[shared_packages]
+        core[core_app_logic]
+        ui[ui_toolkit]
+        web[web_portal]
+        desktop[launcher]
+        
+        shared --> core
+        shared --> ui
+        core --> web
+        core --> desktop
+        ui --> web
+        ui --> desktop
+        
+        subgraph Web Build
+            web_src[web_portal/src] --> wasm_compiler[WASM Compiler]
+            wasm_compiler --> bundler[Web Bundler]
+            bundler --> web_artifact[web_build/]
+        end
+        
+        subgraph Desktop Build
+            desktop_src[launcher/src] --> tauri_compiler[Tauri Builder]
+            tauri_compiler --> desktop_artifact[target/release/]
+        end
+    end
+    
+    subgraph CI/CD
+        ci[CI Server] -->|Web| web_artifact
+        ci -->|Desktop| desktop_artifact
+        web_artifact -->|Deploy| web_hosting[CDN]
+        desktop_artifact -->|Package| installers[Installers]
+    end
+    
+    style web_artifact fill:#b3e6ff
+    style desktop_artifact fill:#b3e6ff
+    style installers fill:#c2f0c2

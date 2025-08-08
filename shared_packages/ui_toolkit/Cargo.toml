@@ -1,0 +1,10 @@
+[package]
+name = "ui_toolkit"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+yew = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true }
+core_app_logic = { path = "../core_app_logic" }

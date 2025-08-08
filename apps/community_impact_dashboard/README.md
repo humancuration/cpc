@@ -145,13 +145,6 @@ We welcome contributions from the community! Here's how you can get involved:
 4. **Develop**: Contribute code through our community enhancement processes
 5. **Govern**: Participate in community governance and decision-making
 
-### Code of Conduct
-All community members are expected to follow our Community Code of Conduct, which emphasizes:
-- Respect for all participants
-- Inclusive language and behavior
-- Constructive feedback and criticism
-- Collaborative problem-solving
-- Transparency and accountability
 
 ## Data Principles
 

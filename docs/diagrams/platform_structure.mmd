@@ -1,0 +1,40 @@
+graph TD
+    root[Workspace Root]
+    apps[apps/]
+    shared[shared_packages/]
+    
+    root --> apps
+    root --> shared
+    
+    %% Desktop entry point
+    apps --> launcher[launcher/ - Desktop entry point]
+    launcher --> src[src/ - Tauri configuration]
+    launcher --> tauri_conf[tauri.conf.json]
+    
+    %% Web entry point
+    apps --> web_portal[web_portal/ - Browser entry point]
+    web_portal --> public[public/ - Static assets]
+    web_portal --> src[src/ - Yew application]
+    
+    %% Shared core logic
+    shared --> core[core_app_logic/]
+    core --> domain[domain/ - Business models]
+    core --> services[services/ - Application services]
+    core --> utils[utils/ - Shared utilities]
+    
+    %% UI Toolkit
+    shared --> ui_toolkit[ui_toolkit/]
+    ui_toolkit --> components[components/ - Reusable components]
+    ui_toolkit --> themes[themes/ - Design system]
+    ui_toolkit --> hooks[hooks/ - Custom Yew hooks]
+    
+    %% Existing packages (sample)
+    shared --> existing1[existing_package1]
+    shared --> existing2[existing_package2]
+    
+    %% Relationships
+    launcher --> core
+    launcher --> ui_toolkit
+    web_portal --> core
+    web_portal --> ui_toolkit
+    ui_toolkit --> core
