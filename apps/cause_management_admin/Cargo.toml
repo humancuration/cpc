@@ -1,0 +1,29 @@
+[package]
+name = "cause_management_admin"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tower-http = { version = "0.5", features = ["cors"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+env_logger = { workspace = true }
+
+# CPC dependencies
+cause_impact_tracker = { path = "../../shared_packages/cause_impact_tracker" }
+cause_management = { path = "../../shared_packages/cause_management" }
+impact_viz = { path = "../../shared_packages/impact_viz" }
+consent_manager = { path = "../../shared_packages/consent_manager" }
+common_utils = { path = "../../shared_packages/common_utils" }
+skill_development = { path = "../../shared_packages/skill_development" }
+learning_impact_tracker = { path = "../../shared_packages/learning_impact_tracker" }
+volunteer_impact_tracker = { path = "../../shared_packages/volunteer_impact_tracker" }
+financial_impact_tracker = { path = "../../shared_packages/financial_impact_tracker" }

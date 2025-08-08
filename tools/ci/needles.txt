@@ -1,0 +1,12 @@
+# Documentation consistency rules
+# Format: <target_file>|<required_substring>
+# See docs/dev/docs-consistency-checks.md for details
+
+# Main documentation index
+docs/README.md|What’s new
+
+# Developer documentation
+docs/README.md|Volunteer Impact Measurement Guide
+
+# Contribution guidelines
+CONTRIBUTING.md|docs-consistency

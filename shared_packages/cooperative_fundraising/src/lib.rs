@@ -10,6 +10,7 @@
 pub mod domain;
 pub mod application;
 pub mod infrastructure;
+pub mod optimization;
 
 // Re-export generated protobuf types
 #[allow(clippy::all)]

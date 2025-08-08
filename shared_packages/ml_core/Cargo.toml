@@ -1,0 +1,43 @@
+[package]
+name = "ml_core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+linfa = { version = "0.7.1", features = ["benchmarks"] }
+linfa-linear = "0.7.1"
+linfa-logistic = "0.7.1"
+linfa-clustering = "0.7.1"
+linfa-preprocessing = "0.7.1"
+linfa-reduction = "0.7.1"
+linfa-trees = "0.7.1"
+linfa-svm = "0.7.1"
+linfa-nn = "0.7.1"
+ndarray = { workspace = true }
+ndarray-stats = { workspace = true }
+ndarray-rand = "0.14.0"
+polars = { workspace = true }
+statrs = { workspace = true }
+
+# CPC ecosystem dependencies
+common_utils = { path = "../common_utils" }
+consent_manager = { path = "../consent_manager" }
+optimization_core = { path = "../optimization_core" }
+cpc-statistics-core = { path = "../cpc-statistics-core" }
+bi_analytics = { path = "../bi_analytics" }
+
+# Standard dependencies
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true, features = ["serde", "v4"] }
+chrono = { workspace = true, features = ["serde"] }
+anyhow = { workspace = true }
+
+# Math dependencies
+nalgebra = { workspace = true }
+fixed = { workspace = true }
+rand = { workspace = true }
+rand_distr = { workspace = true }

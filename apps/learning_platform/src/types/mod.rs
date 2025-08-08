@@ -44,6 +44,34 @@ pub struct AcademicCredential {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SkillProgress {
+    pub id: String,
+    pub skill_name: String,
+    pub current_level: u8,
+    pub target_level: u8,
+    pub progress_percentage: f32,
+    pub total_hours_invested: i32,
+    pub last_practice_date: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Skill {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Certification {
+    pub id: String,
+    pub skill_name: String,
+    pub level_achieved: u8,
+    pub certification_type: i32,
+    pub issued_at: String,
+    pub verification_code: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Tip {
     pub id: String,
     pub from_user_id: String,

@@ -10,6 +10,7 @@ use rust_decimal::Decimal;
 use chrono::{DateTime, Utc};
 use thiserror::Error;
 use std::sync::Arc;
+use common_utils::financial::MonetaryValue;
 
 #[derive(Debug, Error)]
 pub enum ServiceError {
@@ -61,6 +62,25 @@ pub struct CreateInvoiceInput {
     pub due_date: DateTime<Utc>,
 }
 
+impl CreateInvoiceInput {
+    /// Calculate the total amount for the invoice items using high-precision fixed-point arithmetic
+    pub fn calculate_total(&self) -> Decimal {
+        let mut total_fixed = fixed::types::I64F64::from_num(0.0);
+        
+        for item in &self.items {
+            let quantity_fixed = fixed::types::I64F64::from_num(item.quantity as f64);
+            let unit_price_fixed = fixed::types::I64F64::from_num(item.unit_price.to_f64().unwrap_or(0.0));
+            let item_total_fixed = quantity_fixed * unit_price_fixed;
+            total_fixed = total_fixed + item_total_fixed;
+        }
+        
+        // Round to 2 decimal places using banker's rounding for currency
+        let monetary_value = MonetaryValue::new(total_fixed, "USD");
+        let rounded_value = monetary_value.round(2, common_utils::financial::RoundingStrategy::Bankers);
+        Decimal::from_f64(rounded_value.value().to_num::<f64>()).unwrap_or(Decimal::ZERO)
+    }
+}
+
 impl Invoice {
     pub fn new(input: CreateInvoiceInput) -> Result<Self, ServiceError> {
         let now = Utc::now();
@@ -77,6 +97,7 @@ impl Invoice {
             updated_at: now,
         })
     }
+}
 }
 
 pub struct InvoiceService {
@@ -95,16 +116,14 @@ impl InvoiceService {
         Self { repo, p2p_manager, payment_processor }
     }
 
-    pub async fn create_invoice(&self, input: CreateInvoiceInput) -> Result<Invoice, ServiceError> {
+    pub async fn create_invoice(&self, mut input: CreateInvoiceInput) -> Result<Invoice, ServiceError> {
+        // If total_amount is zero, calculate it from the items
+        if input.total_amount.is_zero() {
+            input.total_amount = input.calculate_total();
+        }
+        
         // Domain validation occurs here
-        let invoice = Invoice::new(
-            input.client_id,
-            input.client_name,
-            input.client_email,
-            input.items,
-            input.total_amount,
-            input.due_date,
-        );
+        let invoice = Invoice::new(input)?;
         let invoice = self.repo.create(invoice).await
             .map_err(|e| ServiceError::RepositoryError(e.to_string()))?;
         self.p2p_manager.share_invoice(&invoice).await?;

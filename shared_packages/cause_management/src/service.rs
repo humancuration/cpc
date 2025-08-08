@@ -4,10 +4,20 @@
 //! within the CPC platform.
 
 use crate::models::{
-    Cause, CreateCauseRequest, UpdateCauseRequest, ListCausesRequest, 
+    Cause, CreateCauseRequest, UpdateCauseRequest, ListCausesRequest,
     ListCausesResponse, CauseError
 };
 use crate::repository::CauseRepository;
+#[cfg(feature = "statistics")]
+use crate::application::{
+    statistical_analysis::StatisticalAnalysisService,
+    impact_measurement::{ImpactMeasurementService, ImpactOutcome},
+};
+#[cfg(feature = "statistics")]
+use crate::domain::{
+    impact_models::ImpactMetric,
+    statistical_models::TrendType,
+};
 use tonic::{Request, Response, Status};
 use tracing::{info, error};
 use uuid::Uuid;
@@ -33,6 +43,10 @@ use proto::{
     ListCausesRequest as ProtoListCausesRequest,
     ListCausesResponse as ProtoListCausesResponse,
     Cause as ProtoCause,
+    DonationForecastRequest as ProtoDonationForecastRequest,
+    DonationForecastResponse as ProtoDonationForecastResponse,
+    ImpactAnalysisRequest as ProtoImpactAnalysisRequest,
+    ImpactAnalysisResponse as ProtoImpactAnalysisResponse,
 };
 
 /// Cause management service implementation
@@ -283,5 +297,147 @@ impl CauseService for CauseServiceImpl {
         };
         
         Ok(Response::new(response))
+    }
+    
+    /// Get donation forecast for a cause
+    async fn get_donation_forecast(
+        &self,
+        request: Request<ProtoDonationForecastRequest>,
+    ) -> Result<Response<ProtoDonationForecastResponse>, Status> {
+        let proto_request = request.into_inner();
+        info!("Getting donation forecast for cause: {}", proto_request.cause_id);
+        
+        #[cfg(not(feature = "statistics"))]
+        {
+            return Err(Status::failed_precondition(
+                "Statistical analysis requires the 'statistics' feature to be enabled"
+            ));
+        }
+        
+        #[cfg(feature = "statistics")]
+        {
+            let cause_id = Uuid::parse_str(&proto_request.cause_id)
+                .map_err(|e| Status::invalid_argument(format!("Invalid cause ID: {}", e)))?;
+            
+            // In a real implementation, we would fetch actual donation data from the repository
+            // For now, we'll create some sample data for demonstration
+            let sample_donations = vec![
+                Decimal::new(100, 0),
+                Decimal::new(120, 0),
+                Decimal::new(90, 0),
+                Decimal::new(110, 0),
+                Decimal::new(130, 0),
+            ];
+            
+            let forecast = StatisticalAnalysisService::forecast_donations(
+                &sample_donations,
+                proto_request.forecast_periods as usize,
+                proto_request.confidence_level,
+            ).map_err(|e| {
+                error!("Failed to generate donation forecast: {}", e);
+                Status::internal("Failed to generate donation forecast")
+            })?;
+            
+            let response = ProtoDonationForecastResponse {
+                forecast_values: forecast.forecast_values.clone(),
+                confidence_lower: forecast.confidence_interval.lower,
+                confidence_upper: forecast.confidence_interval.upper,
+                trend_p_value: forecast.trend_significance.p_value,
+                trend_significance: match forecast.trend_significance.level {
+                    cpc_statistics_core::SignificanceLevel::HighlySignificant => "highly_significant".to_string(),
+                    cpc_statistics_core::SignificanceLevel::ModeratelySignificant => "moderately_significant".to_string(),
+                    cpc_statistics_core::SignificanceLevel::NotSignificant => "not_significant".to_string(),
+                },
+                confidence_level: forecast.confidence_level,
+                explanation: forecast.explanation(),
+                cooperative_explanation: forecast.cooperative_explanation(),
+            };
+            
+            Ok(Response::new(response))
+        }
+    }
+    
+    /// Get impact analysis for a cause
+    async fn get_impact_analysis(
+        &self,
+        request: Request<ProtoImpactAnalysisRequest>,
+    ) -> Result<Response<ProtoImpactAnalysisResponse>, Status> {
+        let proto_request = request.into_inner();
+        info!("Getting impact analysis for cause: {}", proto_request.cause_id);
+        
+        #[cfg(not(feature = "statistics"))]
+        {
+            return Err(Status::failed_precondition(
+                "Impact analysis requires the 'statistics' feature to be enabled"
+            ));
+        }
+        
+        #[cfg(feature = "statistics")]
+        {
+            let cause_id = Uuid::parse_str(&proto_request.cause_id)
+                .map_err(|e| Status::invalid_argument(format!("Invalid cause ID: {}", e)))?;
+            
+            // Fetch the cause
+            let cause = self.cause_repository
+                .find_cause_by_id(cause_id)
+                .await
+                .map_err(|e| {
+                    error!("Failed to get cause: {}", e);
+                    Status::internal("Failed to get cause")
+                })?
+                .ok_or_else(|| Status::not_found("Cause not found"))?;
+            
+            // In a real implementation, we would fetch actual donation and outcome data
+            // For now, we'll create some sample data for demonstration
+            let sample_donations = vec![
+                Decimal::new(100, 0),
+                Decimal::new(150, 0),
+                Decimal::new(200, 0),
+            ];
+            
+            let sample_outcomes = vec![
+                ImpactOutcome::new(5.0, chrono::Utc::now(), "Outcome 1".to_string()),
+                ImpactOutcome::new(7.0, chrono::Utc::now(), "Outcome 2".to_string()),
+                ImpactOutcome::new(9.0, chrono::Utc::now(), "Outcome 3".to_string()),
+            ];
+            
+            // Determine impact type from request
+            let impact_type = match proto_request.impact_type.as_str() {
+                "lives_impacted" => ImpactMetric::LivesImpacted,
+                "environmental_benefit" => ImpactMetric::EnvironmentalBenefit,
+                "community_engagement" => ImpactMetric::CommunityEngagement,
+                "economic_impact" => ImpactMetric::EconomicImpact,
+                "educational_outcomes" => ImpactMetric::EducationalOutcomes,
+                "health_outcomes" => ImpactMetric::HealthOutcomes,
+                _ => ImpactMetric::LivesImpacted, // Default
+            };
+            
+            let analysis = ImpactMeasurementService::measure_impact(
+                &cause,
+                &sample_donations,
+                &sample_outcomes,
+                impact_type,
+            ).map_err(|e| {
+                error!("Failed to perform impact analysis: {}", e);
+                Status::internal("Failed to perform impact analysis")
+            })?;
+            
+            let response = ProtoImpactAnalysisResponse {
+                impact_score: analysis.impact_score,
+                evidence_strength: match analysis.evidence_strength {
+                    cpc_statistics_core::SignificanceLevel::HighlySignificant => "highly_significant".to_string(),
+                    cpc_statistics_core::SignificanceLevel::ModeratelySignificant => "moderately_significant".to_string(),
+                    cpc_statistics_core::SignificanceLevel::NotSignificant => "not_significant".to_string(),
+                },
+                p_value: analysis.p_value,
+                confidence_lower: analysis.confidence_interval.lower,
+                confidence_upper: analysis.confidence_interval.upper,
+                impact_type: proto_request.impact_type.clone(),
+                explanation: analysis.explanation(),
+                cooperative_explanation: analysis.cooperative_explanation(),
+            };
+            
+            Ok(Response::new(response))
+        }
     }
 }

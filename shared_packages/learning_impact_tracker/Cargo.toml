@@ -1,0 +1,29 @@
+[package]
+name = "learning_impact_tracker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+sqlx = { workspace = true }
+async-trait = { workspace = true }
+
+# Internal dependencies
+learning_core = { path = "../learning_core" }
+skill_development = { path = "../skill_development" }
+volunteer_coordination = { path = "../volunteer_coordination" }
+impact_viz = { path = "../impact_viz" }
+consent_manager = { path = "../consent_manager" }
+feedback_core = { path = "../feedback_core" }
+ml_core = { path = "../ml_core" }
+
+[dev-dependencies]
+# For testing
+tokio-test = { workspace = true }

@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use stylist::{style, yew::styled_component};
-use crate::components::credential_badge::CredentialBadge;
+use crate::components::{credential_badge::CredentialBadge, navigation::Navigation};
 
 #[styled_component(CredentialPage)]
 pub fn credential_page() -> Html {
@@ -36,6 +36,8 @@ pub fn credential_page() -> Html {
 
     html! {
         <div class={container_style}>
+            <Navigation />
+            
             <div class={header_style}>
                 <h1>{"My Credentials"}</h1>
                 <p>{"View and share your academic achievements"}</p>
@@ -43,10 +45,10 @@ pub fn credential_page() -> Html {
             <div class={grid_style}>
                 {for credentials.iter().map(|(cred_type, course, date)| {
                     html! {
-                        <CredentialBadge 
-                            credential_type={cred_type.to_string()} 
-                            course_name={course.to_string()} 
-                            issued_date={date.to_string()} 
+                        <CredentialBadge
+                            credential_type={cred_type.to_string()}
+                            course_name={course.to_string()}
+                            issued_date={date.to_string()}
                         />
                     }
                 })}

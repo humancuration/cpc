@@ -2,6 +2,7 @@ use crate::domain::{Budget, Expense, SavingsGoal, Investment, Debt, Money, TimeP
 use crate::application::{BudgetService, ExpenseService, SavingsService, InvestmentService, DebtService};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
+use common_utils::financial::MonetaryValue;
 
 /// Financial overview data structure
 #[derive(Debug, Clone)]
@@ -72,40 +73,52 @@ impl FinanceAggregator {
             investment_performance: self.get_investment_performance(),
         }
     }
-    
-    /// Calculate net worth (assets - liabilities)
+    /// Calculate net worth (assets - liabilities) using high-precision fixed-point arithmetic
     fn calculate_net_worth(&self) -> f64 {
-        let total_assets = self.calculate_total_assets().amount;
-        let total_liabilities = self.calculate_total_liabilities().amount;
-        total_assets - total_liabilities
+        let total_assets_fixed = fixed::types::I64F64::from_num(self.calculate_total_assets().amount);
+        let total_liabilities_fixed = fixed::types::I64F64::from_num(self.calculate_total_liabilities().amount);
+        let net_worth_fixed = total_assets_fixed - total_liabilities_fixed;
+        net_worth_fixed.to_num::<f64>()
     }
     
-    /// Calculate monthly cash flow (income - expenses)
+    /// Calculate monthly cash flow (income - expenses) using high-precision fixed-point arithmetic
     fn calculate_cash_flow(&self) -> f64 {
-        let total_income = self.calculate_total_income().amount;
-        let total_expenses = self.calculate_total_expenses().amount;
-        total_income - total_expenses
+        let total_income_fixed = fixed::types::I64F64::from_num(self.calculate_total_income().amount);
+        let total_expenses_fixed = fixed::types::I64F64::from_num(self.calculate_total_expenses().amount);
+        let cash_flow_fixed = total_income_fixed - total_expenses_fixed;
+        cash_flow_fixed.to_num::<f64>()
     }
     
-    /// Calculate debt to income ratio
+    /// Calculate debt to income ratio using high-precision fixed-point arithmetic
     fn calculate_debt_to_income(&self) -> f64 {
         let total_debt_payments = self.debt_service.get_total_minimum_monthly_payments().amount;
         let total_income = self.calculate_total_income().amount;
         
-        if total_income > 0.0 {
-            total_debt_payments / total_income
+        // Use fixed-point arithmetic for precise calculation
+        let debt_payments_fixed = fixed::types::I64F64::from_num(total_debt_payments);
+        let income_fixed = fixed::types::I64F64::from_num(total_income);
+        
+        if income_fixed > fixed::types::I64F64::from_num(0.0) {
+            let ratio_fixed = debt_payments_fixed / income_fixed;
+            ratio_fixed.to_num::<f64>()
         } else {
             0.0
         }
     }
+    }
     
-    /// Calculate savings rate
+    /// Calculate savings rate using high-precision fixed-point arithmetic
     fn calculate_savings_rate(&self) -> f64 {
         let total_income = self.calculate_total_income().amount;
         let total_savings = self.savings_service.get_total_current_amount().amount;
         
-        if total_income > 0.0 {
-            total_savings / total_income
+        // Use fixed-point arithmetic for precise calculation
+        let income_fixed = fixed::types::I64F64::from_num(total_income);
+        let savings_fixed = fixed::types::I64F64::from_num(total_savings);
+        
+        if income_fixed > fixed::types::I64F64::from_num(0.0) {
+            let rate_fixed = savings_fixed / income_fixed;
+            rate_fixed.to_num::<f64>()
         } else {
             0.0
         }
@@ -122,25 +135,33 @@ impl FinanceAggregator {
         ]
     }
     
-    /// Calculate total assets
+    /// Calculate total assets using high-precision fixed-point arithmetic
     fn calculate_total_assets(&self) -> Money {
         // For simplicity, we'll assume all values are in the same currency
         // In a real implementation, we'd need to handle currency conversion
         let investment_value = self.investment_service.get_total_investment_value().amount;
         let savings_value = self.savings_service.get_total_current_amount().amount;
-        let currency = "USD".to_string();
         
-        Money::new(investment_value + savings_value, &currency)
+        // Use fixed-point arithmetic for precise calculation
+        let investment_fixed = fixed::types::I64F64::from_num(investment_value);
+        let savings_fixed = fixed::types::I64F64::from_num(savings_value);
+        let total_fixed = investment_fixed + savings_fixed;
+        
+        let currency = "USD".to_string();
+        Money::new(total_fixed.to_num::<f64>(), &currency)
     }
     
-    /// Calculate total liabilities
+    /// Calculate total liabilities using high-precision fixed-point arithmetic
     fn calculate_total_liabilities(&self) -> Money {
         // For simplicity, we'll assume all values are in the same currency
         // In a real implementation, we'd need to handle currency conversion
         let debt_balance = self.debt_service.get_total_debt_balance().amount;
-        let currency = "USD".to_string();
         
-        Money::new(debt_balance, &currency)
+        // Use fixed-point arithmetic for precise calculation
+        let debt_fixed = fixed::types::I64F64::from_num(debt_balance);
+        
+        let currency = "USD".to_string();
+        Money::new(debt_fixed.to_num::<f64>(), &currency)
     }
     
     /// Calculate total income (simplified implementation)
@@ -151,11 +172,10 @@ impl FinanceAggregator {
         Money::new(5000.0, &currency) // Placeholder value
     }
     
-    /// Calculate total expenses
+    /// Calculate total expenses using high-precision fixed-point arithmetic
     fn calculate_total_expenses(&self) -> Money {
         // For simplicity, we'll assume all values are in the same currency
         // In a real implementation, we'd need to handle currency conversion
-        let mut total_expenses = 0.0;
         let currency = "USD".to_string();
         
         // Sum up all budgeted amounts for the current period
@@ -165,9 +185,12 @@ impl FinanceAggregator {
             now,
         );
         
-        total_expenses += self.budget_service.get_total_budgeted_amount(&period).amount;
+        let budgeted_amount = self.budget_service.get_total_budgeted_amount(&period).amount;
         
-        Money::new(total_expenses, &currency)
+        // Use fixed-point arithmetic for precise calculation
+        let budgeted_fixed = fixed::types::I64F64::from_num(budgeted_amount);
+        
+        Money::new(budgeted_fixed.to_num::<f64>(), &currency)
     }
     
     /// Get savings goals progress

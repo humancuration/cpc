@@ -1,0 +1,106 @@
+# Trunk Build Configuration for Unified Community Impact Dashboard
+
+[build]
+# The output directory for the build artifacts
+dist = "dist"
+
+# The public URL from which the app will be served
+public_url = "/"
+
+# Whether to include file hashes in the output file names for caching
+filehash = true
+
+# Whether to enable minification of the final bundle
+minify = "on"
+
+# Whether to generate a CSP meta tag in the HTML head
+csp = "on"
+
+# The directory containing the static assets to be copied to the dist folder
+assets = ["assets"]
+
+[watch]
+# Whether to enable file watching for hot reloading during development
+watch = true
+
+# Paths to ignore during watch
+ignore = ["dist", "target"]
+
+[serve]
+# The address to serve the application on during development
+address = "127.0.0.1"
+
+# The port to serve the application on during development
+port = 8080
+
+# Whether to enable automatic browser opening
+open = false
+
+# SSL configuration for serving over HTTPS
+# ssl_cert = "path/to/cert.pem"
+# ssl_key = "path/to/key.pem"
+
+[tools]
+# Configuration for build tools
+
+# wasm-bindgen configuration
+[wasm-bindgen]
+# Whether to enable wasm-bindgen optimization
+optimize = true
+
+# Whether to enable wasm-bindgen deduplication
+deduplicate = true
+
+# Configuration for wasm-opt optimization
+[wasm-opt]
+# Optimization level (0-4, s, z)
+optimization_level = "z"
+
+# Whether to enable shrink level optimization
+shrink_level = 2
+
+# Whether to enable debug information removal
+debug_info = false
+
+# Configuration for the final bundle
+[final]
+# Whether to enable brotli compression for the final bundle
+brotli = true
+
+# Whether to enable gzip compression for the final bundle
+gzip = true
+
+# Configuration for proxying API requests during development
+[proxy]
+# Example proxy configuration for API requests
+# [[proxy]]
+# backend = "http://localhost:3000/api/"
+# path = "/api/"
+
+# Configuration for environment variables
+[env]
+# Example environment variable configuration
+# PUBLIC_API_URL = "http://localhost:3000"
+
+# Configuration for features
+[features]
+# Default features to enable
+default = ["console_error_panic_hook"]
+
+# Configuration for the build profile
+[profile]
+# Development profile
+[profile.dev]
+# Whether to enable debug assertions
+debug_assertions = true
+
+# Release profile
+[profile.release]
+# Whether to enable LTO (Link Time Optimization)
+lto = true
+
+# Codegen units for parallel compilation
+codegen-units = 1
+
+# Whether to enable panic behavior optimization
+panic = "abort"

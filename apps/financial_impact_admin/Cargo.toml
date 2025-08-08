@@ -1,0 +1,30 @@
+[package]
+name = "financial_impact_admin"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Workspace dependencies
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+tracing = { workspace = true }
+sqlx = { workspace = true }
+rust_decimal = { workspace = true }
+rust_decimal_macros = { workspace = true }
+
+# Web framework
+axum = { workspace = true }
+tower-http = { workspace = true }
+
+# Local dependencies
+financial_impact_tracker = { path = "../../shared_packages/financial_impact_tracker" }
+cpay_core = { path = "../../shared_packages/cpay_core" }
+cpc-financial-core = { path = "../../shared_packages/cpc-financial-core" }
+
+# Configuration
+env_logger = { workspace = true }

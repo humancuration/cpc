@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use stylist::{style, yew::styled_component};
-use crate::components::course_card::CourseCard;
+use crate::components::{course_card::CourseCard, navigation::Navigation, course_impact_preview::CourseImpactPreview, personal_relevance::PersonalRelevanceIndicator};
 use crate::contexts::use_courses;
 
 #[styled_component(CourseCatalogPage)]
@@ -44,6 +44,8 @@ pub fn course_catalog_page() -> Html {
 
     html! {
         <div class={container_style}>
+            <Navigation />
+            
             <div class={header_style}>
                 <h1>{"Course Catalog"}</h1>
                 <div>

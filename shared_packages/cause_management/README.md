@@ -11,6 +11,10 @@ The Cause Management Service is a shared package within the CPC platform that pr
 - Delete causes
 - List causes with pagination
 - Track total donations for each cause
+- Statistical analysis of donation patterns (with `statistics` feature)
+- Impact measurement for causes (with `statistics` feature)
+- Donation forecasting with confidence intervals (with `statistics` feature)
+- BI visualization integration (with `statistics` and `visualization` features)
 - gRPC service interface for internal communication
 - PostgreSQL database storage
 
@@ -25,6 +29,13 @@ The service defines the following core data models:
 - `UpdateCauseRequest`: Request structure for updating existing causes
 - `ListCausesRequest`: Request structure for listing causes with pagination
 - `CauseError`: Error types for cause management operations
+
+### Statistical Models (requires `statistics` feature)
+
+- `DonationForecast`: Forecast results for donation predictions with confidence intervals
+- `DonationTrend`: Donation trend analysis results
+- `ImpactAnalysis`: Impact analysis results for causes
+- `ImpactMetric`: Types of impact metrics (LivesImpacted, EnvironmentalBenefit, etc.)
 
 ### Repository
 
@@ -48,6 +59,8 @@ The `CauseServiceImpl` implements the gRPC service interface defined in the cpay
 - `update_cause`: Update an existing cause
 - `delete_cause`: Delete a cause
 - `list_causes`: List causes with pagination
+- `get_donation_forecast`: Get donation forecast for a cause (requires `statistics` feature)
+- `get_impact_analysis`: Get impact analysis for a cause (requires `statistics` feature)
 
 ## Database Schema
 
@@ -99,3 +112,32 @@ To use the Cause Management Service:
 - `rust_decimal`: Precise decimal arithmetic
 - `serde`: Serialization
 - `tracing`: Logging
+- `cpc_statistics_core`: Statistical analysis (optional, with `statistics` feature)
+- `cpc_bi_visualization`: BI visualization (optional, with `visualization` feature)
+
+## Statistical Analysis Features
+
+The cause management service includes advanced statistical analysis capabilities that can be enabled with the `statistics` feature flag. These features include:
+
+- **Donation Forecasting**: Predict future donation patterns with confidence intervals
+- **Trend Analysis**: Identify and analyze donation trends over time
+- **Impact Measurement**: Measure the real-world impact of causes with statistical confidence
+- **BI Visualization**: Integrate with the BI visualization system for interactive charts (requires both `statistics` and `visualization` features)
+
+To enable statistical features, add the feature flag to your Cargo.toml:
+
+```toml
+[dependencies]
+cause_management = { path = "../cause_management", features = ["statistics"] }
+```
+
+For visualization integration:
+
+```toml
+[dependencies]
+cause_management = { path = "../cause_management", features = ["statistics", "visualization"] }
+```
+
+See `docs/statistical_analysis_causes.md` for detailed documentation on statistical features.
+- `cpc_statistics_core`: Statistical analysis (optional, with `statistics` feature)
+- `cpc_bi_visualization`: BI visualization (optional, with `visualization` feature)

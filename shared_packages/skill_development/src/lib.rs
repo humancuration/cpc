@@ -11,3 +11,6 @@ pub use infrastructure::grpc::GrpcServer;
 pub use application::SkillTrackingService;
 pub use application::LearningPathService;
 pub use application::CertificationService;
+
+pub mod optimization;
+pub mod ml;

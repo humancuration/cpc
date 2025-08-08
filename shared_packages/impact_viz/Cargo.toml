@@ -1,0 +1,87 @@
+[package]
+name = "impact_viz"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+# Web framework for components
+yew = { workspace = true, optional = true }
+stylist = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true, optional = true }
+web-sys = { workspace = true, optional = true }
+
+# Visualization library
+plotters = { workspace = true }
+
+# Image processing
+image = "0.24"
+
+# Bevy for interactive components
+bevy = { workspace = true }
+
+# Mathematical and statistical processing
+statrs = { workspace = true }
+polars = { workspace = true }
+ndarray = { workspace = true }
+ndarray-stats = { workspace = true }
+
+# Financial precision
+common_utils = { path = "../common_utils" }
+cpc-statistics-core = { path = "../cpc-statistics-core" }
+
+# ML integration
+ml_core = { path = "../ml_core" }
+volunteer_coordination = { path = "../volunteer_coordination" }
+cpay_core = { path = "../cpay_core" }
+skill_development = { path = "../skill_development" }
+cause_management = { path = "../cause_management" }
+
+# Consent management
+consent_manager = { path = "../consent_manager" }
+
+# Storage abstraction (for data retrieval)
+storage_abstraction = { path = "../storage_abstraction" }
+
+# Optional dependencies
+async-trait = { workspace = true }
+
+# PDF generation
+pdf = { workspace = true, optional = true }
+
+# Time handling
+chrono = { workspace = true, features = ["serde"] }
+
+[features]
+pdf_export = ["pdf"]
+web_components = ["yew", "stylist", "wasm-bindgen", "web-sys"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+storage_abstraction = { path = "../storage_abstraction", features = ["in_memory"] }
+
+[[example]]
+name = "volunteer_impact_dashboard"
+path = "examples/volunteer_impact_dashboard.rs"
+
+[[example]]
+name = "financial_health_visualization"
+path = "examples/financial_health_visualization.rs"
+
+[[example]]
+name = "skill_development_mapping"
+path = "examples/skill_development_mapping.rs"
+
+[[example]]
+name = "cause_impact_storytelling"
+path = "examples/cause_impact_storytelling.rs"
+
+[[example]]
+name = "feedback_collector_demo"
+path = "examples/feedback_collector_demo.rs"

@@ -7,6 +7,7 @@ use crate::pages::{
     enrollment::EnrollmentPage,
     credential::CredentialPage,
     tipping::TippingPage,
+    skill_dashboard::SkillDashboardPage,
 };
 
 #[derive(Switch, Clone, Debug, PartialEq)]
@@ -21,6 +22,8 @@ pub enum AppRoute {
     Credentials,
     #[to = "/tip"]
     Tip,
+    #[to = "/skills"]
+    Skills,
 }
 
 pub fn switch(route: AppRoute) -> Html {
@@ -30,5 +33,6 @@ pub fn switch(route: AppRoute) -> Html {
         AppRoute::Enrollments => html! { <EnrollmentPage /> },
         AppRoute::Credentials => html! { <CredentialPage /> },
         AppRoute::Tip => html! { <TippingPage /> },
+        AppRoute::Skills => html! { <SkillDashboardPage /> },
     }
 }

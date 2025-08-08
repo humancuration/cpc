@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use stylist::{style, yew::styled_component};
-use crate::components::progress_bar::ProgressBar;
+use crate::components::{progress_bar::ProgressBar, navigation::Navigation};
 use crate::contexts::use_courses;
 
 #[styled_component(EnrollmentPage)]
@@ -100,6 +100,8 @@ pub fn enrollment_page() -> Html {
 
     html! {
         <div class={container_style}>
+            <Navigation />
+            
             <div class={header_style}>
                 <h1>{"My Enrollments"}</h1>
             </div>

@@ -72,6 +72,43 @@ message FeaturedCausesResponse {
   repeated Cause causes = 1;
 }
 
+// Statistical forecast request
+message DonationForecastRequest {
+  string cause_id = 1;
+  int32 forecast_periods = 2;
+  double confidence_level = 3;
+}
+
+// Statistical forecast response
+message DonationForecastResponse {
+  repeated double forecast_values = 1;
+  double confidence_lower = 2;
+  double confidence_upper = 3;
+  double trend_p_value = 4;
+  string trend_significance = 5;
+  double confidence_level = 6;
+  string explanation = 7;
+  string cooperative_explanation = 8;
+}
+
+// Impact analysis request
+message ImpactAnalysisRequest {
+  string cause_id = 1;
+  string impact_type = 2;
+}
+
+// Impact analysis response
+message ImpactAnalysisResponse {
+  double impact_score = 1;
+  string evidence_strength = 2;
+  double p_value = 3;
+  double confidence_lower = 4;
+  double confidence_upper = 5;
+  string impact_type = 6;
+  string explanation = 7;
+  string cooperative_explanation = 8;
+}
+
 // Cause structure
 message Cause {
   string id = 1;
@@ -197,4 +234,6 @@ service CauseService {
   rpc DeleteCause(DeleteCauseRequest) returns (DeleteCauseResponse);
   rpc ListCauses(ListCausesRequest) returns (ListCausesResponse);
   rpc GetFeaturedCauses(FeaturedCausesRequest) returns (FeaturedCausesResponse);
+  rpc GetDonationForecast(DonationForecastRequest) returns (DonationForecastResponse);
+  rpc GetImpactAnalysis(ImpactAnalysisRequest) returns (ImpactAnalysisResponse);
 }

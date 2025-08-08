@@ -10,6 +10,7 @@ use wallet::domain::primitives::{Money, Currency as WalletCurrency};
 use uuid::Uuid;
 use rust_decimal::Decimal;
 use common_utils::logging::{info, warn, error};
+use common_utils::financial::MonetaryValue;
 use cpc_financial_core::{MonetaryAmount, CurrencyCode};
 use cpc_financial_core::audit::FinancialAuditHook;
 
@@ -159,13 +160,15 @@ impl TransactionEngine {
         // In a real implementation, this would check against actual KYC data
         true
     }
-    
     /// Check transaction limits for a user
     async fn check_transaction_limits(&self, request: &PaymentRequest) -> bool {
         // Simulate transaction limit checking
         // In a real implementation, this would check against user's transaction history
         // and configured limits
-        request.amount <= Decimal::from(10000u64)
+        // Convert to fixed-point for precise comparison
+        let amount_fixed = fixed::types::I64F64::from_num(request.amount.value().to_f64().unwrap_or(0.0));
+        let limit_fixed = fixed::types::I64F64::from_num(10000.0);
+        amount_fixed <= limit_fixed
     }
     
     /// Detect fraud in a transaction
@@ -226,22 +229,30 @@ impl TransactionEngine {
         // For now, we'll just log the action
         Ok(())
     }
-    
     /// Process volunteer hour conversion to Dabloons
     pub async fn process_volunteer_conversion(&self, user_id: Uuid, hours: Decimal, skill_rate: Decimal) -> Result<PaymentResponse, PaymentError> {
         info!("Processing volunteer hour conversion for user: {} ({} hours at rate {})", user_id, hours, skill_rate);
+        
+        // Convert Decimal values to fixed-point for precise calculation
+        let hours_fixed = fixed::types::I64F64::from_num(hours.to_f64().unwrap_or(0.0));
+        let skill_rate_fixed = fixed::types::I64F64::from_num(skill_rate.to_f64().unwrap_or(0.0));
         
         // Record audit log for volunteer conversion
         let _ = self.audit_hook.record_calculation(
             Some(user_id.to_string()),
             "volunteer_hour_conversion",
             vec![hours.to_string(), skill_rate.to_string()],
-            (hours * skill_rate).to_string(),
+            format!("{:.6}", (hours_fixed * skill_rate_fixed).to_num::<f64>()),
         ).await;
         
-        // Calculate Dabloons to credit
-        let dabloons_amount = hours * skill_rate;
-        let monetary_amount = MonetaryAmount::new(dabloons_amount, CurrencyCode::DBL);
+        // Calculate Dabloons to credit using high-precision fixed-point arithmetic
+        let dabloons_amount_fixed = hours_fixed * skill_rate_fixed;
+        let dabloons_amount_monetary = MonetaryValue::new(dabloons_amount_fixed, "DABLOONS");
+        
+        // Convert to the existing MonetaryAmount for compatibility
+        let dabloons_amount_decimal = Decimal::from_f64(dabloons_amount_fixed.to_num::<f64>())
+            .unwrap_or(Decimal::ZERO);
+        let monetary_amount = MonetaryAmount::new(dabloons_amount_decimal, CurrencyCode::DBL);
         
         // Create a payment request for the conversion
         let request = PaymentRequest::new(
@@ -257,7 +268,7 @@ impl TransactionEngine {
         );
         
         // Process as a Dabloons transaction
-        let amount = Money::new(dabloons_amount, WalletCurrency::Dabloons);
+        let amount = Money::new(dabloons_amount_decimal, WalletCurrency::Dabloons);
         self.process_dabloons_transaction(request, amount).await
     }
     

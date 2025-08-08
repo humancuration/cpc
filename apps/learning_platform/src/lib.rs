@@ -2,7 +2,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 
 use crate::routes::{switch, AppRoute};
-use crate::contexts::{AuthContextProvider, CourseContextProvider, ThemeContextProvider};
+use crate::contexts::{AuthContextProvider, CourseContextProvider, ThemeContextProvider, SkillContextProvider};
 
 pub mod routes;
 pub mod contexts;
@@ -18,11 +18,13 @@ pub fn app() -> Html {
         <ThemeContextProvider>
             <AuthContextProvider>
                 <CourseContextProvider>
+                <SkillContextProvider>
                     <BrowserRouter>
                         <main>
                             <Switch<AppRoute> render={switch} />
                         </main>
                     </BrowserRouter>
+                </SkillContextProvider>
                 </CourseContextProvider>
             </AuthContextProvider>
         </ThemeContextProvider>

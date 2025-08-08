@@ -22,9 +22,21 @@ rust_decimal = { workspace = true }
 async-trait = { workspace = true }
 thiserror = { workspace = true }
 tracing-subscriber = { workspace = true }
+rand = { workspace = true }
+rand_distr = { workspace = true }
+statrs = { workspace = true }
 
 # Local dependencies
-# Add any local dependencies here when needed
+cpc_statistics_core = { path = "../cpc-statistics-core", optional = true }
+polars = { version = "0.35.0", optional = true }
+linfa = { version = "0.7.0", optional = true }
+cpc_bi_visualization = { path = "../bi_visualization", optional = true }
+ml_core = { path = "../ml_core" }
 
 [build-dependencies]
 tonic-build = "0.14.0"
+
+[features]
+default = []
+statistics = ["cpc_statistics_core", "polars", "linfa"]
+visualization = ["cpc_bi_visualization"]

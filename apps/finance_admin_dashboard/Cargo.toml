@@ -1,0 +1,56 @@
+[package]
+name = "finance_admin_dashboard"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core CPC dependencies
+financial_impact_tracker = { path = "../../shared_packages/financial_impact_tracker" }
+common_utils = { path = "../../shared_packages/common_utils" }
+consent_manager = { path = "../../shared_packages/consent_manager" }
+skill_development = { path = "../../shared_packages/skill_development" }
+learning_impact_tracker = { path = "../../shared_packages/learning_impact_tracker" }
+volunteer_impact_tracker = { path = "../../shared_packages/volunteer_impact_tracker" }
+cause_management = { path = "../../shared_packages/cause_management" }
+
+# External dependencies
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+fixed = "1.23"
+thiserror = "1.0"
+anyhow = "1.0"
+log = "0.4"
+env_logger = "0.10"
+axum = "0.6"
+tower-http = { version = "0.4", features = ["cors", "trace"] }
+
+# Web dependencies (for frontend)
+yew = { version = "0.21", features = ["csr"], optional = true }
+yew-router = { version = "0.18", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+wasm-bindgen-futures = { version = "0.4", optional = true }
+web-sys = { version = "0.3", optional = true }
+gloo-net = { version = "0.4", optional = true }
+
+[features]
+default = ["web"]
+web = [
+    "yew",
+    "yew-router",
+    "wasm-bindgen",
+    "wasm-bindgen-futures",
+    "web-sys",
+    "gloo-net",
+]
+
+[[bin]]
+name = "finance-admin-dashboard"
+path = "src/main.rs"
+
+[[bin]]
+name = "finance-admin-dashboard-web"
+path = "src/web.rs"
+required-features = ["web"]

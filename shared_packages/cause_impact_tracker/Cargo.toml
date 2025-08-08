@@ -1,0 +1,22 @@
+[package]
+name = "cause_impact_tracker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+tracing = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+cause_management = { path = "../cause_management" }
+impact_viz = { path = "../impact_viz" }
+consent_manager = { path = "../consent_manager" }
+common_utils = { path = "../common_utils" }
+ml_core = { path = "../ml_core" }
+learning_impact_tracker = { path = "../learning_impact_tracker" }
+volunteer_impact_tracker = { path = "../volunteer_impact_tracker" }
+financial_impact_tracker = { path = "../financial_impact_tracker" }
+skill_development = { path = "../skill_development" }
+fixed = { workspace = true }

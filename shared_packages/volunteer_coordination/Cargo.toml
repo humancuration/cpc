@@ -12,5 +12,12 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 parking_lot = "0.12"
 
+# Optimization core
+optimization_core = { path = "../optimization_core" }
+ndarray = { workspace = true }
+
+# ML core
+ml_core = { path = "../ml_core" }
+
 # Internal crates in the workspace may rely on these traits and types
 # Adjust as needed when integrating with the full workspace Cargo.

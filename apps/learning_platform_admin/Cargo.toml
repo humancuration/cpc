@@ -1,0 +1,37 @@
+[package]
+name = "learning-platform-admin"
+version = "0.1.0"
+edition = "2021"
+authors = ["CPC Cooperative <coop@cpc.dev>"]
+description = "Admin dashboard for learning platform impact analytics"
+
+[dependencies]
+# Core dependencies
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+tokio = { workspace = true, features = ["full"] }
+chrono = { workspace = true, features = ["serde"] }
+
+# Web framework
+yew = { workspace = true, features = ["csr"] }
+yew-router = "0.17"
+stylist = { workspace = true, features = ["yew_integration"] }
+
+# CPC modules
+learning_impact_tracker = { path = "../../shared_packages/learning_impact_tracker" }
+learning_core = { path = "../../shared_packages/learning_core" }
+skill_development = { path = "../../shared_packages/skill_development" }
+volunteer_coordination = { path = "../../shared_packages/volunteer_coordination" }
+impact_viz = { path = "../../shared_packages/impact_viz" }
+consent_manager = { path = "../../shared_packages/consent_manager" }
+
+# Logging
+wasm-logger = { workspace = true }
+
+# Build
+trunk = "0.17"
+
+[features]
+default = []
+test-yew = ["wasm-bindgen-test"]

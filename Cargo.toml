@@ -43,6 +43,10 @@ members = [
     "apps/shtairir_demos/user_profiles",
     "apps/shtairir_demos/ml_features",
     "apps/shtairir_editor",
+    "apps/volunteer_coordination_admin",
+    "apps/cause_management_admin",
+    "apps/financial_impact_admin",
+    "apps/community_impact_dashboard",
     
     # Shared Packages
     "shared_packages/shtairir_execution",
@@ -50,7 +54,9 @@ members = [
     "shared_packages/api_integration",
     "shared_packages/audit_framework",
     "shared_packages/bi_visualization",
+    "shared_packages/bi_analytics",
     "shared_packages/cause_management",
+    "shared_packages/community_connect",
     "shared_packages/collaboration_engine",
     "shared_packages/collaborative_docs",
     "shared_packages/collaborative_workspace",
@@ -103,6 +109,13 @@ members = [
     "shared_packages/web_core",
     "shared_packages/cpc-financial-core",
     "shared_packages/cpc-statistics-core",
+    "shared_packages/optimization_core",
+    "shared_packages/ml_core",
+    "shared_packages/impact_viz",
+    "shared_packages/learning_impact_tracker",
+    "shared_packages/volunteer_impact_tracker",
+    "shared_packages/financial_impact_tracker",
+    "shared_packages/cause_impact_tracker",
     
     # Tools and Templates
     "tools/ci",
@@ -142,6 +155,7 @@ gloo-timers = { version = "0.3.0", features = ["futures"] }
 
 # Data Visualization
 plotters = "0.3.7"
+image = "0.24"
 
 # Web Server Framework
 axum = "0.8.4"
@@ -202,6 +216,7 @@ futures-util = "0.3.31"
 log = "0.4.27"
 wasm-logger = "0.2.0"
 rand = "0.8.5"
+tokio-test = "0.4"
 
 # WebSocket support
 tokio-tungstenite = "0.20.1"
@@ -230,3 +245,7 @@ ndarray = "0.16.1"
 ndarray-stats = "0.6.0"
 linfa = "0.7.1"
 toml = "0.8.8"
+
+# Finance dependencies
+env_logger = "0.11.5"
+tower-http = { version = "0.5", features = ["cors"] }

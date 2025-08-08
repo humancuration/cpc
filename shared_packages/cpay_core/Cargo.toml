@@ -26,6 +26,7 @@ notification_core = { path = "../notification_core" }
 social_integration = { path = "../social_integration" }
 wallet = { path = "../wallet" }
 cpc-financial-core = { path = "../cpc-financial-core" }
+ml_core = { path = "../ml_core" }
 
 common_utils = { version = "0.2.0", path = "../common_utils" }
 

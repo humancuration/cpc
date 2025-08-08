@@ -1,0 +1,37 @@
+[package]
+name = "optimization_core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+async-trait = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+
+# Math and optimization
+argmin = { workspace = true }
+ndarray = { workspace = true }
+ndarray-stats = { workspace = true }
+nalgebra = { workspace = true }
+statrs = { workspace = true }
+
+# CPC ecosystem dependencies
+common_utils = { path = "../common_utils" }
+consent_manager = { path = "../consent_manager" }
+bi_analytics = { path = "../bi_analytics" }
+
+# WebAssembly support
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true }
+js-sys = { workspace = true }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

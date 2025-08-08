@@ -14,6 +14,7 @@ chrono = { workspace = true, features = ["serde"] }
 tokio = { workspace = true, features = ["sync", "time", "macros"] }
 futures = "0.3"
 rand = { workspace = true }
+fixed = { workspace = true }
 
 [dev-dependencies]
 tracing-test = "0.2"

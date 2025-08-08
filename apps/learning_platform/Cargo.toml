@@ -23,6 +23,12 @@ wasm-bindgen-futures = { workspace = true }
 web-sys = { workspace = true }
 js-sys = { workspace = true }
 wasm-logger = { workspace = true }
+skill_development = { path = "../../shared_packages/skill_development" }
+ml_core = { path = "../../shared_packages/ml_core" }
+impact_viz = { path = "../../shared_packages/impact_viz" }
+learning_impact_tracker = { path = "../../shared_packages/learning_impact_tracker" }
+consent_manager = { path = "../../shared_packages/consent_manager" }
+feedback_core = { path = "../../shared_packages/feedback_core" }
 
 [build-dependencies]
 tonic-build = "0.11"

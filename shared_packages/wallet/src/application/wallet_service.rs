@@ -7,6 +7,7 @@ use crate::domain::{
     wallet::{Wallet, WalletTransaction, TransactionType, TipSentEvent},
     primitives::{Money, Currency, FinancialError},
 };
+use common_utils::financial::MonetaryValue;
 
 // Conditionally import common_utils logging or fallback to tracing
 #[cfg(feature = "common-utils-integration")]
@@ -94,7 +95,6 @@ impl WalletService for WalletServiceImpl {
                 Ok(wallet)
             }
         }
-    }
     
     async fn add_dabloons(&self, user_id: Uuid, amount: Money, description: Option<String>) -> Result<Wallet, FinancialError> {
         if amount.currency != Currency::Dabloons {
@@ -105,7 +105,19 @@ impl WalletService for WalletServiceImpl {
         }
         
         let mut wallet = self.get_or_create_wallet(user_id).await?;
-        wallet.add_dabloons(amount.clone())?;
+        
+        // Use fixed-point arithmetic for precise balance calculation
+        let current_balance = wallet.dabloons_balance;
+        let amount_to_add = amount.amount;
+        
+        let current_balance_fixed = fixed::types::I64F64::from_num(current_balance.to_f64().unwrap_or(0.0));
+        let amount_to_add_fixed = fixed::types::I64F64::from_num(amount_to_add.to_f64().unwrap_or(0.0));
+        let new_balance_fixed = current_balance_fixed + amount_to_add_fixed;
+        
+        // Update the wallet with the new balance
+        wallet.dabloons_balance = rust_decimal::Decimal::from_f64(new_balance_fixed.to_num::<f64>())
+            .unwrap_or(rust_decimal::Decimal::ZERO);
+        
         self.wallet_repo.save_wallet(&wallet).await?;
         
         // Record the transaction
@@ -116,6 +128,7 @@ impl WalletService for WalletServiceImpl {
             description
         ).await?;
         
+        Ok(wallet)
         Ok(wallet)
     }
     
@@ -128,7 +141,19 @@ impl WalletService for WalletServiceImpl {
         }
         
         let mut wallet = self.get_or_create_wallet(user_id).await?;
-        wallet.subtract_dabloons(amount.clone())?;
+        
+        // Use fixed-point arithmetic for precise balance calculation
+        let current_balance = wallet.dabloons_balance;
+        let amount_to_subtract = amount.amount;
+        
+        let current_balance_fixed = fixed::types::I64F64::from_num(current_balance.to_f64().unwrap_or(0.0));
+        let amount_to_subtract_fixed = fixed::types::I64F64::from_num(amount_to_subtract.to_f64().unwrap_or(0.0));
+        let new_balance_fixed = current_balance_fixed - amount_to_subtract_fixed;
+        
+        // Update the wallet with the new balance
+        wallet.dabloons_balance = rust_decimal::Decimal::from_f64(new_balance_fixed.to_num::<f64>())
+            .unwrap_or(rust_decimal::Decimal::ZERO);
+        
         self.wallet_repo.save_wallet(&wallet).await?;
         
         // Record the transaction
@@ -195,9 +220,23 @@ impl WalletService for WalletServiceImpl {
             return Err(FinancialError::InsufficientFunds(Currency::Dabloons));
         }
         
-        // Perform the transfer
-        from_wallet.subtract_dabloons(amount.clone())?;
-        to_wallet.add_dabloons(amount.clone())?;
+        // Use fixed-point arithmetic for precise balance calculations
+        let from_balance = from_wallet.dabloons_balance;
+        let to_balance = to_wallet.dabloons_balance;
+        let transfer_amount = amount.amount;
+        
+        let from_balance_fixed = fixed::types::I64F64::from_num(from_balance.to_f64().unwrap_or(0.0));
+        let to_balance_fixed = fixed::types::I64F64::from_num(to_balance.to_f64().unwrap_or(0.0));
+        let transfer_amount_fixed = fixed::types::I64F64::from_num(transfer_amount.to_f64().unwrap_or(0.0));
+        
+        let new_from_balance_fixed = from_balance_fixed - transfer_amount_fixed;
+        let new_to_balance_fixed = to_balance_fixed + transfer_amount_fixed;
+        
+        // Update both wallets with the new balances
+        from_wallet.dabloons_balance = rust_decimal::Decimal::from_f64(new_from_balance_fixed.to_num::<f64>())
+            .unwrap_or(rust_decimal::Decimal::ZERO);
+        to_wallet.dabloons_balance = rust_decimal::Decimal::from_f64(new_to_balance_fixed.to_num::<f64>())
+            .unwrap_or(rust_decimal::Decimal::ZERO);
         
         // Save both wallets
         self.wallet_repo.save_wallet(&from_wallet).await?;
@@ -239,7 +278,19 @@ impl WalletService for WalletServiceImpl {
         }
         
         let mut wallet = self.get_or_create_wallet(user_id).await?;
-        wallet.add_dabloons(amount.clone())?;
+        
+        // Use fixed-point arithmetic for precise balance calculation
+        let current_balance = wallet.dabloons_balance;
+        let amount_to_add = amount.amount;
+        
+        let current_balance_fixed = fixed::types::I64F64::from_num(current_balance.to_f64().unwrap_or(0.0));
+        let amount_to_add_fixed = fixed::types::I64F64::from_num(amount_to_add.to_f64().unwrap_or(0.0));
+        let new_balance_fixed = current_balance_fixed + amount_to_add_fixed;
+        
+        // Update the wallet with the new balance
+        wallet.dabloons_balance = rust_decimal::Decimal::from_f64(new_balance_fixed.to_num::<f64>())
+            .unwrap_or(rust_decimal::Decimal::ZERO);
+        
         self.wallet_repo.save_wallet(&wallet).await?;
         
         // Record the transaction with a special description for Universal Income
@@ -263,7 +314,19 @@ impl WalletService for WalletServiceImpl {
         }
         
         let mut wallet = self.get_or_create_wallet(user_id).await?;
-        wallet.add_dabloons(amount.clone())?;
+        
+        // Use fixed-point arithmetic for precise balance calculation
+        let current_balance = wallet.dabloons_balance;
+        let amount_to_add = amount.amount;
+        
+        let current_balance_fixed = fixed::types::I64F64::from_num(current_balance.to_f64().unwrap_or(0.0));
+        let amount_to_add_fixed = fixed::types::I64F64::from_num(amount_to_add.to_f64().unwrap_or(0.0));
+        let new_balance_fixed = current_balance_fixed + amount_to_add_fixed;
+        
+        // Update the wallet with the new balance
+        wallet.dabloons_balance = rust_decimal::Decimal::from_f64(new_balance_fixed.to_num::<f64>())
+            .unwrap_or(rust_decimal::Decimal::ZERO);
+        
         self.wallet_repo.save_wallet(&wallet).await?;
         
         // Record the transaction with a special description for volunteer conversion

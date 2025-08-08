@@ -12,6 +12,7 @@
 //! - `crypto`: Cryptographic functions for hashing and encryption
 //! - `datetime`: DateTime parsing and formatting utilities
 //! - `data_structures`: Common data structures like LRU cache and ring buffer
+//! - `financial`: High-precision financial calculations using fixed-point arithmetic
 
 pub mod error;
 pub mod logging;
@@ -20,6 +21,7 @@ pub mod async_utils;
 pub mod crypto;
 pub mod datetime;
 pub mod data_structures;
+pub mod financial;
 
 // Re-export the most commonly used items for convenience
 pub use error::{CommonError, Result};
@@ -29,6 +31,7 @@ pub use async_utils::{retry, with_timeout};
 pub use crypto::{hash_sha256, encrypt, decrypt};
 pub use datetime::{now_utc, format_datetime};
 pub use data_structures::{LruCache, RingBuffer};
+pub use financial::{MonetaryValue, FinancialError, FinancialResult, RoundingStrategy};
 
 #[cfg(test)]
 mod tests {
@@ -43,5 +46,8 @@ mod tests {
         // Test that modules are accessible
         let _json_result = serialization::to_json(&"test");
         let _hash = crypto::hash_sha256("test");
+        
+        // Test financial module
+        let _amount = financial::MonetaryValue::new(fixed::types::I64F64::from_num(100.50), "USD");
     }
 }

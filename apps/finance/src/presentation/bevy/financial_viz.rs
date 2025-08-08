@@ -39,8 +39,8 @@ pub fn build_dual_currency_budget_chart(
         
         // Create primary currency bars (blue)
         commands.spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::new(0.3, primary_allocated_height, 0.3))),
-            material: materials.add(StandardMaterial {
+            mesh: todo!(), // meshes.add(Mesh::from(shape::Box::new(0.3, primary_allocated_height, 0.3))),
+            material: todo!(), // materials.add(StandardMaterial {
                 base_color: Color::BLUE,
                 ..default()
             }),
@@ -49,8 +49,8 @@ pub fn build_dual_currency_budget_chart(
         });
         
         commands.spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::new(0.3, primary_spent_height, 0.3))),
-            material: materials.add(StandardMaterial {
+            mesh: todo!(), // meshes.add(Mesh::from(shape::Box::new(0.3, primary_spent_height, 0.3))),
+            material: todo!(), // materials.add(StandardMaterial {
                 base_color: Color::rgb(0.0, 0.0, 0.5), // Darker blue for spent
                 ..default()
             }),
@@ -60,8 +60,8 @@ pub fn build_dual_currency_budget_chart(
         
         // Create Dabloons bars (gold)
         commands.spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::new(0.3, dabloons_allocated_height, 0.3))),
-            material: materials.add(StandardMaterial {
+            mesh: todo!(), // meshes.add(Mesh::from(shape::Box::new(0.3, dabloons_allocated_height, 0.3))),
+            material: todo!(), // materials.add(StandardMaterial {
                 base_color: Color::GOLD,
                 ..default()
             }),
@@ -70,8 +70,8 @@ pub fn build_dual_currency_budget_chart(
         });
         
         commands.spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::new(0.3, dabloons_spent_height, 0.3))),
-            material: materials.add(StandardMaterial {
+            mesh: todo!(), // meshes.add(Mesh::from(shape::Box::new(0.3, dabloons_spent_height, 0.3))),
+            material: todo!(), // materials.add(StandardMaterial {
                 base_color: Color::rgb(0.8, 0.7, 0.0), // Darker gold for spent
                 ..default()
             }),
@@ -103,12 +103,12 @@ pub fn build_savings_progress_ring(
         
         // Create outer ring for primary currency (blue)
         commands.spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Torus {
+            mesh: todo!(), // meshes.add(Mesh::from(shape::Torus {
                 radius: 1.0,
                 ring_radius: 0.2,
                 subdivisions: 64,
             })),
-            material: materials.add(StandardMaterial {
+            material: todo!(), // materials.add(StandardMaterial {
                 base_color: Color::rgba(0.2, 0.6, 1.0, primary_progress * 0.8 + 0.2), // Blue with alpha based on progress
                 ..default()
             }),
@@ -119,12 +119,12 @@ pub fn build_savings_progress_ring(
         // Create inner ring for Dabloons (gold/yellow)
         if dabloons_progress > 0.0 {
             commands.spawn(PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Torus {
+                mesh: todo!(), // meshes.add(Mesh::from(shape::Torus {
                     radius: 0.7,
                     ring_radius: 0.15,
                     subdivisions: 64,
                 })),
-                material: materials.add(StandardMaterial {
+                material: todo!(), // materials.add(StandardMaterial {
                     base_color: Color::rgba(1.0, 0.84, 0.0, dabloons_progress * 0.8 + 0.2), // Gold with alpha based on progress
                     ..default()
                 }),
@@ -166,13 +166,13 @@ pub fn build_wallet_coin_visualization(
             let y_position = i as f32 * 0.05; // Stack coins with small gaps
             
             commands.spawn(PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Cylinder {
+                mesh: todo!(), // meshes.add(Mesh::from(shape::Cylinder {
                     radius: 0.5,
                     height: 0.1,
                     resolution: 32,
                     segments: 1,
                 })),
-                material: materials.add(StandardMaterial {
+                material: todo!(), // materials.add(StandardMaterial {
                     base_color: Color::rgb(1.0, 0.84, 0.0), // "Dabloon yellow" - slightly different from gold
                     metallic: 0.9,
                     perceptual_roughness: 0.1,

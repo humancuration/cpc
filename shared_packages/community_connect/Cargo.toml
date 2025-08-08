@@ -1,0 +1,34 @@
+[package]
+name = "community_connect"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+async-trait = { workspace = true }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+
+# Math and optimization
+optimization_core = { path = "../optimization_core" }
+ndarray = { workspace = true }
+ndarray-stats = { workspace = true }
+
+# CPC ecosystem dependencies
+common_utils = { path = "../common_utils" }
+consent_manager = { path = "../consent_manager" }
+
+# WebAssembly support
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true }
+js-sys = { workspace = true }
+gloo-timers = { workspace = true, features = ["futures"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

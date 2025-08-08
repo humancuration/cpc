@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use stylist::{style, yew::styled_component};
-use crate::components::tip_form::TipForm;
+use crate::components::{tip_form::TipForm, navigation::Navigation};
 
 #[styled_component(TippingPage)]
 pub fn tipping_page() -> Html {
@@ -30,6 +30,8 @@ pub fn tipping_page() -> Html {
 
     html! {
         <div class={container_style}>
+            <Navigation />
+            
             <div class={header_style}>
                 <h1>{"Support Educators"}</h1>
                 <p>{"Show your appreciation by tipping educators for their excellent work"}</p>

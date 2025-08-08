@@ -1,0 +1,23 @@
+[package]
+name = "volunteer_impact_tracker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# CPC dependencies
+volunteer_coordination = { path = "../volunteer_coordination" }
+learning_impact_tracker = { path = "../learning_impact_tracker" }
+impact_viz = { path = "../impact_viz" }
+consent_manager = { path = "../consent_manager" }
+ml_core = { path = "../ml_core" }
+feedback_core = { path = "../feedback_core" }
+skill_development = { path = "../skill_development" }
+cause_management = { path = "../cause_management" }

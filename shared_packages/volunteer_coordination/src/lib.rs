@@ -21,6 +21,9 @@ pub mod application {
     pub mod reputation_port;
 }
 
+pub mod optimization;
+pub mod ml;
+
 pub use domain::{models, repository, service};
 
 use std::sync::Arc;
