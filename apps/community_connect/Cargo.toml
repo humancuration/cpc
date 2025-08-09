@@ -7,7 +7,6 @@ edition = "2021"
 social_graph = { path = "../../shared_packages/social_graph" }
 consent_manager = { path = "../../shared_packages/consent_manager" }
 async-graphql = { workspace = true }
-ffmpeg-wasm = { version = "0.13.1", features = ["av1", "opus"] }
 yew = { workspace = true }
 tauri = { workspace = true }
 async-trait = { workspace = true }

@@ -94,7 +94,7 @@ impl ProjectStore {
     }
 }
 
-/// Handle image import/export using ffmpeg
+/// Refactor away from ffmpeg dependency for image import/export
 pub struct ImageIO;
 
 impl ImageIO {

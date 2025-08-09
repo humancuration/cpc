@@ -10,7 +10,6 @@ The CPC Messenger application provides real-time communication capabilities with
 
 The media sharing pipeline enables users to share various types of media with end-to-end encryption:
 
-- **AV1/Opus transcoding** via ffmpeg.wasm for royalty-free codecs
 - **Thumbnail generation** for images and videos
 - **E2EE using AES-GCM** with per-media keys
 - Integration with the shared `media` package for processing

@@ -16,7 +16,6 @@ impl AudioProcessor {
     pub async fn extract_waveform_data(&self, media_cid: &str) -> Result<WaveformData> {
         // In a real implementation, this would:
         // 1. Fetch the audio content (from P2P or central storage)
-        // 2. Process it with ffmpeg.wasm
         // 3. Extract amplitude data at regular intervals
         // 4. Return the waveform data
         
@@ -42,7 +41,6 @@ impl AudioProcessor {
     pub async fn extract_frequency_data(&self, media_cid: &str) -> Result<FrequencyData> {
         // In a real implementation, this would:
         // 1. Fetch the audio content
-        // 2. Process it with ffmpeg.wasm
         // 3. Perform FFT analysis to extract frequency bands
         // 4. Return the frequency data
         
@@ -77,7 +75,6 @@ impl AudioProcessor {
     pub async fn convert_to_webm(&self, input_cid: &str) -> Result<String> {
         // In a real implementation, this would:
         // 1. Fetch the input audio
-        // 2. Process it with ffmpeg.wasm
         // 3. Convert to WebM format with AV1/Opus codecs
         // 4. Store the result and return the new CID
         

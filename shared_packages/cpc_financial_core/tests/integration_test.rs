@@ -1,4 +1,4 @@
-//! Integration test demonstrating how cpc-financial-core works with other CPC components
+//! Integration test demonstrating how cpc_financial_core works with other CPC components
 
 use cpc_financial_core::{
     MonetaryAmount, CurrencyCode, RoundingStrategy,

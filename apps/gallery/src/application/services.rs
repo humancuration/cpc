@@ -11,6 +11,7 @@ use tokio::fs;
 pub trait MediaProcessor: Send + Sync {
     async fn process(&self, media: Media) -> Result<Media, TranscodingError>;
 }
+// were no longer using ffmpeg
 
 pub struct TranscodingService {
     ffmpeg: Arc<dyn FfmpegExecutor>,

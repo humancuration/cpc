@@ -23,7 +23,7 @@ The framework processes outputs from various analytical systems:
 - Confidence scores and uncertainty measures
 
 #### Statistical Analysis
-- Descriptive statistics from `cpc-statistics-core`
+- Descriptive statistics from `cpc_statistics_core`
 - Confidence intervals and significance tests
 - Correlation and regression coefficients
 

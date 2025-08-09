@@ -1,5 +1,5 @@
 [package]
-name = "cpc-statistics-core"
+name = "cpc_statistics_core"
 version = "0.1.0"
 edition = "2021"
 

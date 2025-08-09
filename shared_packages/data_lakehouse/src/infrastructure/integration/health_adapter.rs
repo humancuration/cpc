@@ -1,7 +1,7 @@
 //! Health module integration adapter
 
 use crate::domain::models::{DataAsset, DataAssetType, StorageFormat, DataLineage};
-use cpc_core_health::domain::vital_signs::VitalSign;
+use cpc_health::domain::vital_signs::VitalSign;
 use uuid::Uuid;
 use chrono::Utc;
 

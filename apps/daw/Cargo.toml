@@ -17,7 +17,7 @@ chrono = { workspace = true, features = ["serde"] }
 async-graphql = { workspace = true }
 
 # P2P networking
-p2panda-rs = { git = "https://github.com/p2panda/p2panda", features = ["test-utils"] }
+p2panda = { workspace = true }
 
 # Database
 sqlx = { workspace = true, features = ["runtime-tokio-rustls", "sqlite", "uuid", "chrono"] }

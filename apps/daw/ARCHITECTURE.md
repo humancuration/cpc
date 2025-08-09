@@ -26,7 +26,6 @@ apps/daw/
     ├── infrastructure/       # External implementations
     │   ├── audio/
     │   │   ├── rodio_engine.rs
-    │   │   └── ffmpeg_adapter.rs
     │   ├── collaboration/
     │   │   └── p2panda_adapter.rs
     │   └── persistence/
@@ -80,7 +79,7 @@ pub struct EffectInstance {
   - Real-time audio processing
   - Mixing multiple tracks
   - Applying effects chain
-- **FFmpegAdapter** (infrastructure):
+
   - Encoding/decoding AV1/Opus/WebM
   - File format conversion
   - Audio analysis
@@ -141,7 +140,6 @@ type Subscription {
 ## Integration Strategy
 1. **Audio Stack**:
    - Use rodio for real-time processing
-   - ffmpeg.wasm for format conversion
    - Plotters for visualization
    
 2. **Collaboration**:

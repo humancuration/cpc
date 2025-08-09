@@ -24,7 +24,6 @@ apps/music-player/
     ├── infrastructure/         # External implementations
     │   ├── database.rs         # SQLx repository implementations
     │   ├── p2p.rs              # p2panda integration for streaming
-    │   ├── audio_processor.rs  # ffmpeg.wasm integration
     │   └── media_store.rs      # Content-addressed storage
     └── web/                    # Adapter layer
         ├── routes.rs           # REST API routes
@@ -185,7 +184,6 @@ impl P2PStreamManager {
 ```
 
 ### Audio Processing Pipeline
-We use ffmpeg.wasm with royalty-free codecs:
 
 1. **Client-side Processing**:
    - WebAssembly module for audio processing

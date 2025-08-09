@@ -69,7 +69,7 @@ pub fn video_player(props: &VideoPlayerProps) -> Html {
     "#
     ).unwrap();
 
-    // In a real implementation, we would use ffmpeg.wasm to play AV1/Opus media
+// were no longer using ffmpeg
     // For now, we'll show a placeholder with a play button
     
     let on_play_click = Callback::from(|_| {

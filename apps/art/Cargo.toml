@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 # Core dependencies
 bevy = { workspace = true }
-ffmpeg-next = "6.0" # For AV1/WebP support
 sled = { workspace = true }
 uuid = { workspace = true, features = ["v4", "serde"] }
 serde = { workspace = true, features = ["derive"] }

@@ -24,7 +24,7 @@ statrs = { workspace = true }
 common_utils = { path = "../common_utils" }
 consent_manager = { path = "../consent_manager" }
 optimization_core = { path = "../optimization_core" }
-cpc-statistics-core = { path = "../cpc-statistics-core" }
+cpc_statistics_core = { path = "../cpc_statistics_core" }
 bi_analytics = { path = "../bi_analytics" }
 
 # Standard dependencies

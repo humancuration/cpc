@@ -6,7 +6,7 @@ This document summarizes the implementation of Phase 2 of the mathematical archi
 
 ## Created Components
 
-### 1. CPC Statistics Core Package (`shared_packages/cpc-statistics-core/`)
+### 1. CPC Statistics Core Package (`shared_packages/cpc_statistics_core/`)
 
 A new shared package providing standardized statistical analysis capabilities:
 
@@ -69,11 +69,11 @@ Integrated statistical analysis and visualization into the finance application:
 ## Integration Points
 
 ### Workspace Integration
-- Added `cpc-statistics-core` to root `Cargo.toml` workspace members
+- Added `cpc_statistics_core` to root `Cargo.toml` workspace members
 - Updated finance app `Cargo.toml` with statistics dependency and feature flag
 
 ### Cross-Package Dependencies
-- Finance app depends on `cpc-statistics-core` for statistical analysis
+- Finance app depends on `cpc_statistics_core` for statistical analysis
 - Finance app depends on `cpc-bi-visualization` for statistical visualization
 - BI visualization toolkit extended with statistical components
 
@@ -124,7 +124,7 @@ All statistical components include:
 ## Documentation
 
 Comprehensive documentation created for all components:
-- `shared_packages/cpc-statistics-core/README.md`
+- `shared_packages/cpc_statistics_core/README.md`
 - `shared_packages/bi_visualization/STATISTICAL_VISUALIZATION.md`
 - `apps/finance/STATISTICAL_INTEGRATION.md`
 

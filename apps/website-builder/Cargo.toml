@@ -1,5 +1,5 @@
 [package]
-name = "cpc-website-builder"
+name = "cpc_website_builder"
 version = "0.1.0"
 build = "build.rs"
 edition = "2021"
@@ -31,7 +31,7 @@ tonic = { workspace = true }
 prost = { workspace = true }
 
 # CPC dependencies
-cpc-cooperative-fundraising = { path = "../../shared_packages/cooperative_fundraising" }
+cooperative_fundraising = { path = "../../shared_packages/cooperative_fundraising" }
 
 [build-dependencies]
 tonic-build = "0.12"

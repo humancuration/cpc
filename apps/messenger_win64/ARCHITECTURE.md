@@ -213,7 +213,6 @@ Following patterns from music player social interactions:
    - IV stored with each media item
 
 3. **Transcoding**:
-   - Using ffmpeg.wasm with royalty-free codecs
    - Video: AV1, Container: WebM
    - Audio: Opus
 
@@ -722,7 +721,6 @@ impl ConsentManager for CoreConsentManager {
 **Phase 2.2: Media System (3 weeks)**
 - [ ] Media encryption pipeline
 - [ ] Thumbnail generation service
-- [ ] AV1/Opus transcoding with ffmpeg.wasm
 
 **Phase 2.3: Social Features (2 weeks)**
 - [ ] Message reactions system

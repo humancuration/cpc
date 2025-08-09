@@ -1,5 +1,5 @@
 [package]
-name = "cpc-core-data-lakehouse"
+name = "data_lakehouse"
 version = "0.1.0"
 edition = "2021"
 
@@ -16,16 +16,14 @@ thiserror = { workspace = true }
 async-trait = { workspace = true }
 async-graphql = { workspace = true }
 
-# WebM/AV1 handling
-ffmpeg-wasm = "0.13.1"
 
 # For data processing
-polars = "0.40.0"
+polars = { workspace = true }
 # For the health module integration
-health = { path = "../../apps/health" }
+cpc_health = { path = "../../apps/health" }
 
 # For financial data processing
-cpc-financial-core = { path = "../cpc-financial-core" }
+cpc_financial_core = { path = "../cpc_financial_core" }
 
 # WebAssembly support
 [target.'cfg(target_arch = "wasm32")'.dependencies]

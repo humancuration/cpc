@@ -144,10 +144,10 @@ The statistical integration uses the following dependencies:
 ```toml
 # In apps/finance/Cargo.toml
 [features]
-statistics = ["cpc-statistics-core"]
+statistics = ["cpc_statistics_core"]
 
 [dependencies]
-cpc-statistics-core = { path = "../../shared_packages/cpc-statistics-core", optional = true }
+cpc_statistics_core = { path = "../../shared_packages/cpc_statistics_core", optional = true }
 ```
 
 ### Feature Flags

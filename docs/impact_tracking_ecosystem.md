@@ -64,7 +64,7 @@ The Financial Impact Tracker monitors and analyzes the financial health and impa
 - Tracking of financial transactions and their community impact
 - Analysis of financial data to identify trends and insights
 - Generation of detailed reports with visualizations
-- Integration with other CPC systems (cpay_core, cpc-financial-core)
+- Integration with other CPC systems (cpay_core, cpc_financial_core)
 - Linking of financial activities to causes, volunteer work, and learning outcomes
 
 Key features:

@@ -33,11 +33,12 @@ plotters = { workspace = true, optional = true }
 yew = { workspace = true, optional = true }
 
 # Statistical dependencies
-cpc-statistics-core = { path = "../../shared_packages/cpc-statistics-core", optional = true }
+cpc_statistics_core = { path = "../../shared_packages/cpc_statistics_core", optional = true }
+bi_visualization = { path = "../../shared_packages/bi_visualization", optional = true }
 
 [features]
 default = []
 p2p = ["p2panda"]
-visualization = ["bevy", "plotters"]
+visualization = ["bevy", "plotters", "bi_visualization"]
 web = ["yew"]
-statistics = ["cpc-statistics-core"]
+statistics = ["cpc_statistics_core"]

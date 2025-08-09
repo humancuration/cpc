@@ -41,7 +41,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-cpc-statistics-core = { path = "../../shared_packages/cpc-statistics-core" }
+cpc_statistics_core = { path = "../../shared_packages/cpc_statistics_core" }
 ```
 
 Enable the statistics feature in your application:
@@ -49,7 +49,7 @@ Enable the statistics feature in your application:
 ```toml
 [features]
 default = ["statistics"]
-statistics = ["cpc-statistics-core"]
+statistics = ["cpc_statistics_core"]
 ```
 
 ### Example Usage

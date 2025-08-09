@@ -11,7 +11,7 @@ use cpc_statistics_core::{
 };
 
 #[cfg(all(feature = "statistics", feature = "visualization"))]
-use cpc_bi_visualization::{
+use bi_visualization::{
     StatisticalChartConfig,
     ConfidenceIntervalConfig,
     SignificanceIndicator,

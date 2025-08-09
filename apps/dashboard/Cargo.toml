@@ -37,7 +37,7 @@ sha2 = "0.10"
 # CPC modules
 visualization_context = { path = "../../shared_packages/visualization_context" }
 shtairir = { path = "../../shared_packages/shtairir" }
-shtairir_editor = { path = "../../shared_packages/shtairir_editor" }
+shtairir_editor_core = { path = "../../shared_packages/shtairir_editor" }
 
 # Web framework
 yew = { workspace = true, features = ["csr"] }

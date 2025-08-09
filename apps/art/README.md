@@ -52,7 +52,6 @@ apps/art/
 ## Dependencies
 
 - [Bevy 0.16](https://bevyengine.org/) - Game engine used for rendering
-- [ffmpeg-next 6.0](https://crates.io/crates/ffmpeg-next) - For AV1/WebP support
 - [Sled 0.34](https://crates.io/crates/sled) - Embedded database for local storage
 - [uuid](https://crates.io/crates/uuid) - UUID generation
 - [serde](https://crates.io/crates/serde) - Serialization framework

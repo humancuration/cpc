@@ -6,7 +6,7 @@ This document summarizes the implementation of the CPC Financial Core package an
 
 ## Components Implemented
 
-### 1. cpc-financial-core Package
+### 1. cpc_financial_core Package
 
 #### Core Modules:
 - **monetary.rs**: `MonetaryAmount` struct with precise decimal arithmetic

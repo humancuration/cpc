@@ -21,4 +21,4 @@ env_logger = { workspace = true }
 
 # Local dependencies
 cpay_core = { path = "../cpay_core" }
-cpc-financial-core = { path = "../cpc-financial-core" }
+cpc_financial_core = { path = "../cpc_financial_core" }

@@ -88,13 +88,7 @@ The system automatically generates multiple quality levels:
 - **Update Frequency**: Every segment
 - **Retention**: Last 10 minutes of segments
 
-## Integration with ffmpeg.wasm
 
-The `ffmpeg.wasm` crate is used for media processing in the browser:
-
-- WebAssembly port of FFmpeg
-- Runs entirely in the browser
-- No server-side processing required for basic operations
 
 ## Performance Considerations
 

@@ -1,7 +1,7 @@
 //! Financial Impact Tracker
 //!
 //! Tracks and measures the financial impact of community activities and initiatives.
-//! Integrates with cpay_core and cpc-financial-core to provide comprehensive
+//! Integrates with cpay_core and cpc_financial_core to provide comprehensive
 //! financial analytics and reporting.
 
 pub mod tracker;

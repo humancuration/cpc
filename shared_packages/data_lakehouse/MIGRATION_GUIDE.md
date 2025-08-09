@@ -21,7 +21,7 @@ Add the data lakehouse module to your project dependencies:
 
 ```toml
 [dependencies]
-cpc-core-data-lakehouse = { path = "../shared_packages/data_lakehouse" }
+data_lakehouse = { path = "../shared_packages/data_lakehouse" }
 ```
 
 ### 2. Database Schema Migration
@@ -55,14 +55,14 @@ Update your application configuration to include data lakehouse settings:
 
 Integrate the data lakehouse services into your application:
 
-```rust
-use cpc_core_data_lakehouse::{
+use data_lakehouse::{
     application::ingestion_service::IngestionService,
     infrastructure::{
         cdc::postgres_cdc::PostgresCDCManager,
         storage::webm_columnar::WebMColumnarStorage,
         monitoring::audit_service::{DataAuditService, PostgresAuditLogRepository}
     }
+};
 };
 
 // Initialize services
@@ -84,7 +84,7 @@ let ingestion_service = IngestionService::new(
 Add the GraphQL schema to your API:
 
 ```rust
-use cpc_core_data_lakehouse::infrastructure::api::graphql::{create_schema, LakehouseSchema};
+use data_lakehouse::infrastructure::api::graphql::{create_schema, LakehouseSchema};
 
 let schema = create_schema();
 // Mount the schema on your GraphQL endpoint
@@ -95,7 +95,7 @@ let schema = create_schema();
 Integrate with existing modules using the provided adapters:
 
 ```rust
-use cpc_core_data_lakehouse::infrastructure::integration::{
+use data_lakehouse::infrastructure::integration::{
     health_adapter::HealthAdapter,
     finance_adapter::FinanceAdapter,
     crm_adapter::CRMAdapter

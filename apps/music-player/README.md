@@ -56,7 +56,6 @@ This module follows a hexagonal architecture pattern with clear separation of co
 ├── infrastructure/         # External implementations
 │   ├── database.rs         # SQLx repository implementations
 │   ├── p2p.rs              # p2panda integration for streaming
-│   ├── audio_processor.rs  # ffmpeg.wasm integration
 │   └── media_store.rs      # Content-addressed storage
 └── web/                    # Adapter layer
     ├── routes.rs           # REST API routes
@@ -120,7 +119,6 @@ This module integrates with:
 - **Backend**: Dynamic module system via module registry
 - **Frontend**: GraphQL API for web/mobile clients
 - **P2P Network**: p2panda for content distribution
-- **Media Processing**: ffmpeg.wasm for audio processing
 
 ## Development
 

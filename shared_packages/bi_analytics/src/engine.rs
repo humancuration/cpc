@@ -133,7 +133,7 @@ impl AnalyticsEngine {
         debug!("Applying statistical analysis: {}", analysis_type);
         
         // In a real implementation, this would apply various statistical techniques
-        // using the cpc-statistics-core crate
+        // using the cpc_statistics_core crate
         Ok(df.clone())
     }
     

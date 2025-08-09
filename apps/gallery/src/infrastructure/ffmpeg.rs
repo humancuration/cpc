@@ -6,6 +6,7 @@ pub enum TargetFormat {
     Av1,   // AV1 video + Opus audio
     Opus,  // Audio only
 }
+// were no longer using ffmpeg
 
 #[async_trait]
 pub trait FfmpegExecutor: Send + Sync {

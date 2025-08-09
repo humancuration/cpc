@@ -98,7 +98,7 @@ impl StatisticalVisualizationAdapter {
 ## Usage Example
 
 ```rust
-use cpc_bi_visualization::{
+use bi_visualization::{
     StatisticalChartConfig,
     ConfidenceIntervalConfig,
     SignificanceIndicator,

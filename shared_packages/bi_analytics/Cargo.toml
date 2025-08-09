@@ -20,7 +20,7 @@ ndarray = { workspace = true }
 ndarray-stats = { workspace = true }
 
 # Statistics core
-cpc-statistics-core = { path = "../cpc-statistics-core" }
+cpc_statistics_core = { path = "../cpc_statistics_core" }
 
 # Data structures
 common_utils = { path = "../common_utils" }
@@ -29,7 +29,7 @@ common_utils = { path = "../common_utils" }
 consent_manager = { path = "../consent_manager" }
 
 # Financial precision
-cpc-financial-core = { path = "../cpc-financial-core" }
+cpc_financial_core = { path = "../cpc_financial_core" }
 
 # Domain dependencies
 cause_management = { path = "../cause_management" }

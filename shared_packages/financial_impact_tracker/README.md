@@ -9,7 +9,7 @@ The Financial Impact Tracker provides tools to:
 - Track financial transactions and their community impact
 - Analyze financial data to identify trends and insights
 - Generate detailed reports with visualizations
-- Integrate with other CPC systems (cpay_core, cpc-financial-core)
+- Integrate with other CPC systems (cpay_core, cpc_financial_core)
 - Link financial activities to causes, volunteer work, and learning outcomes
 
 ## Features

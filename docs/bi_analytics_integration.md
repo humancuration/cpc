@@ -9,7 +9,7 @@ The BI Analytics package is a core component of the Cooperative Software Ecosyst
 ### 1. Core Analytics Engine
 The `AnalyticsEngine` serves as the foundation for all analytical operations:
 - Built on Polars for high-performance data processing
-- Integrates with `cpc-statistics-core` for advanced statistical functions
+- Integrates with `cpc_statistics_core` for advanced statistical functions
 - Supports memory-efficient streaming for large datasets
 - Provides data normalization and descriptive statistics
 
@@ -37,7 +37,7 @@ The pipeline system connects to various domain services:
 ### 5. Financial Integration
 Connects with financial systems:
 - Integration with `cpay_core` for transaction analytics
-- `cpc-financial-core` for precision financial calculations
+- `cpc_financial_core` for precision financial calculations
 - Wallet analytics through `wallet` package integration
 
 ### 6. Feedback and Community Integration
@@ -54,7 +54,7 @@ Prepares data for visualization:
 
 ### 8. Data Lakehouse Integration
 Connects to the data infrastructure:
-- `cpc-core-data-lakehouse` for data storage and retrieval
+- `data_lakehouse` for data storage and retrieval
 - Supports both batch and streaming data processing
 - Schema evolution and data quality management
 

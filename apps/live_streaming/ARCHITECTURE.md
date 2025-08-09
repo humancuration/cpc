@@ -101,7 +101,6 @@ Provides web integration for HTTP APIs and GraphQL:
 ### External Services
 
 - **WebRTC**: Peer-to-peer streaming
-- **ffmpeg.wasm**: Media transcoding (AV1/Opus)
 - **Tauri**: Desktop application framework
 
 ## Security Considerations

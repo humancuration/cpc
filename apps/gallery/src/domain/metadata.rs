@@ -1,5 +1,6 @@
 // Gallery domain - Metadata entity
 // This file defines the Metadata entity and related business logic
+// were no longer using ffmpeg
 
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};

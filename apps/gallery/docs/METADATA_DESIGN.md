@@ -62,8 +62,8 @@ pub struct ImageMetadataExtractor;
 #[async_trait]
 impl MetadataExtractor for ImageMetadataExtractor {
     async fn extract_metadata(file_path: &str) -> Result<Metadata, MetadataError> {
-        // Use exif crate or ffmpeg to extract image metadata
-        // Placeholder implementation
+// were no longer using ffmpeg
+       // Placeholder implementation
         Ok(Metadata {
             width: Some(1920),
             height: Some(1080),

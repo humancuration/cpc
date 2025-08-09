@@ -113,7 +113,7 @@ To use the Cause Management Service:
 - `serde`: Serialization
 - `tracing`: Logging
 - `cpc_statistics_core`: Statistical analysis (optional, with `statistics` feature)
-- `cpc_bi_visualization`: BI visualization (optional, with `visualization` feature)
+- `bi_visualization`: BI visualization (optional, with `visualization` feature)
 
 ## Statistical Analysis Features
 
@@ -140,4 +140,4 @@ cause_management = { path = "../cause_management", features = ["statistics", "vi
 
 See `docs/statistical_analysis_causes.md` for detailed documentation on statistical features.
 - `cpc_statistics_core`: Statistical analysis (optional, with `statistics` feature)
-- `cpc_bi_visualization`: BI visualization (optional, with `visualization` feature)
+- `bi_visualization`: BI visualization (optional, with `visualization` feature)

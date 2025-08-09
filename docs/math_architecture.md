@@ -75,7 +75,7 @@ impl MonetaryAmount {
 ### Integration Strategy
 
 #### cpay_core & finance Package Integration
-1. Create shared `cpc-financial-core` package in shared_packages
+1. Create shared `cpc_financial_core` package in shared_packages
 2. Implement standardized rounding strategies:
    - **Banker's Rounding**: Default for all financial calculations
    - **Ceiling Rounding**: For tax calculations

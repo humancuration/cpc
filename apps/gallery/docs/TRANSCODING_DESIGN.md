@@ -48,6 +48,8 @@ classDiagram
 ## Components
 ### Transcoding Service (Application Layer)
 ```rust
+// were no longer using ffmpeg
+
 pub struct TranscodingService {
     ffmpeg: Arc<dyn FfmpegExecutor>,
     storage: Arc<dyn FileStorage>,

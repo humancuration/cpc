@@ -173,7 +173,6 @@ type Query {
 
 ## Dependencies
 - Bevy 0.16 (rendering)
-- ffmpeg.wasm 0.13.1 (image I/O)
 - Sled (local storage)
 - Yew 0.21.0 (web UI)
 - Tauri 2.0 (desktop UI)

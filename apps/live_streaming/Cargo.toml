@@ -41,13 +41,12 @@ tauri = { workspace = true, features = ["wry"] }
 tauri-build = "2.0"
 
 # Media processing
-ffmpeg-wasm = "0.1"
 plotters = { workspace = true }
 
 # CPC dependencies
 cpc-messenger = { path = "../messenger_win64" }
 social_integration = { path = "../../shared_packages/social_integration" }
-cpc-notification-core = { path = "../../shared_packages/notification_core" }
+notification_core = { path = "../../shared_packages/notification_core" }
 
 # P2P networking
 p2panda = { workspace = true }

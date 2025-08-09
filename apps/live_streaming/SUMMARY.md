@@ -126,7 +126,6 @@ The Live Streaming module is a comprehensive platform for live video streaming w
 - **Backend**: Rust, Tokio, SQLx, Axum
 - **Frontend**: Yew, Stylist, WebAssembly
 - **Desktop**: Tauri, WebView
-- **Streaming**: WebRTC, ffmpeg.wasm
 - **Database**: PostgreSQL
 - **Messaging**: WebSocket, CPC Messenger
 - **Build**: Cargo, Webpack

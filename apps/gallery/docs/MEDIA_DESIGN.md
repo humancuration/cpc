@@ -78,9 +78,9 @@ pub fn is_viewable(&self) -> bool {
     }
 }
 
-// Helper to check codec using ffmpeg metadata
+// we are refactoring away from ffmpeg
+
 fn has_codec(&self, codec: &str) -> bool {
-    // Implementation will use ffmpeg-next to check codec
     // Placeholder for actual implementation
     true
 }
