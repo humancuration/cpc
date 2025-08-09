@@ -6,7 +6,7 @@ mod tests {
     use crate::models::{VolunteerActivity, VolunteerVerification, DabloonConversion};
     use crate::services::{VolunteerService, VolunteerServiceImpl};
     use crate::repositories::VolunteerRepository;
-    use wallet::domain::primitives::{Money, Currency};
+    use cpc_wallet::domain::primitives::{Money, Currency};
     use notification_core::domain::types::Notification;
     use notification_core::domain::preferences::UserPreferences;
     use social_integration::domain::social_event::SocialEvent;
@@ -91,46 +91,46 @@ mod tests {
     struct MockWalletService;
 
     #[async_trait::async_trait]
-    impl wallet::application::WalletService for MockWalletService {
-        async fn get_or_create_wallet(&self, _user_id: Uuid) -> Result<wallet::Wallet, wallet::domain::primitives::FinancialError> {
-            Ok(wallet::Wallet::new(Uuid::new_v4()))
+    impl cpc_wallet::application::WalletService for MockWalletService {
+        async fn get_or_create_wallet(&self, _user_id: Uuid) -> Result<cpc_wallet::Wallet, cpc_wallet::domain::primitives::FinancialError> {
+            Ok(cpc_wallet::Wallet::new(Uuid::new_v4()))
         }
 
-        async fn add_dabloons(&self, _user_id: Uuid, amount: Money, _description: Option<String>) -> Result<wallet::Wallet, wallet::domain::primitives::FinancialError> {
-            let mut wallet = wallet::Wallet::new(Uuid::new_v4());
+        async fn add_dabloons(&self, _user_id: Uuid, amount: Money, _description: Option<String>) -> Result<cpc_wallet::Wallet, cpc_wallet::domain::primitives::FinancialError> {
+            let mut wallet = cpc_wallet::Wallet::new(Uuid::new_v4());
             wallet.add_dabloons(amount)?;
             Ok(wallet)
         }
 
-        async fn subtract_dabloons(&self, _user_id: Uuid, amount: Money, _description: Option<String>) -> Result<wallet::Wallet, wallet::domain::primitives::FinancialError> {
-            let mut wallet = wallet::Wallet::new(Uuid::new_v4());
+        async fn subtract_dabloons(&self, _user_id: Uuid, amount: Money, _description: Option<String>) -> Result<cpc_wallet::Wallet, cpc_wallet::domain::primitives::FinancialError> {
+            let mut wallet = cpc_wallet::Wallet::new(Uuid::new_v4());
             wallet.subtract_dabloons(amount)?;
             Ok(wallet)
         }
 
-        async fn transfer_dabloons(&self, _from_user_id: Uuid, _to_user_id: Uuid, amount: Money, _description: Option<String>) -> Result<(wallet::Wallet, wallet::Wallet), wallet::domain::primitives::FinancialError> {
-            let mut from_wallet = wallet::Wallet::new(Uuid::new_v4());
-            let mut to_wallet = wallet::Wallet::new(Uuid::new_v4());
+        async fn transfer_dabloons(&self, _from_user_id: Uuid, _to_user_id: Uuid, amount: Money, _description: Option<String>) -> Result<(cpc_wallet::Wallet, cpc_wallet::Wallet), cpc_wallet::domain::primitives::FinancialError> {
+            let mut from_wallet = cpc_wallet::Wallet::new(Uuid::new_v4());
+            let mut to_wallet = cpc_wallet::Wallet::new(Uuid::new_v4());
             from_wallet.subtract_dabloons(amount.clone())?;
             to_wallet.add_dabloons(amount)?;
             Ok((from_wallet, to_wallet))
         }
 
-        async fn send_tip(&self, _from_user_id: Uuid, _to_user_id: Uuid, _amount: Money, _note: Option<String>) -> Result<(), wallet::domain::primitives::FinancialError> {
+        async fn send_tip(&self, _from_user_id: Uuid, _to_user_id: Uuid, _amount: Money, _note: Option<String>) -> Result<(), cpc_wallet::domain::primitives::FinancialError> {
             Ok(())
         }
 
-        async fn get_transaction_history(&self, _user_id: Uuid) -> Result<Vec<wallet::WalletTransaction>, wallet::domain::primitives::FinancialError> {
+        async fn get_transaction_history(&self, _user_id: Uuid) -> Result<Vec<cpc_wallet::WalletTransaction>, cpc_wallet::domain::primitives::FinancialError> {
             Ok(vec![])
         }
 
-        async fn distribute_universal_income(&self, _user_id: Uuid, amount: Money, _distribution_date: chrono::NaiveDate) -> Result<wallet::Wallet, wallet::domain::primitives::FinancialError> {
-            let mut wallet = wallet::Wallet::new(Uuid::new_v4());
+        async fn distribute_universal_income(&self, _user_id: Uuid, amount: Money, _distribution_date: chrono::NaiveDate) -> Result<cpc_wallet::Wallet, cpc_wallet::domain::primitives::FinancialError> {
+            let mut wallet = cpc_wallet::Wallet::new(Uuid::new_v4());
             wallet.add_dabloons(amount)?;
             Ok(wallet)
         }
 
-        fn subscribe_tip_events(&self) -> tokio::sync::broadcast::Receiver<wallet::domain::wallet::TipSentEvent> {
+        fn subscribe_tip_events(&self) -> tokio::sync::broadcast::Receiver<cpc_wallet::domain::wallet::TipSentEvent> {
             let (sender, _) = tokio::sync::broadcast::channel(1);
             sender.subscribe()
         }

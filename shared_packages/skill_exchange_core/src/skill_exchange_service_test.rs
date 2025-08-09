@@ -7,8 +7,8 @@ mod tests {
     use crate::models::{SkillListing, SkillClaim, SkillExchangeCompletion, ClaimStatus};
     use uuid::Uuid;
     use rust_decimal::Decimal;
-    use wallet::domain::primitives::{Money, Currency};
-    use wallet::domain::wallet::FinancialError;
+    use cpc_wallet::domain::primitives::{Money, Currency};
+    use cpc_wallet::domain::wallet::FinancialError;
     use common_utils::error::CommonError;
     use std::sync::Arc;
     
@@ -116,42 +116,42 @@ mod tests {
     }
     
     #[async_trait::async_trait]
-    impl wallet::application::WalletService for MockWalletService {
-        async fn get_or_create_wallet(&self, _user_id: Uuid) -> Result<wallet::domain::wallet::Wallet, FinancialError> {
+    impl cpc_wallet::application::WalletService for MockWalletService {
+        async fn get_or_create_wallet(&self, _user_id: Uuid) -> Result<cpc_wallet::domain::wallet::Wallet, FinancialError> {
             if self.should_fail {
                 Err(FinancialError::ServiceError("Wallet service error".to_string()))
             } else {
-                Ok(wallet::domain::wallet::Wallet::new(_user_id))
+                Ok(cpc_wallet::domain::wallet::Wallet::new(_user_id))
             }
         }
         
-        async fn add_dabloons(&self, _user_id: Uuid, _amount: Money, _description: Option<String>) -> Result<wallet::domain::wallet::Wallet, FinancialError> {
+        async fn add_dabloons(&self, _user_id: Uuid, _amount: Money, _description: Option<String>) -> Result<cpc_wallet::domain::wallet::Wallet, FinancialError> {
             if self.should_fail {
                 Err(FinancialError::ServiceError("Wallet service error".to_string()))
             } else if self.insufficient_funds {
                 Err(FinancialError::InsufficientFunds(Currency::Dabloons))
             } else {
-                Ok(wallet::domain::wallet::Wallet::new(_user_id))
+                Ok(cpc_wallet::domain::wallet::Wallet::new(_user_id))
             }
         }
         
-        async fn subtract_dabloons(&self, _user_id: Uuid, _amount: Money, _description: Option<String>) -> Result<wallet::domain::wallet::Wallet, FinancialError> {
+        async fn subtract_dabloons(&self, _user_id: Uuid, _amount: Money, _description: Option<String>) -> Result<cpc_wallet::domain::wallet::Wallet, FinancialError> {
             if self.should_fail {
                 Err(FinancialError::ServiceError("Wallet service error".to_string()))
             } else if self.insufficient_funds {
                 Err(FinancialError::InsufficientFunds(Currency::Dabloons))
             } else {
-                Ok(wallet::domain::wallet::Wallet::new(_user_id))
+                Ok(cpc_wallet::domain::wallet::Wallet::new(_user_id))
             }
         }
         
-        async fn transfer_dabloons(&self, _from_user_id: Uuid, _to_user_id: Uuid, _amount: Money, _description: Option<String>) -> Result<(wallet::domain::wallet::Wallet, wallet::domain::wallet::Wallet), FinancialError> {
+        async fn transfer_dabloons(&self, _from_user_id: Uuid, _to_user_id: Uuid, _amount: Money, _description: Option<String>) -> Result<(cpc_wallet::domain::wallet::Wallet, cpc_wallet::domain::wallet::Wallet), FinancialError> {
             if self.should_fail {
                 Err(FinancialError::ServiceError("Wallet service error".to_string()))
             } else if self.insufficient_funds {
                 Err(FinancialError::InsufficientFunds(Currency::Dabloons))
             } else {
-                Ok((wallet::domain::wallet::Wallet::new(_from_user_id), wallet::domain::wallet::Wallet::new(_to_user_id)))
+                Ok((cpc_wallet::domain::wallet::Wallet::new(_from_user_id), cpc_wallet::domain::wallet::Wallet::new(_to_user_id)))
             }
         }
         
@@ -165,7 +165,7 @@ mod tests {
             }
         }
         
-        async fn get_transaction_history(&self, _user_id: Uuid) -> Result<Vec<wallet::domain::wallet::WalletTransaction>, FinancialError> {
+        async fn get_transaction_history(&self, _user_id: Uuid) -> Result<Vec<cpc_wallet::domain::wallet::WalletTransaction>, FinancialError> {
             if self.should_fail {
                 Err(FinancialError::ServiceError("Wallet service error".to_string()))
             } else {
@@ -173,21 +173,21 @@ mod tests {
             }
         }
         
-        async fn distribute_universal_income(&self, _user_id: Uuid, _amount: Money, _distribution_date: chrono::NaiveDate) -> Result<wallet::domain::wallet::Wallet, FinancialError> {
+        async fn distribute_universal_income(&self, _user_id: Uuid, _amount: Money, _distribution_date: chrono::NaiveDate) -> Result<cpc_wallet::domain::wallet::Wallet, FinancialError> {
             if self.should_fail {
                 Err(FinancialError::ServiceError("Wallet service error".to_string()))
             } else {
-                Ok(wallet::domain::wallet::Wallet::new(_user_id))
+                Ok(cpc_wallet::domain::wallet::Wallet::new(_user_id))
             }
         }
         
-        async fn credit_volunteer_dabloons(&self, _user_id: Uuid, _amount: Money, _hours_converted: Decimal) -> Result<wallet::domain::wallet::Wallet, FinancialError> {
+        async fn credit_volunteer_dabloons(&self, _user_id: Uuid, _amount: Money, _hours_converted: Decimal) -> Result<cpc_wallet::domain::wallet::Wallet, FinancialError> {
             if self.should_fail {
                 Err(FinancialError::ServiceError("Wallet service error".to_string()))
             } else if self.insufficient_funds {
                 Err(FinancialError::InsufficientFunds(Currency::Dabloons))
             } else {
-                Ok(wallet::domain::wallet::Wallet::new(_user_id))
+                Ok(cpc_wallet::domain::wallet::Wallet::new(_user_id))
             }
         }
     }

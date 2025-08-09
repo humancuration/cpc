@@ -58,7 +58,7 @@ Key methods:
 
 ### Social Integration
 
-The module integrates with `cpc-social-integration` for:
+The module integrates with `social_integration` for:
 
 - Following relationships
 - Social graph management

@@ -17,6 +17,7 @@ tokio = { workspace = true, features = ["full"] }
 tracing = { workspace = true }
 
 # CPC core dependencies
+common_utils = { version = "0.2.0", path = "../common_utils" }
 
 # Database dependencies
 sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
@@ -52,6 +53,3 @@ test-yew = ["wasm-bindgen-test"]
 
 [lib]
 crate-type = ["rlib"]
-
-# Common utilities
-common_utils = { version = "0.2.0", path = "../common_utils" }

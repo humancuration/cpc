@@ -45,7 +45,7 @@ The module follows a hexagonal architecture with clear separation of concerns. K
 The module integrates with several CPC shared packages:
 
 - `cpc-messenger` for chat functionality
-- `cpc-social-integration` for following and social features
+- `social_integration` for following and social features
 - `cpc-notification-core` for user notifications
 - `cpc-media` for shared media processing utilities
 

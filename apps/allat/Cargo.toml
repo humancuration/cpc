@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 async-trait = { workspace = true }
 consent_manager = { path = "../../shared_packages/consent_manager" }
-cpc_wallet = { path = "../../shared_packages/wallet" }
+wallet = { path = "../../shared_packages/wallet", package = "cpc_wallet" }
 serde = { workspace = true }
 tokio = { workspace = true }
 uuid = { workspace = true }

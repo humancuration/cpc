@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 uuid = { workspace = true, features = ["v4", "serde"] }
 chrono = { workspace = true, features = ["serde"] }
-task_manager = { path = "../productivity/task_manager" }
+task_manager = { path = "../task_manager" }
 tokio = { workspace = true, features = ["full"] }
 thiserror = { workspace = true }
 

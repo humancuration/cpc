@@ -76,8 +76,8 @@ tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 pretty_assertions = "1.4"
 criterion = { version = "0.5", features = ["html_reports"] }
 # For stress and fuzz testing
-arbitrary = { version = "1.3", features = ["derive"], optional = true }
-libfuzzer-sys = { version = "0.4", optional = true }
+arbitrary = { version = "1.3", features = ["derive"] }
+libfuzzer-sys = { version = "0.4" }
 
 [[bench]]
 name = "timeline_bench"
@@ -90,13 +90,3 @@ path = "tests/stress_test.rs"
 [[test]]
 name = "fuzz_test"
 path = "tests/fuzz_test.rs"
-
-[profile.dev]
-opt-level = 1
-debug = true
-
-[profile.release]
-opt-level = 3
-lto = "fat"
-codegen-units = 1
-panic = "abort"

@@ -7,7 +7,7 @@ license = "CPC"
 
 [dependencies]
 cpc-messenger = { path = "../messenger" }
-cpc-social-integration = { path = "../../shared_packages/social_integration" }
+social_integration = { path = "../../shared_packages/social_integration" }
 cpc-notification-core = { path = "../../shared_packages/notification_core" }
 cpc-media = { path = "../../shared_packages/media" }
 

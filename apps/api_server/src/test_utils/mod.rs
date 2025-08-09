@@ -178,18 +178,18 @@ pub trait EventBus: Send + Sync {
 pub struct CurrencyValidator;
 
 impl CurrencyValidator {
-    pub fn validate_currency(currency: &wallet::domain::primitives::Currency) -> bool {
+    pub fn validate_currency(currency: &cpc_wallet::domain::primitives::Currency) -> bool {
         match currency {
-            wallet::domain::primitives::Currency::Dabloons => true,
-            wallet::domain::primitives::Currency::USD => true,
-            wallet::domain::primitives::Currency::EUR => true,
+            cpc_wallet::domain::primitives::Currency::Dabloons => true,
+            cpc_wallet::domain::primitives::Currency::USD => true,
+            cpc_wallet::domain::primitives::Currency::EUR => true,
             _ => false,
         }
     }
     
-    pub fn is_supported_currency(currency: &wallet::domain::primitives::Currency) -> bool {
+    pub fn is_supported_currency(currency: &cpc_wallet::domain::primitives::Currency) -> bool {
         // Only Dabloons are supported for conversions in the CPC ecosystem
-        matches!(currency, wallet::domain::primitives::Currency::Dabloons)
+        matches!(currency, cpc_wallet::domain::primitives::Currency::Dabloons)
     }
 }
 
@@ -244,11 +244,11 @@ mod tests {
     #[tokio::test]
     async fn test_currency_validator() {
         // Test supported currency
-        let dabloon_currency = wallet::domain::primitives::Currency::Dabloons;
+        let dabloon_currency = cpc_wallet::domain::primitives::Currency::Dabloons;
         assert!(CurrencyValidator::is_supported_currency(&dabloon_currency));
         
         // Test unsupported currency
-        let usd_currency = wallet::domain::primitives::Currency::USD;
+        let usd_currency = cpc_wallet::domain::primitives::Currency::USD;
         // Dabloons is the only supported currency for conversions
         assert!(CurrencyValidator::is_supported_currency(&usd_currency));
     }

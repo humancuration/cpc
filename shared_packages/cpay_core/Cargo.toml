@@ -24,7 +24,7 @@ rust-crypto = { workspace = true }
 # Local dependencies
 notification_core = { path = "../notification_core" }
 social_integration = { path = "../social_integration" }
-wallet = { path = "../wallet" }
+cpc_wallet = { path = "../wallet" }
 cpc-financial-core = { path = "../cpc-financial-core" }
 ml_core = { path = "../ml_core" }
 
@@ -39,4 +39,4 @@ tonic-build = "0.14.0"
 [dev-dependencies]
 notification_core = { path = "../notification_core" }
 social_integration = { path = "../social_integration" }
-wallet = { path = "../wallet" }
+cpc_wallet = { path = "../wallet" }

@@ -14,7 +14,7 @@ async-trait = { workspace = true }
 thiserror = { workspace = true }
 
 # CPC domain dependencies
-packages.domains.finance = { path = "../../domains/finance" }
+# finance_domain = { path = "../finance_domain" }
 
 # For testing
 tempfile = "3.0"

@@ -86,10 +86,10 @@ Key features:
 
 ### Community Connect
 
-The `community_connect` package includes route optimization for community events:
+The `community_route_optimization` package includes route optimization for community events:
 
 ```rust
-use community_connect::optimization::RouteOptimizer;
+use community_route_optimization::optimization::RouteOptimizer;
 
 let mut optimizer = RouteOptimizer::new();
 

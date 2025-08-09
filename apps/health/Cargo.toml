@@ -28,13 +28,13 @@ bevy = { workspace = true, optional = true }
 yew = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }
 
+# Additional dependencies
+aes = "0.8"
+rand = { workspace = true }
+base64 = "0.21"
+
 [features]
 default = []
 p2p = ["p2panda"]
 visualization = ["bevy"]
 web = ["yew", "web-sys"]
-
-[dependencies]
-aes = "0.8"
-rand = { workspace = true }
-base64 = "0.21"

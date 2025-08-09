@@ -142,7 +142,7 @@ In route optimization, cooperative values ensure:
 - **Inclusive Planning**: All community members have reasonable access to events
 
 ```rust
-// In community_connect/src/optimization.rs
+// In community_route_optimization/src/optimization.rs
 impl RouteOptimizer {
     pub fn minimize_transportation_and_environmental_impact(
         &mut self,

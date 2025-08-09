@@ -1,5 +1,5 @@
 [package]
-name = "cpc-social-integration"
+name = "social_integration"
 version = "0.1.0"
 edition = "2021"
 
@@ -20,12 +20,10 @@ sled = { workspace = true }
 bincode = "1.3"
 
 # Finance dependencies
-cpc_wallet = { path = "../core/wallet" }
+cpc_wallet = { path = "../wallet" }
 rust_decimal = { workspace = true }
 
-# App dependencies
-allat = { path = "../../apps/allat" }
-yapper = { path = "../../apps/yapper" }
+# App dependencies removed to avoid circular dependencies
 
 [dev-dependencies]
 rust_decimal_macros = { workspace = true }

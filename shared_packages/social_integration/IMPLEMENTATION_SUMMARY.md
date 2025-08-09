@@ -12,7 +12,7 @@ The social integration crate provides functionality for integrating social featu
 
 ### 1. Social Integration Crate
 
-A new crate `cpc-social-integration` was created with the following structure:
+A new crate `social_integration` was created with the following structure:
 
 #### Domain Layer
 - `post`: Unified post model and related types (AppSource, PostMetadata, EngagementMetrics, etc.)

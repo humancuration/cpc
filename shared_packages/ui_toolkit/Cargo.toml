@@ -2,9 +2,30 @@
 name = "ui_toolkit"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "ui_toolkit_demo"
+path = "src/main.rs"
+required-features = ["demo"]
 
 [dependencies]
 yew = { workspace = true }
+yew-router = { workspace = true }
 wasm-bindgen = { workspace = true }
 web-sys = { workspace = true }
 core_app_logic = { path = "../core_app_logic" }
+stylist = { workspace = true }
+gloo-events = "0.2"
+serde = { workspace = true }
+gloo-utils = "0.2"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+[features]
+default = []
+demo = []

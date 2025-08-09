@@ -35,7 +35,7 @@ sled = { workspace = true }
 sha2 = "0.10"
 
 # CPC modules
-visualization_context = { path = "../../packages/visualization_context" }
+visualization_context = { path = "../../shared_packages/visualization_context" }
 shtairir = { path = "../../shared_packages/shtairir" }
 shtairir_editor = { path = "../../shared_packages/shtairir_editor" }
 
@@ -43,15 +43,15 @@ shtairir_editor = { path = "../../shared_packages/shtairir_editor" }
 yew = { workspace = true, features = ["csr"] }
 yew-router = "0.17"
 
-# JSON handling
-serde_json = { workspace = true }
+# JSON handling already included above
 
 # Logging
 wasm-logger = "0.2"
 
 # Testing
-wasm-bindgen-test = "0.3"
+wasm-bindgen-test = { version = "0.3", optional = true }
 
+[dev-dependencies]
 # Build
 trunk = "0.17"
 

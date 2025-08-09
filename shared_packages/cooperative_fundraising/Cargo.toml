@@ -17,7 +17,7 @@ rust_decimal = { workspace = true }
 rust_decimal_macros = { workspace = true }
 
 # CPC ecosystem dependencies
-wallet = { path = "../wallet" }
+cpc_wallet = { path = "../wallet" }
 cpay_core = { path = "../cpay_core" }
 skill_volunteering = { path = "../skill_volunteering" }
 

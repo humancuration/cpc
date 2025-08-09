@@ -24,8 +24,6 @@ gloo-timers = { workspace = true, features = ["futures"] }
 wasm-bindgen-futures = { workspace = true }
 web-sys = { workspace = true, features = ["Blob", "Url", "HtmlAnchorElement", "HtmlCanvasElement", "CanvasRenderingContext2d", "TextMetrics", "ResizeObserver", "Clipboard"] }
 js-sys = { workspace = true }
-uuid = { workspace = true, features = ["v4", "serde"] }
-chrono = { workspace = true, features = ["serde", "js-sys"] }
 stylist = { workspace = true }
 
 [dev-dependencies]

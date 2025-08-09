@@ -21,7 +21,7 @@ tracing-subscriber = { workspace = true }
 volunteer_core = { path = "../../shared_packages/volunteer_core" }
 skill_exchange_core = { path = "../../shared_packages/skill_exchange_core" }
 social_enhancements = { path = "../../shared_packages/social_enhancements" }
-wallet = { path = "../../shared_packages/wallet" }
+wallet = { path = "../../shared_packages/wallet", package = "cpc_wallet" }
 notification_core = { path = "../../shared_packages/notification_core" }
 social_integration = { path = "../../shared_packages/social_integration" }
 cpay_core = { path = "../../shared_packages/cpay_core" }

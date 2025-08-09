@@ -5,8 +5,8 @@
 
 use crate::models::{PaymentRequest, PaymentResponse, Transaction, TransactionStatus, PaymentError};
 use crate::repositories::TraditionalCurrencyTransactionRepository;
-use wallet::application::WalletService;
-use wallet::domain::primitives::{Money, Currency as WalletCurrency};
+use cpc_wallet::application::WalletService;
+use cpc_wallet::domain::primitives::{Money, Currency as WalletCurrency};
 use uuid::Uuid;
 use rust_decimal::Decimal;
 use common_utils::logging::{info, warn, error};
@@ -353,7 +353,7 @@ mod tests {
     use super::*;
     use crate::models::{PaymentRequest, Currency, TransactionStatus};
     use crate::repositories::mock::MockTraditionalCurrencyTransactionRepository;
-    use wallet::application::WalletServiceImpl;
+    use cpc_wallet::application::WalletServiceImpl;
     use std::sync::Arc;
     use uuid::Uuid;
     use rust_decimal::Decimal;
@@ -362,20 +362,20 @@ mod tests {
     struct MockWalletRepository;
     
     #[async_trait::async_trait]
-    impl wallet::application::WalletRepository for MockWalletRepository {
-        async fn save_wallet(&self, _wallet: &wallet::Wallet) -> Result<(), wallet::domain::primitives::FinancialError> {
+    impl cpc_wallet::application::WalletRepository for MockWalletRepository {
+        async fn save_wallet(&self, _wallet: &cpc_wallet::Wallet) -> Result<(), cpc_wallet::domain::primitives::FinancialError> {
             Ok(())
         }
         
-        async fn find_wallet_by_user_id(&self, _user_id: Uuid) -> Result<Option<wallet::Wallet>, wallet::domain::primitives::FinancialError> {
+        async fn find_wallet_by_user_id(&self, _user_id: Uuid) -> Result<Option<cpc_wallet::Wallet>, cpc_wallet::domain::primitives::FinancialError> {
             Ok(None)
         }
         
-        async fn save_transaction(&self, _transaction: &wallet::WalletTransaction) -> Result<(), wallet::domain::primitives::FinancialError> {
+        async fn save_transaction(&self, _transaction: &cpc_wallet::WalletTransaction) -> Result<(), cpc_wallet::domain::primitives::FinancialError> {
             Ok(())
         }
         
-        async fn find_transactions_by_wallet_id(&self, _wallet_id: Uuid) -> Result<Vec<wallet::WalletTransaction>, wallet::domain::primitives::FinancialError> {
+        async fn find_transactions_by_wallet_id(&self, _wallet_id: Uuid) -> Result<Vec<cpc_wallet::WalletTransaction>, cpc_wallet::domain::primitives::FinancialError> {
             Ok(vec![])
         }
     }
@@ -384,7 +384,7 @@ mod tests {
     async fn test_process_dabloons_transaction() {
         // Arrange
         let wallet_repo = Arc::new(MockWalletRepository);
-        let wallet_service: Arc<dyn wallet::application::WalletService> = Arc::new(WalletServiceImpl::new(wallet_repo));
+        let wallet_service: Arc<dyn cpc_wallet::application::WalletService> = Arc::new(WalletServiceImpl::new(wallet_repo));
         let traditional_currency_repo = Arc::new(MockTraditionalCurrencyTransactionRepository::new());
         let engine = TransactionEngine::new(wallet_service, traditional_currency_repo);
         
@@ -417,7 +417,7 @@ mod tests {
     async fn test_process_traditional_currency_transaction() {
         // Arrange
         let wallet_repo = Arc::new(MockWalletRepository);
-        let wallet_service: Arc<dyn wallet::application::WalletService> = Arc::new(WalletServiceImpl::new(wallet_repo));
+        let wallet_service: Arc<dyn cpc_wallet::application::WalletService> = Arc::new(WalletServiceImpl::new(wallet_repo));
         let traditional_currency_repo = Arc::new(MockTraditionalCurrencyTransactionRepository::new());
         let engine = TransactionEngine::new(wallet_service, traditional_currency_repo);
         
@@ -450,7 +450,7 @@ mod tests {
     async fn test_get_transaction_history() {
         // Arrange
         let wallet_repo = Arc::new(MockWalletRepository);
-        let wallet_service: Arc<dyn wallet::application::WalletService> = Arc::new(WalletServiceImpl::new(wallet_repo));
+        let wallet_service: Arc<dyn cpc_wallet::application::WalletService> = Arc::new(WalletServiceImpl::new(wallet_repo));
         let traditional_currency_repo = Arc::new(MockTraditionalCurrencyTransactionRepository::new());
         let engine = TransactionEngine::new(wallet_service, traditional_currency_repo);
         

@@ -12,8 +12,8 @@ anyhow = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 rayon = { workspace = true }
-async_trait = { workspace = true }
-futures_util = { workspace = true }
+async-trait = { workspace = true }
+futures-util = { workspace = true }
 
 # Local dependencies
 shtairir_registry = { path = "../shtairir_registry" }

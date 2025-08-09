@@ -8,7 +8,7 @@ mod tests {
     use uuid::Uuid;
     use rust_decimal::Decimal;
     use skill_exchange_core::models::{SkillListing, SkillClaim, SkillExchangeCompletion, ClaimStatus};
-    use wallet::domain::primitives::{Money, Currency};
+    use cpc_wallet::domain::primitives::{Money, Currency};
     
     // Test utilities
     struct TestSkillExchangeService {

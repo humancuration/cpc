@@ -5,7 +5,7 @@ use uuid::Uuid;
 use rust_decimal::Decimal;
 use skill_exchange_core::models::{SkillListing, SkillClaim, SkillExchangeCompletion, ClaimStatus};
 use skill_exchange_core::services::SkillExchangeService;
-use wallet::domain::primitives::{Money, Currency};
+use cpc_wallet::domain::primitives::{Money, Currency};
 use common_utils::error::CommonError;
 
 /// GraphQL input for creating a skill listing

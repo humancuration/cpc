@@ -8,7 +8,7 @@ use cpay_core::{
     models::{PaymentRequest, CurrencyCode, TransactionStatus}
 };
 use cpc_financial_core::audit::FinancialAuditHook;
-use wallet::application::{WalletService, WalletServiceImpl};
+use cpc_wallet::application::{WalletService, WalletServiceImpl};
 use std::sync::Arc;
 use uuid::Uuid;
 use rust_decimal::Decimal;
@@ -19,24 +19,23 @@ struct MockNotificationService;
 struct MockSocialService;
 
 #[async_trait::async_trait]
-impl wallet::application::WalletRepository for MockWalletRepository {
-    async fn save_wallet(&self, _wallet: &wallet::Wallet) -> Result<(), wallet::domain::primitives::FinancialError> {
+impl cpc_wallet::application::WalletRepository for MockWalletRepository {
+    async fn save_wallet(&self, _wallet: &cpc_wallet::Wallet) -> Result<(), cpc_wallet::domain::primitives::FinancialError> {
         Ok(())
     }
     
-    async fn find_wallet_by_user_id(&self, _user_id: Uuid) -> Result<Option<wallet::Wallet>, wallet::domain::primitives::FinancialError> {
+    async fn find_wallet_by_user_id(&self, _user_id: Uuid) -> Result<Option<cpc_wallet::Wallet>, cpc_wallet::domain::primitives::FinancialError> {
         Ok(None)
     }
     
-    async fn save_transaction(&self, _transaction: &wallet::WalletTransaction) -> Result<(), wallet::domain::primitives::FinancialError> {
+    async fn save_transaction(&self, _transaction: &cpc_wallet::WalletTransaction) -> Result<(), cpc_wallet::domain::primitives::FinancialError> {
         Ok(())
     }
     
-    async fn find_transactions_by_wallet_id(&self, _wallet_id: Uuid) -> Result<Vec<wallet::WalletTransaction>, wallet::domain::primitives::FinancialError> {
+    async fn find_transactions_by_wallet_id(&self, _wallet_id: Uuid) -> Result<Vec<cpc_wallet::WalletTransaction>, cpc_wallet::domain::primitives::FinancialError> {
         Ok(vec![])
     }
 }
-
 #[async_trait::async_trait]
 impl notification_core::application::service::NotificationService for MockNotificationService {
     async fn send_notification(&self, _notification: notification_core::Notification) -> Result<(), notification_core::NotificationError> {

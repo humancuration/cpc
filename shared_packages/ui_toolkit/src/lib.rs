@@ -1,6 +1,18 @@
-pub mod components;
+//! UI Toolkit for CPC applications
+//!
+//! This crate provides a comprehensive set of UI components, themes, and hooks
+//! for building consistent and accessible user interfaces across CPC applications.
+
 pub mod themes;
 pub mod hooks;
+pub mod components;
+pub mod examples;
+
+// Re-export commonly used items
+pub use themes::*;
+pub use hooks::*;
+pub use components::*;
+pub use examples::*;
 
 #[cfg(test)]
 mod tests {
@@ -16,3 +28,6 @@ mod tests {
         assert!(true);
     }
 }
+
+#[cfg(test)]
+mod integration_test;

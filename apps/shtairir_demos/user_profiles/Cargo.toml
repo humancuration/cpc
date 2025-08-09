@@ -13,7 +13,7 @@ tokio = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 rand = { workspace = true }
-regex = { workspace = true }
+regex = "1.10"
 shtairir_core = { path = "../../../shared_packages/shtairir_core" }
 shtairir_registry = { path = "../../../shared_packages/shtairir_registry" }
 shtairir_execution = { path = "../../../shared_packages/shtairir_execution" }

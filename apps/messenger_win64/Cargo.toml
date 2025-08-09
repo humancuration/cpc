@@ -21,15 +21,9 @@ tokio = { workspace = true, features = ["full"] }
 # Domain layer
 messenger_domain = { path = "../../shared_packages/messenger", features = ["graphql", "auth"] }
 
-# Application layer
-messenger_app = { path = "../../shared_packages/messenger_app" }
-
-# Infrastructure layer
-messenger_infrastructure = { path = "../../shared_packages/messenger_infrastructure" }
-
 # Shared packages
-social_interactions = { path = "../../packages/core/social_interactions" }
-media = { path = "../../packages/core/media" }
+social_interactions = { path = "../../shared_packages/social_interactions" }
+media = { path = "../../shared_packages/media" }
 
 # Web dependencies (for UI components)
 yew = { workspace = true, optional = true }
@@ -72,7 +66,7 @@ tonic = { workspace = true }
 prost = { workspace = true }
 
 # Consent manager
-consent_manager = { path = "../../packages/core/consent_manager" }
+consent_manager = { path = "../../shared_packages/consent_manager" }
 
 [dev-dependencies]
 tempfile = "3.8"

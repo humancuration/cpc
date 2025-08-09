@@ -11,7 +11,6 @@ sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid
 rust-decimal = "1.29"
 uuid = { workspace = true, features = ["v4", "serde"] }
 chrono = { workspace = true, features = ["serde"] }
-serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["full"] }
 async-trait = { workspace = true }
 tracing = { workspace = true }
@@ -22,5 +21,3 @@ libp2p-core = "0.40"
 [features]
 default = []
 p2p = ["p2panda"]
-web = ["yew"]
-visualization = ["bevy", "plotters"]

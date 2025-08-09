@@ -22,7 +22,7 @@ ffmpeg-wasm = "0.13.1"
 # For data processing
 polars = "0.40.0"
 # For the health module integration
-cpc-core-health = { path = "../health" }
+health = { path = "../../apps/health" }
 
 # For financial data processing
 cpc-financial-core = { path = "../cpc-financial-core" }

@@ -8,12 +8,12 @@ async-channel = "1.8.0"
 async-trait = { workspace = true }
 argon2 = { workspace = true }
 axum = { workspace = true }
-consent_manager = { path = "../../packages/core/consent_manager" }
-cpc_auth = { path = "../../packages/cpc_auth" }
-cpc_rbac = { path = "../../packages/cpc_rbac" }
-cpc_karma = { path = "../../packages/cpc_karma" }
-cpc_consent = { path = "../../packages/cpc_consent" }
-cpc_wallet = { path = "../../packages/core/wallet" }
+consent_manager = { path = "../../shared_packages/consent_manager" }
+cpc_auth = { path = "../../shared_packages/cpc_auth" }
+cpc_rbac = { path = "../../shared_packages/cpc_rbac" }
+cpc_karma = { path = "../../shared_packages/cpc_karma" }
+cpc_consent = { path = "../../shared_packages/cpc_consent" }
+wallet = { path = "../../shared_packages/wallet", package = "cpc_wallet" }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 sled = { workspace = true }
@@ -22,7 +22,7 @@ uuid = { workspace = true, features = ["v4", "serde"] }
 chrono = { workspace = true, features = ["serde"] }
 rust_decimal = { workspace = true }
 thiserror = { workspace = true }
-social_integration = { path = "../../packages/social_integration" }
+social_integration = { path = "../../shared_packages/social_integration" }
 jsonwebtoken = { workspace = true }
 tonic = { workspace = true }
 prost = { workspace = true }

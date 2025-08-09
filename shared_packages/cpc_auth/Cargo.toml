@@ -1,0 +1,14 @@
+[package]
+name = "cpc_auth"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-trait = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+tokio = { workspace = true, features = ["full"] }
+thiserror = { workspace = true }
+jsonwebtoken = { workspace = true }
+argon2 = { workspace = true }

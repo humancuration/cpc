@@ -16,4 +16,4 @@ web-sys = { workspace = true }
 js-sys = { workspace = true }
 
 # Messenger backend
-cpc-messenger = { path = "../messenger" }
+messenger_domain = { path = "../messenger" }

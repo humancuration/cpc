@@ -22,10 +22,10 @@ futures-util = { workspace = true, optional = true }
 tokio = { workspace = true, features = ["time"], optional = true }
 
 # Storage abstraction
-storage_abstraction = { path = "../../core/storage_abstraction" }
+storage_abstraction = { path = "../storage_abstraction" }
 
 # Event bus for real-time communication
-event_bus = { path = "../../core/event_bus" }
+event_bus = { path = "../event_bus" }
 
 [features]
 default = []

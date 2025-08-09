@@ -27,7 +27,7 @@ The Optimization Core provides a robust foundation for solving complex optimizat
 - Balancing immediate needs with long-term sustainability
 - Incorporating community voting results
 
-#### Route Optimization (`community_connect`)
+#### Route Optimization (`community_route_optimization`)
 - Optimizing physical meeting routes for community events
 - Minimizing transportation costs and environmental impact
 - Maximizing accessibility for community members

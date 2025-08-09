@@ -3,8 +3,8 @@
 use async_trait::async_trait;
 use uuid::Uuid;
 use rust_decimal::Decimal;
-use wallet::application::WalletService;
-use wallet::domain::primitives::{Money, Currency};
+use cpc_wallet::application::WalletService;
+use cpc_wallet::domain::primitives::{Money, Currency};
 
 #[async_trait]
 pub trait WalletIntegration: Send + Sync {

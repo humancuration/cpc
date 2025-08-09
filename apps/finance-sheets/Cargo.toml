@@ -30,8 +30,4 @@ jni = "0.21"
 ndk-context = "0.1"
 
 # CPC Core dependencies
-packages-core-consent_manager = { path = "../../packages/core/consent_manager" }
-
-# CPC Domain dependencies
-packages-domains-finance = { path = "../../packages/domains/finance" }
-packages-domains-sheets = { path = "../../packages/domains/sheets" }
+consent_manager = { path = "../../shared_packages/consent_manager" }

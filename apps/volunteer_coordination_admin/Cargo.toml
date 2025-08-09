@@ -33,6 +33,8 @@ wasm-logger = { workspace = true }
 # Build
 trunk = "0.17"
 
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
 [features]
 default = []
-test-yew = ["wasm-bindgen-test"]

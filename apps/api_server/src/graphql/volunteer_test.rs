@@ -8,7 +8,7 @@ mod tests {
     use uuid::Uuid;
     use rust_decimal::Decimal;
     use volunteer_core::models::{VolunteerActivity, DabloonConversion};
-    use wallet::domain::primitives::{Money, Currency};
+    use cpc_wallet::domain::primitives::{Money, Currency};
     
     // Test utilities
     struct TestVolunteerService {

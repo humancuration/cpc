@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
-use wallet::domain::primitives::{Money, Currency};
+use cpc_wallet::domain::primitives::{Money, Currency};
 
 /// Represents a skill listing in the marketplace
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

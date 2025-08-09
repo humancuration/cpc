@@ -39,7 +39,7 @@ cpay_core = { path = "../cpay_core" }
 feedback_analysis = { path = "../feedback_analysis" }
 
 # Data lakehouse integration
-cpc-core-data-lakehouse = { path = "../data_lakehouse" }
+data_lakehouse = { path = "../data_lakehouse" }
 
 # Visualization integration
 bi_visualization = { path = "../bi_visualization" }

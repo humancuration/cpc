@@ -32,7 +32,6 @@ members = [
     "apps/sheets",
     "apps/skill_profile_ui",
     "apps/skill_tracking",
-    "apps/social_integration",
     "apps/task_manager",
     "apps/video_editor_win64",
     "apps/website-builder",
@@ -58,7 +57,7 @@ members = [
     "shared_packages/bi_visualization",
     "shared_packages/bi_analytics",
     "shared_packages/cause_management",
-    "shared_packages/community_connect",
+    "shared_packages/community_route_optimization",
     "shared_packages/collaboration_engine",
     "shared_packages/collaborative_docs",
     "shared_packages/collaborative_workspace",
@@ -109,6 +108,10 @@ members = [
     "shared_packages/vulkan_renderer",
     "shared_packages/wallet",
     "shared_packages/web_core",
+    "shared_packages/cpc_auth",
+    "shared_packages/cpc_rbac",
+    "shared_packages/cpc_karma",
+    "shared_packages/cpc_consent",
     "shared_packages/cpc-financial-core",
     "shared_packages/cpc-statistics-core",
     "shared_packages/optimization_core",
@@ -120,10 +123,10 @@ members = [
     "shared_packages/cause_impact_tracker",
     "shared_packages/core_app_logic",
     "shared_packages/ui_toolkit",
+    "shared_packages/shtairir_registry",
     
     # Tools and Templates
     "tools/ci",
-    "templates/web_app",
 ]
 [workspace.dependencies]
 # Core Technologies
@@ -217,10 +220,20 @@ rust_decimal = "1.37.2"
 rust_decimal_macros = "1.37.2"
 async-stream = "0.3.6"
 futures-util = "0.3.31"
+futures = "0.3.31"
 log = "0.4.27"
 wasm-logger = "0.2.0"
 rand = "0.8.5"
 tokio-test = "0.4"
+rust-crypto = "0.2.36"
+criterion = "0.5"
+hex = "0.4"
+semver = "1.0"
+bincode = "1.3"
+parking_lot = "0.12"
+sha2 = "0.10"
+walkdir = "2.0"
+regex = "1.10"
 
 # WebSocket support
 tokio-tungstenite = "0.20.1"
