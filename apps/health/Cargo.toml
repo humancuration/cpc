@@ -20,7 +20,7 @@ tracing = { workspace = true }
 sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
 
 # p2p dependencies
-p2panda = { workspace = true, optional = true }
+# p2panda = { workspace = true, optional = true }
 libp2p = { version = "0.53", features = ["tcp", "dns", "websocket", "noise", "yamux", "ping", "macros"] }
 
 # Visualization dependencies
@@ -35,6 +35,6 @@ base64 = "0.21"
 
 [features]
 default = []
-p2p = ["p2panda"]
+p2p = []
 visualization = ["bevy"]
 web = ["yew", "web-sys"]

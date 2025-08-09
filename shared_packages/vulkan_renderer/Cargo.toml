@@ -6,8 +6,8 @@ edition = "2021"
 [dependencies]
 rendering_core = { path = "../rendering_core" }
 wry = { workspace = true }
-vulkano = "0.38.0"
-vulkano-shaders = "0.38.0"
+vulkano = "0.35.1"
+vulkano-shaders = "0.35.0"
 
 [dev-dependencies]
 tempfile = "3.0"

@@ -33,7 +33,7 @@ plotters = { workspace = true }
 axum = { workspace = true }
 
 # P2P networking
-p2panda = { workspace = true }
+# p2panda = { workspace = true }
 iroh = "0.1"
 
 # Audio processing

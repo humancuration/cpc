@@ -13,12 +13,12 @@ uuid = { workspace = true, features = ["v4", "serde"] }
 tokio = { workspace = true, features = ["full"] }
 
 # Execution pipeline dependencies
-dashmap = "5.5"
+dashmap = { workspace = true }
 wasm-timer = "0.2"
 futures = { workspace = true }
 
 # HTTP client
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { workspace = true, features = ["json"] }
 
 # GraphQL support
 async-graphql = { workspace = true }
@@ -27,8 +27,8 @@ async-graphql-axum = { workspace = true }
 # WebSocket support
 tokio-tungstenite = { workspace = true }
 futures-util = { workspace = true }
-url = "2.0"
-base64 = "0.21"
+url = { workspace = true }
+base64 = { workspace = true }
 
 # Caching support
 sled = { workspace = true }
@@ -41,12 +41,12 @@ shtairir_editor_core = { path = "../../shared_packages/shtairir_editor" }
 
 # Web framework
 yew = { workspace = true, features = ["csr"] }
-yew-router = "0.17"
+yew-router = { workspace = true }
 
 # JSON handling already included above
 
 # Logging
-wasm-logger = "0.2"
+wasm-logger = { workspace = true }
 
 # Testing
 wasm-bindgen-test = { version = "0.3", optional = true }

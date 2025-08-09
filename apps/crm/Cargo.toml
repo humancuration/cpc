@@ -21,7 +21,7 @@ db_pool = { path = "../../shared_packages/db_pool" }
 db_abstraction = { path = "../../shared_packages/db_abstraction" }
 
 # P2P dependencies
-p2panda = { workspace = true }
+# p2panda = { workspace = true }
 
 # Web dependencies
 axum = { workspace = true, optional = true }

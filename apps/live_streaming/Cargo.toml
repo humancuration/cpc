@@ -38,7 +38,7 @@ wry = { workspace = true }
 
 # Tauri
 tauri = { workspace = true, features = ["wry"] }
-tauri-build = "2.0"
+tauri-build = { workspace = true }
 
 # Media processing
 plotters = { workspace = true }
@@ -49,8 +49,8 @@ social_integration = { path = "../../shared_packages/social_integration" }
 notification_core = { path = "../../shared_packages/notification_core" }
 
 # P2P networking
-p2panda = { workspace = true }
-iroh = "0.1"
+# p2panda = { workspace = true }
+iroh = { workspace = true }
 
 # Audio processing
 rodio = { workspace = true }

@@ -28,6 +28,9 @@ uuid = { workspace = true, features = ["v4", "serde"] }
 # Time handling
 chrono = { workspace = true, features = ["serde"] }
 
+[features]
+in_memory = []
+
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 

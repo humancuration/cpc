@@ -16,8 +16,7 @@ tokio = { workspace = true, features = ["full"] }
 thiserror = { workspace = true }
 
 # Utilities
-std = "0.0"
-futures = "0.3"
+futures = { workspace = true }
 
 # Shared packages
 notification_core = { path = "../notification_core" }

@@ -6,9 +6,9 @@ license = "This project will be licensed under a new type of CoopyLeft license w
 
 [dependencies]
 # Core Technologies
-p2panda-core = { workspace = true }
-p2panda-net = { workspace = true }
-p2panda-store = { workspace = true }
+# p2panda-core = { workspace = true }
+# p2panda-net = { workspace = true }
+# p2panda-store = { workspace = true }
 tracing = { workspace = true }
 libp2p-core = "0.40"
 libp2p-noise = "0.40"

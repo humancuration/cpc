@@ -14,7 +14,7 @@ oauth2 = { workspace = true, features = ["basic", "reqwest"] }
 tokio = { workspace = true, features = ["full"] }
 
 # HTTP client for OAuth2 requests
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { workspace = true, features = ["json"] }
 
 # Serialization
 serde = { workspace = true, features = ["derive"] }
@@ -26,7 +26,7 @@ thiserror = { workspace = true }
 # Encryption - using RustCrypto
 aes-gcm = { workspace = true, features = ["aes"] }
 rand = { workspace = true }
-base64 = "0.21"
+base64 = { workspace = true }
 
 # Logging
 tracing = { workspace = true }
@@ -39,13 +39,13 @@ uuid = { workspace = true, features = ["v4", "serde"] }
 chrono = { workspace = true, features = ["serde"] }
 
 # URL handling
-url = "2.0"
+url = { workspace = true }
 
 # Consent manager integration
-cpc_consent = { path = "../consent_manager" }
+consent_manager = { path = "../consent_manager" }
 
 # Audit framework integration
-cpc_audit = { path = "../audit_framework" }
+audit_framework = { path = "../audit_framework" }
 
 # gRPC
 prost = { workspace = true }

@@ -8,16 +8,16 @@ async-graphql = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_cbor = "0.11"
 sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "rust_decimal"] }
-rust-decimal = "1.29"
+rust_decimal = { workspace = true }
 uuid = { workspace = true, features = ["v4", "serde"] }
 chrono = { workspace = true, features = ["serde"] }
 tokio = { workspace = true, features = ["full"] }
 async-trait = { workspace = true }
 tracing = { workspace = true }
-p2panda = { workspace = true, optional = true }
+# p2panda = { workspace = true, optional = true }
 libp2p = { version = "0.53", features = ["tcp", "noise", "yamux", "ping"] }
 libp2p-core = "0.40"
 
 [features]
 default = []
-p2p = ["p2panda"]
+p2p = []

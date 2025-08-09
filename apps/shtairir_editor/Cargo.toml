@@ -8,7 +8,7 @@ edition = "2021"
 shtairir = { path = "../../shared_packages/shtairir" }
 shtairir_registry = { path = "../../shared_packages/shtairir_registry" }
 shtairir_execution = { path = "../../shared_packages/shtairir_execution" }
-shtairir_editor = { path = "../../shared_packages/shtairir_editor" }
+shtairir_editor_core = { path = "../../shared_packages/shtairir_editor" }
 
 # UI framework
 yew = { workspace = true }

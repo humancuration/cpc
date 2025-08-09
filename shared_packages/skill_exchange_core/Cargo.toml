@@ -15,7 +15,7 @@ common_utils = { path = "../common_utils" }
 cpc_wallet = { path = "../wallet" }
 notification_core = { path = "../notification_core" }
 social_integration = { path = "../social_integration" }
-sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "decimal"] }
+sqlx = { workspace = true, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
 
 [features]
 default = ["common-utils-integration"]
